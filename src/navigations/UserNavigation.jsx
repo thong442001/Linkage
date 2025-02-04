@@ -1,15 +1,20 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 const UserStack = createNativeStackNavigator();
-import Welcome from '../screens/Welcome';
+import Screen1 from '../screens/Register/Screen1';
+import Screen2 from '../screens/Register/Screen2';
+import Screen3 from '../screens/Register/Screen3';
 import Login from '../screens/Login';
-import Register from '../screens/Register';
+import CreatePasswordScreen from '../screens/Register/CreatePasswordScreen';
 const UserNavigation = () => {
     return (
-        <UserStack.Navigator initialRouteName='Welcome' screenOptions={{ headerShown: false }}>
-            <UserStack.Screen name="Welcome" component={Welcome} />
+        <UserStack.Navigator initialRouteName='Login' screenOptions={{ headerShown: false }}>
             <UserStack.Screen name="Login" component={Login} />
-            <UserStack.Screen name="Register" component={Register} />
+            <UserStack.Screen name="Screen1" component={Screen1} />
+            <UserStack.Screen name="Screen2" component={Screen2} />
+            <UserStack.Screen name="Screen3" component={Screen3} />
+            <UserStack.Screen name="CreatePasswordScreen" component={CreatePasswordScreen} />
+
         </UserStack.Navigator>
     )
 }
