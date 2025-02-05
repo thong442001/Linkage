@@ -6,6 +6,7 @@ import UserNavigation from './UserNavigation';
 import Welcome from '../screens/welcome/Welcome';
 
 const AppNavigation = () => {
+
   const user = useSelector(state => state.app.user);
   const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
 

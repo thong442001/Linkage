@@ -2,18 +2,23 @@ import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } 
 import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Stories from '../../components/items/Stories'
-import Post from '../../components/items/Post'
+import Post from '../../components/items/Post';
+import { useSelector } from 'react-redux';
 const Home = (props) => {
   // const [stories, setStories] = useState([])
-  const {navigation} = props
+  const { route, navigation } = props;
+  const { params } = route;
+
+  const me = useSelector(state => state.app.user);
+  const token = useSelector(state => state.app.token);
 
   const Information = () => {
-    
+
   }
   const headerComponentStory = () => {
     return (
       <View style={styles.boxStory}>
-        <Image style={styles.imageStory} source={require('./../../../assets/images/person.jpg')} />
+        <Image style={styles.imageStory} source={{ uri: me?.avatar }} />
         <View style={styles.backGround}>
           <View style={styles.addStory}>
             <Icon name="add-circle" size={30} color="#0064E0" />
@@ -48,7 +53,7 @@ const Home = (props) => {
             >
               <Image
                 style={styles.image}
-                source={require('./../../../assets/images/person.jpg')}
+                source={{ uri: me?.avatar }}
               />
             </TouchableOpacity>
 

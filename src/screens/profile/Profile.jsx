@@ -4,8 +4,14 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'
 import ProfilePage from '../../components/items/ProfilePage'
 import Friends from '../../components/items/Friends'
+import { useSelector } from 'react-redux';
 const Profile = (props) => {
-    const { navigation } = props
+    const { route, navigation } = props;
+    const { params } = route;
+
+    const me = useSelector(state => state.app.user);
+    const token = useSelector(state => state.app.token);
+
     const dataPost = [
         {
             id: 1,
@@ -72,10 +78,10 @@ const Profile = (props) => {
                     <View >
                         <View>
                             <Image style={styles.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
-                            <Image style={styles.avata} source={require('./../../../assets/images/person.jpg')} />
+                            <Image style={styles.avata} source={{ uri: me?.avatar }} />
                         </View>
                         <View style={styles.boxBackground}>
-                            <Text style={styles.name}>Kenny</Text>
+                            <Text style={styles.name}>{me?.first_name} {me?.last_name}</Text>
                             <View style={styles.boxInformation}>
                                 <Text style={styles.friendNumber}>500 </Text>
                                 <Text style={[styles.friendNumber, { color: "#D6D6D6" }]}> Người bạn</Text>
@@ -157,13 +163,13 @@ const Profile = (props) => {
             <View style={styles.boxHeader}>
                 <View style={styles.header}>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('HomePage')}
+                        onPress={() => navigation.goBack()}
                     >
                         <View >
                             <Icon name="chevron-back" size={20} color="black" />
                         </View>
                     </TouchableOpacity>
-                    <Text style={styles.titleName}>Kenny</Text>
+                    <Text style={styles.titleName}>{me?.first_name} {me?.last_name}</Text>
                     <View>
                         <Icon name="search" size={20} color="black" />
                     </View>
