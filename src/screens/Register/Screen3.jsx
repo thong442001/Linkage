@@ -11,7 +11,7 @@ const Screen3 = (props) => {
     const [email, setEmail] = useState('')
 
     const handleTiep = () => {
-        if (phone != '') {
+        if (email != '') {
             navigation.navigate('CreatePasswordScreen', {
                 first_name: params.first_name,
                 last_name: params.last_name,
