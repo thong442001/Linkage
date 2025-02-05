@@ -5,7 +5,25 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const { width, height } = Dimensions.get('window');
 
 const Screen3 = (props) => {
-    const { navigation } = props;
+    const { route, navigation } = props;
+    const { params } = route;
+
+    const [email, setEmail] = useState('')
+
+    const handleTiep = () => {
+        if (phone != '') {
+            navigation.navigate('CreatePasswordScreen', {
+                first_name: params.first_name,
+                last_name: params.last_name,
+                dateOfBirth: params.dateOfBirth,
+                sex: params.sex,
+                phone: '',
+                email: email,
+            })
+        } else {
+            console.log("Thiếu ");
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -17,19 +35,21 @@ const Screen3 = (props) => {
             <Text style={styles.label2}>Nhập Email có thể dùng để liên lạc với bạn.</Text>
 
             <TextInput
+                value={email}
+                onChangeText={setEmail}
                 placeholderTextColor={'#8C96A2'}
-                placeholder="Ngày sinh"
+                placeholder="Email"
                 style={styles.inputDate}
             />
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua email</Text>
 
-            <Pressable style={styles.button} onPress={() => navigation.navigate('CreatePasswordScreen')}>
+            <Pressable style={styles.button} onPress={() => handleTiep()}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
-            <View style={styles.containerButton}>   
-            <Pressable style={styles.buttonNextSceen}>
-                <Text style={styles.buttonTextNextScreen}>Đăng ký bằng số điện thoại</Text>
-            </Pressable>
+            <View style={styles.containerButton}>
+                <Pressable style={styles.buttonNextSceen}>
+                    <Text style={styles.buttonTextNextScreen}>Đăng ký bằng số điện thoại</Text>
+                </Pressable>
             </View>
         </View>
     );
@@ -38,46 +58,46 @@ const Screen3 = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: width * 0.04, 
+        padding: width * 0.04,
         backgroundColor: '#f0f4ff',
     },
     iconBack: {
-        marginVertical: height * 0.02, 
+        marginVertical: height * 0.02,
     },
     label: {
         color: 'black',
-        fontSize: height * 0.03, 
+        fontSize: height * 0.03,
         fontWeight: 'bold',
-        marginBottom: height * 0.01, 
+        marginBottom: height * 0.01,
     },
     label2: {
-        fontSize: height * 0.018, 
+        fontSize: height * 0.018,
         color: '#1C2931',
         fontWeight: '450',
-        marginBottom: height * 0.02, 
+        marginBottom: height * 0.02,
     },
     inputDate: {
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius: width * 0.03, 
+        borderRadius: width * 0.03,
         padding: height * 0.015,
         backgroundColor: '#fff',
-        marginVertical: height * 0.02, 
+        marginVertical: height * 0.02,
     },
     infoText: {
-        fontSize: height * 0.018, 
+        fontSize: height * 0.018,
         color: 'black',
     },
     button: {
-        marginVertical: height * 0.02, 
+        marginVertical: height * 0.02,
         backgroundColor: '#0064E0',
-        paddingVertical: height * 0.015, 
-        borderRadius: width * 0.05, 
+        paddingVertical: height * 0.015,
+        borderRadius: width * 0.05,
         alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
-        fontSize: width * 0.045, 
+        fontSize: width * 0.045,
     },
     containerButton: {
         width: width * 0.92,
@@ -85,8 +105,8 @@ const styles = StyleSheet.create({
     linkText: {
         color: 'black',
         fontWeight: '500',
-        fontSize: width * 0.04, 
-        marginTop: height * 0.01, 
+        fontSize: width * 0.04,
+        marginTop: height * 0.01,
     },
     buttonNextSceen: {
         borderWidth: 1,
@@ -97,12 +117,12 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-      },
-      buttonTextNextScreen:{
+    },
+    buttonTextNextScreen: {
         fontWeight: '500',
-        fontSize: height * 0.02, 
-        color:'black'
-      }
+        fontSize: height * 0.02,
+        color: 'black'
+    }
 });
 
 export default Screen3;

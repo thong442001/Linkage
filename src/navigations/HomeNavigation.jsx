@@ -6,11 +6,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
 
 //tab tổng
-import Home from '../screens/Home';
-import Profile from '../screens/Profile';
-import Notification from '../screens/Notification';
-import Friend from '../screens/Friend';
-import Setting from '../screens/Setting';
+import Home from '../screens/home/Home';
+import Profile from '../screens/profile/Profile';
+import Notification from '../screens/notification/Notification';
+import Friend from '../screens/friend/Friend';
+import Setting from '../screens/setting/Setting';
 const oTab = {
   Home: { name: 'Home', component: Home },
   Friend: { name: 'Friend', component: Friend },
@@ -117,8 +117,8 @@ const TabHome = () => {
 }
 
 //stack home
-import Search from '../screens/Search';
-import Story from '../screens/Story';
+import Search from '../screens/home/Search';
+import Story from '../screens/story/Story';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },

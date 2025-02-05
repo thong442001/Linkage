@@ -1,25 +1,22 @@
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
-import PostS from '../../../../../Linkage_V1/Linkage/src/styles/custom/items/PostS';
+import PostS from '../../styles/components/items/PostS';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { ThemeContext } from '../../assets/context/ThemeContext';
-import { useContext } from 'react';
-import colors from '../../assets/colors';
-const Post = (props) => {
-    const { dataP } = props
+
+const ProfilePost = (props) => {
+    const { dataProfile } = props
     const [like, setLike] = useState(false)
-    const {theme} = useContext(ThemeContext)
-    const activeColors = colors[theme.mode]
+
     return (
-        <View style={[PostS.container, { backgroundColor: activeColors.tertiary }]}>
+        <View style={PostS.container}>
             <View style={PostS.h2}>
                 <View style={PostS.header}>
                     <View>
-                        <Image style={PostS.avata} source={{ uri: dataP.avata }} />
+                        <Image style={PostS.avata} source={{ uri: dataProfile.userId.avatar }} />
                     </View>
                     <View>
-                        <Text style={PostS.name}>{dataP.name}</Text>
-                        <Text style={PostS.fontDate}>{dataP.date}</Text>
+                        <Text style={PostS.name}>{dataProfile.userId.displayName}</Text>
+                        <Text style={PostS.fontDate}>{dataProfile.createdAt}</Text>
                     </View>
                 </View>
                 <View>
@@ -27,8 +24,8 @@ const Post = (props) => {
                 </View>
             </View>
             <View style={PostS.body}>
-                <Text style={PostS.title}>{dataP.title}</Text>
-                <Image style={PostS.image} source={{ uri: dataP.image }} />
+                <Text style={PostS.title}>{dataProfile.content}</Text>
+                <Image style={PostS.image} source={{ uri: dataProfile.images[0] }} />
             </View>
             <View style={PostS.interact}>
                 <TouchableOpacity onPress={() => { setLike(!like) }}>
@@ -41,4 +38,4 @@ const Post = (props) => {
     )
 }
 
-export default Post
+export default ProfilePost

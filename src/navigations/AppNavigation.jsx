@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import HomeNavigation from './HomeNavigation';
 import UserNavigation from './UserNavigation';
-import Welcome from '../screens/Welcome';
+import Welcome from '../screens/welcome/Welcome';
 
 const AppNavigation = () => {
   const user = useSelector(state => state.app.user);
@@ -15,15 +15,15 @@ const AppNavigation = () => {
       setSplashVisible(false);  // Ẩn màn hình chào sau 2 giây
     }, 2000);
 
-    return () => clearTimeout(timeout);  
+    return () => clearTimeout(timeout);
   }, []);
 
   return (
     <NavigationContainer>
       {
-        isSplashVisible 
+        isSplashVisible
           ? <Welcome />  // Hiển thị màn hình chào trước
-          : (user ? <HomeNavigation /> : <UserNavigation />) 
+          : (user ? <HomeNavigation /> : <UserNavigation />)
       }
     </NavigationContainer>
   );

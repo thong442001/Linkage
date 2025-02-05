@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, Image } from 'react-native';
-import styles from '../styles/WelcomeS';
+import styles from '../../styles/screens/welcome/WelcomeS';
 
 const Welcome = () => {
-  const [dots, setDots] = useState('');  
+  const [dots, setDots] = useState('');
 
   useEffect(() => {
     // Tạo hiệu ứng dấu chấm chạy
@@ -11,7 +11,7 @@ const Welcome = () => {
       setDots(prevDots => (prevDots.length < 3 ? prevDots + '.' : ''));
     }, 500);
 
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -19,10 +19,10 @@ const Welcome = () => {
       <View >
         <Image
           style={styles.logo}
-          source={require('../../assets/images/Logo_app.png')}
+          source={require('../../../assets/images/Logo_app.png')}
         />
       </View>
-      
+
       <View style={styles.dotContainer}>
         <Text style={styles.headerText}>
           {dots}

@@ -1,12 +1,10 @@
 import { Dimensions, StyleSheet } from "react-native";
-
-
 const { width, height } = Dimensions.get('window');
 
 const inputStyles = StyleSheet.create({
   inputContainer: {
     width: width * 0.9,
-    height:  height * 0.075,
+    height: height * 0.075,
     marginVertical: 5,
     flexDirection: 'row',
     alignItems: 'center',

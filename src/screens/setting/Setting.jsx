@@ -5,14 +5,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { logoutTest } from '../rtk/Reducer';
+import { logout } from '../../rtk/Reducer';
 
 const Setting = (props) => {
   const { navigation } = props;
   const dispatch = useDispatch();
 
   const onRegister = () => {
-    dispatch(logoutTest())
+    dispatch(logout())
   };
   return (
     <View>

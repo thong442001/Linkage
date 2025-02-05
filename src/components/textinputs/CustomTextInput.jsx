@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, TextInput } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import {faUser, faRedo } from '@fortawesome/free-solid-svg-icons';
-import inputStyles from '../../../../../Linkage_V1/Linkage/src/styles/custom/textinputs/TextInputS';
-import searchStyles from '../../../../../Linkage_V1/Linkage/src/styles/custom/textinputs/TextInputSearchS';
+import { faUser, faRedo } from '@fortawesome/free-solid-svg-icons';
+import inputStyles from '../../styles/components/textinputs/TextInputS';
+import searchStyles from '../../styles/components/textinputs/TextInputSearchS';
 
 export const CustomTextInputUserName = ({ placeholder, onChangeText, value }) => {
   return (

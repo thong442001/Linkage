@@ -2,10 +2,33 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const { width, height } = Dimensions.get('window'); 
+const { width, height } = Dimensions.get('window');
 
 const Screen2 = (props) => {
-    const { navigation } = props;
+    const { route, navigation } = props;
+    const { params } = route;
+
+    const [phone, setPhone] = useState('')
+
+    // console.log(params.first_name);
+    // console.log(params.last_name);
+    // console.log(params.dateOfBirth);
+    // console.log(params.sex);
+
+    const handleTiep = () => {
+        if (phone != '') {
+            navigation.navigate('CreatePasswordScreen', {
+                first_name: params.first_name,
+                last_name: params.last_name,
+                dateOfBirth: params.dateOfBirth,
+                sex: params.sex,
+                phone: phone,
+                email: '',
+            })
+        } else {
+            console.log("Thiếu ");
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -17,8 +40,10 @@ const Screen2 = (props) => {
             <Text style={styles.label2}>Nhập số di động có thể dùng để liên lạc với bạn.</Text>
 
             <TextInput
+                value={phone}
+                onChangeText={setPhone}
                 placeholderTextColor={'#8C96A2'}
-                placeholder="Ngày sinh"
+                placeholder="Số điện thoại"
                 style={styles.inputDate}
             />
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
@@ -26,10 +51,10 @@ const Screen2 = (props) => {
             <Pressable style={styles.button}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
-            <View style={styles.containerButton}>   
-            <Pressable style={styles.buttonNextSceen} onPress={() => navigation.navigate('Screen3')}>
-                <Text style={styles.buttonTextNextScreen}>Đăng ký bằng email</Text>
-            </Pressable>
+            <View style={styles.containerButton}>
+                <Pressable style={styles.buttonNextSceen} onPress={handleTiep}>
+                    <Text style={styles.buttonTextNextScreen}>Đăng ký bằng email</Text>
+                </Pressable>
             </View>
         </View>
     );
@@ -38,46 +63,46 @@ const Screen2 = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: width * 0.04, 
+        padding: width * 0.04,
         backgroundColor: '#f0f4ff',
     },
     iconBack: {
-        marginVertical: height * 0.02, 
+        marginVertical: height * 0.02,
     },
     label: {
         color: 'black',
-        fontSize: height * 0.03, 
+        fontSize: height * 0.03,
         fontWeight: 'bold',
-        marginBottom: height * 0.01, 
+        marginBottom: height * 0.01,
     },
     label2: {
-        fontSize: height * 0.018, 
+        fontSize: height * 0.018,
         color: '#1C2931',
         fontWeight: '450',
-        marginBottom: height * 0.02, 
+        marginBottom: height * 0.02,
     },
     inputDate: {
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: width * 0.03,
-        padding: height * 0.015, 
+        padding: height * 0.015,
         backgroundColor: '#fff',
-        marginVertical: height * 0.02, 
+        marginVertical: height * 0.02,
     },
     infoText: {
-        fontSize: height * 0.018, 
+        fontSize: height * 0.018,
         color: 'black',
     },
     button: {
-        marginVertical: height * 0.02, 
+        marginVertical: height * 0.02,
         backgroundColor: '#0064E0',
-        paddingVertical: height * 0.015, 
-        borderRadius: width * 0.05, 
+        paddingVertical: height * 0.015,
+        borderRadius: width * 0.05,
         alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
-        fontSize: width * 0.045, 
+        fontSize: width * 0.045,
     },
     containerButton: {
         width: width * 0.92,
@@ -85,8 +110,8 @@ const styles = StyleSheet.create({
     linkText: {
         color: 'black',
         fontWeight: '500',
-        fontSize: width * 0.04, 
-        marginTop: height * 0.01, 
+        fontSize: width * 0.04,
+        marginTop: height * 0.01,
     },
     buttonNextSceen: {
         borderWidth: 1,
@@ -97,12 +122,12 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-      },
-      buttonTextNextScreen:{
+    },
+    buttonTextNextScreen: {
         fontWeight: '500',
-        fontSize: height * 0.02, 
-        color:'black'
-      }
+        fontSize: height * 0.02,
+        color: 'black'
+    }
 });
 
 export default Screen2;

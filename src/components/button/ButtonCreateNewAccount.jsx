@@ -2,7 +2,7 @@ import React from 'react';
 import { Dimensions, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
-const ButtonCreateNewAccount = ({onPress}) => {
+const ButtonCreateNewAccount = ({ onPress }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={onPress}>
@@ -15,9 +15,9 @@ const ButtonCreateNewAccount = ({onPress}) => {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute', 
-    bottom: height * 0.03, 
-    width: '100%', 
+    position: 'absolute',
+    bottom: height * 0.03,
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     borderColor: '#1976D2',
     height: height * 0.06,
     width: width * 0.9,
-    backgroundColor: '#ffffff', 
+    backgroundColor: '#ffffff',
     paddingVertical: height * 0.01,
     borderRadius: 25,
     justifyContent: 'center',

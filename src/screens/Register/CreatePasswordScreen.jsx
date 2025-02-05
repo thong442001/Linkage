@@ -1,16 +1,49 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import { register } from '../../rtk/API';
+import { useDispatch } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
-const CreatePasswordScreen = ({ navigation }) => {
+const CreatePasswordScreen = (props) => {
+
+    const { route, navigation } = props;
+    const { params } = route;
+
+    const dispatch = useDispatch();
+
     const [password, setPassword] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
+    };
+
+    const onRegister = () => {
+        const userDataRegister = {
+            first_name: params.first_name,
+            last_name: params.last_name,
+            dateOfBirth: params.dateOfBirth,
+            sex: params.sex,
+            email: params.email,
+            phone: params.phone,
+            password: password,
+        };
+        if (password != '') {
+            dispatch(register(userDataRegister))
+                .unwrap()
+                .then((response) => {
+                    console.log(response?.message);
+                    navigation.navigate('Login');
+                })
+                .catch((error) => {
+                    console.log('Error:', error);
+                });
+        } else {
+            console.log('THieu password');
+        }
+
     };
 
     return (
@@ -38,7 +71,10 @@ const CreatePasswordScreen = ({ navigation }) => {
                 </Pressable>
             </View>
 
-            <Pressable style={styles.button}>
+            <Pressable
+                style={styles.button}
+                onPress={() => onRegister()}
+            >
                 <Text style={styles.buttonText}>Tạo</Text>
             </Pressable>
         </View>
@@ -48,7 +84,7 @@ const CreatePasswordScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: width * 0.04, 
+        padding: width * 0.04,
         backgroundColor: '#EFF5FF',
     },
     iconBack: {
