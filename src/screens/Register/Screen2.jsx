@@ -51,6 +51,7 @@ const Screen2 = (props) => {
             <Pressable style={styles.button} onPress={handleTiep}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
+
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}

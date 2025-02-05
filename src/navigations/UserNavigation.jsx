@@ -14,7 +14,6 @@ const UserNavigation = () => {
             <UserStack.Screen name="Screen2" component={Screen2} />
             <UserStack.Screen name="Screen3" component={Screen3} />
             <UserStack.Screen name="CreatePasswordScreen" component={CreatePasswordScreen} />
-
         </UserStack.Navigator>
     )
 }
