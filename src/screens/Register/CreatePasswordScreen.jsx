@@ -21,6 +21,8 @@ const CreatePasswordScreen = (props) => {
     };
 
     const onRegister = () => {
+        console.log(params.email);
+        console.log(params.phone);
         const userDataRegister = {
             first_name: params.first_name,
             last_name: params.last_name,
@@ -34,7 +36,7 @@ const CreatePasswordScreen = (props) => {
             dispatch(register(userDataRegister))
                 .unwrap()
                 .then((response) => {
-                    console.log(response?.message);
+                    console.log(response);
                     navigation.navigate('Login');
                 })
                 .catch((error) => {

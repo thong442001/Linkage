@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { checkEmail } from '../../rtk/API';
+import { useDispatch } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
@@ -8,22 +10,44 @@ const Screen3 = (props) => {
     const { route, navigation } = props;
     const { params } = route;
 
+    const dispatch = useDispatch();
     const [email, setEmail] = useState('')
 
-    const handleTiep = () => {
+    const check = () => {
         if (email != '') {
-            navigation.navigate('CreatePasswordScreen', {
-                first_name: params.first_name,
-                last_name: params.last_name,
-                dateOfBirth: params.dateOfBirth,
-                sex: params.sex,
-                phone: '',
-                email: email,
-            })
+            callAPICheckEamil();
         } else {
             console.log("Thiếu ");
         }
     };
+
+    const callAPICheckEamil = () => {
+        dispatch(checkEmail({ email: email }))
+            .unwrap()
+            .then((response) => {
+                //console.log(response);
+                if (response.status) {
+                    handleTiep()
+                } else {
+                    console.log(response.message);
+                }
+            })
+            .catch((error) => {
+                console.log('Error:', error);
+            });
+    };
+
+    const handleTiep = () => {
+        navigation.navigate('CreatePasswordScreen', {
+            first_name: params.first_name,
+            last_name: params.last_name,
+            dateOfBirth: params.dateOfBirth,
+            sex: params.sex,
+            phone: null,
+            email: email,
+        })
+    };
+
 
     return (
         <View style={styles.container}>
@@ -43,7 +67,7 @@ const Screen3 = (props) => {
             />
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua email</Text>
 
-            <Pressable style={styles.button} onPress={() => handleTiep()}>
+            <Pressable style={styles.button} onPress={check}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
             <View style={styles.containerButton}>
