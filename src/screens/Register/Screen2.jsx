@@ -48,11 +48,19 @@ const Screen2 = (props) => {
             />
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
 
-            <Pressable style={styles.button}>
+            <Pressable style={styles.button} onPress={handleTiep}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
             <View style={styles.containerButton}>
-                <Pressable style={styles.buttonNextSceen} onPress={handleTiep}>
+                <Pressable
+                    style={styles.buttonNextSceen}
+                    onPress={() => navigation.navigate('Screen3', {
+                        first_name: params.first_name,
+                        last_name: params.last_name,
+                        dateOfBirth: params.dateOfBirth,
+                        sex: params.sex,
+                    })}
+                >
                     <Text style={styles.buttonTextNextScreen}>Đăng ký bằng email</Text>
                 </Pressable>
             </View>

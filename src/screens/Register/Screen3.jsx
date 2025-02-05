@@ -47,7 +47,15 @@ const Screen3 = (props) => {
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
             <View style={styles.containerButton}>
-                <Pressable style={styles.buttonNextSceen}>
+                <Pressable
+                    style={styles.buttonNextSceen}
+                    onPress={() => navigation.navigate('Screen2', {
+                        first_name: params.first_name,
+                        last_name: params.last_name,
+                        dateOfBirth: params.dateOfBirth,
+                        sex: params.sex,
+                    })}
+                >
                     <Text style={styles.buttonTextNextScreen}>Đăng ký bằng số điện thoại</Text>
                 </Pressable>
             </View>
