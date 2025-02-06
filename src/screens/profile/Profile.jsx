@@ -1,16 +1,108 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView } from 'react-native'
-import React from 'react'
+import {
+    StyleSheet,
+    Text,
+    View,
+    Image,
+    TouchableOpacity,
+    FlatList,
+    ScrollView
+} from 'react-native'
+import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'
 import ProfilePage from '../../components/items/ProfilePage'
 import Friends from '../../components/items/Friends'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    joinGroupPrivate,
+    getUser,
+} from '../../rtk/API';
+
 const Profile = (props) => {
     const { route, navigation } = props;
     const { params } = route;
 
+    const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
+
+    const [user, setUser] = useState(null);
+    //const [posts, setPosts] = useState([]);
+
+    const onGetUser = async (userId) => {
+        try {
+            await dispatch(getUser({ userId: userId, token: token }))
+                .unwrap()
+                .then((response) => {
+                    console.log(response);
+                    setUser(response.user);
+                })
+                .catch((error) => {
+                    console.log('Error:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    // const onGetPosts = async (userId) => {
+    //     try {
+    //         await dispatch(myPost({ userId: userId, token: token }))
+    //             .unwrap()
+    //             .then((response) => {
+    //                 //console.log(response);
+    //                 setPosts(response.posts);
+    //             })
+    //             .catch((error) => {
+    //                 console.log('Error:', error);
+    //             });
+
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
+
+    const fetchData = async () => {
+        let userId = params?._id || me?._id;  // Nếu có params._id thì là bạn bè, không thì là chính mình
+        setUser(params?._id ? null : me); // Nếu là mình thì lấy từ Redux
+
+        if (userId && params?._id) {
+            await onGetUser(userId);
+        }
+        //await onGetPosts(userId);
+    };
+
+    //chat
+    const getID_groupPrivate = async (user1, user2) => {
+        try {
+            const paramsAPI = {
+                user1: user1,
+                user2: user2,
+            }
+            await dispatch(joinGroupPrivate(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    //setID_groupPrivate(response.ID_group);
+                    navigation.navigate("Chat", { ID_group: response.ID_group })
+                })
+                .catch((error) => {
+                    console.log('Error1:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    const onChat = async () => {
+        await getID_groupPrivate(params?._id, me?._id)
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
+
 
     const dataPost = [
         {
@@ -78,27 +170,51 @@ const Profile = (props) => {
                     <View >
                         <View>
                             <Image style={styles.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
-                            <Image style={styles.avata} source={{ uri: me?.avatar }} />
+                            <Image style={styles.avata} source={{ uri: user?.avatar }} />
                         </View>
                         <View style={styles.boxBackground}>
-                            <Text style={styles.name}>{me?.first_name} {me?.last_name}</Text>
+                            <Text style={styles.name}>{user?.first_name} {user?.last_name}</Text>
                             <View style={styles.boxInformation}>
                                 <Text style={styles.friendNumber}>500 </Text>
                                 <Text style={[styles.friendNumber, { color: "#D6D6D6" }]}> Người bạn</Text>
                             </View>
-                            <View>
-                                <TouchableOpacity style={styles.btnAddStory}>
-                                    <Text style={styles.textAddStory}>+ Thêm vào tin</Text>
-                                </TouchableOpacity>
-                                <View style={styles.boxEdit}>
-                                    <TouchableOpacity style={styles.btnEdit}>
-                                        <Text style={styles.textEdit}>Chỉnh sửa trang cá nhân</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.btnMore}>
-                                        <Icon name="ellipsis-horizontal" size={25} color="black" />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+
+                            {/* btn me vs friend */}
+                            {
+                                user && (user._id !== me._id ? (
+                                    <View>
+                                        <TouchableOpacity style={styles.btnAddStory}>
+                                            <Text style={styles.textAddStory}>+ Thêm bạn bè</Text>
+                                        </TouchableOpacity>
+                                        <View style={styles.boxEdit}>
+                                            <TouchableOpacity
+                                                style={styles.btnEdit}
+                                                onPress={onChat}
+                                            >
+                                                <Text style={styles.textEdit}>Nhắn tin</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={styles.btnMore}>
+                                                <Icon name="ellipsis-horizontal" size={25} color="black" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                ) : (
+                                    <View>
+                                        <TouchableOpacity style={styles.btnAddStory}>
+                                            <Text style={styles.textAddStory}>+ Thêm vào tin</Text>
+                                        </TouchableOpacity>
+                                        <View style={styles.boxEdit}>
+                                            <TouchableOpacity style={styles.btnEdit}>
+                                                <Text style={styles.textEdit}>Chỉnh sửa trang cá nhân</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={styles.btnMore}>
+                                                <Icon name="ellipsis-horizontal" size={25} color="black" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                ))
+                            }
+
 
                         </View>
                     </View>
@@ -169,7 +285,7 @@ const Profile = (props) => {
                             <Icon name="chevron-back" size={20} color="black" />
                         </View>
                     </TouchableOpacity>
-                    <Text style={styles.titleName}>{me?.first_name} {me?.last_name}</Text>
+                    <Text style={styles.titleName}>{user?.first_name} {user?.last_name}</Text>
                     <View>
                         <Icon name="search" size={20} color="black" />
                     </View>

@@ -6,6 +6,8 @@ const initialState = {
     messageLogin: null,
     token: '', // token
     refreshToken: '',// refreshToken
+    // reactions
+    reactions: null,
 };
 
 const appSlice = createSlice({
@@ -20,6 +22,10 @@ const appSlice = createSlice({
         // Đăng xuất người dùng
         logout: (state) => {
             state.user = null;
+        },
+        setReactions: (state, action) => {
+            state.reactions = action.payload;
+            //console.log(state.reactions);
         },
     },
 
@@ -53,7 +59,7 @@ const appSlice = createSlice({
 export const {
     resetToken,
     logout,
-
+    setReactions,
 } = appSlice.actions;
 export default appSlice.reducer;
 
