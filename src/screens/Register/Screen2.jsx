@@ -23,7 +23,7 @@ const Screen2 = (props) => {
                 dateOfBirth: params.dateOfBirth,
                 sex: params.sex,
                 phone: phone,
-                email: '',
+                email: null,
             })
         } else {
             console.log("Thiếu ");

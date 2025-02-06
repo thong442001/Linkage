@@ -21,6 +21,12 @@ const CreatePasswordScreen = (props) => {
     };
 
     const onRegister = () => {
+        console.log(params.first_name);
+        console.log(params.last_name);
+        console.log(params.dateOfBirth);
+        console.log(params.sex)
+        console.log(params.phone);
+        console
         const userDataRegister = {
             first_name: params.first_name,
             last_name: params.last_name,
@@ -38,8 +44,13 @@ const CreatePasswordScreen = (props) => {
                     navigation.navigate('Login');
                 })
                 .catch((error) => {
-                    console.log('Error:', error);
+                    if (error?.message === 'Tài khoản đã tồn tại') {
+                        console.log('Tài khoản đã tồn tại. Vui lòng thử email hoặc số điện thoại khác.');
+                    } else {
+                        console.log('Lỗi không xác định:', error);
+                    }
                 });
+                
         } else {
             console.log('THieu password');
         }

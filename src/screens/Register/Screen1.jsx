@@ -37,6 +37,7 @@ const Screen1 = (props) => {
                 onPress={() => {
                     setGender(value)
                     console.log(gender);
+                
                 }}
                 style={styles.radioContainer}
             >

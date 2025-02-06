@@ -17,7 +17,7 @@ const Screen3 = (props) => {
                 last_name: params.last_name,
                 dateOfBirth: params.dateOfBirth,
                 sex: params.sex,
-                phone: '',
+                phone: null,
                 email: email,
             })
         } else {
