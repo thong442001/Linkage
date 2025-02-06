@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { checkPhone } from '../../rtk/API';
+import { useDispatch } from 'react-redux';
 
 const { width, height } = Dimensions.get('window');
 
@@ -8,6 +10,7 @@ const Screen2 = (props) => {
     const { route, navigation } = props;
     const { params } = route;
 
+    const dispatch = useDispatch();
     const [phone, setPhone] = useState('')
 
     // console.log(params.first_name);
@@ -15,7 +18,7 @@ const Screen2 = (props) => {
     // console.log(params.dateOfBirth);
     // console.log(params.sex);
 
-    const handleTiep = () => {
+    const check = () => {
         if (phone != '') {
             navigation.navigate('CreatePasswordScreen', {
                 first_name: params.first_name,
@@ -28,6 +31,34 @@ const Screen2 = (props) => {
         } else {
             console.log("Thiếu ");
         }
+    };
+
+    const callAPICheckPhone = () => {
+        dispatch(checkPhone({ phone: phone }))
+            .unwrap()
+            .then((response) => {
+                //console.log(response);
+                if (response.status) {
+                    handleTiep()
+                } else {
+                    console.log(response.message);
+                }
+
+            })
+            .catch((error) => {
+                console.log('Error:', error);
+            });
+    };
+
+    const handleTiep = () => {
+        navigation.navigate('CreatePasswordScreen', {
+            first_name: params.first_name,
+            last_name: params.last_name,
+            dateOfBirth: params.dateOfBirth,
+            sex: params.sex,
+            phone: phone,
+            email: null,
+        })
     };
 
     return (
@@ -48,7 +79,7 @@ const Screen2 = (props) => {
             />
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
 
-            <Pressable style={styles.button} onPress={handleTiep}>
+            <Pressable style={styles.button} onPress={check}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
 

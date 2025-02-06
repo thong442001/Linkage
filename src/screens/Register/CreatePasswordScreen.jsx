@@ -40,7 +40,7 @@ const CreatePasswordScreen = (props) => {
             dispatch(register(userDataRegister))
                 .unwrap()
                 .then((response) => {
-                    console.log(response?.message);
+                    console.log(response);
                     navigation.navigate('Login');
                 })
                 .catch((error) => {
