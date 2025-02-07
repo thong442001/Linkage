@@ -6,12 +6,93 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import ItemFriend from '../../components/items/ItemFriend';
 import ItemNewFriend from '../../components/items/ItemNewFriend';
 
-const Friend = () => {
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getAllLoiMoiKetBan,
+  chapNhanLoiMoiKetBan,
+  huyLoiMoiKetBan,
+} from '../../rtk/API';
+
+const Friend = (props) => {
+  const { route, navigation } = props;
+  const { params } = route;
+
+  const dispatch = useDispatch();
+  const me = useSelector(state => state.app.user);
+  const token = useSelector(state => state.app.token);
+
+  const [relationships, setRelationships] = useState([]);
+
+  useEffect(() => {
+    callGetAllLoiMoiKetBan();
+  }, []);
+
+
+  //getAllLoiMoiKetBan
+  const callGetAllLoiMoiKetBan = async () => {
+    try {
+      await dispatch(getAllLoiMoiKetBan({ me: me._id, token: token }))
+        .unwrap()
+        .then((response) => {
+          //console.log(response);
+          setRelationships(response.relationships);
+        })
+        .catch((error) => {
+          console.log('Error2 getAllLoiMoiKetBan:', error);
+        });
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //chapNhanLoiMoiKetBan
+  const callChapNhanLoiMoiKetBan = async (ID_relationship) => {
+    try {
+      const paramsAPI = {
+        ID_relationship: ID_relationship,
+      }
+      await dispatch(chapNhanLoiMoiKetBan(paramsAPI))
+        .unwrap()
+        .then((response) => {
+          console.log(response?.message);
+          callGetAllLoiMoiKetBan();
+        })
+        .catch((error) => {
+          console.log('Error2 callChapNhanLoiMoiKetBan:', error);
+        });
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //huyLoiMoiKetBan
+  const callHuyLoiMoiKetBan = async (ID_relationship) => {
+    try {
+      const paramsAPI = {
+        ID_relationship: ID_relationship,
+      }
+      await dispatch(huyLoiMoiKetBan(paramsAPI))
+        .unwrap()
+        .then((response) => {
+          console.log(response?.message);
+          callGetAllLoiMoiKetBan();
+        })
+        .catch((error) => {
+          console.log('Error2 callHuyLoiMoiKetBan:', error);
+        });
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.title}>
@@ -31,12 +112,21 @@ const Friend = () => {
         <Icon name="search" size={22} color="#D6D6D6" />
         <TextInput placeholder="Tìm kiếm bạn bè" />
       </View>
+
+      {/* ALl Lời mời kết bạn */}
       <View style={{ height: 250 }}>
         <FlatList
-          data={data}
-          keyExtractor={item => item.id}
+          data={relationships}
+          keyExtractor={item => item._id}
           style={styles.list_friend}
-          renderItem={({ item }) => <ItemFriend data={item} />}
+          renderItem={({ item }) =>
+            <ItemFriend
+              data={item}
+              me={me._id}
+              onXacNhan={callChapNhanLoiMoiKetBan}
+              onXoa={callHuyLoiMoiKetBan}
+            />
+          }
         />
       </View>
 

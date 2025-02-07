@@ -224,8 +224,8 @@ export const guiLoiMoiKetBan = createAsyncThunk(
   'relationship/guiLoiMoiKetBan',
   async (data, { rejectWithValue }) => {
     try {
-      const response = await AxiosHelper(data.token)
-        .get(`relationship/guiLoiMoiKetBan?ID_relationship=${data.ID_relationship}&me=${data.me}`);
+      const response = await AxiosHelper()
+        .post(`relationship/guiLoiMoiKetBan`, data);
       //console.log(response.status)
       if (response.status == true) {
         return response;
@@ -242,8 +242,8 @@ export const chapNhanLoiMoiKetBan = createAsyncThunk(
   'relationship/chapNhanLoiMoiKetBan',
   async (data, { rejectWithValue }) => {
     try {
-      const response = await AxiosHelper(data.token)
-        .get(`relationship/chapNhanLoiMoiKetBan?ID_relationship=${data.ID_relationship}`);
+      const response = await AxiosHelper()
+        .post(`relationship/chapNhanLoiMoiKetBan`, data);
       //console.log(response.status)
       if (response.status == true) {
         return response;
@@ -260,8 +260,8 @@ export const huyLoiMoiKetBan = createAsyncThunk(
   'relationship/huyLoiMoiKetBan',
   async (data, { rejectWithValue }) => {
     try {
-      const response = await AxiosHelper(data.token)
-        .get(`relationship/huyLoiMoiKetBan?ID_relationship=${data.ID_relationship}`);
+      const response = await AxiosHelper()
+        .post(`relationship/huyLoiMoiKetBan`, data);
       //console.log(response.status)
       if (response.status == true) {
         return response;

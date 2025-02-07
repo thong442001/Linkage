@@ -18,6 +18,9 @@ import {
     joinGroupPrivate,
     getUser,
     getRelationshipAvsB,// relationships
+    guiLoiMoiKetBan,
+    chapNhanLoiMoiKetBan,
+    huyLoiMoiKetBan,
 } from '../../rtk/API';
 
 const Profile = (props) => {
@@ -85,7 +88,7 @@ const Profile = (props) => {
         }
     };
 
-    //xác định mối quan hệ
+    //tìm mối quan hệ
     const getRelation = async () => {
         try {
             const paramsAPI = {
@@ -95,11 +98,75 @@ const Profile = (props) => {
             await dispatch(getRelationshipAvsB(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log(response);
+                    //console.log(response);
                     setRelationship(response.relationship);
                 })
                 .catch((error) => {
                     console.log('Error2 getRelationshipAvsB:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    //guiLoiMoiKetBan
+    const callGuiLoiMoiKetBan = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+                me: me._id,
+            }
+            await dispatch(guiLoiMoiKetBan(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 callGuiLoiMoiKetBan:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    //chapNhanLoiMoiKetBan
+    const callChapNhanLoiMoiKetBan = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+            }
+            await dispatch(chapNhanLoiMoiKetBan(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 callChapNhanLoiMoiKetBan:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    //huyLoiMoiKetBan
+    const callHuyLoiMoiKetBan = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+            }
+            await dispatch(huyLoiMoiKetBan(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 callHuyLoiMoiKetBan:', error);
                 });
 
         } catch (error) {
@@ -220,42 +287,48 @@ const Profile = (props) => {
                                 user && (user._id !== me._id ? (
                                     <View>
                                         {
-                                            relationship?.relationship == 'Người lạ'
-                                            && <TouchableOpacity style={styles.btnAddStory}>
+                                            relationship?.relation == 'Người lạ'
+                                            && <TouchableOpacity
+                                                style={styles.btnAddStory}
+                                                onPress={callGuiLoiMoiKetBan}
+                                            >
                                                 <Text style={styles.textAddStory}>+ Thêm bạn bè</Text>
                                             </TouchableOpacity>
                                         }
                                         {
-                                            relationship?.relationship == 'Bạn bè'
+                                            relationship?.relation == 'Bạn bè'
                                             && <TouchableOpacity style={styles.btnAddStory}>
                                                 <Text style={styles.textAddStory}>Bạn bè</Text>
                                             </TouchableOpacity>
                                         }
                                         {
                                             ((relationship?.ID_userA == me._id
-                                                && relationship?.relationship == 'A gửi lời kết bạn B')
+                                                && relationship?.relation == 'A gửi lời kết bạn B')
                                                 || (relationship?.ID_userB == me._id
-                                                    && relationship?.relationship == 'B gửi lời kết bạn A'))
+                                                    && relationship?.relation == 'B gửi lời kết bạn A'))
                                             && (
-                                                <TouchableOpacity style={styles.btnAddStory}>
+                                                <TouchableOpacity
+                                                    style={styles.btnAddStory}
+                                                    onPress={callHuyLoiMoiKetBan}
+                                                >
                                                     <Text style={styles.textAddStory}>Hủy lời mời</Text>
                                                 </TouchableOpacity>
                                             )
                                         }
                                         {
                                             ((relationship?.ID_userA == me._id
-                                                && relationship?.relationship == 'B gửi lời kết bạn A')
+                                                && relationship?.relation == 'B gửi lời kết bạn A')
                                                 || (relationship?.ID_userB == me._id
-                                                    && relationship?.relationship == 'A gửi lời kết bạn B'))
+                                                    && relationship?.relation == 'A gửi lời kết bạn B'))
                                             && (
                                                 /* Nhấn để mở menu */
-                                                < TouchableWithoutFeedback
+                                                <TouchableOpacity
                                                     style={styles.btnAddStory}
                                                     onPress={() => {
                                                         setMenuVisible(true);
                                                     }}>
                                                     <Text style={styles.textAddStory}>+ Phản hồi</Text>
-                                                </TouchableWithoutFeedback>
+                                                </TouchableOpacity>
                                             )
                                         }
 
@@ -393,7 +466,26 @@ const Profile = (props) => {
                     onPress={() => setMenuVisible(false)}
                 >
                     <View style={styles.overlay}>
-                        <Text>Phản hồi</Text>
+                        <View style={styles.dialog}>
+                            <TouchableOpacity
+                                style={styles.btnXacNhan}
+                                onPress={()=>{
+                                    setMenuVisible(false);
+                                    callChapNhanLoiMoiKetBan();
+                                }}
+                            >
+                                <Text style={styles.text_button}>Xác Nhận</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.btnXoa}
+                                onPress={()=>{
+                                    setMenuVisible(false);
+                                    callHuyLoiMoiKetBan();
+                                }}
+                            >
+                                <Text style={styles.text_button}>Xóa</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
@@ -570,6 +662,37 @@ const styles = StyleSheet.create({
     //modal
     overlay: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.4)",
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    dialog: {
+        borderRadius: 14,
+        width: 336,
+        height: 194,
+        alignItems: 'center',
+        backgroundColor: '#FFFF',
+        justifyContent: 'space-evenly',
+    },
+    btnXacNhan: {
+        width: 140,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0064E0',
+        borderRadius: 30,
+    },
+    btnXoa: {
+        width: 140,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#A6A6A6',
+        borderRadius: 30,
+    },
+    text_button: {
+        fontSize: 16,
+        color: 'white',
+        fontWeight: '600',
     },
 })
