@@ -5,7 +5,8 @@ import {
     Image,
     TouchableOpacity,
     FlatList,
-    ScrollView
+    TouchableWithoutFeedback,
+    Modal,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -16,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     joinGroupPrivate,
     getUser,
+    getRelationshipAvsB,// relationships
 } from '../../rtk/API';
 
 const Profile = (props) => {
@@ -28,6 +30,10 @@ const Profile = (props) => {
 
     const [user, setUser] = useState(null);
     //const [posts, setPosts] = useState([]);
+    const [relationship, setRelationship] = useState(null);
+    // visible phản hồi kết bạn
+    const [menuVisible, setMenuVisible] = useState(false);
+
 
     const onGetUser = async (userId) => {
         try {
@@ -71,7 +77,35 @@ const Profile = (props) => {
             await onGetUser(userId);
         }
         //await onGetPosts(userId);
+
+        if (params?._id !== me._id) {
+            if (params?._id != null || params?._id != '') {
+                await getRelation();
+            }
+        }
     };
+
+    //xác định mối quan hệ
+    const getRelation = async () => {
+        try {
+            const paramsAPI = {
+                ID_user: params?._id,
+                me: me._id,
+            }
+            await dispatch(getRelationshipAvsB(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 getRelationshipAvsB:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     //chat
     const getID_groupPrivate = async (user1, user2) => {
@@ -95,6 +129,8 @@ const Profile = (props) => {
             console.log(error)
         }
     }
+
+
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id)
     }
@@ -183,9 +219,46 @@ const Profile = (props) => {
                             {
                                 user && (user._id !== me._id ? (
                                     <View>
-                                        <TouchableOpacity style={styles.btnAddStory}>
-                                            <Text style={styles.textAddStory}>+ Thêm bạn bè</Text>
-                                        </TouchableOpacity>
+                                        {
+                                            relationship?.relationship == 'Người lạ'
+                                            && <TouchableOpacity style={styles.btnAddStory}>
+                                                <Text style={styles.textAddStory}>+ Thêm bạn bè</Text>
+                                            </TouchableOpacity>
+                                        }
+                                        {
+                                            relationship?.relationship == 'Bạn bè'
+                                            && <TouchableOpacity style={styles.btnAddStory}>
+                                                <Text style={styles.textAddStory}>Bạn bè</Text>
+                                            </TouchableOpacity>
+                                        }
+                                        {
+                                            ((relationship?.ID_userA == me._id
+                                                && relationship?.relationship == 'A gửi lời kết bạn B')
+                                                || (relationship?.ID_userB == me._id
+                                                    && relationship?.relationship == 'B gửi lời kết bạn A'))
+                                            && (
+                                                <TouchableOpacity style={styles.btnAddStory}>
+                                                    <Text style={styles.textAddStory}>Hủy lời mời</Text>
+                                                </TouchableOpacity>
+                                            )
+                                        }
+                                        {
+                                            ((relationship?.ID_userA == me._id
+                                                && relationship?.relationship == 'B gửi lời kết bạn A')
+                                                || (relationship?.ID_userB == me._id
+                                                    && relationship?.relationship == 'A gửi lời kết bạn B'))
+                                            && (
+                                                /* Nhấn để mở menu */
+                                                < TouchableWithoutFeedback
+                                                    style={styles.btnAddStory}
+                                                    onPress={() => {
+                                                        setMenuVisible(true);
+                                                    }}>
+                                                    <Text style={styles.textAddStory}>+ Phản hồi</Text>
+                                                </TouchableWithoutFeedback>
+                                            )
+                                        }
+
                                         <View style={styles.boxEdit}>
                                             <TouchableOpacity
                                                 style={styles.btnEdit}
@@ -270,7 +343,7 @@ const Profile = (props) => {
                         </View>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </View >
         )
     }
 
@@ -306,6 +379,25 @@ const Profile = (props) => {
                     </View>
                 </View>
             </View>
+
+
+
+            {/* Menu Phản hồi kết bạn */}
+            <Modal
+                visible={menuVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setMenuVisible(false)}
+            >
+                <TouchableWithoutFeedback
+                    onPress={() => setMenuVisible(false)}
+                >
+                    <View style={styles.overlay}>
+                        <Text>Phản hồi</Text>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
         </View>
     )
 }
@@ -474,5 +566,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 5,
         marginBottom: 10
-    }
+    },
+    //modal
+    overlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.4)",
+    },
 })
