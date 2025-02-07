@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Pressable,
   //ToastAndroid
 } from 'react-native';
 import styles from '../../styles/screens/login/LoginS';
@@ -92,7 +93,9 @@ const Login = (props) => {
         <TouchableOpacity style={styles.loginButton} onPress={checkLogin}>
           <Text style={styles.loginButtonText}>Đăng nhập</Text>
         </TouchableOpacity>
+        <Pressable onPress={() => navigation.navigate('FindWithEmail')}>
         <Text style={styles.forgotPasswordText}>Bạn quên mật khẩu ư?</Text>
+        </Pressable>
       </View>
       <ButtonCreateNewAccount onPress={() => navigation.navigate('Screen1')} />
     </View>

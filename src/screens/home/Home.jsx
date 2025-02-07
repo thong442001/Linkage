@@ -79,6 +79,7 @@ const Home = (props) => {
               showsHorizontalScrollIndicator={false}
               ListHeaderComponent={headerComponentStory}
               contentContainerStyle={{ paddingHorizontal: 20 }}
+              
             />
           </View>
         </View>
