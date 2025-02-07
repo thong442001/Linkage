@@ -4,6 +4,8 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import Stories from '../../components/items/Stories'
 import Post from '../../components/items/Post';
 import { useSelector } from 'react-redux';
+import { oStackHome } from '../../navigations/HomeNavigation';
+
 const Home = (props) => {
   // const [stories, setStories] = useState([])
   const { route, navigation } = props;
@@ -35,15 +37,21 @@ const Home = (props) => {
           <View style={styles.header}>
             <Text style={styles.title}>Linkage</Text>
             <View style={styles.icons}>
-              <View style={styles.iconsPadding}>
+              <TouchableOpacity style={styles.iconsPadding}>
                 <Icon name="add-circle" size={30} color="gray" />
-              </View>
-              <View style={styles.iconsPadding}>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.iconsPadding}
+                onPress={() => navigation.navigate(oStackHome.Search.name)}
+              >
                 <Icon name="search" size={30} color="gray" />
-              </View>
-              <View style={styles.iconsPadding}>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.iconsPadding}
+                onPress={() => navigation.navigate(oStackHome.HomeChat.name)}
+              >
                 <Icon name="mail" size={30} color="gray" />
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
           <View style={styles.line}></View>

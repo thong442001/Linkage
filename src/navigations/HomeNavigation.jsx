@@ -20,7 +20,7 @@ const oTab = {
 }
 const Tab = createBottomTabNavigator();
 const TabHome = () => {
-  const theme = useSelector(state => state.app.theme);
+  const me = useSelector(state => state.app.user);
   //console.log(theme);
   return (
     <Tab.Navigator
@@ -30,69 +30,37 @@ const TabHome = () => {
           let name;
           if (route.name === 'Home') {
             name = "home"
-            theme ? (
-              color = focused
-                ? "#121212"
-                : "gray"
-            ) : (
-              color = focused
-                ? "white"
-                : "gray"
-            )
+            color = focused
+              ? "#121212"
+              : "gray"
           } else if (route.name === 'Friend') {
             name = "users";
-            theme ? (
-              color = focused
-                ? "#121212"
-                : "gray"
-            ) : (
-              color = focused
-                ? "white"
-                : "gray"
-            )
+            color = focused
+              ? "#121212"
+              : "gray"
           } else if (route.name === 'Notification') {
             name = "bell-o";
-            theme ? (
-              color = focused
-                ? "#121212"
-                : "gray"
-            ) : (
-              color = focused
-                ? "white"
-                : "gray"
-            )
+            color = focused
+              ? "#121212"
+              : "gray"
           } else if (route.name === 'Profile') {
             name = "user-circle-o";
-            theme ? (
-              color = focused
-                ? "#121212"
-                : "gray"
-            ) : (
-              color = focused
-                ? "white"
-                : "gray"
-            )
+            color = focused
+              ? "#121212"
+              : "gray"
           } else if (route.name === 'Setting') {
             name = "server";
-            theme ? (
-              color = focused
-                ? "#121212"
-                : "gray"
-            ) : (
-              color = focused
-                ? "white"
-                : "gray"
-            )
+            color = focused
+              ? "#121212"
+              : "gray"
           }
 
           return <FontAwesome name={name} size={size} color={color} />;
         },
         headerShown: false,
         tabBarActiveTintColor: '#D17842',
-        // tabBarActiveBackgroundColor: "white",
-        // tabBarInactiveBackgroundColor: "white",
-        tabBarActiveBackgroundColor: theme ? "white" : "#121212",
-        tabBarInactiveBackgroundColor: theme ? "white" : "#121212",
+        tabBarActiveBackgroundColor: "white",
+        tabBarInactiveBackgroundColor: "white",
         //ẩn bottom khi bàn phím xuất hiện
         tabBarHideOnKeyboard: true,
 
@@ -100,11 +68,27 @@ const TabHome = () => {
     >
       {
         Object.keys(oTab).map((item, index) => {
-          return <Tab.Screen
-            key={index}
-            name={oTab[item].name}
-            component={oTab[item].component}
-            options={{ title: "" }} />
+          if (oTab[item].name == 'Profile') {
+            return <Tab.Screen
+              key={index}
+              name={oTab[item].name}
+              component={oTab[item].component}
+              options={{ title: "" }}
+              listeners={({ navigation }) => ({
+                tabPress: (e) => {
+                  e.preventDefault(); // Chặn mặc định
+                  navigation.navigate("Profile", { _id: me._id }); // Reset về profile của chính bạn
+                },
+              })}
+            />
+          } else {
+            return <Tab.Screen
+              key={index}
+              name={oTab[item].name}
+              component={oTab[item].component}
+              options={{ title: "" }}
+            />
+          }
         })
       }
       {/* <Tab.Screen name="Home" component={Home} options={{ title: '' }} />
@@ -119,11 +103,15 @@ const TabHome = () => {
 //stack home
 import Search from '../screens/home/Search';
 import Story from '../screens/story/Story';
+import Chat from '../screens/chat/Chat';
+import HomeChat from '../screens/chat/HomeChat';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
   Story: { name: 'Story', component: Story },
+  Chat: { name: 'Chat', component: Chat },
+  HomeChat: { name: 'HomeChat', component: HomeChat },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

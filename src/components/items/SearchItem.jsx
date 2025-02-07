@@ -6,7 +6,7 @@ const SearchItem = ({ user }) => {
   return (
     <View style={styles.container}>
       <Image source={{ uri: user.avatar }} style={styles.avatar} />
-      <Text style={styles.name}>{user.displayName}</Text>
+      <Text style={styles.name}>{user.first_name} {user.last_name}</Text>
     </View>
   );
 };
