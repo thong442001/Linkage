@@ -11,7 +11,7 @@ import AppNavigation from './src/navigations/AppNavigation';
 import { Provider } from 'react-redux'
 import { store, persistor } from './src/rtk/Store';
 import { PersistGate } from 'redux-persist/integration/react'
-
+// import 'react-native-gesture-handler'
 function App(): React.JSX.Element {
 
   return (
