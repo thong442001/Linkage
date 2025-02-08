@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
   },
   backGround: {
     width: 123,
-    height: 50,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    height: 40,
+    backgroundColor: 'rgba(0,0,0,0.1)',
     position: 'absolute',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,

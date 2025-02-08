@@ -1,12 +1,13 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useMemo, useRef, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/EvilIcons'
 import Icon3 from 'react-native-vector-icons/MaterialIcons'
 import Icon4 from 'react-native-vector-icons/FontAwesome5'
 import FBPhotoGrid from '@renzycode/react-native-fb-photo-grid';
 const Post = (props) => {
-    const { post } = props
+    const { post, openBottomSheet } = props
+
     return (
         <View style={[styles.box, { marginTop: 4 }]}>
             <View style={{ marginVertical: 18 }}>
@@ -48,10 +49,12 @@ const Post = (props) => {
                     <Text>Thích</Text>
                 </View>
                 <View style={styles.boxIcons2}>
-                    <View style={styles.boxIcons3}>
-                        <Icon3 name="comment" size={20} color="black" />
-                    </View>
-                    <Text>Bình luận</Text>
+                    <TouchableOpacity onPress={openBottomSheet} style={{ flexDirection: "row" }}>
+                        <View style={styles.boxIcons3}>
+                            <Icon3 name="comment" size={20} color="black" />
+                        </View>
+                        <Text>Bình luận</Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.boxIcons2}>
                     <View style={styles.boxIcons3}>
