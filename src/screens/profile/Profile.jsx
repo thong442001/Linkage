@@ -5,7 +5,8 @@ import {
     Image,
     TouchableOpacity,
     FlatList,
-    ScrollView
+    TouchableWithoutFeedback,
+    Modal,
 } from 'react-native'
 import React, { useEffect, useState, useMemo, useRef } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -21,6 +22,10 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import {
     joinGroupPrivate,
     getUser,
+    getRelationshipAvsB,// relationships
+    guiLoiMoiKetBan,
+    chapNhanLoiMoiKetBan,
+    huyLoiMoiKetBan,
 } from '../../rtk/API';
 
 const Profile = (props) => {
@@ -33,7 +38,6 @@ const Profile = (props) => {
 
     const [user, setUser] = useState(null);
     //const [posts, setPosts] = useState([]);
-
 
     const onGetUser = async (userId) => {
         try {
@@ -77,7 +81,99 @@ const Profile = (props) => {
             await onGetUser(userId);
         }
         //await onGetPosts(userId);
+
+        if (params?._id !== me._id) {
+            if (params?._id != null || params?._id != '') {
+                await getRelation();
+            }
+        }
     };
+
+    //tìm mối quan hệ
+    const getRelation = async () => {
+        try {
+            const paramsAPI = {
+                ID_user: params?._id,
+                me: me._id,
+            }
+            await dispatch(getRelationshipAvsB(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 getRelationshipAvsB:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    //guiLoiMoiKetBan
+    const callGuiLoiMoiKetBan = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+                me: me._id,
+            }
+            await dispatch(guiLoiMoiKetBan(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 callGuiLoiMoiKetBan:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    //chapNhanLoiMoiKetBan
+    const callChapNhanLoiMoiKetBan = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+            }
+            await dispatch(chapNhanLoiMoiKetBan(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 callChapNhanLoiMoiKetBan:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    //huyLoiMoiKetBan
+    const callHuyLoiMoiKetBan = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+            }
+            await dispatch(huyLoiMoiKetBan(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch((error) => {
+                    console.log('Error2 callHuyLoiMoiKetBan:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     //chat
     const getID_groupPrivate = async (user1, user2) => {
@@ -101,6 +197,8 @@ const Profile = (props) => {
             console.log(error)
         }
     }
+
+
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id)
     }
@@ -214,13 +312,10 @@ const Profile = (props) => {
                             {
                                 user && (user._id !== me._id ? (
                                     <View>
-                                        <TouchableOpacity style={frag ? ProfileS.btnAddStory2 : ProfileS.btnAddStory} onPress={btnUnfriends}>
-                                            <View>
-                                                {frag ? <Icon3 name="user-friends" size={20} color="#FFFFFF" /> : <Icon name="person-add" size={20} color="#FFFFFF" />}
-                                            </View>
-                                            <Text style={ProfileS.textAddStory}>{frag ? "Đã là bạn bè" : "Thêm bạn bè"}</Text>
+                                        <TouchableOpacity style={styles.btnAddStory}>
+                                            <Text style={styles.textAddStory}>+ Thêm bạn bè</Text>
                                         </TouchableOpacity>
-                                        <View style={ProfileS.boxEdit}>
+                                        <View style={styles.boxEdit}>
                                             <TouchableOpacity
                                                 style={frag ? ProfileS.btnEdit2 : ProfileS.btnEdit}
                                                 onPress={onChat}
@@ -304,7 +399,7 @@ const Profile = (props) => {
                         </View>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </View >
         )
     }
 
@@ -345,29 +440,173 @@ const Profile = (props) => {
                     </View>
                 </View>
             </View>
-
-            {check >= 2 && (
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    snapPoints={snapPoints}
-                    enablePanDownToClose
-                // onClose={() => setIsSheetOpen(false)}
-                >
-                    <BottomSheetView style={{ height: "auto" }}>
-                        <TouchableOpacity onPress={unfriend}>
-                            <View style={{ padding: 20, flexDirection: 'row', alignItems: 'center' }}>
-                                <View>
-                                    <Icon name="person-remove-sharp" size={20} color="black" />
-                                </View>
-                                <Text style={{ fontSize: 18, fontWeight: "bold", marginLeft: 15 }}>Hủy kết bạn</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </BottomSheetView>
-                </BottomSheet>
-            )}
-        </GestureHandlerRootView>
+        </View>
     )
 }
 
 export default Profile
 
+const styles = StyleSheet.create({
+    container1: {
+        flex: 1,
+        backgroundColor: "#A1A6AD"
+    },
+    container: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginHorizontal: 20,
+        marginVertical: 11,
+    },
+    titleName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    boxHeader: {
+        backgroundColor: "#fff",
+    },
+    backGroundImage: {
+        height: 170,
+        width: '100%',
+    },
+    avata: {
+        width: 136,
+        height: 136,
+        borderRadius: 320,
+        borderColor: '#fff',
+        borderWidth: 2,
+        position: 'absolute',
+        bottom: -68,
+        left: 20,
+    },
+    boxBackground: {
+        marginHorizontal: 20,
+        marginVertical: 20,
+        marginTop: "20%",
+
+    },
+    boxInformation: {
+        flexDirection: 'row',
+    },
+    name: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    friendNumber: {
+        fontSize: 13,
+        fontWeight: 'bold',
+    },
+    btnAddStory: {
+        backgroundColor: '#0064E0',
+        borderRadius: 8,
+        marginVertical: 10,
+    },
+    textAddStory: {
+        color: '#FFFFFF',
+        textAlign: 'center',
+        marginVertical: 11,
+    },
+    boxEdit: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    btnEdit: {
+        backgroundColor: '#D9D9D9',
+        borderRadius: 8,
+        flex: 4,
+        alignItems: 'center',
+    },
+    textEdit: {
+        fontSize: 13,
+        fontWeight: 'bold',
+        marginVertical: 11,
+    },
+    btnMore: {
+        backgroundColor: '#D9D9D9',
+        borderRadius: 8,
+        flex: 1,
+        alignItems: 'center',
+        padding: 8,
+        marginLeft: 13,
+    },
+    boxFriends: {
+        marginHorizontal: 20
+    },
+    title: {
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginVertical: 14
+    },
+    textFriendNumber2: {
+        fontSize: 12,
+        color: "#BEBEBE",
+        fontWeight: "bold"
+    },
+    textFriend: {
+        fontSize: 16,
+        fontWeight: "bold"
+    },
+    textSeeAll: {
+        color: "#0064E099"
+    },
+    listFriends: {
+        alignItems: "center",
+        marginVertical: 19,
+    },
+    boxLive: {
+        marginHorizontal: 20,
+        marginVertical: 15
+    },
+    avataStatus: {
+        width: 40,
+        height: 40,
+        borderRadius: 180,
+
+    },
+    boxAllThink: {
+        flexDirection: "row",
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10
+    },
+    boxThink: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    title2: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    boxLivestream: {
+        paddingVertical: 17,
+        backgroundColor: '#D9D9D999',
+        marginVertical: 10
+    },
+    btnLivestream: {
+        marginHorizontal: 20,
+        backgroundColor: "#FFFFFF",
+        width: 130,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 15,
+    },
+    boxManange: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    btnManage: {
+        backgroundColor: '#D9D9D9',
+        marginHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 5,
+        marginBottom: 10
+    }
+})

@@ -200,6 +200,98 @@ export const getAllReaction = createAsyncThunk(
   }
 );
 
+// ******* relationships *******
+
+export const getRelationshipAvsB = createAsyncThunk(
+  'relationship/getRelationshipAvsB',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('relationship/getRelationshipAvsB', data);
+      console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const guiLoiMoiKetBan = createAsyncThunk(
+  'relationship/guiLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post(`relationship/guiLoiMoiKetBan`, data);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const chapNhanLoiMoiKetBan = createAsyncThunk(
+  'relationship/chapNhanLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post(`relationship/chapNhanLoiMoiKetBan`, data);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const huyLoiMoiKetBan = createAsyncThunk(
+  'relationship/huyLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post(`relationship/huyLoiMoiKetBan`, data);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllLoiMoiKetBan = createAsyncThunk(
+  'relationship/getAllLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`relationship/getAllLoiMoiKetBan?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // /// test token
 // export const getAllUsers = createAsyncThunk(
 //   'user/getAllUsers',

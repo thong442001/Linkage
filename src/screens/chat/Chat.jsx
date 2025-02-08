@@ -49,7 +49,10 @@ const Chat = (props) => {
         getMessagesOld(params?.ID_group);
 
         // Kết nối tới server
+
         const newSocket = io('http://192.168.1.11:3001', {
+
+
             transports: ['websocket', 'polling'],
             reconnection: true,   // Cho phép tự động kết nối lại
             reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần

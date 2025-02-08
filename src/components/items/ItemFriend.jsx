@@ -1,18 +1,38 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 
 const ItemFriend = props => {
-  const {data} = props;
+
+  const { data, me, onXacNhan, onXoa } = props;
+
   return (
     <View style={styles.container}>
-      <Image style={styles.img} source={{uri: data.img}} />
+      {
+        data.ID_userA == me
+          ? <Image style={styles.img} source={{ uri: data.ID_userA.avatar }} />
+          : <Image style={styles.img} source={{ uri: data.ID_userB.avatar }} />
+      }
       <View>
-        <Text style={styles.text}>{data.name}</Text>
+        {
+          data.ID_userA == me
+            ? <Text style={styles.text}>
+              {data.ID_userA.first_name} {data.ID_userA.last_name}
+            </Text>
+            : <Text style={styles.text}>
+              {data.ID_userB.first_name} {data.ID_userB.last_name}
+            </Text>
+        }
         <View style={styles.container_button}>
-          <TouchableOpacity style={styles.button1}>
+          <TouchableOpacity
+            style={styles.button1}
+            onPress={() => onXacNhan(data._id)}
+          >
             <Text style={styles.text_button}>Xác nhận</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button2}>
+          <TouchableOpacity
+            style={styles.button2}
+            onPress={() => onXoa(data._id)}
+          >
             <Text style={styles.text_button}>Xóa</Text>
           </TouchableOpacity>
         </View>

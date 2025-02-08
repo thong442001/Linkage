@@ -30,19 +30,20 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
     }, async (error) => {
         const x = error?.config;
         if (error.response.status == 403 && !x?.sent) {
-            //console.error("403, token hết hạn");
+            console.error("403, token hết hạn");
             x.sent = true;
             //gọi api refreshToken
+
             await axios.post(`https://192.168.1.11:3001/user/refreshToken`, {
                 refreshToken: store.getState().app.refreshToken
             })
                 .then(async function (response) {
-                    //console.log("=>token1: " + response.data?.token);
+                    console.log("=>token1: " + response.data?.token);
                     await store.dispatch(resetToken(response.data?.token));
                     x.headers['Authorization'] = `Bearer ${response.data?.token}`;
                 })
                 .catch(async function (error) {
-                    console.log(error);
+                    console.error("token hết hạn");
                     // refreshToken hết hạn đăng xuất ra
                     await store.dispatch(logout());
                 });

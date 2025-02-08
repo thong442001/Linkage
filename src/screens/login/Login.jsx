@@ -55,7 +55,7 @@ const Login = (props) => {
       dispatch(login(data))
         .unwrap()
         .then((response) => {
-          //console.log(response);
+          console.log(response);
           //ToastAndroid.show('Đăng nhập thành công', ToastAndroid.SHORT);
         })
         .catch((error) => {
