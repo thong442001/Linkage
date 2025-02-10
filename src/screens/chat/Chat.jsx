@@ -166,8 +166,6 @@ const Chat = (props) => {
             });
         });
 
-
-
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardHeight(e.endCoordinates.height);

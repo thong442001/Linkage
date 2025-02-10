@@ -22,6 +22,7 @@ import {
     chapNhanLoiMoiKetBan,
     huyLoiMoiKetBan,
 } from '../../rtk/API';
+import { Snackbar } from 'react-native-paper';// thông báo (ios and android)
 
 const Profile = (props) => {
     const { route, navigation } = props;
@@ -36,6 +37,8 @@ const Profile = (props) => {
     const [relationship, setRelationship] = useState(null);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
+    // dialog reLoad
+    const [dialogReLoad, setDialogreload] = useState(false);
 
 
     const onGetUser = async (userId) => {
@@ -81,6 +84,7 @@ const Profile = (props) => {
         }
         //await onGetPosts(userId);
 
+        //get relationship
         if (params?._id !== me._id) {
             if (params?._id != null || params?._id != '') {
                 await getRelation();
@@ -125,6 +129,7 @@ const Profile = (props) => {
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
+                    setDialogreload(true);
                 });
 
         } catch (error) {
@@ -146,6 +151,7 @@ const Profile = (props) => {
                 })
                 .catch((error) => {
                     console.log('Error2 callChapNhanLoiMoiKetBan:', error);
+                    setDialogreload(true);
                 });
 
         } catch (error) {
@@ -167,6 +173,7 @@ const Profile = (props) => {
                 })
                 .catch((error) => {
                     console.log('Error2 callHuyLoiMoiKetBan:', error);
+                    setDialogreload(true);
                 });
 
         } catch (error) {
@@ -270,6 +277,17 @@ const Profile = (props) => {
         return (
             <View style={styles.container1}>
                 <View style={styles.boxHeader}>
+                    {/* Hiển thị Snackbar dưới cùng màn hình */}
+                    <Snackbar
+                        visible={dialogReLoad}
+                        onDismiss={() => {
+                            fetchData();
+                            setDialogreload(false);
+                        }}
+                        duration={1000}
+                    >
+                        làm mới!
+                    </Snackbar>
                     <View >
                         <View>
                             <Image style={styles.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
@@ -469,7 +487,7 @@ const Profile = (props) => {
                         <View style={styles.dialog}>
                             <TouchableOpacity
                                 style={styles.btnXacNhan}
-                                onPress={()=>{
+                                onPress={() => {
                                     setMenuVisible(false);
                                     callChapNhanLoiMoiKetBan();
                                 }}
@@ -478,7 +496,7 @@ const Profile = (props) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.btnXoa}
-                                onPress={()=>{
+                                onPress={() => {
                                     setMenuVisible(false);
                                     callHuyLoiMoiKetBan();
                                 }}
