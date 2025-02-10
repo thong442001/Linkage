@@ -29,8 +29,19 @@ const Friend = (props) => {
   const [relationships, setRelationships] = useState([]);
 
   useEffect(() => {
+    // Call API khi lần đầu vào trang
     callGetAllLoiMoiKetBan();
-  }, []);
+
+    // Thêm listener để gọi lại API khi quay lại trang
+    const focusListener = navigation.addListener('focus', () => {
+      callGetAllLoiMoiKetBan();
+    });
+
+    // Cleanup listener khi component bị unmount
+    return () => {
+      focusListener();
+    };
+  }, [navigation]);
 
 
   //getAllLoiMoiKetBan

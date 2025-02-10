@@ -44,12 +44,12 @@ const Chat = (props) => {
 
     useEffect(() => {
         // lấy name vs avt
-        getID_groupPrivate(params?.ID_group);
+        getInforGroup(params?.ID_group);
         // lấy messages old
         getMessagesOld(params?.ID_group);
 
         // Kết nối tới server
-        const newSocket = io('http://192.168.1.4:3001', {
+        const newSocket = io('https://linkage.id.vn/', {
             transports: ['websocket', 'polling'],
             reconnection: true,   // Cho phép tự động kết nối lại
             reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
@@ -188,13 +188,14 @@ const Chat = (props) => {
     }, [params?.ID_group]);
 
     //infor group
-    const getID_groupPrivate = async (ID_group) => {
+    const getInforGroup = async (ID_group) => {
         try {
             await dispatch(getGroupID({ ID_group: ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
                     setGroup(response.group)
                     if (response.group.isPrivate == true) {
+                        // chat private
                         //console.log(response.group.members);
                         const otherUser = response.group.members.find(user => user._id !== me._id);
                         if (otherUser) {
@@ -203,6 +204,23 @@ const Chat = (props) => {
                             setGroupAvatar(otherUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
+                        }
+                    } else {
+                        // group 
+                        if (response.group.avatar == null) {
+                            setGroupAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
+                        } else {
+                            setGroupAvatar(response.group.avatar);
+                        }
+                        if (response.group.name == null) {
+                            const names = response.group.members
+                                .filter(user => user._id !== me._id)
+                                .map(user => `${user.first_name} ${user.last_name}`)
+                                .join(", ");
+                            // Cập nhật state một lần duy nhất
+                            setGroupName(names);
+                        } else {
+                            setGroupName(response.group.name);
                         }
                     }
                 })
@@ -256,7 +274,7 @@ const Chat = (props) => {
     };
 
     const handleGoBack = () => {
-        navigation.goBack();
+        navigation.navigate("HomeChat");
     };
 
     useEffect(() => {
