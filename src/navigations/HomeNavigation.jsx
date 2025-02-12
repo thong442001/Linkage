@@ -105,6 +105,8 @@ import Search from '../screens/home/Search';
 import Story from '../screens/story/Story';
 import Chat from '../screens/chat/Chat';
 import HomeChat from '../screens/chat/HomeChat';
+import UpPost from '../screens/home/UpPost';
+import PostDetail from '../screens/home/PostDetail';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -112,6 +114,8 @@ const oStackHome = {
   Story: { name: 'Story', component: Story },
   Chat: { name: 'Chat', component: Chat },
   HomeChat: { name: 'HomeChat', component: HomeChat },
+  UpPost: { name: 'UpPost', component: UpPost },
+  PostDetail: { name: 'PostDetail', component: PostDetail },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

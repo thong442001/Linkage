@@ -18,6 +18,8 @@ import HomeS from '../../styles/screens/home/HomeS'
 import { useDispatch, useSelector } from 'react-redux';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import { useBottomSheet } from '../../context/BottomSheetContext';
+
 import {
     joinGroupPrivate,
     getUser,
@@ -33,7 +35,7 @@ const Profile = (props) => {
 
     const [user, setUser] = useState(null);
     //const [posts, setPosts] = useState([]);
-
+    const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
     const onGetUser = async (userId) => {
         try {
@@ -173,26 +175,43 @@ const Profile = (props) => {
 
 
     // bottomsheet
-    const bottomSheetRef = useRef(null);
-    const snapPoints = useMemo(() => ["30%"], []);
+    // const bottomSheetRef = useRef(null);
+    // const snapPoints = useMemo(() => ["30%"], []);
     // const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-    const btnUnfriends = () => {
-        setCheck(check + 1)
-        setFrag(true)
-        // setIsSheetOpen(true);
-        bottomSheetRef.current?.snapToIndex(0); // Mở ngay 100%
-    };
-
-    const unfriend = () => {
-        setFrag(false),
-            setCheck(0)
-    }
 
     //btnFriends
     const [frag, setFrag] = useState(false)
     const [check, setCheck] = useState(0)
 
+    const btnUnfriends = () => {
+        setCheck(check + 1)
+        setFrag(true)
+        // setIsSheetOpen(true);
+        // bottomSheetRef.current?.snapToIndex(0); // Mở ngay 100%
+    };
+
+    const unfriend = () => {
+        setFrag(false)
+        setCheck(0)
+        closeBottomSheet()
+    }
+
+
+    useEffect(() => {
+        if (check == 2) {
+            openBottomSheet(15,
+                <TouchableOpacity onPress={unfriend}>
+                    <View style={{ padding: 20, flexDirection: 'row', alignItems: 'center' }}>
+                        <View>
+                            <Icon name="person-remove-sharp" size={20} color="black" />
+                        </View>
+                        <Text style={{ fontSize: 18, fontWeight: "bold", marginLeft: 15 }}>Hủy kết bạn</Text>
+                    </View>
+                </TouchableOpacity>
+            )
+            setCheck(1)
+        }
+    }, [check == 2]);
 
     const headerFriends = () => {
         return (
@@ -248,8 +267,6 @@ const Profile = (props) => {
                                     </View>
                                 ))
                             }
-
-
                         </View>
                     </View>
                 </View>
@@ -309,7 +326,8 @@ const Profile = (props) => {
     }
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
+
+        <View style={{ flex: 1 }}>
             <View style={ProfileS.container}>
                 <View style={ProfileS.boxHeader}>
                     <View style={ProfileS.header}>
@@ -346,26 +364,7 @@ const Profile = (props) => {
                 </View>
             </View>
 
-            {check >= 2 && (
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    snapPoints={snapPoints}
-                    enablePanDownToClose
-                // onClose={() => setIsSheetOpen(false)}
-                >
-                    <BottomSheetView style={{ height: "auto" }}>
-                        <TouchableOpacity onPress={unfriend}>
-                            <View style={{ padding: 20, flexDirection: 'row', alignItems: 'center' }}>
-                                <View>
-                                    <Icon name="person-remove-sharp" size={20} color="black" />
-                                </View>
-                                <Text style={{ fontSize: 18, fontWeight: "bold", marginLeft: 15 }}>Hủy kết bạn</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </BottomSheetView>
-                </BottomSheet>
-            )}
-        </GestureHandlerRootView>
+        </View>
     )
 }
 

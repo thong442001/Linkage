@@ -8,6 +8,8 @@ import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Comment from '../../components/comment/Comment';
+
 const Home = (props) => {
   // const [stories, setStories] = useState([])
   const { route, navigation } = props;
@@ -15,17 +17,6 @@ const Home = (props) => {
 
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-
-
-  // bottomsheet
-  const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ["100%"], []);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  const openBottomSheet = () => {
-    setIsSheetOpen(true);
-    bottomSheetRef.current?.snapToIndex(0); // Mở ngay 100%
-  };
 
   const Information = () => {
 
@@ -79,8 +70,11 @@ const Home = (props) => {
             </TouchableOpacity>
 
             <TextInput
+              onPress={() => navigation.navigate('UpPost')}
               style={HomeS.textInput}
               placeholder="Bạn đang nghĩ gì ?"
+              // editable={false} ngan nhap lieu
+              // selectTextOnFocus={false}
             />
             <View style={HomeS.icons}>
               <View style={HomeS.iconsPadding2}>
@@ -163,37 +157,21 @@ const Home = (props) => {
 
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={HomeS.container}>
-        {/* post */}
-        <View>
-          <View style={HomeS.post}>
-            <FlatList
-              data={dataPost}
-              renderItem={({ item }) => <Post post={item} openBottomSheet={openBottomSheet} />}
-              keyExtractor={(item) => item.id}
-              showsHorizontalScrollIndicator={false}
-              ListHeaderComponent={headerComponentPost}
-            />
-          </View>
+    <View style={HomeS.container}>
+      {/* post */}
+      <View>
+        <View style={HomeS.post}>
+          <FlatList
+            data={dataPost}
+            renderItem={({ item }) => <Post post={item} />}
+            keyExtractor={(item) => item.id}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={headerComponentPost}
+          />
         </View>
       </View>
-      {isSheetOpen && (
-        <BottomSheet
-          ref={bottomSheetRef}
-          snapPoints={snapPoints}
-          enablePanDownToClose
-          onClose={() => setIsSheetOpen(false)}
-        >
-          <BottomSheetView style = {{height: "100%"}}>
-            <View style={{ padding: 20 }}>
-              <Text style={{ fontSize: 18, fontWeight: "bold" }}>Bình luận</Text>
-            </View>
-          </BottomSheetView>
-        </BottomSheet>
-      )}
-    </GestureHandlerRootView>
-
+    </View>
   )
 }
 
