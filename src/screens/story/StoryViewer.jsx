@@ -11,13 +11,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector, useDispatch } from "react-redux"; // Import useSelector
-import { addStory, getUser } from "../../rtk/Reducer"; // Import getUser
+import { useSelector, useDispatch } from "react-redux";
+import { getUser } from "../../rtk/Reducer";
 import { oStackHome } from "../../navigations/HomeNavigation";
 
 const { width, height } = Dimensions.get("window");
 
 const Story = ({ route }) => {
+  const { StoryView } = route.params; // Lấy newStory từ route.params 
+  console.log("StoryView:", StoryView); // Kiểm tra dữ liệu nhận được
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [stories, setStories] = useState([]);
@@ -30,44 +32,59 @@ const Story = ({ route }) => {
 
   useEffect(() => {
     if (!user && token) {
-      dispatch(getUser(token)); // Gọi API lấy thông tin user nếu chưa có
+      dispatch(getUser(token));
     }
   }, [user, token, dispatch]);
 
-  
   useEffect(() => {
-    if (route.params?.newStory) {
-      setStories([
-        {
-          id: new Date().getTime(),
-          image: { uri: route.params.newStory },
-          avatar: { uri: user?.avatar },
-          name: user?.first_name + " " + user?.last_name,
-        },
-      ]);
+    if (stories.length > 0) {
+      startProgress();
+    }
+  }, [currentIndex, stories]);
+
+  const startProgress = () => {
+    progress.setValue(0);
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 5000,
+      useNativeDriver: false,
+    }).start(({ finished }) => finished && nextStory());
+  };
+
+  const nextStory = () => {
+    if (currentIndex < stories.length - 1) {
+      setCompletedIndices((prev) => [...prev, currentIndex]);
+      setCurrentIndex((prevIndex) => prevIndex + 1);
+    } else {
       setCurrentIndex(0);
       setCompletedIndices([]);
     }
-  }, [route.params?.newStory]);
+  };
 
- 
-
-
-  const saveStory = () => {
-    if (stories.length > 0) {
-      dispatch(addStory(stories[0])); // Lưu story vào Redux
-      navigation.navigate(oStackHome.TabHome.name); // Quay về trang Home
+  const prevStory = () => {
+    if (currentIndex > 0) {
+      setCompletedIndices((prev) =>
+        prev.filter((index) => index !== currentIndex - 1)
+      );
+      setCurrentIndex((prevIndex) => prevIndex - 1);
     }
   };
 
-
+  const handlePress = (event) => {
+    const { locationX } = event.nativeEvent;
+    if (locationX < width / 2) {
+      prevStory();
+    } else {
+      nextStory();
+    }
+  };
 
   return (
-    <TouchableWithoutFeedback >
+    <TouchableWithoutFeedback onPress={handlePress}>
       <View style={styles.container}>
-        <Image source={stories[currentIndex]?.image} style={styles.image} />
+        <Image source={StoryView.image} style={styles.image} />
         
-        {/* <View style={styles.progressBarContainer}>
+        <View style={styles.progressBarContainer}>
           {stories.map((_, index) => (
             <View key={index} style={styles.progressBar}>
               <View
@@ -97,23 +114,17 @@ const Story = ({ route }) => {
               </View>
             </View>
           ))}
-        </View> */}
+        </View>
 
-        {/* Avatar & Nút Thoát */}
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
-            <Image source={{ uri: user?.avatar }} style={styles.avatar} />
-            <Text style={styles.username}>{user?.first_name} {user?.last_name}</Text>
+            <Image source={StoryView.avatar} style={styles.avatar} />
+            <Text style={styles.username}>{StoryView.name} {StoryView.last_name}</Text>
           </View>
           <TouchableOpacity style={styles.exitButton} onPress={() => navigation.navigate(oStackHome.TabHome.name)}>
             <Text style={styles.exitText}>❌</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Nút Đăng */}
-        <TouchableOpacity style={styles.postButton} onPress={saveStory}>
-          <Text style={styles.postText}>Đăng</Text>
-        </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -184,31 +195,6 @@ const styles = StyleSheet.create({
   exitText: {
     fontSize: 20,
     color: "white",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
-  },
-  emptyText: {
-    color: "white",
-    fontSize: 18,
-    textAlign: "center",
-  },
-  postButton: {
-    position: "absolute",
-    bottom: 30,
-    right: 20,
-    backgroundColor: "blue",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  postText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
 

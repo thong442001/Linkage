@@ -11,6 +11,7 @@ import Profile from '../screens/profile/Profile';
 import Notification from '../screens/notification/Notification';
 import Friend from '../screens/friend/Friend';
 import Setting from '../screens/setting/Setting';
+
 const oTab = {
   Home: { name: 'Home', component: Home },
   Friend: { name: 'Friend', component: Friend },
@@ -102,16 +103,21 @@ const TabHome = () => {
 
 //stack home
 import Search from '../screens/home/Search';
+import PostStory from '../screens/story/PostStory';
 import Story from '../screens/story/Story';
 import Chat from '../screens/chat/Chat';
 import HomeChat from '../screens/chat/HomeChat';
+import StoryViewer from '../screens/story/StoryViewer';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
+  PostStory: { name: 'PostStory', component: PostStory },
   Story: { name: 'Story', component: Story },
+  StoryViewer: { name: 'StoryViewer', component: StoryViewer },
   Chat: { name: 'Chat', component: Chat },
   HomeChat: { name: 'HomeChat', component: HomeChat },
+  Home: { name: 'Home', component: Home },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

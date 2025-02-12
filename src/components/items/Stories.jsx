@@ -1,19 +1,18 @@
 import { Image, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-
-const Stories = (props) => {
-  const { stories } = props
-
+const Stories = ({stories , isSelected }) => {
+  console.log("Props received in Stories:", stories); // Kiểm tra props nhận được
+  if (!stories) return null; // Kiểm tra nếu stories không tồn tại
+ 
   return (
     <View style={styles.boxStory}>
-      <Image style={styles.imageStories} source={{ uri: stories.image }} />
-      <Image style={styles.avataStories} source={{ uri: stories.avata }} />
+      <Image style={styles.imageStories} source={  stories.image } />
+      <Image style={[styles.avataStories, isSelected && styles.selectedBorder]} source={ stories.avatar } />
       <View style={styles.backGround}></View>
       <Text style={styles.name}>{stories.name}</Text>
     </View>
-  )
-}
-
+  );
+};
 export default Stories
 
 const styles = StyleSheet.create({
@@ -51,5 +50,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     bottom: 0,
-  }
+  },
+  selectedBorder: {
+    borderColor: "gray", // Viền xám khi được chọn
+  },
 })
