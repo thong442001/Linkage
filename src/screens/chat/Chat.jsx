@@ -379,6 +379,14 @@ const Chat = (props) => {
             }
 
             <View style={styles.inputContainer}>
+                {/* Thư Viện */}
+                <TouchableOpacity
+                    onPress={sendMessage}
+                    style={styles.sendButton}
+                >
+                    <Text style={styles.sendText}>Thư Viện</Text>
+                </TouchableOpacity>
+
                 <TextInput
                     style={styles.input}
                     placeholder="Type a message"
@@ -390,6 +398,7 @@ const Chat = (props) => {
                     <Text style={styles.sendText}>Send</Text>
                 </TouchableOpacity>
             </View>
+
         </View >
     )
 }
@@ -401,15 +410,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         backgroundColor: 'white',
-    },
-    input: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        paddingHorizontal: 10,
-        marginBottom: 10,
-        borderRadius: 5,
-        color: 'black',
     },
     messageContainer: {
         flexDirection: 'row',
@@ -443,10 +443,13 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         borderWidth: 1,
-        borderColor: '#ccc',
         padding: 10,
         borderRadius: 20,
-        color: "#000",
+        color: 'black',
+        height: 40,
+        borderColor: 'gray',
+        paddingHorizontal: 10,
+        marginBottom: 10,
     },
     sendButton: {
         marginLeft: 10,
