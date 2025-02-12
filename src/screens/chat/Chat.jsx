@@ -9,9 +9,12 @@ import {
     Dimensions,
     Platform,
     Keyboard, // bàn phím
+    PermissionsAndroid,
+    Image,
 } from 'react-native';
 import io from 'socket.io-client';
 import { useDispatch, useSelector } from 'react-redux';
+import * as ImagePicker from "react-native-image-picker";
 //import { socket } from "../../utils/index";
 import Messagecomponent from "../../components/chat/Messagecomponent";
 import {
@@ -41,6 +44,89 @@ const Chat = (props) => {
 
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    // const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dzlomqxnn/upload";
+    const CLOUDINARY_URL_VIDEO = "https://api.cloudinary.com/v1_1/dzlomqxnn/video/upload";
+    const UPLOAD_PRESET = "ml_default";
+
+
+    // Hàm upload ảnh lên Cloudinary
+    const uploadFileToCloudinary = async (fileUri, fileType) => {
+        const formData = new FormData();
+        formData.append("file", {
+            uri: fileUri,
+            type: fileType.startsWith("image") ? "image/jpeg" : "video/mp4", // Kiểm tra ảnh hay video
+            name: fileType.startsWith("image") ? "upload.jpg" : "upload.mp4",
+        });
+        formData.append("upload_preset", UPLOAD_PRESET);
+
+        try {
+            const response = await fetch(
+                fileType.startsWith("image") ? CLOUDINARY_URL_IMAGE : CLOUDINARY_URL_VIDEO,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            const data = await response.json();
+            if (data.secure_url) {
+                console.log(fileType.startsWith("image") ? "📸 Ảnh" : "🎥 Video", "đã tải lên Cloudinary:", data.secure_url);
+                return data.secure_url; // Trả về link của ảnh/video
+            } else {
+                console.error("Lỗi tải file lên Cloudinary:", data);
+            }
+        } catch (error) {
+            console.error("Lỗi khi upload file:", error);
+        }
+        return null;
+    };
+    const requestGalleryPermission = async () => {
+        if (Platform.OS === "android") {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn("Lỗi cấp quyền:", err);
+                return false;
+            }
+        }
+        return true; // iOS không cần xin quyền
+    };
+
+    const pickMedia = async () => {
+        const hasPermission = await requestGalleryPermission();
+        if (!hasPermission) {
+            alert("Bạn cần cấp quyền để truy cập thư viện!");
+            return;
+        }
+
+        ImagePicker.launchImageLibrary(
+            { mediaType: "mixed", quality: 1 },
+            async (response) => {
+                if (response.didCancel) {
+                    console.log("Người dùng đã hủy chọn file.");
+                } else if (response.errorCode) {
+                    console.log("Lỗi chọn file:", response.errorMessage);
+                } else if (response.assets && response.assets.length > 0) {
+                    const fileUri = response.assets[0].uri;
+                    const fileType = response.assets[0].type; // Kiểm tra loại file
+
+                    console.log("📂 File đã chọn:", fileUri, "| Loại:", fileType);
+
+                    const uploadedUrl = await uploadFileToCloudinary(fileUri, fileType);
+                    if (uploadedUrl) {
+                        // Lưu URL vào state hoặc hiển thị trong tin nhắn
+                        setSelectedMedia(uploadedUrl);
+                    }
+                }
+            }
+        );
+    };
 
     useEffect(() => {
         // lấy name vs avt
@@ -165,6 +251,7 @@ const Chat = (props) => {
                 });
             });
         });
+
 
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
@@ -381,11 +468,18 @@ const Chat = (props) => {
             <View style={styles.inputContainer}>
                 {/* Thư Viện */}
                 <TouchableOpacity
-                    onPress={sendMessage}
+                    onPress={pickMedia}
                     style={styles.sendButton}
                 >
                     <Text style={styles.sendText}>Thư Viện</Text>
                 </TouchableOpacity>
+
+                {selectedImage && (
+                    <Image
+                        source={{ uri: selectedImage }}
+                        style={styles.previewImage}
+                    />
+                )}
 
                 <TextInput
                     style={styles.input}
@@ -480,6 +574,12 @@ const styles = StyleSheet.create({
     },
     replyRight: {
         alignItems: 'flex-end',
-    }
+    },
+    previewImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 10,
+        marginRight: 10,
+    },
 });
 
