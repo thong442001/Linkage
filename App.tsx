@@ -1,19 +1,13 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-} from 'react-native';
-
+import {SafeAreaView, StatusBar, StyleSheet} from 'react-native';
 
 import AppNavigation from './src/navigations/AppNavigation';
 
-import { Provider } from 'react-redux'
-import { store, persistor } from './src/rtk/Store';
-import { PersistGate } from 'redux-persist/integration/react'
+import {Provider} from 'react-redux';
+import {store, persistor} from './src/rtk/Store';
+import {PersistGate} from 'redux-persist/integration/react';
 
 function App(): React.JSX.Element {
-
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
@@ -32,7 +26,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'white',
-  }
+  },
 });
 
 export default App;
