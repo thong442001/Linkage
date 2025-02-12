@@ -127,6 +127,24 @@ export const joinGroupPrivate = createAsyncThunk(
     }
   }
 );
+export const addGroup = createAsyncThunk(
+  'group/addGroup',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/addGroup', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const getGroupID = createAsyncThunk(
   'group/getGroupID',
@@ -281,6 +299,24 @@ export const getAllLoiMoiKetBan = createAsyncThunk(
     try {
       const response = await AxiosHelper(data.token)
         .get(`relationship/getAllLoiMoiKetBan?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllFriendOfID_user = createAsyncThunk(
+  'relationship/getAllLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`relationship/getAllFriendOfID_user?me=${data.me}`);
       //console.log(response.status)
       if (response.status == true) {
         return response;

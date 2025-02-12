@@ -17,6 +17,7 @@ import {
   chapNhanLoiMoiKetBan,
   huyLoiMoiKetBan,
 } from '../../rtk/API';
+import { Snackbar } from 'react-native-paper';// thông báo (ios and android)
 
 const Friend = (props) => {
   const { route, navigation } = props;
@@ -27,10 +28,23 @@ const Friend = (props) => {
   const token = useSelector(state => state.app.token);
 
   const [relationships, setRelationships] = useState([]);
+  // dialog reLoad
+  const [dialogReLoad, setDialogreload] = useState(false);
 
   useEffect(() => {
+    // Call API khi lần đầu vào trang
     callGetAllLoiMoiKetBan();
-  }, []);
+
+    // Thêm listener để gọi lại API khi quay lại trang
+    const focusListener = navigation.addListener('focus', () => {
+      callGetAllLoiMoiKetBan();
+    });
+
+    // Cleanup listener khi component bị unmount
+    return () => {
+      focusListener();
+    };
+  }, [navigation]);
 
 
   //getAllLoiMoiKetBan
@@ -65,6 +79,7 @@ const Friend = (props) => {
         })
         .catch((error) => {
           console.log('Error2 callChapNhanLoiMoiKetBan:', error);
+          setDialogreload(true);
         });
 
     } catch (error) {
@@ -86,6 +101,7 @@ const Friend = (props) => {
         })
         .catch((error) => {
           console.log('Error2 callHuyLoiMoiKetBan:', error);
+          setDialogreload(true);
         });
 
     } catch (error) {
@@ -95,6 +111,18 @@ const Friend = (props) => {
 
   return (
     <View style={styles.container}>
+      {/* Hiển thị Snackbar dưới cùng màn hình */}
+      <Snackbar
+        visible={dialogReLoad}
+        onDismiss={() => {
+          callGetAllLoiMoiKetBan();
+          setDialogreload(false);
+        }}
+        duration={1000}
+      >
+        làm mới!
+      </Snackbar>
+
       <View style={styles.title}>
         <Icon name="times" size={30} color="black" />
         <Text style={styles.text_titel}>Bạn bè</Text>
@@ -141,7 +169,7 @@ const Friend = (props) => {
         renderItem={({ item }) => <ItemNewFriend data={item} />}
         keyExtractor={item => item.id}
       />
-    </View>
+    </View >
   );
 };
 

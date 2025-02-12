@@ -44,13 +44,17 @@ const Chat = (props) => {
 
     useEffect(() => {
         // lấy name vs avt
-        getID_groupPrivate(params?.ID_group);
+        getInforGroup(params?.ID_group);
         // lấy messages old
         getMessagesOld(params?.ID_group);
 
         // Kết nối tới server
+<<<<<<< HEAD
 
         const newSocket = io('https://linkage.id.vn', {
+=======
+        const newSocket = io('https://linkage.id.vn/', {
+>>>>>>> 3f2578c79c83c267d04e63d838b1780c0f24c7eb
             transports: ['websocket', 'polling'],
             reconnection: true,   // Cho phép tự động kết nối lại
             reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
@@ -167,8 +171,6 @@ const Chat = (props) => {
             });
         });
 
-
-
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardHeight(e.endCoordinates.height);
@@ -189,13 +191,14 @@ const Chat = (props) => {
     }, [params?.ID_group]);
 
     //infor group
-    const getID_groupPrivate = async (ID_group) => {
+    const getInforGroup = async (ID_group) => {
         try {
             await dispatch(getGroupID({ ID_group: ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
                     setGroup(response.group)
                     if (response.group.isPrivate == true) {
+                        // chat private
                         //console.log(response.group.members);
                         const otherUser = response.group.members.find(user => user._id !== me._id);
                         if (otherUser) {
@@ -204,6 +207,23 @@ const Chat = (props) => {
                             setGroupAvatar(otherUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
+                        }
+                    } else {
+                        // group 
+                        if (response.group.avatar == null) {
+                            setGroupAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
+                        } else {
+                            setGroupAvatar(response.group.avatar);
+                        }
+                        if (response.group.name == null) {
+                            const names = response.group.members
+                                .filter(user => user._id !== me._id)
+                                .map(user => `${user.first_name} ${user.last_name}`)
+                                .join(", ");
+                            // Cập nhật state một lần duy nhất
+                            setGroupName(names);
+                        } else {
+                            setGroupName(response.group.name);
                         }
                     }
                 })
@@ -257,7 +277,7 @@ const Chat = (props) => {
     };
 
     const handleGoBack = () => {
-        navigation.goBack();
+        navigation.navigate("HomeChat");
     };
 
     useEffect(() => {
@@ -364,9 +384,8 @@ const Chat = (props) => {
             }
 
             <View style={styles.inputContainer}>
-
-                   {/* Thư Viện */}
-                   <TouchableOpacity
+                {/* Thư Viện */}
+                <TouchableOpacity
                     onPress={sendMessage}
                     style={styles.sendButton}
                 >
@@ -383,6 +402,7 @@ const Chat = (props) => {
                     <Text style={styles.sendText}>Send</Text>
                 </TouchableOpacity>
             </View>
+
         </View >
     )
 }
@@ -394,15 +414,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         backgroundColor: 'white',
-    },
-    input: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        paddingHorizontal: 10,
-        marginBottom: 10,
-        borderRadius: 5,
-        color: 'black',
     },
     messageContainer: {
         flexDirection: 'row',
@@ -436,10 +447,13 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         borderWidth: 1,
-        borderColor: '#ccc',
         padding: 10,
         borderRadius: 20,
-        color: "#000",
+        color: 'black',
+        height: 40,
+        borderColor: 'gray',
+        paddingHorizontal: 10,
+        marginBottom: 10,
     },
     sendButton: {
         marginLeft: 10,

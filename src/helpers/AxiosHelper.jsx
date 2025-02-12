@@ -33,7 +33,6 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
             console.error("403, token hết hạn");
             x.sent = true;
             //gọi api refreshToken
-
             await axios.post(`https://linkage.id.vn/user/refreshToken`, {
                 refreshToken: store.getState().app.refreshToken
             })
