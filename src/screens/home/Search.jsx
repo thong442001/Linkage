@@ -31,7 +31,7 @@ const Search = (props) => {
                 });
 
             // if (result.payload && result.payload.users) {
-
+                
             // }
             // console.log(result);
         } catch (error) {

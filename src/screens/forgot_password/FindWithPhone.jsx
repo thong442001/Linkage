@@ -9,7 +9,7 @@ const { width, height } = Dimensions.get('window');
 const FindWithPhone = (props) => {
     const { navigation } = props;
 
-
+    
     return (
         <View style={styles.container}>
             <Pressable onPress={() => navigation.goBack()}>
@@ -26,14 +26,14 @@ const FindWithPhone = (props) => {
                 style={styles.inputDate}
             />
 
-            <Pressable style={styles.button} onPress={() => navigation.navigate('CreatePasswordScreen')}>
+            <Pressable style={styles.button} onPress={() => navigation.navigate('CreateNewPassWord')}>
                 <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
-
+            
               <View style={styles.containerButton}>
                             <Pressable
                                 style={styles.buttonNextSceen}
-                                onPress={() => navigation.navigate('Screen3')}>
+                                onPress={() => navigation.navigate('FindWithEmail')}>
                                 <Text style={styles.buttonTextNextScreen}>Tìm kiếm bằng email</Text>
                             </Pressable>
                         </View>

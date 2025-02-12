@@ -28,7 +28,7 @@ const Home = (props) => {
   };
 
   const Information = () => {
-
+    
   }
   const headerComponentStory = () => {
     return (

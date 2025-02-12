@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { checkPhone } from '../../rtk/API';
-import { useDispatch } from 'react-redux';
+
 
 const { width, height } = Dimensions.get('window');
 
 const FindWithEmail = (props) => {
     const { navigation } = props;
 
-
+    
     return (
         <View style={styles.container}>
             <Pressable onPress={() => navigation.goBack()}>

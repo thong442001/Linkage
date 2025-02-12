@@ -8,17 +8,12 @@ import {
     TouchableWithoutFeedback,
     Modal,
 } from 'react-native'
-import React, { useEffect, useState, useMemo, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'
-import Icon3 from 'react-native-vector-icons/FontAwesome5'
 import ProfilePage from '../../components/items/ProfilePage'
 import Friends from '../../components/items/Friends'
-import ProfileS from '../../styles/screens/profile/ProfileS'
-import HomeS from '../../styles/screens/home/HomeS'
 import { useDispatch, useSelector } from 'react-redux';
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import {
     joinGroupPrivate,
     getUser,
@@ -38,6 +33,10 @@ const Profile = (props) => {
 
     const [user, setUser] = useState(null);
     //const [posts, setPosts] = useState([]);
+    const [relationship, setRelationship] = useState(null);
+    // visible phản hồi kết bạn
+    const [menuVisible, setMenuVisible] = useState(false);
+
 
     const onGetUser = async (userId) => {
         try {
@@ -208,8 +207,6 @@ const Profile = (props) => {
     }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
 
-
-
     const dataPost = [
         {
             id: 1,
@@ -269,74 +266,94 @@ const Profile = (props) => {
         },
     ]
 
-
-    // bottomsheet
-    const bottomSheetRef = useRef(null);
-    const snapPoints = useMemo(() => ["30%"], []);
-    // const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-    const btnUnfriends = () => {
-        setCheck(check + 1)
-        setFrag(true)
-        // setIsSheetOpen(true);
-        bottomSheetRef.current?.snapToIndex(0); // Mở ngay 100%
-    };
-
-    const unfriend = () => {
-        setFrag(false),
-            setCheck(0)
-    }
-
-    //btnFriends
-    const [frag, setFrag] = useState(false)
-    const [check, setCheck] = useState(0)
-
-
     const headerFriends = () => {
         return (
-            <View style={ProfileS.container1}>
-                <View style={ProfileS.boxHeader}>
+            <View style={styles.container1}>
+                <View style={styles.boxHeader}>
                     <View >
                         <View>
-                            <Image style={ProfileS.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
-                            <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
+                            <Image style={styles.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
+                            <Image style={styles.avata} source={{ uri: user?.avatar }} />
                         </View>
-                        <View style={ProfileS.boxBackground}>
-                            <Text style={ProfileS.name}>{user?.first_name} {user?.last_name}</Text>
-                            <View style={ProfileS.boxInformation}>
-                                <Text style={ProfileS.friendNumber}>500 </Text>
-                                <Text style={[ProfileS.friendNumber, { color: "#D6D6D6" }]}> Người bạn</Text>
+                        <View style={styles.boxBackground}>
+                            <Text style={styles.name}>{user?.first_name} {user?.last_name}</Text>
+                            <View style={styles.boxInformation}>
+                                <Text style={styles.friendNumber}>500 </Text>
+                                <Text style={[styles.friendNumber, { color: "#D6D6D6" }]}> Người bạn</Text>
                             </View>
 
                             {/* btn me vs friend */}
                             {
                                 user && (user._id !== me._id ? (
                                     <View>
-                                        <TouchableOpacity style={styles.btnAddStory}>
-                                            <Text style={styles.textAddStory}>+ Thêm bạn bè</Text>
-                                        </TouchableOpacity>
+                                        {
+                                            relationship?.relation == 'Người lạ'
+                                            && <TouchableOpacity
+                                                style={styles.btnAddStory}
+                                                onPress={callGuiLoiMoiKetBan}
+                                            >
+                                                <Text style={styles.textAddStory}>+ Thêm bạn bè</Text>
+                                            </TouchableOpacity>
+                                        }
+                                        {
+                                            relationship?.relation == 'Bạn bè'
+                                            && <TouchableOpacity style={styles.btnAddStory}>
+                                                <Text style={styles.textAddStory}>Bạn bè</Text>
+                                            </TouchableOpacity>
+                                        }
+                                        {
+                                            ((relationship?.ID_userA == me._id
+                                                && relationship?.relation == 'A gửi lời kết bạn B')
+                                                || (relationship?.ID_userB == me._id
+                                                    && relationship?.relation == 'B gửi lời kết bạn A'))
+                                            && (
+                                                <TouchableOpacity
+                                                    style={styles.btnAddStory}
+                                                    onPress={callHuyLoiMoiKetBan}
+                                                >
+                                                    <Text style={styles.textAddStory}>Hủy lời mời</Text>
+                                                </TouchableOpacity>
+                                            )
+                                        }
+                                        {
+                                            ((relationship?.ID_userA == me._id
+                                                && relationship?.relation == 'B gửi lời kết bạn A')
+                                                || (relationship?.ID_userB == me._id
+                                                    && relationship?.relation == 'A gửi lời kết bạn B'))
+                                            && (
+                                                /* Nhấn để mở menu */
+                                                <TouchableOpacity
+                                                    style={styles.btnAddStory}
+                                                    onPress={() => {
+                                                        setMenuVisible(true);
+                                                    }}>
+                                                    <Text style={styles.textAddStory}>+ Phản hồi</Text>
+                                                </TouchableOpacity>
+                                            )
+                                        }
+
                                         <View style={styles.boxEdit}>
                                             <TouchableOpacity
-                                                style={frag ? ProfileS.btnEdit2 : ProfileS.btnEdit}
+                                                style={styles.btnEdit}
                                                 onPress={onChat}
                                             >
-                                                <Text style={frag ? ProfileS.textEdit : ProfileS.textEdit2}>Nhắn tin</Text>
+                                                <Text style={styles.textEdit}>Nhắn tin</Text>
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={ProfileS.btnMore}>
+                                            <TouchableOpacity style={styles.btnMore}>
                                                 <Icon name="ellipsis-horizontal" size={25} color="black" />
                                             </TouchableOpacity>
                                         </View>
                                     </View>
                                 ) : (
                                     <View>
-                                        <TouchableOpacity style={ProfileS.btnAddStory}>
-                                            <Text style={ProfileS.textAddStory}>+ Thêm vào tin</Text>
+                                        <TouchableOpacity style={styles.btnAddStory}>
+                                            <Text style={styles.textAddStory}>+ Thêm vào tin</Text>
                                         </TouchableOpacity>
-                                        <View style={ProfileS.boxEdit}>
-                                            <TouchableOpacity style={ProfileS.btnEdit}>
-                                                <Text style={ProfileS.textEdit}>Chỉnh sửa trang cá nhân</Text>
+                                        <View style={styles.boxEdit}>
+                                            <TouchableOpacity style={styles.btnEdit}>
+                                                <Text style={styles.textEdit}>Chỉnh sửa trang cá nhân</Text>
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={ProfileS.btnMore}>
+                                            <TouchableOpacity style={styles.btnMore}>
                                                 <Icon name="ellipsis-horizontal" size={25} color="black" />
                                             </TouchableOpacity>
                                         </View>
@@ -348,16 +365,16 @@ const Profile = (props) => {
                         </View>
                     </View>
                 </View>
-                <View style={[ProfileS.boxHeader, { marginVertical: 7 }]}>
-                    <View style={ProfileS.boxFriends}>
-                        <View style={ProfileS.title}>
+                <View style={[styles.boxHeader, { marginVertical: 7 }]}>
+                    <View style={styles.boxFriends}>
+                        <View style={styles.title}>
                             <View>
-                                <Text style={ProfileS.textFriend}>Bạn bè</Text>
-                                <Text style={ProfileS.textFriendNumber2}>500 Người bạn</Text>
+                                <Text style={styles.textFriend}>Bạn bè</Text>
+                                <Text style={styles.textFriendNumber2}>500 Người bạn</Text>
                             </View>
-                            <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
+                            <Text style={styles.textSeeAll}>Xem tất cả bạn bè</Text>
                         </View>
-                        <View style={ProfileS.listFriends}>
+                        <View style={styles.listFriends}>
                             <FlatList
                                 data={data.slice(0, 6)}
                                 renderItem={({ item }) => <Friends friends={item} />}
@@ -369,31 +386,31 @@ const Profile = (props) => {
                     </View>
                 </View>
 
-                <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
-                    <View style={ProfileS.boxLive}>
-                        <View style={ProfileS.title2}>
+                <View style={[styles.boxHeader]}>
+                    <View style={styles.boxLive}>
+                        <View style={styles.title2}>
                             <Text style={{ fontSize: 16, fontWeight: "bold" }}>Bài viết</Text>
                             <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
                         </View>
-                        <View style={ProfileS.boxAllThink}>
-                            <View style={ProfileS.boxThink}>
-                                <Image style={ProfileS.avataStatus} source={require('./../../../assets/images/person.jpg')} />
+                        <View style={styles.boxAllThink}>
+                            <View style={styles.boxThink}>
+                                <Image style={styles.avataStatus} source={require('./../../../assets/images/person.jpg')} />
                                 <Text style={{ fontSize: 13, marginLeft: 10 }}>Bạn đang nghĩ gì?</Text>
                             </View>
                             <Icon name="image" size={30} color="#3FF251" />
                         </View>
 
                     </View>
-                    <View style={ProfileS.boxLivestream}>
-                        <TouchableOpacity style={ProfileS.btnLivestream}>
+                    <View style={styles.boxLivestream}>
+                        <TouchableOpacity style={styles.btnLivestream}>
                             <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                                 <Icon name="videocam" size={20} color="red" />
                                 <Text>   Phát trực tiếp</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity style={ProfileS.btnManage}>
-                        <View style={ProfileS.boxManange}>
+                    <TouchableOpacity style={styles.btnManage}>
+                        <View style={styles.boxManange}>
                             <Icon2 name="comment-text" size={17} color="black" />
                             <Text style={{ fontSize: 13 }}>  Quản lí bài viết</Text>
                         </View>
@@ -404,42 +421,75 @@ const Profile = (props) => {
     }
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <View style={ProfileS.container}>
-                <View style={ProfileS.boxHeader}>
-                    <View style={ProfileS.header}>
-                        <TouchableOpacity
-                            onPress={() => navigation.goBack()}
-                        >
-                            <View >
-                                <Icon name="chevron-back" size={20} color="black" />
-                            </View>
-                        </TouchableOpacity>
-                        <Text style={ProfileS.titleName}>{user?.first_name} {user?.last_name}</Text>
-                        <View>
-                            <Icon name="search" size={20} color="black" />
-
+        <View style={styles.container}>
+            <View style={styles.boxHeader}>
+                <View style={styles.header}>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                    >
+                        <View >
+                            <Icon name="chevron-back" size={20} color="black" />
                         </View>
-                    </View>
-                </View>
-                <View style={HomeS.line}></View>
-
-                <View style={[ProfileS.boxHeader]}>
+                    </TouchableOpacity>
+                    <Text style={styles.titleName}>{user?.first_name} {user?.last_name}</Text>
                     <View>
-                        <View style={ProfileS.post}>
-                            <FlatList
-                                data={dataPost}
-                                renderItem={({ item }) => <ProfilePage post={item} />}
-                                keyExtractor={(item) => item.id}
-                                showsHorizontalScrollIndicator={false}
-                                ListHeaderComponent={headerFriends}
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ paddingBottom: 50 }}
-                            />
-                        </View>
+                        <Icon name="search" size={20} color="black" />
                     </View>
                 </View>
             </View>
+
+            <View style={[styles.boxHeader, { marginTop: 7 }]}>
+                <View>
+                    <View style={styles.post}>
+                        <FlatList
+                            data={dataPost}
+                            renderItem={({ item }) => <ProfilePage post={item} />}
+                            keyExtractor={(item) => item.id}
+                            showsHorizontalScrollIndicator={false}
+                            ListHeaderComponent={headerFriends}
+                            showsVerticalScrollIndicator={false}
+                        />
+                    </View>
+                </View>
+            </View>
+
+
+
+            {/* Menu Phản hồi kết bạn */}
+            <Modal
+                visible={menuVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setMenuVisible(false)}
+            >
+                <TouchableWithoutFeedback
+                    onPress={() => setMenuVisible(false)}
+                >
+                    <View style={styles.overlay}>
+                        <View style={styles.dialog}>
+                            <TouchableOpacity
+                                style={styles.btnXacNhan}
+                                onPress={()=>{
+                                    setMenuVisible(false);
+                                    callChapNhanLoiMoiKetBan();
+                                }}
+                            >
+                                <Text style={styles.text_button}>Xác Nhận</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.btnXoa}
+                                onPress={()=>{
+                                    setMenuVisible(false);
+                                    callHuyLoiMoiKetBan();
+                                }}
+                            >
+                                <Text style={styles.text_button}>Xóa</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
         </View>
     )
 }
@@ -608,5 +658,41 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 5,
         marginBottom: 10
-    }
+    },
+    //modal
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    dialog: {
+        borderRadius: 14,
+        width: 336,
+        height: 194,
+        alignItems: 'center',
+        backgroundColor: '#FFFF',
+        justifyContent: 'space-evenly',
+    },
+    btnXacNhan: {
+        width: 140,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0064E0',
+        borderRadius: 30,
+    },
+    btnXoa: {
+        width: 140,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#A6A6A6',
+        borderRadius: 30,
+    },
+    text_button: {
+        fontSize: 16,
+        color: 'white',
+        fontWeight: '600',
+    },
 })

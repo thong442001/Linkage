@@ -11,6 +11,7 @@ import Profile from '../screens/profile/Profile';
 import Notification from '../screens/notification/Notification';
 import Friend from '../screens/friend/Friend';
 import Setting from '../screens/setting/Setting';
+
 const oTab = {
   Home: { name: 'Home', component: Home },
   Friend: { name: 'Friend', component: Friend },
@@ -18,7 +19,9 @@ const oTab = {
   Profile: { name: 'Profile', component: Profile },
   Setting: { name: 'Setting', component: Setting }
 }
+
 const Tab = createBottomTabNavigator();
+
 const TabHome = () => {
   const me = useSelector(state => state.app.user);
   //console.log(theme);
@@ -105,13 +108,26 @@ import Search from '../screens/home/Search';
 import Story from '../screens/story/Story';
 import Chat from '../screens/chat/Chat';
 import HomeChat from '../screens/chat/HomeChat';
-
+import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
+import ChangePassWord from '../screens/changeProfile/ChangePassWord';
+import FindWithEmail from '../screens/forgot_password/FindWithEmail';
+import FindWithPhone from '../screens/forgot_password/FindWithPhone';
+import CheckEmail from '../screens/forgot_password/CheckEmail';
+import CreateNewPassWord from '../screens/forgot_password/CreateNewPassWord';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
   Story: { name: 'Story', component: Story },
   Chat: { name: 'Chat', component: Chat },
   HomeChat: { name: 'HomeChat', component: HomeChat },
+  ChangeDisplayName: { name: 'ChangeDisplayName', component: ChangeDisplayName },
+  ChangePassWord: { name: 'ChangePassWord', component: ChangePassWord },
+  FindWithEmail: { name: 'FindWithEmail', component: FindWithEmail },
+  FindWithPhone : {name: 'FindWithPhone', component: FindWithPhone},
+  CheckEmail : {name: 'CheckEmail', component: CheckEmail},
+  CreateNewPassWord : {name: 'CreateNewPassWord', component: CreateNewPassWord},
+
+  
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -133,7 +149,7 @@ const HomeNavigation = () => {
   )
 }
 
-//stack add post
+// //stack change profile
 // import SelectImage from '../components/screens/SelectImage';
 // import UpPost from '../components/screens/UpPost';
 // const oStackAddPost = {

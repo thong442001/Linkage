@@ -50,9 +50,7 @@ const Chat = (props) => {
 
         // Kết nối tới server
 
-        const newSocket = io('http://192.168.1.11:3001', {
-
-
+        const newSocket = io('https://linkage.id.vn', {
             transports: ['websocket', 'polling'],
             reconnection: true,   // Cho phép tự động kết nối lại
             reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
@@ -366,6 +364,14 @@ const Chat = (props) => {
             }
 
             <View style={styles.inputContainer}>
+
+                   {/* Thư Viện */}
+                   <TouchableOpacity
+                    onPress={sendMessage}
+                    style={styles.sendButton}
+                >
+                    <Text style={styles.sendText}>Thư Viện</Text>
+                </TouchableOpacity>
                 <TextInput
                     style={styles.input}
                     placeholder="Type a message"

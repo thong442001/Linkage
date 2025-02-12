@@ -54,6 +54,7 @@ const AppNavigation = () => {
         isSplashVisible
           ? <Welcome />  // Hiển thị màn hình chào trước
           : (user ? <HomeNavigation /> : <UserNavigation />)
+          
       }
     </NavigationContainer>
   );
