@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useSelector, useDispatch } from "react-redux"; // Import useSelector
 import { addStory, getUser } from "../../rtk/Reducer"; // Import getUser
 import { oStackHome } from "../../navigations/HomeNavigation";
+import Icon from "react-native-vector-icons/Ionicons";
 
 const { width, height } = Dimensions.get("window");
 
@@ -110,6 +111,21 @@ const Story = ({ route }) => {
           </TouchableOpacity>
         </View>
 
+        
+{/*  Nút Gắn thẻ và Nhập văn bản" */}
+<TouchableOpacity style={styles.textInputButton} onPress={() => console.log("Nhập văn bản")}>
+  <Icon name="text" size={24} color="white" />
+</TouchableOpacity>
+
+<TouchableOpacity style={styles.tagButton} onPress={() => console.log("Gắn thẻ")}>
+  <Icon name="person-add" size={24} color="white" />
+</TouchableOpacity>
+
+<TouchableOpacity style={styles.settingsButton} onPress={() => console.log("Mở cài đặt")}>
+  <Icon name="settings" size={24} color="white" />
+</TouchableOpacity>
+
+
         {/* Nút Đăng */}
         <TouchableOpacity style={styles.postButton} onPress={saveStory}>
           <Text style={styles.postText}>Đăng</Text>
@@ -177,7 +193,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   exitButton: {
-    backgroundColor: "rgba(0,0,0,0.5)",
     padding: 8,
     borderRadius: 20,
   },
@@ -200,7 +215,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 30,
     right: 20,
-    backgroundColor: "blue",
+    backgroundColor: "#71AFD8",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -210,6 +225,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  textInputButton: {
+    position: "absolute",
+    top: 90,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  
+  tagButton: {
+    position: "absolute",
+    top: 150,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  settingsButton: {
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  
 });
 
 export default Story;

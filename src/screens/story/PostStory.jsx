@@ -7,7 +7,7 @@ const PostStory = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    pickImage(); // Khi mở trang, tự động chọn ảnh
+      pickImage(); // Khi mở trang, tự động chọn ảnh
   }, []);
 
   const requestGalleryPermission = async () => {
