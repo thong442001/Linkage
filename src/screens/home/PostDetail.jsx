@@ -4,8 +4,10 @@ import PostDetailS from '../../styles/screens/home/PostDetailS'
 import Icon from 'react-native-vector-icons/Ionicons'
 import ItemPostDetail from '../../components/items/ItemPostDetail'
 import { Item } from 'react-native-paper/lib/typescript/components/List/List'
+import { useRoute } from '@react-navigation/native'
 const PostDetail = (props) => {
-  const { post } = props
+  const route = useRoute();
+  const post = route.params?.post || {}; // Lấy post từ navigation
   const data = [
     {
       id: 1,
@@ -20,7 +22,7 @@ const PostDetail = (props) => {
     // dùng tam flatlist để hiển thị chi tiết bài viết
     <View style={PostDetailS.container}>
       <FlatList
-        data={data}
+        data={[post]}
         renderItem={({ item }) => <ItemPostDetail post={item} />}
         keyExtractor={item => item.id.toString()}
         showsHorizontalScrollIndicator={false}

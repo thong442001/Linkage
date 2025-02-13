@@ -55,26 +55,14 @@ const ProfileS = StyleSheet.create({
         fontWeight: 'bold',
     },
     btnAddStory: {
-        flexDirection: "row",
         backgroundColor: '#0064E0',
         borderRadius: 8,
         marginVertical: 10,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    btnAddStory2: {
-        flexDirection: 'row',
-        backgroundColor: '#BEBEBE',
-        borderRadius: 8,
-        marginVertical: 10,
-        justifyContent: 'center',
-        alignItems: 'center'
     },
     textAddStory: {
         color: '#FFFFFF',
         textAlign: 'center',
         marginVertical: 11,
-        marginLeft: 5
     },
     boxEdit: {
         flexDirection: 'row',
@@ -87,23 +75,10 @@ const ProfileS = StyleSheet.create({
         flex: 4,
         alignItems: 'center',
     },
-    btnEdit2: {
-        backgroundColor: '#0064E0',
-        borderRadius: 8,
-        flex: 4,
-        alignItems: 'center',
-    },
     textEdit: {
         fontSize: 13,
         fontWeight: 'bold',
         marginVertical: 11,
-        color: "#FFFFFF"
-    },
-    textEdit2: {
-        fontSize: 13,
-        fontWeight: 'bold',
-        marginVertical: 11,
-        color: "black"
     },
     btnMore: {
         backgroundColor: '#D9D9D9',
@@ -188,7 +163,43 @@ const ProfileS = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 5,
         marginBottom: 10
-    }
+    },
+    //modal
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    dialog: {
+        borderRadius: 14,
+        width: 336,
+        height: 194,
+        alignItems: 'center',
+        backgroundColor: '#FFFF',
+        justifyContent: 'space-evenly',
+    },
+    btnXacNhan: {
+        width: 140,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0064E0',
+        borderRadius: 30,
+    },
+    btnXoa: {
+        width: 140,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#A6A6A6',
+        borderRadius: 30,
+    },
+    text_button: {
+        fontSize: 16,
+        color: 'white',
+        fontWeight: '600',
+    },
 })
 
 export default ProfileS

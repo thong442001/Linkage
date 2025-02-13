@@ -27,31 +27,10 @@ const ItemPostDetail = (props) => {
                         <Text>{post.title}</Text>
                     </View>
                 </View>
-                <Image style={{ width: '100%', height: 300 }} source={{ uri: post.image[0] }} />
-                <View style={styles.boxInteract}>
-                    <View style={styles.boxIcons2}>
-                        <View style={styles.boxIcons3}>
-                            <Icon2 name="like" size={25} color="black" />
-                        </View>
-                        <Text>Thích</Text>
-                    </View>
-                    <View style={styles.boxIcons2}>
-                        <TouchableOpacity onPress={() => { console.log("Mở BottomSheet..."), openBottomSheet(100, <Text>Bình luận</Text>) }} style={{ flexDirection: "row" }}>
-                            <View style={styles.boxIcons3}>
-                                <Icon3 name="comment" size={20} color="black" />
-                            </View>
-                            <Text>Bình luận</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.boxIcons2}>
-                        <View style={styles.boxIcons3}>
-                            <Icon4 name="share-alt" size={20} color="black" />
-                        </View>
-                        <Text>Chia sẻ</Text>
-                    </View>
-                </View>
-                <View style={styles.line}></View>
-                <Image style={{ width: '100%', height: 300 }} source={{ uri: post.image[0] }} />
+                {post.image.map((img, index) => (
+                    <Image key={index} style={{ width: '100%', height: 300, marginTop: 10 }} source={{ uri: img }} />
+                ))}
+                {/* <Image style={{ width: '100%', height: 300 }} source={{ uri: post.image[0] }} /> */}
                 <View style={styles.boxInteract}>
                     <View style={styles.boxIcons2}>
                         <View style={styles.boxIcons3}>

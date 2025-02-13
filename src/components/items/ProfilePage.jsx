@@ -8,7 +8,7 @@ import FBPhotoGrid from '@renzycode/react-native-fb-photo-grid';
 const ProfilePage = (props) => {
     const { post } = props
     return (
-        <View style={[styles.box, { marginTop: 4 }]}>
+        <View style={[styles.box, { marginTop: 7 }]}>
 
             <View style={{ marginVertical: 18 }}>
                 <View style={styles.post}>

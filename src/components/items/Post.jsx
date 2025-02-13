@@ -61,7 +61,6 @@ const Post = (props) => {
             </View>
         )
     }
-
     return (
         <View style={[styles.box, { marginTop: 4 }]}>
             <View style={{ marginVertical: 18 }}>
