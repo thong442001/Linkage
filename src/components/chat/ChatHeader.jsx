@@ -2,7 +2,7 @@ import React from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-export default function ChatHeader({ name, avatar, onGoBack }) {
+export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat }) {
 
     return (
         <View style={styles.headerContainer}>
@@ -15,20 +15,31 @@ export default function ChatHeader({ name, avatar, onGoBack }) {
             <View style={styles.userInfo}>
                 <Image source={{ uri: avatar }} style={styles.avatar} />
                 <View>
-                    <Text style={styles.userName}>{name}</Text>
+                    <Text
+                        style={styles.userName}
+                        numberOfLines={1}
+                    >{name}</Text>
                     {/* <Text style={styles.lastSeen}>Hoạt động {user.lastSeen} trước</Text> */}
                 </View>
             </View>
 
             {/* Nút gọi & Video Call */}
-            {/* <View style={styles.actionIcons}>
+            <View style={styles.actionIcons}>
                 <TouchableOpacity>
-                    <Ionicons name="call" size={24} color="purple" />
+                    <FontAwesome name="phone" size={24} color="purple" />
                 </TouchableOpacity>
                 <TouchableOpacity>
-                    <Ionicons name="videocam" size={24} color="purple" style={{ marginLeft: 15 }} />
+                    <FontAwesome name="video-camera" size={24} color="purple" style={{ marginLeft: 15 }} />
                 </TouchableOpacity>
-            </View> */}
+                {
+                    isPrivate == false
+                    && <TouchableOpacity
+                        onPress={onToSettingChat}
+                    >
+                        <FontAwesome name="server" size={24} color="purple" style={{ marginLeft: 15 }} />
+                    </TouchableOpacity>
+                }
+            </View>
         </View>
     );
 }
@@ -52,6 +63,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     userName: {
+        width: 180,
         fontSize: 16,
         fontWeight: "bold",
         color: "black",

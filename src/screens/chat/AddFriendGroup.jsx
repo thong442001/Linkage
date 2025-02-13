@@ -11,21 +11,23 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAllFriendOfID_user,
-    addGroup,
+    getGroupID,
+    addtMembers
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
 
 
-const CreateGroup = (props) => {// cần param
+const AddFriendGroup = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
 
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
-    const [nameGroup, setNameGroup] = useState(null);
+
+    const [membersGroup, setMembersGroup] = useState([]);
     const [friends, setFriends] = useState(null);
-    const [selectedUsers, setSelectedUsers] = useState([me._id]);// me phải trong nhóm 
+    const [selectedUsers, setSelectedUsers] = useState([]);
 
     const toggleSelectUser = (id) => {
         setSelectedUsers((prev) =>
@@ -38,10 +40,12 @@ const CreateGroup = (props) => {// cần param
     useEffect(() => {
         // Call API khi lần đầu vào trang
         callGetAllFriendOfID_user();
+        callGetGroupID();
 
         // Thêm listener để gọi lại API khi quay lại trang
         const focusListener = navigation.addListener('focus', () => {
             callGetAllFriendOfID_user();
+            callGetGroupID();
         });
 
         // Cleanup listener khi component bị unmount
@@ -50,7 +54,7 @@ const CreateGroup = (props) => {// cần param
         };
     }, [navigation]);
 
-    //call api getAllFriendOfID_user
+    //call api getAllFriendOfID_user (lấy danh sách bạn bè)
     const callGetAllFriendOfID_user = async () => {
         try {
             await dispatch(getAllFriendOfID_user({ me: me._id, token: token }))
@@ -68,35 +72,58 @@ const CreateGroup = (props) => {// cần param
         }
     }
 
-    //call api addGroup
-    const callAddGroup = async (name, members) => {
+    //call api getGroupID (lấy danh sách thành viên đã trong nhóm)
+    const callGetGroupID = async () => {
         try {
-            const paramsAPI = {
-                name: name,
-                members: members,
-            }
-            await dispatch(addGroup(paramsAPI))
+            await dispatch(getGroupID({ ID_group: params.ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
                     //console.log(response.groups)
-                    navigation.navigate("Chat", { ID_group: response.ID_group })
+                    setMembersGroup(response.group.members);
                 })
                 .catch((error) => {
-                    console.log('Error1 addGroup:', error);
+                    console.log('Error1 getGroupID:', error);
                 });
 
         } catch (error) {
             console.log(error)
         }
     }
-    // Xử lý tạo group
-    const taogGroup = () => {
+
+    //call api addtMembers
+    const callAddtMembers = async (ID_group, new_members) => {
+        try {
+            const paramsAPI = {
+                ID_group: ID_group,
+                new_members: new_members,
+            }
+            await dispatch(addtMembers(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    console.log(response.message)
+                    navigation.navigate("Chat", { ID_group: ID_group })
+                })
+                .catch((error) => {
+                    console.log('Error1 addtMembers:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    // Xử lý add ng
+    const handleAddMembers = () => {
         if (selectedUsers.length > 0) {
-            callAddGroup(nameGroup, selectedUsers)
+            callAddtMembers(params.ID_group, selectedUsers)
         } else {
             return;
         }
+    };
 
+    const toMembersGroup = () => {
+        // để load lại trang chat khi thay đổi 
+        navigation.navigate("SettingChat", { ID_group: params.ID_group });
     };
 
     return (
@@ -106,25 +133,27 @@ const CreateGroup = (props) => {// cần param
                 style={styles.vHeader}
             >
                 {/* Nút quay lại */}
-                <TouchableOpacity onPress={() => navigation.navigate("HomeChat")}>
+                <TouchableOpacity
+                    onPress={toMembersGroup}
+                >
                     <Text style={styles.headerBlue}>Hủy</Text>
                 </TouchableOpacity>
-                <Text style={styles.header}>Tạo nhóm</Text>
-                {/* Nút tạo group */}
-                <TouchableOpacity onPress={taogGroup}>
-                    <Text style={styles.headerBlue}>Tạo</Text>
+                <Text style={styles.header}>Chọn người</Text>
+                {/* Nút add ng */}
+                <TouchableOpacity
+                    onPress={handleAddMembers}
+                >
+                    <Text style={styles.headerBlue}>Thêm</Text>
                 </TouchableOpacity>
             </View>
-            {/* ten nhóm */}
-            <Text style={styles.txtGrey}>Tên nhóm (không bắt buộc)</Text>
+            {/* search friend */}
             <TextInput
                 style={styles.searchBox}
-                placeholder="Nhập tên nhóm..."
-                value={nameGroup}
-                onChangeText={setNameGroup}
+                placeholder="Tìm kiếm"
+            // value={nameGroup}
+            // onChangeText={setNameGroup}
             />
 
-            {/* <TextInput style={styles.searchBox} placeholder="Tìm kiếm" /> */}
             {/* gợi ý */}
             <Text style={styles.txtGrey}>Gợi ý</Text>
             <FlatList
@@ -136,7 +165,7 @@ const CreateGroup = (props) => {// cần param
                         item={item}
                         onToggle={toggleSelectUser}
                         selectedUsers={selectedUsers}
-                        membersGroup={[]}
+                        membersGroup={membersGroup}
                     />
                 )}
             />
@@ -144,7 +173,7 @@ const CreateGroup = (props) => {// cần param
     )
 }
 
-export default CreateGroup
+export default AddFriendGroup
 
 const styles = StyleSheet.create({
     container: {

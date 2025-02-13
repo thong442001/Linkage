@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
+    ToastAndroid,
+    Platform,
+    PermissionsAndroid,
     View,
     Text,
     TextInput,
@@ -7,23 +10,22 @@ import {
     StyleSheet,
     FlatList,
     Dimensions,
-    Platform,
-    Keyboard, // bàn phím
-    PermissionsAndroid,
-    Image,
+    Keyboard,
+    Pressable, // bàn phím
 } from 'react-native';
 import io from 'socket.io-client';
 import { useDispatch, useSelector } from 'react-redux';
-import * as ImagePicker from "react-native-image-picker";
 //import { socket } from "../../utils/index";
+import Icon from 'react-native-vector-icons/Ionicons';
 import Messagecomponent from "../../components/chat/Messagecomponent";
 import {
     getGroupID,
     getMessagesGroup,
 } from '../../rtk/API';
 import ChatHeader from '../../components/chat/ChatHeader';
-
-const Chat = (props) => {
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
 
@@ -45,88 +47,115 @@ const Chat = (props) => {
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-    const [selectedImage, setSelectedImage] = useState(null);
 
-    // const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dzlomqxnn/upload";
-    const CLOUDINARY_URL_VIDEO = "https://api.cloudinary.com/v1_1/dzlomqxnn/video/upload";
-    const UPLOAD_PRESET = "ml_default";
-
-
-    // Hàm upload ảnh lên Cloudinary
-    const uploadFileToCloudinary = async (fileUri, fileType) => {
-        const formData = new FormData();
-        formData.append("file", {
-            uri: fileUri,
-            type: fileType.startsWith("image") ? "image/jpeg" : "video/mp4", // Kiểm tra ảnh hay video
-            name: fileType.startsWith("image") ? "upload.jpg" : "upload.mp4",
-        });
-        formData.append("upload_preset", UPLOAD_PRESET);
-
+    // Hàm yêu cầu quyền camera
+    const requestCameraPermission = async () => {
         try {
-            const response = await fetch(
-                fileType.startsWith("image") ? CLOUDINARY_URL_IMAGE : CLOUDINARY_URL_VIDEO,
-                {
-                    method: "POST",
-                    body: formData,
-                }
-            );
+            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA);
 
-            const data = await response.json();
-            if (data.secure_url) {
-                console.log(fileType.startsWith("image") ? "📸 Ảnh" : "🎥 Video", "đã tải lên Cloudinary:", data.secure_url);
-                return data.secure_url; // Trả về link của ảnh/video
-            } else {
-                console.error("Lỗi tải file lên Cloudinary:", data);
-            }
-        } catch (error) {
-            console.error("Lỗi khi upload file:", error);
-        }
-        return null;
-    };
-    const requestGalleryPermission = async () => {
-        if (Platform.OS === "android") {
-            try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                console.log('✅ Quyền camera đã được cấp!');
+                return true;
+            } else if (granted === PermissionsAndroid.RESULTS.DENIED) {
+                console.log('❌ Người dùng từ chối quyền camera.');
+                return false;
+            } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+                console.log('🚫 Người dùng đã chặn quyền camera.');
+                Alert.alert(
+                    'Quyền bị từ chối',
+                    'Bạn cần cấp quyền camera trong Cài đặt để tiếp tục sử dụng.',
+                    [{ text: 'Mở Cài đặt', onPress: () => Linking.openSettings() }]
                 );
-                return granted === PermissionsAndroid.RESULTS.GRANTED;
-            } catch (err) {
-                console.warn("Lỗi cấp quyền:", err);
                 return false;
             }
+        } catch (err) {
+            console.warn(err);
+            return false;
         }
-        return true; // iOS không cần xin quyền
     };
 
-    const pickMedia = async () => {
-        const hasPermission = await requestGalleryPermission();
-        if (!hasPermission) {
-            alert("Bạn cần cấp quyền để truy cập thư viện!");
-            return;
-        }
+    //up lên cloudiary
+    const uploadFile = async (file) => {
+        try {
+            const data = new FormData();
+            data.append('file', {
+                uri: file.uri,
+                type: file.type,
+                name: file.fileName || (file.type.startsWith('video/') ? 'video.mp4' : 'image.jpg'),
+            });
+            data.append('upload_preset', 'ml_default');
 
-        ImagePicker.launchImageLibrary(
-            { mediaType: "mixed", quality: 1 },
-            async (response) => {
+            const response = await axios.post('https://api.cloudinary.com/v1_1/ddbolgs7p/upload', data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const fileUrl = response.data.secure_url;
+            console.log('🌍 Link file Cloudinary:', fileUrl);
+        } catch (error) {
+            console.log('uploadFile -> ', error.response ? error.response.data : error.message);
+            console.log("lỗi khi tải file")
+        }
+    };
+
+    //mở thư viện
+    const onOpenGallery = async () => {
+        try {
+            const options = {
+                mediaType: 'mixed',
+                quality: 1,
+            };
+
+            launchImageLibrary(options, async (response) => {
                 if (response.didCancel) {
-                    console.log("Người dùng đã hủy chọn file.");
-                } else if (response.errorCode) {
-                    console.log("Lỗi chọn file:", response.errorMessage);
-                } else if (response.assets && response.assets.length > 0) {
-                    const fileUri = response.assets[0].uri;
-                    const fileType = response.assets[0].type; // Kiểm tra loại file
+                    console.log("đã hủy")
+                } else if (response.errorMessage) {
+                    console.log("lỗi khi mở thư viện")
+                } else {
+                    const selectedFile = response.assets[0];
+                    console.log('📂 File đã chọn:', selectedFile.uri);
 
-                    console.log("📂 File đã chọn:", fileUri, "| Loại:", fileType);
-
-                    const uploadedUrl = await uploadFileToCloudinary(fileUri, fileType);
-                    if (uploadedUrl) {
-                        // Lưu URL vào state hoặc hiển thị trong tin nhắn
-                        setSelectedMedia(uploadedUrl);
-                    }
+                    await uploadFile(selectedFile);
                 }
-            }
-        );
+            });
+        } catch (error) {
+            console.log('onOpenGallery -> ', error);
+        }
     };
+
+    //mở camera
+    const onOpenCamera = async () => {
+        const permissionGranted = await requestCameraPermission();
+        if (!permissionGranted) return;
+
+        try {
+            const options = {
+                mediaType: 'mixed', // Cho phép chụp ảnh hoặc quay video
+                quality: 1,
+                cameraType: 'back', // Dùng camera sau
+                saveToPhotos: true, // Lưu vào thư viện
+            };
+
+            launchCamera(options, async (response) => {
+                if (response.didCancel) {
+                    console.log("đã hủy")
+                } else if (response.errorMessage) {
+                    console.log("lỗi khi mở camera")
+                } else {
+                    const capturedFile = response.assets[0];
+                    console.log('📷 File đã chụp/quay:', capturedFile.uri);
+
+                    await uploadFile(capturedFile);
+                }
+            });
+        } catch (error) {
+            console.log('onOpenCamera -> ', error);
+        }
+    };
+
+
+
 
     useEffect(() => {
         // lấy name vs avt
@@ -135,7 +164,8 @@ const Chat = (props) => {
         getMessagesOld(params?.ID_group);
 
         // Kết nối tới server
-        const newSocket = io('https://linkage.id.vn/', {
+
+        const newSocket = io('https://linkage.id.vn', {
             transports: ['websocket', 'polling'],
             reconnection: true,   // Cho phép tự động kết nối lại
             reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
@@ -252,7 +282,6 @@ const Chat = (props) => {
             });
         });
 
-
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardHeight(e.endCoordinates.height);
@@ -358,8 +387,12 @@ const Chat = (props) => {
         }
     };
 
-    const handleGoBack = () => {
+    const goBack = () => {
         navigation.navigate("HomeChat");
+    };
+
+    const toSettingChat = () => {
+        navigation.navigate("SettingChat", { ID_group: group._id });
     };
 
     useEffect(() => {
@@ -412,7 +445,9 @@ const Chat = (props) => {
                 && < ChatHeader
                     name={groupName}
                     avatar={groupAvatar}
-                    onGoBack={handleGoBack}
+                    onGoBack={goBack}
+                    isPrivate={group?.isPrivate}
+                    onToSettingChat={toSettingChat}
                 />
             }
             <FlatList
@@ -467,20 +502,18 @@ const Chat = (props) => {
 
             <View style={styles.inputContainer}>
                 {/* Thư Viện */}
-                <TouchableOpacity
-                    onPress={pickMedia}
-                    style={styles.sendButton}
-                >
-                    <Text style={styles.sendText}>Thư Viện</Text>
-                </TouchableOpacity>
+                <View style={styles.librarySelect}>
+                    <Pressable
+                        onPress={onOpenGallery}>
+                        <Icon name="image" size={25} />
+                    </Pressable>
 
-                {selectedImage && (
-                    <Image
-                        source={{ uri: selectedImage }}
-                        style={styles.previewImage}
-                    />
-                )}
 
+                    <Pressable
+                        onPress={onOpenCamera}>
+                        <Icon name="camera" size={25} />
+                    </Pressable>
+                </View>
                 <TextInput
                     style={styles.input}
                     placeholder="Type a message"
@@ -500,6 +533,11 @@ const Chat = (props) => {
 export default Chat
 
 const styles = StyleSheet.create({
+    librarySelect: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
     container: {
         flex: 1,
         padding: 10,
@@ -533,9 +571,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderTopWidth: 1,
         borderTopColor: '#ccc',
+        justifyContent: 'space-between',  // Chia đều khoảng cách giữa các phần
+
     },
     input: {
-        flex: 1,
+        flex: 0.95,
         borderWidth: 1,
         padding: 10,
         borderRadius: 20,
@@ -574,12 +614,5 @@ const styles = StyleSheet.create({
     },
     replyRight: {
         alignItems: 'flex-end',
-    },
-    previewImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 10,
-        marginRight: 10,
-    },
+    }
 });
-

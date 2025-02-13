@@ -40,12 +40,14 @@ const Home = (props) => {
               <TouchableOpacity style={styles.iconsPadding}>
                 <Icon name="add-circle" size={30} color="gray" />
               </TouchableOpacity>
+              {/* to Search */}
               <TouchableOpacity
                 style={styles.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.Search.name)}
               >
                 <Icon name="search" size={30} color="gray" />
               </TouchableOpacity>
+              {/* to HomeChat */}
               <TouchableOpacity
                 style={styles.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.HomeChat.name)}
@@ -57,7 +59,7 @@ const Home = (props) => {
           <View style={styles.line}></View>
           <View style={styles.header2}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Information')}
+            //onPress={() => navigation.navigate('Information')}
             >
               <Image
                 style={styles.image}

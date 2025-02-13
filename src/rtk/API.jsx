@@ -328,6 +328,83 @@ export const getAllFriendOfID_user = createAsyncThunk(
   }
 );
 
+// nhóm chat
+export const addtMembers = createAsyncThunk(
+  'group/addtMembers',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/addtMembers', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteMember = createAsyncThunk(
+  'group/deleteMember',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/deleteMember', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const passKey = createAsyncThunk(
+  'group/passKey',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/passKey', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteGroup = createAsyncThunk(
+  'group/deleteGroup',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/deleteGroup', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // /// test token
 // export const getAllUsers = createAsyncThunk(
 //   'user/getAllUsers',

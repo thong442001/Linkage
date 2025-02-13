@@ -16,7 +16,7 @@ import Groupcomponent from '../../components/chat/Groupcomponent';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 
-const HomeChat = (props) => {
+const HomeChat = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
 
