@@ -66,7 +66,7 @@ const Screen1 = (props) => {
 
 
 
-    const handleTiep = () => {
+    const handleNext = () => {
         if (validateForm()) {
             navigation.navigate('Screen2', {
                 first_name,
@@ -175,7 +175,7 @@ const Screen1 = (props) => {
                 <CustomRadioButton label="Lựa chọn khác" value="Khác" description="Chọn Tùy chọn khác nếu bạn thuộc giới tính khác hoặc không muốn tiết lộ" />
             </View>
 
-            <Pressable style={styles.button} onPress={handleTiep}>
+            <Pressable style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
         </View>
