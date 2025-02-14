@@ -106,10 +106,17 @@ export default function MessageComponent({
                   {message.content}
                 </Text>
                 : ((message.type == 'image'
-                  && <Image
+                  ? <Image
                     style={[styles.messageText, isCurrentUser && styles.currentUserText]}
                     source={{ uri: message.content }}
-                  />))
+                  />
+                  : (message.type == 'video'
+                    &&
+                    <Image
+                      style={[styles.messageText, isCurrentUser && styles.currentUserText]}
+                      source={{ uri: message.content }}
+                    />
+                  )))
               ))
           }
           {/* thời gian */}

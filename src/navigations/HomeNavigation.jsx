@@ -109,6 +109,7 @@ import CreateGroup from '../screens/chat/CreateGroup';
 import SettingChat from '../screens/chat/SettingChat';
 import MembersGroup from '../screens/chat/MembersGroup';
 import AddFriendGroup from '../screens/chat/AddFriendGroup';
+import AvtNameGroup from '../screens/chat/AvtNameGroup';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -120,6 +121,7 @@ const oStackHome = {
   SettingChat: { name: 'SettingChat', component: SettingChat },
   MembersGroup: { name: 'MembersGroup', component: MembersGroup },
   AddFriendGroup: { name: 'AddFriendGroup', component: AddFriendGroup },
+  AvtNameGroup: { name: 'AvtNameGroup', component: AvtNameGroup },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

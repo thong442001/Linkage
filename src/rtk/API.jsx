@@ -405,6 +405,25 @@ export const deleteGroup = createAsyncThunk(
   }
 );
 
+export const editAvtNameGroup = createAsyncThunk(
+  'group/editAvtNameGroup',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/editAvtNameGroup', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // /// test token
 // export const getAllUsers = createAsyncThunk(
 //   'user/getAllUsers',

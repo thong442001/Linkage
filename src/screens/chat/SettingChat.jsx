@@ -73,7 +73,7 @@ const SettingChat = (props) => { // cần ID_group (param)
         }
     }
 
-    //call api deleteMember
+    //call api deleteGroup
     const callDeleteGroup = async () => {
         try {
             const paramsAPI = {
@@ -106,6 +106,10 @@ const SettingChat = (props) => { // cần ID_group (param)
 
     const toAddFriendGroup = () => {
         navigation.navigate("AddFriendGroup", { ID_group: params.ID_group });
+    };
+
+    const toAvtNameGroup = () => {
+        navigation.navigate("AvtNameGroup", { ID_group: params.ID_group });
     };
 
     const handleRoiNhom = () => {
@@ -158,7 +162,9 @@ const SettingChat = (props) => { // cần ID_group (param)
                         {
                             group.members[0]._id == me._id
                             && (
-                                <TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={toAvtNameGroup}
+                                >
                                     <Text style={styles.changeGroupInfo}>Đổi tên hoặc ảnh</Text>
                                 </TouchableOpacity>
                             )
