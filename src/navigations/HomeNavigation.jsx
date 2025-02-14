@@ -116,6 +116,8 @@ import UpPost from '../screens/home/UpPost';
 import PostDetail from '../screens/home/PostDetail';
 import Comment from '../components/comment/Comment';
 import StoryViewer from '../screens/story/StoryViewer';
+import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
+import ChangePassWord from '../screens/changeProfile/ChangePassWord';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -134,6 +136,8 @@ const oStackHome = {
   PostDetail: { name: 'PostDetail', component: PostDetail },
   Comment: { name: 'Comment', component: Comment },
   Home: { name: 'Home', component: Home },
+  ChangeDisplayName: { name: 'ChangeDisplayName', component: ChangeDisplayName },
+  ChangePassWord: { name: 'ChangePassWord', component: ChangePassWord },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

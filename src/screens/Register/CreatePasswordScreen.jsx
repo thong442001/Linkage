@@ -1,85 +1,36 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { register } from '../../rtk/API';
-import { useDispatch } from 'react-redux';
+
 
 const { width, height } = Dimensions.get('window');
 
-const CreatePasswordScreen = (props) => {
+const CreateNewPassWord = (props) => {
+    const { navigation } = props;
 
-    const { route, navigation } = props;
-    const { params } = route;
-
-    const dispatch = useDispatch();
-
-    const [password, setPassword] = useState('');
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-    const togglePasswordVisibility = () => {
-        setIsPasswordVisible(!isPasswordVisible);
-    };
-
-    const onRegister = () => {
-        console.log(params.email);
-        console.log(params.phone);
-        console.log(params.sex)
-        const userDataRegister = {
-            first_name: params.first_name,
-            last_name: params.last_name,
-            dateOfBirth: params.dateOfBirth,
-            sex: params.sex,
-            email: params.email,
-            phone: params.phone,
-            password: password,
-        };
-        if (password != '') {
-            dispatch(register(userDataRegister))
-                .unwrap()
-                .then((response) => {
-                    console.log(response);
-                    navigation.navigate('Login');
-                })
-                .catch((error) => {
-                    console.log('Error:', error);
-                });
-        } else {
-            console.log('THieu password');
-        }
-
-    };
 
     return (
         <View style={styles.container}>
             <Pressable onPress={() => navigation.goBack()}>
-                <Icon style={styles.iconBack} name="angle-left" size={30} color="black" />
+                <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
-            <Text style={styles.title}>Tạo mật khẩu</Text>
-            <Text style={styles.description}>
-                Tạo mật khẩu gồm ít nhất 6 chữ cái hoặc chữ số. Bạn nên chọn mật khẩu thật khó đoán
-            </Text>
+            <Text style={styles.label}>Tạo mật khẩu mới</Text>
+            <Text style={styles.label2}>Tạo mật khẩu gồm ít nhất 6 chữ cái hoặc chữ số.
+                Bạn nên chọn mật khẩu thật khó đoán.</Text>
 
-            <View style={styles.inputContainer}>
-                <TextInput
-                    placeholderTextColor={'#8C96A2'}
-                    style={styles.input}
-                    placeholder="Mật khẩu"
-                    secureTextEntry={!isPasswordVisible}
-                    value={password}
-                    onChangeText={setPassword}
-                />
-                <Pressable onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-                    <Icon name={isPasswordVisible ? 'eye' : 'eye-slash'} size={20} color="#A0A0A0" />
-                </Pressable>
-            </View>
+            <TextInput
+                onChangeText={'black'}
+                placeholderTextColor={'#8C96A2'}
+                placeholder="Mật khẩu mới"
+                style={styles.inputDate}
+            />
 
-            <Pressable
-                style={styles.button}
-                onPress={() => onRegister()}
-            >
-                <Text style={styles.buttonText}>Tạo</Text>
+            <Pressable style={styles.button} onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
+
+
         </View>
     );
 };
@@ -88,50 +39,70 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: width * 0.04,
-        backgroundColor: '#EFF5FF',
+        backgroundColor: '#f0f4ff',
     },
     iconBack: {
-        marginBottom: height * 0.02,
+        marginVertical: height * 0.02,
     },
-    title: {
-        fontSize: width * 0.07,
-        fontWeight: 'bold',
+    label: {
         color: 'black',
+        fontSize: height * 0.03,
+        fontWeight: 'bold',
         marginBottom: height * 0.01,
     },
-    description: {
-        fontSize: width * 0.04,
-        color: 'black',
-        marginBottom: height * 0.03,
+    label2: {
+        fontSize: height * 0.018,
+        color: '#1C2931',
+        fontWeight: '450',
+        marginBottom: height * 0.02,
     },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    inputDate: {
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: '#ccc',
         borderRadius: width * 0.03,
-        paddingHorizontal: width * 0.04,
-        backgroundColor: '#FFFFFF',
-        marginBottom: height * 0.03,
+        padding: height * 0.015,
+        backgroundColor: '#fff',
+        marginVertical: height * 0.02,
     },
-    input: {
-        flex: 1,
-        fontSize: width * 0.045,
+    infoText: {
+        fontSize: height * 0.018,
         color: 'black',
-    },
-    eyeIcon: {
-        marginLeft: width * 0.02,
     },
     button: {
+        marginVertical: height * 0.02,
         backgroundColor: '#0064E0',
         paddingVertical: height * 0.015,
-        borderRadius: width * 0.07,
+        borderRadius: width * 0.05,
         alignItems: 'center',
     },
     buttonText: {
-        color: '#FFFFFF',
+        color: '#fff',
         fontSize: width * 0.045,
     },
+    containerButton: {
+        width: width * 0.92,
+    },
+    linkText: {
+        color: 'black',
+        fontWeight: '500',
+        fontSize: width * 0.04,
+        marginTop: height * 0.01,
+    },
+    buttonNextSceen: {
+        borderWidth: 1,
+        borderColor: '#CED5DF',
+        height: height * 0.06,
+        width: width * 0.92,
+        paddingVertical: height * 0.01,
+        borderRadius: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buttonTextNextScreen: {
+        fontWeight: '500',
+        fontSize: height * 0.02,
+        color: 'black'
+    }
 });
 
-export default CreatePasswordScreen;
+export default CreateNewPassWord;
