@@ -13,6 +13,11 @@ const ItemPostDetail = (props) => {
             <View>
                 <View style={styles.boxInfor}>
                     <View style={styles.boxInfor2}>
+                        <TouchableOpacity>
+                            <View style={{ marginRight: 10 }}>
+                                <Icon name="chevron-back-outline" size={25} color="black" />
+                            </View>
+                        </TouchableOpacity>
                         <Image style={styles.avatar} source={require('../../../assets/images/person.jpg')} />
                         <View style={{ marginLeft: 20 }}>
                             <Text style={{ fontSize: 16, fontWeight: "bold" }}>{post.name}</Text>
@@ -39,7 +44,7 @@ const ItemPostDetail = (props) => {
                         <Text>Thích</Text>
                     </View>
                     <View style={styles.boxIcons2}>
-                        <TouchableOpacity onPress={() => { console.log("Mở BottomSheet..."), openBottomSheet(100, <Text>Bình luận</Text>) }} style={{ flexDirection: "row" }}>
+                        <TouchableOpacity style={{ flexDirection: "row" }}>
                             <View style={styles.boxIcons3}>
                                 <Icon3 name="comment" size={20} color="black" />
                             </View>

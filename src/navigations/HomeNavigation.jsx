@@ -11,7 +11,7 @@ import Profile from '../screens/profile/Profile';
 import Notification from '../screens/notification/Notification';
 import Friend from '../screens/friend/Friend';
 import Setting from '../screens/setting/Setting';
-
+import Comment from '../components/comment/Comment';
 const oTab = {
   Home: { name: 'Home', component: Home },
   Friend: { name: 'Friend', component: Friend },
@@ -119,6 +119,7 @@ const oStackHome = {
   HomeChat: { name: 'HomeChat', component: HomeChat },
   UpPost: { name: 'UpPost', component: UpPost },
   PostDetail: { name: 'PostDetail', component: PostDetail },
+  Comment: { name: 'Comment', component: Comment },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

@@ -10,57 +10,13 @@ import { useBottomSheet } from '../../context/BottomSheetContext';
 import PostDetailS from '../../styles/screens/home/PostDetailS'
 import { useNavigation } from '@react-navigation/native'
 import ListComment from './ListComment'
+import Comment from '../comment/Comment'
 const Post = (props) => {
     const navigation = useNavigation();
     const { post } = props
     const { openBottomSheet } = useBottomSheet();
 
-    const dataComment = [
-        {
-            id: 1,
-            name: 'Kenny',
-            image: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/04/anh-bien-4.jpg',
-            avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Andrzej_Person_Kancelaria_Senatu.jpg/1200px-Andrzej_Person_Kancelaria_Senatu.jpg',
-            comment: 'Chúc mừng bạn',
-            time: '1p'
-        },
-        {
-            id: 2,
-            name: 'Henry',
-            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKFYJLwRyqjBk-O1RB0na6l08l5Invpcq5A&s',
-            avatar: 'https://www.shutterstock.com/image-photo/handsome-indian-male-office-employee-260nw-2278702237.jpg',
-            comment: 'Chúc mừng bạn',
-            time: '1p'
-        },
-        {
-            id: 3,
-            name: 'John',
-            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrNXaVKjl0ywihdE-KRHXIA6nevtd2IksdVw&s',
-            avatar: 'https://t3.ftcdn.net/jpg/02/35/92/68/360_F_235926813_VGqvkvucMfZ0T16NLwhkN9C8hUS0vbOH.jpg',
-            comment: 'Tuyệt vời quá ',
-            time: '1p'
-        },
-    ]
 
-    const comment = () => {
-        return (
-            <View>
-                <View style={[styles.boxHeader, { justifyContent: 'space-between', marginBottom: 10 }]}>
-                    <View style={styles.boxHeader}>
-                        <Icon5 name="like1" size={25} color="blue" />
-                        <Text style={{ marginHorizontal: 10 }}> Bạn và 161 </Text>
-                        <Icon name="chevron-forward" size={25} color="black" />
-                    </View>
-                    <Icon5 name="like1" size={25} color="blue" />
-                </View>
-                <FlatList
-                    data={dataComment}
-                    renderItem={({ item }) => <ListComment comment={item} />}
-                    keyExtractor={item => item.id}
-                />
-            </View>
-        )
-    }
     return (
         <View style={[styles.box, { marginTop: 4 }]}>
             <View style={{ marginVertical: 18 }}>
@@ -102,7 +58,7 @@ const Post = (props) => {
                     <Text>Thích</Text>
                 </View>
                 <View style={styles.boxIcons2}>
-                    <TouchableOpacity onPress={() => { console.log("Mở BottomSheet..."), openBottomSheet(100, comment()) }} style={{ flexDirection: "row" }}>
+                    <TouchableOpacity onPress={() => { navigation.navigate("Comment", { post }) }} style={{ flexDirection: "row" }}>
                         <View style={styles.boxIcons3}>
                             <Icon3 name="comment" size={20} color="black" />
                         </View>
