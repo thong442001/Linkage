@@ -10,7 +10,6 @@ import Profile from '../screens/profile/Profile';
 import Notification from '../screens/notification/Notification';
 import Friend from '../screens/friend/Friend';
 import Setting from '../screens/setting/Setting';
-
 const oTab = {
   Home: { name: 'Home', component: Home },
   Friend: { name: 'Friend', component: Friend },

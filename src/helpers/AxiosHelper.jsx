@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { store } from '../rtk/Store';
-import { logout } from '../rtk/Reducer';
-import { resetToken } from '../rtk/Reducer';
-
+import {store} from '../rtk/Store';
+import {logout} from '../rtk/Reducer';
+import {resetToken} from '../rtk/Reducer';
 
 const AxiosHelper = (token = '', contentType = 'application/json') => {
     const axiosInstance = axios.create({
@@ -56,10 +55,7 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
         return Promise.reject(error.message);
     });
 
-    return axiosInstance;
+  return axiosInstance;
 };
 
 export default AxiosHelper;
-
-
-

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 const UserStack = createNativeStackNavigator();
 import Screen1 from '../screens/register/Screen1';
@@ -27,7 +27,7 @@ const UserNavigation = () => {
             <UserStack.Screen name="CheckEmail" component={CheckEmail} />
             <UserStack.Screen name="CreateNewPassWord" component={CreateNewPassWord} />
         </UserStack.Navigator>
-    )
-}
+    );
+};
 
-export default UserNavigation
+export default UserNavigation;

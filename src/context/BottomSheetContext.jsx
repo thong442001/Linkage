@@ -6,16 +6,18 @@ const BottomSheetContext = createContext();
 
 export const BottomSheetProvider = ({ children }) => {
     const bottomSheetRef = useRef(null);
-    const [snapPoints, setSnapPoints] = useState(['15%']); // Chiều cao mặc định
+    const [snapPoints, setSnapPoints] = useState(['100%']); // Chiều cao mặc định
     const [content, setContent] = useState(null); // Nội dung động
 
     const openBottomSheet = (height, content) => {
         setSnapPoints([`${height}%`]); // Cập nhật chiều cao
 
-        setTimeout(() => {
-            setContent(content);
-            bottomSheetRef.current?.snapToIndex(0);
-        }, 50);
+        setContent(content);
+        bottomSheetRef.current?.snapToIndex(0);
+        // setTimeout(() => {
+        //     setContent(content);
+        //     bottomSheetRef.current?.snapToIndex(0);
+        // }, 50);
     };
 
     const closeBottomSheet = () => {
