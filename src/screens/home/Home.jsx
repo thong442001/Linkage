@@ -15,21 +15,29 @@ const Home = (props) => {
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
 
-  const Information = () => {
+  const story = useSelector(state => state.app.stories);
 
-  }
   const headerComponentStory = () => {
     return (
-      <View style={HomeS.boxStory}>
+      <TouchableOpacity style={HomeS.boxStory} onPress={() => navigation.navigate(oStackHome.PostStory.name)}>
         <Image style={HomeS.imageStory} source={{ uri: me?.avatar }} />
         <View style={HomeS.backGround}>
           <View style={HomeS.addStory}>
             <Icon name="add-circle" size={30} color="#0064E0" />
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     )
   }
+
+
+  const renderStory = ({ item }) => {
+    return (
+      <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { StoryView: item })}>
+        <Stories stories={item} />
+      </TouchableOpacity>
+    );
+  };
 
   const headerComponentPost = () => {
     return (
@@ -86,14 +94,13 @@ const Home = (props) => {
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
             <FlatList
-              data={data}
-              renderItem={({ item }) => <Stories stories={item} />}
-              keyExtractor={(item) => item.id}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              ListHeaderComponent={headerComponentStory}
-              contentContainerStyle={{ paddingHorizontal: 20 }}
-
+              data={story}
+              renderItem={renderStory}  // Gọi hàm renderStory để vẽ từng story
+              keyExtractor={(item) => item.id} // Mỗi story có một key duy nhất
+              horizontal={true} // Danh sách hiển thị ngang
+              showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
+              ListHeaderComponent={headerComponentStory} // Phần đầu danh sách (nếu có)
+              contentContainerStyle={{ paddingHorizontal: 20 }} // Thêm khoảng cách hai bên
             />
           </View>
         </View>
