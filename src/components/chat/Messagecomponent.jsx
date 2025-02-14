@@ -103,9 +103,16 @@ export default function MessageComponent({
               ? <Text style={[styles.messageTextThuHoi]}>
                 Tin nhắn đã được thu hồi
               </Text>
-              : <Text style={[styles.messageText, isCurrentUser && styles.currentUserText]}>
-                {message.content}
-              </Text>
+              : ((message.type == 'text'
+                ? < Text style={[styles.messageText, isCurrentUser && styles.currentUserText]}>
+                  {message.content}
+                </Text>
+                : ((message.type == 'image'
+                  && <Image
+                    style={[styles.messageText, isCurrentUser && styles.currentUserText]}
+                    source={{ uri: message.content }}
+                  />))
+              ))
           }
           {/* thời gian */}
           <Text style={styles.messageTime}>{formatTime(message.createdAt)}</Text>
@@ -122,19 +129,20 @@ export default function MessageComponent({
             ))
           }
         </View>
-      </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback >
 
       {/* Hiển thị Snackbar dưới cùng màn hình */}
-      <Snackbar
+      < Snackbar
         visible={dialogCopyVisible}
-        onDismiss={() => setDialogCopyVisible(false)}
+        onDismiss={() => setDialogCopyVisible(false)
+        }
         duration={1000}
       >
         Đã sao chép tin nhắn!
-      </Snackbar>
+      </Snackbar >
 
       {/* Menu tùy chọn khi nhấn giữ */}
-      <Modal
+      < Modal
         visible={menuVisible}
         transparent
         animationType="fade"
@@ -170,7 +178,7 @@ export default function MessageComponent({
                       style={styles.reactionButton}
                       onPress={() => {
                         onIcon(message._id, reaction._id);
-                        setMenuVisible(false);// tắc modal
+                        setMenuVisible(false);
                       }}
                     >
                       <Text style={styles.reactionText}>{reaction.icon}</Text>
@@ -236,7 +244,7 @@ export default function MessageComponent({
             </View>
           </View>
         </TouchableWithoutFeedback>
-      </Modal>
+      </Modal >
     </View >
   );
 }

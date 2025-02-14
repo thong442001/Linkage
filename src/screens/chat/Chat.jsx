@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    ToastAndroid,
     Platform,
-    PermissionsAndroid,
     View,
     Text,
     TextInput,
@@ -23,9 +21,9 @@ import {
     getMessagesGroup,
 } from '../../rtk/API';
 import ChatHeader from '../../components/chat/ChatHeader';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
-const Chat = (props) => {
+const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
 
@@ -41,41 +39,12 @@ const Chat = (props) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [reply, setReply] = useState(null);
+    
 
     const flatListRef = useRef(null); // Tạo ref cho FlatList
 
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-
-      // Hàm yêu cầu quyền camera
-      const requestCameraPermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA);
-    
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                console.log('✅ Quyền camera đã được cấp!');
-                return true;
-            } else if (granted === PermissionsAndroid.RESULTS.DENIED) {
-                console.log('❌ Người dùng từ chối quyền camera.');
-                return false;
-            } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-                console.log('🚫 Người dùng đã chặn quyền camera.');
-                Alert.alert(
-                    'Quyền bị từ chối',
-                    'Bạn cần cấp quyền camera trong Cài đặt để tiếp tục sử dụng.',
-                    [{ text: 'Mở Cài đặt', onPress: () => Linking.openSettings() }]
-                );
-                return false;
-            }
-        } catch (err) {
-            console.warn(err);
-            return false;
-        }
-    };
-
-    
-    
 
 
     //up lên cloudiary
@@ -84,37 +53,36 @@ const Chat = (props) => {
             const data = new FormData();
             data.append('file', {
                 uri: file.uri,
-                type: file.type, 
-                name: file.fileName || (file.type.startsWith('video/') ? 'video.mp4' : 'image.jpg'),
+                type: file.type,
+                name: file.fileName || (file.type.startsWith('video/') ? 'video.mp4' : 'image.png'),
             });
             data.append('upload_preset', 'ml_default');
-    
+
             const response = await axios.post('https://api.cloudinary.com/v1_1/ddbolgs7p/upload', data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-    
+
             const fileUrl = response.data.secure_url;
             console.log('🌍 Link file Cloudinary:', fileUrl);
+
         } catch (error) {
             console.log('uploadFile -> ', error.response ? error.response.data : error.message);
             console.log("lỗi khi tải file")
         }
     };
-    
-
-
 
     //mở thư viện
     const onOpenGallery = async () => {
         try {
             const options = {
-                mediaType: 'mixed', 
+                mediaType: 'mixed',
                 quality: 1,
             };
-    
+
             launchImageLibrary(options, async (response) => {
+                //console.log(response);
                 if (response.didCancel) {
                     console.log("đã hủy")
                 } else if (response.errorMessage) {
@@ -122,7 +90,7 @@ const Chat = (props) => {
                 } else {
                     const selectedFile = response.assets[0];
                     console.log('📂 File đã chọn:', selectedFile.uri);
-    
+
                     await uploadFile(selectedFile);
                 }
             });
@@ -131,39 +99,6 @@ const Chat = (props) => {
         }
     };
 
-    //mở camera
-    const onOpenCamera = async () => {
-        const permissionGranted = await requestCameraPermission();
-                if (!permissionGranted) return;
-    
-        try {
-            const options = {
-                mediaType: 'mixed', // Cho phép chụp ảnh hoặc quay video
-                quality: 1,
-                cameraType: 'back', // Dùng camera sau
-                saveToPhotos: true, // Lưu vào thư viện
-            };
-    
-            launchCamera(options, async (response) => {
-                if (response.didCancel) {
-                    console.log("đã hủy")
-                } else if (response.errorMessage) {
-                    console.log("lỗi khi mở camera")
-                } else {
-                    const capturedFile = response.assets[0];
-                    console.log('📷 File đã chụp/quay:', capturedFile.uri);
-    
-                    await uploadFile(capturedFile);
-                }
-            });
-        } catch (error) {
-            console.log('onOpenCamera -> ', error);
-        }
-    };
-    
-
-
-
     useEffect(() => {
         // lấy name vs avt
         getInforGroup(params?.ID_group);
@@ -171,6 +106,7 @@ const Chat = (props) => {
         getMessagesOld(params?.ID_group);
 
         // Kết nối tới server
+
         const newSocket = io('https://linkage.id.vn', {
             transports: ['websocket', 'polling'],
             reconnection: true,   // Cho phép tự động kết nối lại
@@ -283,7 +219,7 @@ const Chat = (props) => {
                             message_reactionList: updatedReactions
                         };
                     }
-                    return msg; // Nếu không phải message cần cập nhật, giữ nguyên
+                    return msg; 
                 });
             });
         });
@@ -393,8 +329,12 @@ const Chat = (props) => {
         }
     };
 
-    const handleGoBack = () => {
+    const goBack = () => {
         navigation.navigate("HomeChat");
+    };
+
+    const toSettingChat = () => {
+        navigation.navigate("SettingChat", { ID_group: group._id });
     };
 
     useEffect(() => {
@@ -447,7 +387,9 @@ const Chat = (props) => {
                 && < ChatHeader
                     name={groupName}
                     avatar={groupAvatar}
-                    onGoBack={handleGoBack}
+                    onGoBack={goBack}
+                    isPrivate={group?.isPrivate}
+                    onToSettingChat={toSettingChat}
                 />
             }
             <FlatList
@@ -503,16 +445,11 @@ const Chat = (props) => {
             <View style={styles.inputContainer}>
                 {/* Thư Viện */}
                 <View style={styles.librarySelect}>
-                <Pressable
-                    onPress={onOpenGallery}>
-                        <Icon name= "image" size={25} />
-                </Pressable>
+                    <Pressable
+                        onPress={onOpenGallery}>
+                        <Icon name="image" size={25} />
+                    </Pressable>
 
-
-                <Pressable
-                    onPress={onOpenCamera}>
-                        <Icon name= "camera" size={25} />
-                </Pressable>
                 </View>
                 <TextInput
                     style={styles.input}
@@ -533,10 +470,10 @@ const Chat = (props) => {
 export default Chat
 
 const styles = StyleSheet.create({
-    librarySelect:{
+    librarySelect: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10, 
+        gap: 10,
     },
     container: {
         flex: 1,
@@ -616,4 +553,3 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     }
 });
-

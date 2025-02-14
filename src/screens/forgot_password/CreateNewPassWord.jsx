@@ -26,7 +26,7 @@ const CreateNewPassWord = (props) => {
                 style={styles.inputDate}
             />
 
-            <Pressable style={styles.button} onPress={() => navigation.navigate('CreatePasswordScreen')}>
+            <Pressable style={styles.button} onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
 

@@ -110,7 +110,8 @@ import Chat from '../screens/chat/Chat';
 import HomeChat from '../screens/chat/HomeChat';
 import UpPost from '../screens/home/UpPost';
 import PostDetail from '../screens/home/PostDetail';
-
+import ChangePassWord from '../screens/changeProfile/ChangePassWord';
+import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
@@ -119,6 +120,8 @@ const oStackHome = {
   HomeChat: { name: 'HomeChat', component: HomeChat },
   UpPost: { name: 'UpPost', component: UpPost },
   PostDetail: { name: 'PostDetail', component: PostDetail },
+  ChangeDisplayName: {name: 'ChangeDisplayName', component: ChangeDisplayName},
+  ChangePassWord: {name: 'ChangePassWord', component: ChangePassWord}
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
