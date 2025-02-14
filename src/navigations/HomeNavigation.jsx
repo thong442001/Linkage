@@ -1,5 +1,4 @@
 import React from 'react'
-// import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -18,7 +17,9 @@ const oTab = {
   Profile: { name: 'Profile', component: Profile },
   Setting: { name: 'Setting', component: Setting }
 }
+
 const Tab = createBottomTabNavigator();
+
 const TabHome = () => {
   const me = useSelector(state => state.app.user);
   //console.log(theme);
@@ -110,7 +111,9 @@ import SettingChat from '../screens/chat/SettingChat';
 import MembersGroup from '../screens/chat/MembersGroup';
 import AddFriendGroup from '../screens/chat/AddFriendGroup';
 import AvtNameGroup from '../screens/chat/AvtNameGroup';
-
+import UpPost from '../screens/home/UpPost';
+import PostDetail from '../screens/home/PostDetail';
+import Comment from '../components/comment/Comment';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
@@ -122,6 +125,9 @@ const oStackHome = {
   MembersGroup: { name: 'MembersGroup', component: MembersGroup },
   AddFriendGroup: { name: 'AddFriendGroup', component: AddFriendGroup },
   AvtNameGroup: { name: 'AvtNameGroup', component: AvtNameGroup },
+  UpPost: { name: 'UpPost', component: UpPost },
+  PostDetail: { name: 'PostDetail', component: PostDetail },
+  Comment: { name: 'Comment', component: Comment },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -143,7 +149,7 @@ const HomeNavigation = () => {
   )
 }
 
-//stack add post
+// //stack change profile
 // import SelectImage from '../components/screens/SelectImage';
 // import UpPost from '../components/screens/UpPost';
 // const oStackAddPost = {

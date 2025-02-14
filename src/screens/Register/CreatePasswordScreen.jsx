@@ -23,6 +23,7 @@ const CreatePasswordScreen = (props) => {
     const onRegister = () => {
         console.log(params.email);
         console.log(params.phone);
+        console.log(params.sex)
         const userDataRegister = {
             first_name: params.first_name,
             last_name: params.last_name,

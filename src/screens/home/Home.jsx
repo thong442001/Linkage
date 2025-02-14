@@ -1,10 +1,11 @@
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Stories from '../../components/items/Stories'
 import Post from '../../components/items/Post';
 import { useSelector } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
+import HomeS from '../../styles/screens/home/HomeS';
 
 const Home = (props) => {
   // const [stories, setStories] = useState([])
@@ -19,10 +20,10 @@ const Home = (props) => {
   }
   const headerComponentStory = () => {
     return (
-      <View style={styles.boxStory}>
-        <Image style={styles.imageStory} source={{ uri: me?.avatar }} />
-        <View style={styles.backGround}>
-          <View style={styles.addStory}>
+      <View style={HomeS.boxStory}>
+        <Image style={HomeS.imageStory} source={{ uri: me?.avatar }} />
+        <View style={HomeS.backGround}>
+          <View style={HomeS.addStory}>
             <Icon name="add-circle" size={30} color="#0064E0" />
           </View>
         </View>
@@ -33,54 +34,57 @@ const Home = (props) => {
   const headerComponentPost = () => {
     return (
       <View>
-        <View style={styles.box}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Linkage</Text>
-            <View style={styles.icons}>
-              <TouchableOpacity style={styles.iconsPadding}>
+        <View style={HomeS.box}>
+          <View style={HomeS.header}>
+            <Text style={HomeS.title}>Linkage</Text>
+            <View style={HomeS.icons}>
+              <TouchableOpacity style={HomeS.iconsPadding}>
                 <Icon name="add-circle" size={30} color="gray" />
               </TouchableOpacity>
               {/* to Search */}
               <TouchableOpacity
-                style={styles.iconsPadding}
+                style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.Search.name)}
               >
                 <Icon name="search" size={30} color="gray" />
               </TouchableOpacity>
               {/* to HomeChat */}
               <TouchableOpacity
-                style={styles.iconsPadding}
+                style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.HomeChat.name)}
               >
                 <Icon name="mail" size={30} color="gray" />
               </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.line}></View>
-          <View style={styles.header2}>
+          <View style={HomeS.line}></View>
+          <View style={HomeS.header2}>
             <TouchableOpacity
-            //onPress={() => navigation.navigate('Information')}
+              onPress={() => navigation.navigate('Profile', { ID_user: me._id })}
             >
               <Image
-                style={styles.image}
+                style={HomeS.image}
                 source={{ uri: me?.avatar }}
               />
             </TouchableOpacity>
 
             <TextInput
-              style={styles.textInput}
+              onPress={() => navigation.navigate('UpPost')}
+              style={HomeS.textInput}
               placeholder="Bạn đang nghĩ gì ?"
+            // editable={false} ngan nhap lieu
+            // selectTextOnFocus={false}
             />
-            <View style={styles.icons}>
-              <View style={styles.iconsPadding2}>
+            <View style={HomeS.icons}>
+              <View style={HomeS.iconsPadding2}>
                 <Icon name="image" size={30} color="#0064E0" />
               </View>
             </View>
           </View>
         </View>
         {/* story */}
-        <View style={[styles.box, { marginTop: 4 }]}>
-          <View style={styles.story}>
+        <View style={[HomeS.box, { marginTop: 4 }]}>
+          <View style={HomeS.story}>
             <FlatList
               data={data}
               renderItem={({ item }) => <Stories stories={item} />}
@@ -89,6 +93,7 @@ const Home = (props) => {
               showsHorizontalScrollIndicator={false}
               ListHeaderComponent={headerComponentStory}
               contentContainerStyle={{ paddingHorizontal: 20 }}
+
             />
           </View>
         </View>
@@ -152,17 +157,16 @@ const Home = (props) => {
 
 
   return (
-    <View style={styles.container}>
-
-
+    <View style={HomeS.container}>
       {/* post */}
       <View>
-        <View style={styles.post}>
+        <View style={HomeS.post}>
           <FlatList
             data={dataPost}
             renderItem={({ item }) => <Post post={item} />}
             keyExtractor={(item) => item.id}
             showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             ListHeaderComponent={headerComponentPost}
           />
         </View>
@@ -172,98 +176,3 @@ const Home = (props) => {
 }
 
 export default Home
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#A1A6AD"
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 14,
-    marginHorizontal: 20,
-
-  },
-  box: {
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 32,
-    color: "#0064E0",
-    fontWeight: "bold",
-  },
-  icons: {
-    flexDirection: 'row'
-  },
-  iconsPadding: {
-    paddingLeft: 21
-  },
-  iconsPadding2: {
-    paddingLeft: 15,
-  },
-  line: {
-    height: 0.5,
-    width: '100%',
-    backgroundColor: 'gray',
-  },
-  header2: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 14,
-    marginHorizontal: 20,
-  },
-  image: {
-    marginRight: 15,
-    width: 42,
-    height: 42,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-  },
-  textInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    borderRadius: 28,
-    paddingLeft: 10,
-    height: 42,
-  },
-  story: {
-    flexDirection: 'row',
-    // marginLeft: 20,
-    marginVertical: 9,
-  },
-  post: {
-
-  },
-  imageStory: {
-    width: 123,
-    height: 192,
-    borderRadius: 10,
-  },
-  backGround: {
-    backgroundColor: '#fff',
-    height: 57,
-    width: "100%",
-    position: 'absolute',
-    bottom: -0.1,
-    borderBottomLeftRadius: 9,
-    borderBottomRightRadius: 9,
-    alignItems: 'center',
-  },
-  boxStory: {
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    borderRadius: 11,
-  },
-  addStory: {
-    borderWidth: 1,
-    borderColor: '#fff',
-    backgroundColor: '#fff',
-    borderRadius: 50,
-    position: 'absolute',
-    top: -15
-  }
-})

@@ -8,7 +8,8 @@ import FBPhotoGrid from '@renzycode/react-native-fb-photo-grid';
 const ProfilePage = (props) => {
     const { post } = props
     return (
-        <View style={[styles.box, { marginTop: 4 }]}>
+        <View style={[styles.box, { marginTop: 7 }]}>
+
             <View style={{ marginVertical: 18 }}>
                 <View style={styles.post}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -40,7 +41,7 @@ const ProfilePage = (props) => {
                     onTouchPhoto={(photoUri, index) => console.log(photoUri, index)}
                 />
             </View>
-            <View style={styles.boxInteract}>
+            <View style={[styles.boxInteract]}>
                 <View style={styles.boxIcons2}>
                     <View style={styles.boxIcons3}>
                         <Icon2 name="like" size={25} color="black" />
