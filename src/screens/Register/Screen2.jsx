@@ -20,7 +20,14 @@ const Screen2 = (props) => {
 
     const check = () => {
         if (phone != '') {
-            callAPICheckPhone();
+            navigation.navigate('CreatePasswordScreen', {
+                first_name: params.first_name,
+                last_name: params.last_name,
+                dateOfBirth: params.dateOfBirth,
+                sex: params.sex,
+                phone: phone,
+                email: null,
+            })
         } else {
             console.log("Thiếu ");
         }

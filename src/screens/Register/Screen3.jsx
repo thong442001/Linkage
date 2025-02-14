@@ -15,7 +15,14 @@ const Screen3 = (props) => {
 
     const check = () => {
         if (email != '') {
-            callAPICheckEamil();
+            navigation.navigate('CreatePasswordScreen', {
+                first_name: params.first_name,
+                last_name: params.last_name,
+                dateOfBirth: params.dateOfBirth,
+                sex: params.sex,
+                phone: null,
+                email: email,
+            })
         } else {
             console.log("Thiếu ");
         }

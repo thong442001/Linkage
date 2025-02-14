@@ -1,5 +1,6 @@
 import {
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -59,12 +60,30 @@ const Setting = (props) => {
         <Icon name="moon-o" size={30} color="black" />
         <Text style={styles.text}>Chế độ tối</Text>
       </View>
+
+       <Pressable onPress={() => navigation.navigate('ChangePassWord')}>
+        <View style={styles.container_item1}>
+        <Icon name="weibo" size={30} color="black" />
+        <Text style={styles.text}>Đổi mật khẩu</Text>
+      </View>
+      </Pressable>   
+
+      <Pressable onPress={() => navigation.navigate('ChangeDisplayName')}>
+        <View style={styles.container_item1}>
+        <Icon name="weibo" size={30} color="black" />
+        <Text style={styles.text}>Đổi tên</Text>
+      </View>
+      </Pressable>   
+
+
+      <View style={styles.btnLogout}>
       <TouchableOpacity
         style={styles.button}
-        onPress={onRegister}
-      >
+        onPress={onRegister}>
         <Text style={styles.text_button}>Đăng xuất</Text>
       </TouchableOpacity>
+      </View>
+
     </View>
   );
 };
@@ -127,15 +146,22 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-    height: 40,
+    height: 50,
     backgroundColor: '#E1E6EA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 170,
+    borderRadius: 10,
   },
   text_button: {
     color: 'black',
     fontSize: 16,
     fontWeight: '600',
   },
+  btnLogout:{
+    position: 'absolute',
+    bottom: '20',
+    left: 0,
+    right: 0,
+    paddingHorizontal: 10,
+  }
 });

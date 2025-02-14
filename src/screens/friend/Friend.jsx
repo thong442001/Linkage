@@ -19,6 +19,7 @@ import {
   chapNhanLoiMoiKetBan,
   huyLoiMoiKetBan,
 } from '../../rtk/API';
+import {Snackbar} from 'react-native-paper'; // thông báo (ios and android)
 
 const Friend = props => {
   const {route, navigation} = props;
@@ -29,10 +30,23 @@ const Friend = props => {
   const token = useSelector(state => state.app.token);
 
   const [relationships, setRelationships] = useState([]);
+  // dialog reLoad
+  const [dialogReLoad, setDialogreload] = useState(false);
 
   useEffect(() => {
+    // Call API khi lần đầu vào trang
     callGetAllLoiMoiKetBan();
-  }, []);
+
+    // Thêm listener để gọi lại API khi quay lại trang
+    const focusListener = navigation.addListener('focus', () => {
+      callGetAllLoiMoiKetBan();
+    });
+
+    // Cleanup listener khi component bị unmount
+    return () => {
+      focusListener();
+    };
+  }, [navigation]);
 
   //getAllLoiMoiKetBan
   const callGetAllLoiMoiKetBan = async () => {
@@ -66,6 +80,7 @@ const Friend = props => {
         })
         .catch(error => {
           console.log('Error2 callChapNhanLoiMoiKetBan:', error);
+          setDialogreload(true);
         });
     } catch (error) {
       console.log(error);
@@ -86,6 +101,7 @@ const Friend = props => {
         })
         .catch(error => {
           console.log('Error2 callHuyLoiMoiKetBan:', error);
+          setDialogreload(true);
         });
     } catch (error) {
       console.log(error);
@@ -94,9 +110,24 @@ const Friend = props => {
 
   return (
     <View style={styles.container}>
+      {/* Hiển thị Snackbar dưới cùng màn hình */}
+      <Snackbar
+        visible={dialogReLoad}
+        onDismiss={() => {
+          callGetAllLoiMoiKetBan();
+          setDialogreload(false);
+        }}
+        duration={1000}>
+        làm mới!
+      </Snackbar>
       <View style={styles.HeaderWrap}>
-        <Text style={styles.title}> Bạn bè </Text>
-        <Icon style={styles.findButton} name="search" size={25} color="black" />
+        <Text style={[styles.title, {color: 'black'}]}> Bạn bè</Text>
+        <Icon
+          style={styles.findButton}
+          name="search"
+          size={25}
+          color={'black'}
+        />
       </View>
       <View style={styles.goiYWrap}>
         <Text

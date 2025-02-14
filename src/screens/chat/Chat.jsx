@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {
+  Platform,
   View,
   Text,
   TextInput,
@@ -7,18 +8,20 @@ import {
   StyleSheet,
   FlatList,
   Dimensions,
-  Platform,
-  Keyboard, // bàn phím
+  Keyboard,
+  Pressable, // bàn phím
 } from 'react-native';
-// import io from 'socket.io-client';
 import io from 'socket.io-client';
 import {useDispatch, useSelector} from 'react-redux';
 //import { socket } from "../../utils/index";
+import Icon from 'react-native-vector-icons/Ionicons';
 import Messagecomponent from '../../components/chat/Messagecomponent';
 import {getGroupID, getMessagesGroup} from '../../rtk/API';
 import ChatHeader from '../../components/chat/ChatHeader';
-
+import {launchImageLibrary} from 'react-native-image-picker';
+import axios from 'axios';
 const Chat = props => {
+  // cần ID_group (param)
   const {route, navigation} = props;
   const {params} = route;
 
@@ -40,13 +43,74 @@ const Chat = props => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+  //up lên cloudiary
+  const uploadFile = async file => {
+    try {
+      const data = new FormData();
+      data.append('file', {
+        uri: file.uri,
+        type: file.type,
+        name:
+          file.fileName ||
+          (file.type.startsWith('video/') ? 'video.mp4' : 'image.png'),
+      });
+      data.append('upload_preset', 'ml_default');
+
+      const response = await axios.post(
+        'https://api.cloudinary.com/v1_1/ddbolgs7p/upload',
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      const fileUrl = response.data.secure_url;
+      console.log('🌍 Link file Cloudinary:', fileUrl);
+    } catch (error) {
+      console.log(
+        'uploadFile -> ',
+        error.response ? error.response.data : error.message,
+      );
+      console.log('lỗi khi tải file');
+    }
+  };
+
+  //mở thư viện
+  const onOpenGallery = async () => {
+    try {
+      const options = {
+        mediaType: 'mixed',
+        quality: 1,
+      };
+
+      launchImageLibrary(options, async response => {
+        //console.log(response);
+        if (response.didCancel) {
+          console.log('đã hủy');
+        } else if (response.errorMessage) {
+          console.log('lỗi khi mở thư viện');
+        } else {
+          const selectedFile = response.assets[0];
+          console.log('📂 File đã chọn:', selectedFile.uri);
+
+          await uploadFile(selectedFile);
+        }
+      });
+    } catch (error) {
+      console.log('onOpenGallery -> ', error);
+    }
+  };
+
   useEffect(() => {
     // lấy name vs avt
-    getID_groupPrivate(params?.ID_group);
+    getInforGroup(params?.ID_group);
     // lấy messages old
     getMessagesOld(params?.ID_group);
 
     // Kết nối tới server
+
     const newSocket = io('https://linkage.id.vn', {
       transports: ['websocket', 'polling'],
       reconnection: true, // Cho phép tự động kết nối lại
@@ -191,13 +255,14 @@ const Chat = props => {
   }, [params?.ID_group]);
 
   //infor group
-  const getID_groupPrivate = async ID_group => {
+  const getInforGroup = async ID_group => {
     try {
       await dispatch(getGroupID({ID_group: ID_group, token: token}))
         .unwrap()
         .then(response => {
           setGroup(response.group);
           if (response.group.isPrivate == true) {
+            // chat private
             //console.log(response.group.members);
             const otherUser = response.group.members.find(
               user => user._id !== me._id,
@@ -208,6 +273,25 @@ const Chat = props => {
               setGroupAvatar(otherUser.avatar);
             } else {
               console.log('⚠️ Không tìm thấy thành viên khác trong nhóm!');
+            }
+          } else {
+            // group
+            if (response.group.avatar == null) {
+              setGroupAvatar(
+                'https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4',
+              );
+            } else {
+              setGroupAvatar(response.group.avatar);
+            }
+            if (response.group.name == null) {
+              const names = response.group.members
+                .filter(user => user._id !== me._id)
+                .map(user => `${user.first_name} ${user.last_name}`)
+                .join(', ');
+              // Cập nhật state một lần duy nhất
+              setGroupName(names);
+            } else {
+              setGroupName(response.group.name);
             }
           }
         })
@@ -258,8 +342,12 @@ const Chat = props => {
     }
   };
 
-  const handleGoBack = () => {
-    navigation.goBack();
+  const goBack = () => {
+    navigation.navigate('HomeChat');
+  };
+
+  const toSettingChat = () => {
+    navigation.navigate('SettingChat', {ID_group: group._id});
   };
 
   useEffect(() => {
@@ -313,7 +401,9 @@ const Chat = props => {
         <ChatHeader
           name={groupName}
           avatar={groupAvatar}
-          onGoBack={handleGoBack}
+          onGoBack={goBack}
+          isPrivate={group?.isPrivate}
+          onToSettingChat={toSettingChat}
         />
       )}
       <FlatList
@@ -361,6 +451,12 @@ const Chat = props => {
       )}
 
       <View style={styles.inputContainer}>
+        {/* Thư Viện */}
+        <View style={styles.librarySelect}>
+          <Pressable onPress={onOpenGallery}>
+            <Icon name="image" size={25} />
+          </Pressable>
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Type a message"
@@ -379,19 +475,15 @@ const Chat = props => {
 export default Chat;
 
 const styles = StyleSheet.create({
+  librarySelect: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   container: {
     flex: 1,
     padding: 10,
     backgroundColor: 'white',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-    color: 'black',
   },
   messageContainer: {
     flexDirection: 'row',
@@ -421,14 +513,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: '#ccc',
+    justifyContent: 'space-between', // Chia đều khoảng cách giữa các phần
   },
   input: {
-    flex: 1,
+    flex: 0.95,
     borderWidth: 1,
-    borderColor: '#ccc',
     padding: 10,
     borderRadius: 20,
-    color: '#000',
+    color: 'black',
+    height: 40,
+    borderColor: 'gray',
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
   sendButton: {
     marginLeft: 10,

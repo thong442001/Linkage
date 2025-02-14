@@ -5,14 +5,16 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    FlatList
+    FlatList,
+    Dimensions
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getAllGroupOfUser,
 } from '../../rtk/API';
 import Groupcomponent from '../../components/chat/Groupcomponent';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 
 const HomeChat = (props) => {
     const { route, navigation } = props;
@@ -63,11 +65,22 @@ const HomeChat = (props) => {
 
     return (
         <View style={styles.container}>
-            {/* Nút quay lại */}
-            <TouchableOpacity onPress={() => navigation.navigate("TabHome")}>
-                <FontAwesome name="long-arrow-left" size={24} color="black" />
-            </TouchableOpacity>
-            <Text style={styles.header}>Đoạn chat</Text>
+            {/* header */}
+            <View
+                style={styles.vHeader}
+            >
+                {/* Nút quay lại */}
+                <TouchableOpacity onPress={() => navigation.navigate("TabHome")}>
+                    <MaterialIcons name="arrow-back-ios-new" size={24} color="black" />
+                </TouchableOpacity>
+                <Text style={styles.header}>Đoạn chat</Text>
+                {/* Nút tạo group */}
+                <TouchableOpacity onPress={() => navigation.navigate("CreateGroup")}>
+                    <MaterialIcons name="group-add" size={24} color="black" />
+                </TouchableOpacity>
+            </View>
+
+
             <TextInput style={styles.searchBox} placeholder="Tìm kiếm" />
             {/* groups */}
             <FlatList
@@ -94,13 +107,20 @@ const styles = StyleSheet.create({
     header: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10,
         color: "black",
+        width: Dimensions.get('window').width * 0.5,
+        textAlign: 'center',
     },
     searchBox: {
         backgroundColor: '#eee',
         borderRadius: 20,
         padding: 10,
         marginBottom: 15,
+    },
+    vHeader: {
+        flexDirection: 'row',
+        //width: Dimensions.get('window').width,
+        justifyContent: 'space-around',
+        marginBottom: 10,
     },
 });

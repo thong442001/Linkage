@@ -1,12 +1,22 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useMemo, useRef, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/EvilIcons'
 import Icon3 from 'react-native-vector-icons/MaterialIcons'
 import Icon4 from 'react-native-vector-icons/FontAwesome5'
+import Icon5 from 'react-native-vector-icons/AntDesign'
 import FBPhotoGrid from '@renzycode/react-native-fb-photo-grid';
+import { useBottomSheet } from '../../context/BottomSheetContext';
+import PostDetailS from '../../styles/screens/home/PostDetailS'
+import { useNavigation } from '@react-navigation/native'
+import ListComment from './ListComment'
+import Comment from '../comment/Comment'
 const Post = (props) => {
+    const navigation = useNavigation();
     const { post } = props
+    const { openBottomSheet } = useBottomSheet();
+
+
     return (
         <View style={[styles.box, { marginTop: 4 }]}>
             <View style={{ marginVertical: 18 }}>
@@ -37,7 +47,7 @@ const Post = (props) => {
                     gutterColor="#fff"
                     photos={post.image}
                     gutterSize={1}
-                    onTouchPhoto={(photoUri, index) => console.log(photoUri, index)}
+                    onTouchPhoto={() => { navigation.navigate("PostDetail", { post }) }}// truyền dữ liệu qua trang chi tiết bài post
                 />
             </View>
             <View style={styles.boxInteract}>
@@ -48,10 +58,12 @@ const Post = (props) => {
                     <Text>Thích</Text>
                 </View>
                 <View style={styles.boxIcons2}>
-                    <View style={styles.boxIcons3}>
-                        <Icon3 name="comment" size={20} color="black" />
-                    </View>
-                    <Text>Bình luận</Text>
+                    <TouchableOpacity onPress={() => { navigation.navigate("Comment", { post }) }} style={{ flexDirection: "row" }}>
+                        <View style={styles.boxIcons3}>
+                            <Icon3 name="comment" size={20} color="black" />
+                        </View>
+                        <Text>Bình luận</Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.boxIcons2}>
                     <View style={styles.boxIcons3}>
@@ -111,5 +123,9 @@ const styles = StyleSheet.create({
     },
     boxIcons3: {
         marginRight: 10
+    },
+    boxHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
     }
 })
