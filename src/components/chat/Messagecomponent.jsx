@@ -9,8 +9,10 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
+
 // Lỗi copy
 //import Clipboard from '@react-native-clipboard/clipboard';// copy
+
 import { Snackbar } from 'react-native-paper';// thông báo (ios and android)
 import { useSelector } from 'react-redux';
 
