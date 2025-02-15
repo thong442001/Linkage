@@ -39,7 +39,6 @@ local.properties
 node_modules/
 npm-debug.log
 yarn-error.log
-android/.settings/org.eclipse.buildship.core.prefs
 
 # fastlane
 #
@@ -73,3 +72,4 @@ android/.settings/org.eclipse.buildship.core.prefs
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+android/.settings/org.eclipse.buildship.core.prefs
