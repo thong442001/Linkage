@@ -48,40 +48,28 @@ const Setting = (props) => {
         <Icon name="user-circle" size={30} color="black" />
         <Text style={styles.text}>Thông tin các nhân</Text>
       </View>
-      <View style={styles.container_item1}>
-        <Icon name="lock" size={30} color="black" />
-        <Text style={styles.text}>Quyền riêng tư</Text>
-      </View>
-      <View style={styles.container_item1}>
-        <Icon name="language" size={30} color="black" />
-        <Text style={styles.text}>Thay đổi ngôn ngữ</Text>
-      </View>
-      <View style={styles.container_item1}>
-        <Icon name="moon-o" size={30} color="black" />
-        <Text style={styles.text}>Chế độ tối</Text>
-      </View>
 
-       <Pressable onPress={() => navigation.navigate('ChangePassWord')}>
+      <Pressable onPress={() => navigation.navigate('ChangePassWord')}>
         <View style={styles.container_item1}>
-        <Icon name="weibo" size={30} color="black" />
-        <Text style={styles.text}>Đổi mật khẩu</Text>
-      </View>
-      </Pressable>   
+          <Icon name="lock" size={30} color="black" />
+          <Text style={styles.text}>Đổi mật khẩu</Text>
+        </View>
+      </Pressable>
 
       <Pressable onPress={() => navigation.navigate('ChangeDisplayName')}>
         <View style={styles.container_item1}>
-        <Icon name="weibo" size={30} color="black" />
-        <Text style={styles.text}>Đổi tên</Text>
-      </View>
-      </Pressable>   
+          <Icon name="lock" size={30} color="black" />
+          <Text style={styles.text}>Đổi tên</Text>
+        </View>
+      </Pressable>
 
 
       <View style={styles.btnLogout}>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={onRegister}>
-        <Text style={styles.text_button}>Đăng xuất</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={onRegister}>
+          <Text style={styles.text_button}>Đăng xuất</Text>
+        </TouchableOpacity>
       </View>
 
     </View>
@@ -157,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  btnLogout:{
+  btnLogout: {
     position: 'absolute',
     bottom: '20',
     left: 0,

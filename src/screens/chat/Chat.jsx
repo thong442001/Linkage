@@ -62,9 +62,18 @@ const Chat = (props) => {// cần ID_group (param)
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
+            //console.log(file.type.type);
             const fileUrl = response.data.secure_url;
             console.log('🌍 Link file Cloudinary:', fileUrl);
+
+            if (file.type.startsWith('image/')) {
+                console.log("image");
+                sendMessage('image', fileUrl)
+            }
+            if (file.type.startsWith('video/')) {
+                console.log("video");
+                sendMessage('video', fileUrl)
+            }
 
         } catch (error) {
             console.log('uploadFile -> ', error.response ? error.response.data : error.message);
@@ -307,29 +316,31 @@ const Chat = (props) => {// cần ID_group (param)
     }
 
     // gửi tin nhắn
-    const sendMessage = () => {
-        if (socket && message) {
-            const payload = {
-                ID_group: params.ID_group,
-                sender: me._id,
-                content: message,
-                type: 'text',
-                ID_message_reply: reply
-                    ? {
-                        _id: reply._id,
-                        content: reply.content || "Tin nhắn không tồn tại", // Đảm bảo không bị undefined
-                    }
-                    : null,
-            };
-            socket.emit('send_message', payload);
-            setMessage('');
-            setReply(null); // Xóa tin nhắn trả lời sau khi gửi
-            Keyboard.dismiss();// tắc bàn phím
+    const sendMessage = (type, content) => {
+        if (socket == null || (message == null && type === 'text')) {
+            return;
         }
+        const payload = {
+            ID_group: params.ID_group,
+            sender: me._id,
+            content: content,
+            type: type,
+            ID_message_reply: reply
+                ? {
+                    _id: reply._id,
+                    content: reply.content || "Tin nhắn không tồn tại", // Đảm bảo không bị undefined
+                }
+                : null,
+        };
+        socket.emit('send_message', payload);
+        setMessage('');
+        setReply(null); // Xóa tin nhắn trả lời sau khi gửi
+        Keyboard.dismiss();// tắc bàn phím
     };
 
     const goBack = () => {
-        navigation.navigate("HomeChat");
+        //navigation.navigate("HomeChat");
+        navigation.goBack();
     };
 
     const toSettingChat = () => {
@@ -457,7 +468,10 @@ const Chat = (props) => {// cần ID_group (param)
                     value={message}
                     onChangeText={setMessage}
                 />
-                <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+                <TouchableOpacity
+                    onPress={() => sendMessage('text', message)}
+                    style={styles.sendButton}
+                >
                     <Text style={styles.sendText}>Send</Text>
                 </TouchableOpacity>
             </View>
