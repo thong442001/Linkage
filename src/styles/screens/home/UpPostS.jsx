@@ -89,13 +89,35 @@ const UpPostS = StyleSheet.create({
     },
     boxItems2: {
     },
-    btnIcon:{
+    btnIcon: {
         paddingVertical: 5
     },
-    txtIcon:{
+    txtIcon: {
         fontSize: 15,
         marginLeft: 10
-    }
+    },
+    // model
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 16,
+    },
+    optionButton: {
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    optionText: {
+        fontSize: 16,
+        color: '#000',
+    },
 })
 
 export default UpPostS

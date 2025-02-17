@@ -162,7 +162,6 @@ const Home = (props) => {
     },
   ]
 
-
   return (
     <View style={HomeS.container}>
       {/* post */}
