@@ -13,7 +13,7 @@ const ProfilePage = (props) => {
             <View style={{ marginVertical: 18 }}>
                 <View style={styles.post}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image style={styles.avata} source={{ uri: post.avata }} />
+                        <Image style={styles.avata} source={{ uri: post.avatar }} />
                         <View style={{ marginLeft: 20 }}>
                             <Text style={styles.name}>{post.name}</Text>
                             <View style={styles.boxName}>
