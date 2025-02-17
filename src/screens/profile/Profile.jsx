@@ -21,6 +21,7 @@ import {
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
     huyLoiMoiKetBan,
+    allProfile,// allProfile
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper';// thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS'
@@ -34,30 +35,59 @@ const Profile = (props) => {
     const token = useSelector(state => state.app.token);
 
     const [user, setUser] = useState(null);
-    //const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState([]);
     const [relationship, setRelationship] = useState(null);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
     const [dialogReLoad, setDialogreload] = useState(false);
 
+    useEffect(() => {
+        callAllProfile();
+        //fetchData();
+    }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
-    const onGetUser = async (userId) => {
+    //callAllProfile
+    const callAllProfile = async () => {
         try {
-            await dispatch(getUser({ userId: userId, token: token }))
+            const paramsAPI = {
+                ID_user: params?._id,
+                me: me._id,
+            }
+            await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log(response);
-                    setUser(response.user);
+                    //console.log("callGuiLoiMoiKetBan: ", response);
+                    setUser(response.user)
+                    setPosts(response.posts);
+                    setRelationship(response.relationship)
                 })
                 .catch((error) => {
-                    console.log('Error:', error);
+                    console.log('Error2 callGuiLoiMoiKetBan:', error);
+                    setDialogreload(true);
                 });
 
         } catch (error) {
             console.log(error)
         }
     }
+
+    // const onGetUser = async (userId) => {
+    //     try {
+    //         await dispatch(getUser({ userId: userId, token: token }))
+    //             .unwrap()
+    //             .then((response) => {
+    //                 console.log(response);
+    //                 setUser(response.user);
+    //             })
+    //             .catch((error) => {
+    //                 console.log('Error:', error);
+    //             });
+
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
 
     // const onGetPosts = async (userId) => {
     //     try {
@@ -76,44 +106,46 @@ const Profile = (props) => {
     //     }
     // }
 
-    const fetchData = async () => {
-        let userId = params?._id || me?._id;  // Nếu có params._id thì là bạn bè, không thì là chính mình
-        setUser(params?._id ? null : me); // Nếu là mình thì lấy từ Redux
+    // const fetchData = async () => {
+    //     let userId = params?._id || me?._id;  // Nếu có params._id thì là bạn bè, không thì là chính mình
+    //     setUser(params?._id ? null : me); // Nếu là mình thì lấy từ Redux
 
-        if (userId && params?._id) {
-            await onGetUser(userId);
-        }
-        //await onGetPosts(userId);
+    //     if (userId && params?._id) {
+    //         await onGetUser(userId);
+    //     }
+    //     //await onGetPosts(userId);
 
-        //get relationship
-        if (params?._id !== me._id) {
-            if (params?._id != null || params?._id != '') {
-                await getRelation();
-            }
-        }
-    };
+    //     //get relationship
+    //     if (params?._id !== me._id) {
+    //         if (params?._id != null || params?._id != '') {
+    //             await getRelation();
+    //         }
+    //     }
+    //     // nếu ko có relationship là trang cá nhân của bản thân
+
+    // };
 
     //tìm mối quan hệ
-    const getRelation = async () => {
-        try {
-            const paramsAPI = {
-                ID_user: params?._id,
-                me: me._id,
-            }
-            await dispatch(getRelationshipAvsB(paramsAPI))
-                .unwrap()
-                .then((response) => {
-                    //console.log(response);
-                    setRelationship(response.relationship);
-                })
-                .catch((error) => {
-                    console.log('Error2 getRelationshipAvsB:', error);
-                });
+    // const getRelation = async () => {
+    //     try {
+    //         const paramsAPI = {
+    //             ID_user: params?._id,
+    //             me: me._id,
+    //         }
+    //         await dispatch(getRelationshipAvsB(paramsAPI))
+    //             .unwrap()
+    //             .then((response) => {
+    //                 //console.log(response);
+    //                 setRelationship(response.relationship);
+    //             })
+    //             .catch((error) => {
+    //                 console.log('Error2 getRelationshipAvsB:', error);
+    //             });
 
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
 
     //guiLoiMoiKetBan
     const callGuiLoiMoiKetBan = async () => {
@@ -209,10 +241,6 @@ const Profile = (props) => {
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id)
     }
-
-    useEffect(() => {
-        fetchData();
-    }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
 
     const dataPost = [
@@ -405,7 +433,7 @@ const Profile = (props) => {
                     </View>
                 </View>
 
-                <View style={[ProfileS.boxHeader , { marginBottom: 7 }]}>
+                <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
                     <View style={ProfileS.boxLive}>
                         <View style={ProfileS.title2}>
                             <Text style={{ fontSize: 16, fontWeight: "bold" }}>Bài viết</Text>
@@ -456,14 +484,14 @@ const Profile = (props) => {
                     </View>
                 </View>
             </View>
-            <View style = {HomeS.line}></View>
+            <View style={HomeS.line}></View>
             <View style={[ProfileS.boxHeader]}>
                 <View>
                     <View style={ProfileS.post}>
                         <FlatList
-                            data={dataPost}
+                            data={posts}
                             renderItem={({ item }) => <ProfilePage post={item} />}
-                            keyExtractor={(item) => item.id}
+                            keyExtractor={(item) => item._id}
                             showsHorizontalScrollIndicator={false}
                             ListHeaderComponent={headerFriends}
                             showsVerticalScrollIndicator={false}

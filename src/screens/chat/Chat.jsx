@@ -257,10 +257,10 @@ const Chat = (props) => {// cần ID_group (param)
             await dispatch(getGroupID({ ID_group: ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
+                    //console.log("thong show data: ", response);
                     setGroup(response.group)
                     if (response.group.isPrivate == true) {
                         // chat private
-                        //console.log(response.group.members);
                         const otherUser = response.group.members.find(user => user._id !== me._id);
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
@@ -339,8 +339,8 @@ const Chat = (props) => {// cần ID_group (param)
     };
 
     const goBack = () => {
-        //navigation.navigate("HomeChat");
-        navigation.goBack();
+        navigation.navigate("HomeChat");
+        //navigation.goBack();
     };
 
     const toSettingChat = () => {

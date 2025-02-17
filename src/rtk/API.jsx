@@ -425,6 +425,46 @@ export const editAvtNameGroup = createAsyncThunk(
   }
 );
 
+// post
+export const addPost = createAsyncThunk(
+  'post/addPost',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response =
+        await AxiosHelper()
+          .post('post/addPost', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//allProfile
+export const allProfile = createAsyncThunk(
+  'post/allProfile',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('post/allProfile', data);
+      console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
 // /// test token
 // export const getAllUsers = createAsyncThunk(
 //   'user/getAllUsers',
@@ -445,24 +485,7 @@ export const editAvtNameGroup = createAsyncThunk(
 //   }
 // );
 
-// export const addPost = createAsyncThunk(
-//   'post/addPost',
-//   async (data, { rejectWithValue }) => {
-//     try {
-//       const response =
-//         await AxiosHelper()
-//           .post('post/add', data);
-//       //console.log(response)
-//       if (response.status == true) {
-//         return response;
-//       } else {
-//         return rejectWithValue(response.data.message);
-//       }
-//     } catch (error) {
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
+
 
 
 

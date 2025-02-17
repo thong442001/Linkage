@@ -57,14 +57,10 @@ const Screen1 = (props) => {
             setShowErrorDate(false);
         }
 
-      
+
 
         return isValid;
     };
-
-
-
-
 
     const handleNext = () => {
         if (validateForm()) {
