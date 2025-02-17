@@ -97,6 +97,7 @@ export default function MessageComponent({
                 </Text>
               </View>
             )}
+
           {/* Nội dung tin nhắn chính */}
           {
             // tin nhắn bị thu hồi
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
     maxWidth: Dimensions.get('window').width * 0.7,
     padding: 10,
     borderRadius: 15,
-    backgroundColor: "#D9D9D9", // Màu tin nhắn của người khác 
+    backgroundColor: '#d9d9d9'// Màu tin nhắn của người khác 
   },
   currentUserMessage: {
     backgroundColor: "#3A6DF0", // Màu tin nhắn của người dùng hiện tại 
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   reactionText: {
-    fontSize: 20,
+    fontSize: 15,
     color: "#000",
   },
   menu: {
@@ -362,12 +363,12 @@ const styles = StyleSheet.create({
   messageImage: {
     width: 200,
     height: 200,
-    //borderRadius: 10,
+    borderRadius: 5,
   },
   //video
   messageVideo: {
     width: 250,
     height: 250,
-    //borderRadius: 10,
+    borderRadius: 5,
   },
 });

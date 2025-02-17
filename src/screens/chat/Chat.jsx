@@ -404,7 +404,7 @@ const Chat = (props) => {// cần ID_group (param)
             }
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
-                contentContainerStyle={{ flexGrow: 1 }}
+                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingTop: 10 }}
                 data={messages || []}
                 renderItem={({ item }) => (
                     <Messagecomponent
@@ -418,6 +418,8 @@ const Chat = (props) => {// cần ID_group (param)
                 keyExtractor={(item) => item._id}
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                 onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                // showsHorizontalScrollIndicator = {false}
+                showsVerticalScrollIndicator={false}
             />
             {/* bàn phím */}
             {
@@ -456,8 +458,11 @@ const Chat = (props) => {// cần ID_group (param)
                 {/* Thư Viện */}
                 <View style={styles.librarySelect}>
                     <Pressable
-                        onPress={onOpenGallery}>
-                        <Icon name="image" size={25} />
+                        onPress={onOpenGallery}
+                    >
+                        <View>
+                            <Icon name="image" size={25} />
+                        </View>
                     </Pressable>
 
                 </View>
@@ -468,14 +473,22 @@ const Chat = (props) => {// cần ID_group (param)
                     value={message}
                     onChangeText={setMessage}
                 />
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     onPress={() => sendMessage('text', message)}
                     style={styles.sendButton}
                 >
                     <Text style={styles.sendText}>Send</Text>
+                </TouchableOpacity> */}
+                <TouchableOpacity
+                    onPress={() => sendMessage('text', message)}
+                    style={styles.sendButton}
+                >
+                    <View>
+                        <Icon name="send" size={25} color='#007bff' />
+                    </View>
+                    {/* <Text style={styles.sendText}>Send</Text> */}
                 </TouchableOpacity>
             </View>
-
         </View >
     )
 }
@@ -487,10 +500,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
+        marginRight: 10
     },
     container: {
         flex: 1,
-        padding: 10,
         backgroundColor: 'white',
     },
     messageContainer: {
@@ -515,31 +528,30 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#ffffff',
         padding: 10,
         flexDirection: 'row',
         alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#ccc',
+        // borderTopWidth: 1,
+        // borderTopColor: '#ccc',
         justifyContent: 'space-between',  // Chia đều khoảng cách giữa các phần
 
     },
     input: {
-        flex: 0.95,
-        borderWidth: 1,
+        flex: 1,
+        // borderWidth: 1,
         padding: 10,
         borderRadius: 20,
         color: 'black',
-        height: 40,
-        borderColor: 'gray',
-        paddingHorizontal: 10,
-        marginBottom: 10,
+        // borderColor: 'gray',
+        backgroundColor: '#d9d9d9d9',
+        // paddingHorizontal: 10,
     },
     sendButton: {
         marginLeft: 10,
-        backgroundColor: '#007bff',
-        padding: 10,
-        borderRadius: 20,
+        // backgroundColor: '#007bff',
+        // padding: 10,
+        // borderRadius: 20,
     },
     sendText: {
         color: '#fff',
