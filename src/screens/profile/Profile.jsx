@@ -58,9 +58,17 @@ const Profile = (props) => {
                 .unwrap()
                 .then((response) => {
                     //console.log("callGuiLoiMoiKetBan: ", response);
-                    setUser(response.user)
-                    setPosts(response.posts);
-                    setRelationship(response.relationship)
+                    if (response.posts && response.user) {
+                        // Gán thông tin user vào từng bài post
+                        const updatedPosts = response.posts.map(post => ({
+                            ...post,
+                            user: response.user // Thêm thông tin user vào mỗi post
+                        }));
+    
+                        setUser(response.user);
+                        setPosts(updatedPosts);
+                        setRelationship(response.relationship);
+                    }
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
@@ -407,8 +415,6 @@ const Profile = (props) => {
                                     </View>
                                 ))
                             }
-
-
                         </View>
                     </View>
                 </View>
@@ -485,7 +491,7 @@ const Profile = (props) => {
                 </View>
             </View>
             <View style={HomeS.line}></View>
-            <View style={[ProfileS.boxHeader]}>
+            <View>
                 <View>
                     <View style={ProfileS.post}>
                         <FlatList
@@ -500,8 +506,6 @@ const Profile = (props) => {
                     </View>
                 </View>
             </View>
-
-
 
             {/* Menu Phản hồi kết bạn */}
             <Modal
@@ -537,7 +541,6 @@ const Profile = (props) => {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
-
         </View>
     )
 }
