@@ -64,7 +64,7 @@ const Profile = (props) => {
                             ...post,
                             user: response.user // Thêm thông tin user vào mỗi post
                         }));
-    
+
                         setUser(response.user);
                         setPosts(updatedPosts);
                         setRelationship(response.relationship);

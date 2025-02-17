@@ -1,12 +1,14 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import Icon from 'react-native-vector-icons/Ionicons'
-import Icon2 from 'react-native-vector-icons/EvilIcons'
-import Icon3 from 'react-native-vector-icons/MaterialIcons'
-import Icon4 from 'react-native-vector-icons/FontAwesome5'
-import FBPhotoGrid from '@renzycode/react-native-fb-photo-grid';
-const ProfilePage = (props) => {
-    const { post } = props
+import React from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import Video from 'react-native-video';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Icon2 from 'react-native-vector-icons/EvilIcons';
+import Icon3 from 'react-native-vector-icons/MaterialIcons';
+import Icon4 from 'react-native-vector-icons/FontAwesome5';
+
+const PostItem = ({ post }) => {
+    const hasCaption = post?.caption?.trim() !== '';
+    const hasMedia = post?.medias?.length > 0;
 
     const getIcon = (status) => {
         switch (status) {
@@ -20,87 +22,117 @@ const ProfilePage = (props) => {
                 return <Icon name="lock-closed" size={12} color="gray" />; // mặc định
         }
     }
-    return (
-        <View style={{ marginBottom: 7 }} >
-            <View style={[styles.box]}>
-                <View style={{ marginVertical: 18 }}>
-                    <View style={styles.post}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image style={styles.avata} source={{ uri: post?.user?.avatar }} />
-                            <View style={{ marginLeft: 20 }}>
-                                <Text style={styles.name}>{post?.user?.first_name + " " + post?.user?.last_name}</Text>
-                                <View style={styles.boxName}>
-                                    <Text style={styles.time}>{post.status}</Text>
-                                    {/* <Icon name="earth" size={12} color="gray" /> */}
-                                    {
-                                        getIcon(post.status)
-                                    }
+
+    const isVideo = (uri) => uri?.endsWith('.mp4') || uri?.endsWith('.mov');
+
+    const renderMediaGrid = (medias) => {
+        const mediaCount = medias.length;
+
+        if (mediaCount === 0) return null;
+
+        return (
+            <View style={styles.mediaContainer}>
+                {medias.slice(0, 5).map((uri, index) => (
+                    <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
+                        {isVideo(uri) ? (
+                            <View style={styles.videoWrapper}>
+                                <Video source={{ uri }} style={styles.video} resizeMode="cover" paused />
+                                <View style={styles.playButton}>
+                                    <Icon name="play-circle" size={40} color="white" />
                                 </View>
                             </View>
-                        </View>
-                        <View style={styles.boxIcons}>
-                            <View style={{ marginRight: 10 }}>
-                                <Icon name="ellipsis-horizontal" size={25} color="black" />
+                        ) : (
+                            <Image source={{ uri }} style={styles.image} resizeMode="cover" />
+                        )}
+
+                        {index === 4 && mediaCount > 5 && (
+                            <View style={styles.overlay}>
+                                <Text style={styles.overlayText}>+{mediaCount - 5}</Text>
                             </View>
-                            <Icon name="close" size={25} color="black" />
+                        )}
+                    </TouchableOpacity>
+                ))}
+            </View>
+        );
+    };
+
+    const getMediaStyle = (count, index) => {
+        if (count === 1) {
+            return styles.singleMedia;
+        } else if (count === 2) {
+            return styles.doubleMedia;
+        } else if (count === 3) {
+            return index === 0 ? styles.tripleMediaFirst : styles.tripleMediaSecond;
+        } else if (count === 4) {
+            return styles.quadMedia;
+        } else { // 5+ media
+            if (index < 2) return styles.fivePlusMediaFirstRow;
+            else if (index === 2) return styles.fivePlusMediaSecondRowLeft;
+            else if (index === 3) return styles.fivePlusMediaSecondRowMiddle;
+            else return styles.fivePlusMediaSecondRowRight;
+        }
+    };
+
+    return (
+        <View style={styles.postContainer}>
+            <View style={styles.header}>
+                <Image source={{ uri: post?.user?.avatar }} style={styles.avatar} />
+                <View style={styles.userInfo}>
+                    <View style={{ marginLeft: 20 }}>
+                        <Text style={styles.name}>{post?.user?.first_name + " " + post?.user?.last_name}</Text>
+                        <View style={styles.boxName}>
+                            <Text style={styles.time}>{post.status}</Text>
+                            {/* <Icon name="earth" size={12} color="gray" /> */}
+                            {
+                                getIcon(post.status)
+                            }
                         </View>
                     </View>
-                    <View style={styles.title}>
-                        <Text>{post.caption}</Text>
-                    </View>
-                    {/* <Image style={{ width: '100%', height: 300 }} source={{ uri: post.image }} /> */}
-                    <FBPhotoGrid
-                        height={300}
-                        gutterColor="#fff"
-                        photos={post.medias}
-                        gutterSize={1}
-                        onTouchPhoto={(photoUri, index) => console.log(photoUri, index)}
-                    />
                 </View>
-                <View style={[styles.boxInteract]}>
-                    <View style={styles.boxIcons2}>
-                        <View style={styles.boxIcons3}>
-                            <Icon2 name="like" size={25} color="black" />
-                        </View>
-                        <Text>Thích</Text>
-                    </View>
-                    <View style={styles.boxIcons2}>
-                        <View style={styles.boxIcons3}>
-                            <Icon3 name="comment" size={20} color="black" />
-                        </View>
-                        <Text>Bình luận</Text>
-                    </View>
-                    <View style={styles.boxIcons2}>
-                        <View style={styles.boxIcons3}>
-                            <Icon4 name="share-alt" size={20} color="black" />
-                        </View>
-                        <Text>Chia sẻ</Text>
-                    </View>
-                </View>
+                <Icon name="ellipsis-horizontal" size={22} color="black" />
+            </View>
+
+            {hasCaption && <Text style={styles.caption}>{post?.caption}</Text>}
+            {hasMedia && renderMediaGrid(post?.medias)}
+
+            <View style={styles.interactions}>
+                <TouchableOpacity style={styles.action}>
+                    <Icon2 name="like" size={25} color="black" />
+                    <Text style={styles.actionText}>Thích</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.action}>
+                    <Icon3 name="comment" size={20} color="black" />
+                    <Text style={styles.actionText}>Bình luận</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.action}>
+                    <Icon4 name="share-alt" size={20} color="black" />
+                    <Text style={styles.actionText}>Chia sẻ</Text>
+                </TouchableOpacity>
             </View>
         </View>
-    )
-}
-
-export default ProfilePage
+    );
+};
 
 const styles = StyleSheet.create({
-    box: {
-        backgroundColor: "#ffff",
+    postContainer: {
+        backgroundColor: '#fff',
+        padding: 10,
+        marginBottom: 10,
     },
-    boxIcons: {
-        flexDirection: 'row',
-    },
-    post: {
-        marginHorizontal: 20,
+    header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        marginBottom: 10,
     },
-    avata: {
+    avatar: {
         width: 42,
         height: 42,
         borderRadius: 50,
+    },
+    userInfo: {
+        flex: 1,
+        marginLeft: 0,
     },
     boxName: {
         flexDirection: 'row',
@@ -114,20 +146,113 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: 'bold',
     },
-    title: {
-        marginHorizontal: 20,
-        marginVertical: 15,
+    caption: {
+        marginBottom: 10,
+        fontSize: 14,
     },
-    boxInteract: {
+    mediaContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    singleMedia: {
+        width: '100%',
+        height: 300,
+        marginBottom: 2,
+    },
+    doubleMedia: {
+        width: '49.5%',
+        height: 200,
+        marginBottom: 2,
+    },
+    tripleMediaFirst: {
+        width: '100%',
+        height: 250,
+        marginBottom: 2,
+    },
+    tripleMediaSecond: {
+        width: '49.5%',
+        height: 150,
+        marginBottom: 2,
+    },
+    quadMedia: {
+        width: '49.5%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaFirstRow: {
+        width: '49.5%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaSecondRowLeft: {
+        width: '32.66%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaSecondRowMiddle: {
+        width: '32.66%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaSecondRowRight: {
+        width: '32.66%',
+        height: 150,
+        marginBottom: 2,
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+    },
+    videoWrapper: {
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    video: {
+        width: '100%',
+        height: '100%',
+    },
+    playButton: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: [{ translateX: -20 }, { translateY: -20 }],
+    },
+    overlay: {
+        position: 'absolute',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 8,
+    },
+    overlayText: {
+        color: 'white',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    interactions: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginBottom: 18
+        marginTop: 10,
+        paddingTop: 10,
+        borderTopWidth: 0.5,
+        borderTopColor: '#ddd',
     },
-    boxIcons2: {
+    action: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    boxIcons3: {
-        marginRight: 10
-    }
-})
+    actionText: {
+        marginLeft: 5,
+        fontSize: 14,
+    },
+});
+
+export default PostItem;
