@@ -250,18 +250,6 @@ const Profile = (props) => {
         await getID_groupPrivate(params?._id, me?._id)
     }
 
-
-    const dataPost = [
-        {
-            id: 1,
-            name: 'Kenny',
-            image: ['https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/04/anh-bien-4.jpg'],
-            avata: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Andrzej_Person_Kancelaria_Senatu.jpg/1200px-Andrzej_Person_Kancelaria_Senatu.jpg',
-            time: '1 giờ trước',
-            title: 'Hôm nay trời đẹp quá',
-        },
-    ]
-
     const data = [
         {
             id: 1,

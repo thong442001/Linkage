@@ -28,11 +28,11 @@ const Login = (props) => {
 
   function isValidEmail(email) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-  } 
+  }
 
   function isValidPhone(phone) {
     return /^(84|0[3|5|7|8|9])[0-9]{8}$/.test(phone);
-}
+  }
 
 
   const validateForm = () => {
@@ -67,7 +67,7 @@ const Login = (props) => {
     if (!validateForm()) {
       return;
     }
-    
+
     const checkEmail = isValidEmail(emailVsPhone);
     if (checkEmail) {
       const dataEmail = {
