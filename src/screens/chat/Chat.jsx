@@ -34,6 +34,8 @@ const Chat = (props) => {// cần ID_group (param)
     const [group, setGroup] = useState(null);
     const [groupAvatar, setGroupAvatar] = useState(null); // Ảnh đại diện nhóm
     const [groupName, setGroupName] = useState(null); // Tên nhóm
+    const [ID_user, setID_user] = useState(null);
+    const [myUsername, setmyUsername] = useState(null);
 
     const [socket, setSocket] = useState(null);
     const [message, setMessage] = useState('');
@@ -44,8 +46,11 @@ const Chat = (props) => {// cần ID_group (param)
 
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-
+    
+    // call video
+    const onCallvieo = ()=>{
+        navigation.navigate("CallPage", { ID_group: group._id ,id_user: ID_user,MyUsername:myUsername});
+    };
     //up lên cloudiary
     const uploadFile = async (file) => {
         try {
@@ -259,12 +264,23 @@ const Chat = (props) => {// cần ID_group (param)
                 .then((response) => {
                     setGroup(response.group)
                     if (response.group.isPrivate == true) {
+                        // lấy tên của mình
+                        const myUser = response.group.members.find(user => user._id === me._id);
+                        console.log(myUser);
+                        if(myUser){
+                            setID_user(myUser._id);
+                            setmyUsername((myUser.first_name + " " + myUser.last_name));
+                        }else{
+                            console.log("⚠️ Không tìm thấy người dùng");
+                        }
                         // chat private
-                        //console.log(response.group.members);
+                        
                         const otherUser = response.group.members.find(user => user._id !== me._id);
+                        
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
                             //setGroupName(otherUser.displayName);
+                           
                             setGroupAvatar(otherUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
@@ -400,6 +416,7 @@ const Chat = (props) => {// cần ID_group (param)
                     onGoBack={goBack}
                     isPrivate={group?.isPrivate}
                     onToSettingChat={toSettingChat}
+                    onCallVideo={onCallvieo}
                 />
             }
             <FlatList

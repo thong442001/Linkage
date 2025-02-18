@@ -2,7 +2,7 @@ import React from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat }) {
+export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat, onCallVideo }) {
 
     return (
         <View style={styles.headerContainer}>
@@ -25,7 +25,7 @@ export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSett
 
             {/* Nút gọi & Video Call */}
             <View style={styles.actionIcons}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={onCallVideo}>
                     <FontAwesome name="phone" size={24} color="purple" />
                 </TouchableOpacity>
                 <TouchableOpacity>

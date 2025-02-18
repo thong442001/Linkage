@@ -13,6 +13,8 @@ import { store, persistor } from './src/rtk/Store';
 import { PersistGate } from 'redux-persist/integration/react'
 import { BottomSheetProvider } from './src/context/BottomSheetContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {enableScreens} from 'react-native-screens';
+enableScreens();
 // import 'react-native-gesture-handler'
 function App(): React.JSX.Element {
 

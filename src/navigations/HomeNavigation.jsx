@@ -118,6 +118,7 @@ import Comment from '../components/comment/Comment';
 import StoryViewer from '../screens/story/StoryViewer';
 import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
 import ChangePassWord from '../screens/changeProfile/ChangePassWord';
+import CallPage from '../screens/call/CallPage';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -138,6 +139,7 @@ const oStackHome = {
   Home: { name: 'Home', component: Home },
   ChangeDisplayName: { name: 'ChangeDisplayName', component: ChangeDisplayName },
   ChangePassWord: { name: 'ChangePassWord', component: ChangePassWord },
+  CallPage: { name: 'CallPage', component: CallPage },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
