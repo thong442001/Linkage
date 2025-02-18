@@ -404,7 +404,7 @@ const Chat = (props) => {// cần ID_group (param)
             }
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
-                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingTop: 10 }}
+                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10 }}
                 data={messages || []}
                 renderItem={({ item }) => (
                     <Messagecomponent

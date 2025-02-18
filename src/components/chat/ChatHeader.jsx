@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat }) {
 
     return (
-        <View style = {styles.container}>
+        <View style={styles.container}>
             <View style={styles.headerContainer}>
                 {/* Nút quay lại */}
                 <TouchableOpacity onPress={onGoBack}>
@@ -19,6 +19,7 @@ export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSett
                         <Text
                             style={styles.userName}
                             numberOfLines={1}
+                            ellipsizeMode="tail" // Cách hiển thị dấu 3 chấm (tail: ở cuối)
                         >{name}</Text>
                         {/* <Text style={styles.lastSeen}>Hoạt động {user.lastSeen} trước</Text> */}
                     </View>
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     userName: {
-        width: 180,
+        width: 100,
         fontSize: 16,
         fontWeight: "bold",
         color: "black",
