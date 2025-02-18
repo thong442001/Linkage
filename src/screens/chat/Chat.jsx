@@ -49,7 +49,12 @@ const Chat = (props) => {// cần ID_group (param)
     
     // call video
     const onCallvieo = ()=>{
-        navigation.navigate("CallPage", { ID_group: group._id ,id_user: ID_user,MyUsername:myUsername});
+        if(!group) return;
+        if(group.isPrivate == true){
+            navigation.navigate("CallPage", { ID_group: group._id ,id_user: ID_user,MyUsername:myUsername});
+        }else{
+            navigation.navigate("CallGroup", { ID_group: group._id ,id_user: ID_user,MyUsername:myUsername});
+        }
     };
     //up lên cloudiary
     const uploadFile = async (file) => {
@@ -286,7 +291,7 @@ const Chat = (props) => {// cần ID_group (param)
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
                         }
                     } else {
-                        // group 
+                        // group
                         if (response.group.avatar == null) {
                             setGroupAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
                         } else {

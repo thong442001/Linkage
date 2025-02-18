@@ -3,10 +3,11 @@ import React, { useEffect } from 'react';
 import {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
+  GROUP_VIDEO_CALL_CONFIG
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import { request, PERMISSIONS } from 'react-native-permissions';
 
-const CallPage = props => {
+const callGroup = props => {
   const {route, navigation} = props;
   const {params} = route;
   console.log(params);
@@ -40,7 +41,7 @@ const CallPage = props => {
           userName={params?.MyUsername}
           callID={params?.ID_group}
           config={{
-            ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
+            ...GROUP_VIDEO_CALL_CONFIG,
             onCallEnd: (callID, reason, duration) => {
               navigation.navigate("Chat", { ID_group: params.ID_group })
             },
@@ -53,7 +54,7 @@ const CallPage = props => {
   }
 };
 
-export default CallPage;
+export default callGroup;
 
 const styles = StyleSheet.create({
   container: {
