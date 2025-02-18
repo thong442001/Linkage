@@ -46,14 +46,14 @@ const Chat = (props) => {// cần ID_group (param)
 
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
-    
+
     // call video
-    const onCallvieo = ()=>{
-        if(!group) return;
-        if(group.isPrivate == true){
-            navigation.navigate("CallPage", { ID_group: group._id ,id_user: ID_user,MyUsername:myUsername});
-        }else{
-            navigation.navigate("CallGroup", { ID_group: group._id ,id_user: ID_user,MyUsername:myUsername});
+    const onCallvieo = () => {
+        if (!group) return;
+        if (group.isPrivate == true) {
+            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
+        } else {
+            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
         }
     };
     //up lên cloudiary
@@ -272,20 +272,20 @@ const Chat = (props) => {// cần ID_group (param)
                         // lấy tên của mình
                         const myUser = response.group.members.find(user => user._id === me._id);
                         console.log(myUser);
-                        if(myUser){
+                        if (myUser) {
                             setID_user(myUser._id);
                             setmyUsername((myUser.first_name + " " + myUser.last_name));
-                        }else{
+                        } else {
                             console.log("⚠️ Không tìm thấy người dùng");
                         }
                         // chat private
-                        
+
                         const otherUser = response.group.members.find(user => user._id !== me._id);
-                        
+
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
                             //setGroupName(otherUser.displayName);
-                           
+
                             setGroupAvatar(otherUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
