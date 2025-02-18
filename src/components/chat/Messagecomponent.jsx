@@ -81,63 +81,68 @@ export default function MessageComponent({
       <TouchableWithoutFeedback onLongPress={() => {
         message._destroy != true && handleLongPress()
       }}>
-        <View
-          ref={messageRef} // Gắn ref vào đây
-          style={[styles.messageWrapper, isCurrentUser && styles.currentUserMessage]}
-        >
-          {!isCurrentUser && <Text style={styles.username}>{message.sender?.first_name} {message.sender?.last_name}</Text>}
-          {/* Hiển thị tin nhắn trả lời nếu có */}
-          {
-            (message.ID_message_reply && message._destroy == false) && (
-              <View style={styles.replyContainer}>
-                <Text
-                  style={styles.replyText}
-                  numberOfLines={2}>
-                  {message.ID_message_reply.content || "Tin nhắn không tồn tại"}
+        <View>
+          <View>
+            {!isCurrentUser && <Text style={styles.username}>{message.sender?.first_name} {message.sender?.last_name}</Text>}
+          </View>
+          <View
+            ref={messageRef} // Gắn ref vào đây
+            style={[styles.messageWrapper, isCurrentUser && styles.currentUserMessage]}>
+            {/* Hiển thị tin nhắn trả lời nếu có */}
+            {
+              (message.ID_message_reply && message._destroy == false) && (
+                <View>
+                  <View style={styles.replyContainer}>
+                    <Text
+                      style={styles.replyText}
+                      numberOfLines={2}>
+                      {message.ID_message_reply.content || "Tin nhắn không tồn tại"}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            {/* Nội dung tin nhắn chính */}
+            {
+              // tin nhắn bị thu hồi
+              message._destroy == true
+                ? <Text style={[styles.messageTextThuHoi]}>
+                  Tin nhắn đã được thu hồi
                 </Text>
-              </View>
-            )}
-          {/* Nội dung tin nhắn chính */}
-          {
-            // tin nhắn bị thu hồi
-            message._destroy == true
-              ? <Text style={[styles.messageTextThuHoi]}>
-                Tin nhắn đã được thu hồi
-              </Text>
-              : ((message.type == 'text'
-                ? < Text style={[styles.messageText, isCurrentUser && styles.currentUserText]}>
-                  {message.content}
-                </Text>
-                : ((message.type == 'image'
-                  ? <Image
-                    style={[styles.messageImage, isCurrentUser && styles.currentUserText]}
-                    source={{ uri: message.content }}
-                  />
-                  : (message.type == 'video'
-                    &&
-                    <Video
-                      source={{ uri: message.content }} // URL video
-                      style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
-                      controls={true} // Hiển thị điều khiển video
-                      resizeMode="contain" // Cách hiển thị video
+                : ((message.type == 'text'
+                  ? < Text style={[styles.messageText, isCurrentUser && styles.currentUserText]}>
+                    {message.content}
+                  </Text>
+                  : ((message.type == 'image'
+                    ? <Image
+                      style={[styles.messageImage, isCurrentUser && styles.currentUserText]}
+                      source={{ uri: message.content }}
                     />
-                  )))
+                    : (message.type == 'video'
+                      &&
+                      <Video
+                        source={{ uri: message.content }} // URL video
+                        style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
+                        controls={true} // Hiển thị điều khiển video
+                        resizeMode="contain" // Cách hiển thị video
+                      />
+                    )))
+                ))
+            }
+            {/* thời gian */}
+            <Text style={styles.messageTime}>{formatTime(message.createdAt)}</Text>
+            {/* reaction biểu cảm */}
+            {
+              message?.message_reactionList.map((reaction, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.reactionButton}
+                >
+                  <Text style={styles.reactionText}
+                  >{reaction.ID_reaction.icon} {reaction.quantity}</Text>
+                </TouchableOpacity>
               ))
-          }
-          {/* thời gian */}
-          <Text style={styles.messageTime}>{formatTime(message.createdAt)}</Text>
-          {/* reaction biểu cảm */}
-          {
-            message?.message_reactionList.map((reaction, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.reactionButton}
-              >
-                <Text style={styles.reactionText}
-                >{reaction.ID_reaction.icon} {reaction.quantity}</Text>
-              </TouchableOpacity>
-            ))
-          }
+            }
+          </View>
         </View>
       </TouchableWithoutFeedback >
 
@@ -180,6 +185,7 @@ export default function MessageComponent({
               <View
                 style={[styles.reactionBar]}
               >
+                //
                 {/* reaction biểu cảm */}
                 {
                   reactions.map((reaction, index) => (
@@ -281,7 +287,7 @@ const styles = StyleSheet.create({
     maxWidth: Dimensions.get('window').width * 0.7,
     padding: 10,
     borderRadius: 15,
-    backgroundColor: "#D9D9D9", // Màu tin nhắn của người khác 
+    backgroundColor: '#d9d9d9'// Màu tin nhắn của người khác 
   },
   currentUserMessage: {
     backgroundColor: "#3A6DF0", // Màu tin nhắn của người dùng hiện tại 
@@ -290,6 +296,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
     marginBottom: 3,
+    marginLeft: 10
   },
   messageText: {
     color: "#000000", // Màu chữ cho tin nhắn của người khác
@@ -305,8 +312,9 @@ const styles = StyleSheet.create({
   messageTime: {
     fontSize: 10,
     color: "#aaa",
-    marginTop: 3,
-    alignSelf: "flex-end",
+    marginVertical:5,
+    marginLeft: 5,
+    alignSelf: "flex-start",
   },
   //reply
   replyContainer: {
@@ -337,8 +345,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   reactionText: {
-    fontSize: 20,
+    fontSize: 15,
     color: "#000",
+    alignSelf: 'flex-end'
   },
   menu: {
     backgroundColor: "#FFFFFF",
@@ -362,12 +371,12 @@ const styles = StyleSheet.create({
   messageImage: {
     width: 200,
     height: 200,
-    //borderRadius: 10,
+    borderRadius: 5,
   },
   //video
   messageVideo: {
     width: 250,
     height: 250,
-    //borderRadius: 10,
+    borderRadius: 5,
   },
 });

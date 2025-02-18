@@ -336,7 +336,7 @@ const Profile = (props) => {
                         <TouchableOpacity style={ProfileS.btnLivestream}>
                             <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                                 <Icon name="videocam" size={20} color="red" />
-                                <Text>   Phát trực tiếp</Text>
+                                <Text>Phát trực tiếp</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

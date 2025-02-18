@@ -157,58 +157,56 @@ const styles = StyleSheet.create({
     singleMedia: {
         width: '100%',
         height: 300,
-        marginBottom: 2,
     },
     doubleMedia: {
         width: '49.5%',
-        height: 200,
-        marginBottom: 2,
+        height: 300,
+        padding: 1
     },
     tripleMediaFirst: {
         width: '100%',
         height: 250,
-        marginBottom: 2,
+        padding: 1
     },
     tripleMediaSecond: {
         width: '49.5%',
         height: 150,
-        marginBottom: 2,
+        padding: 1
     },
     quadMedia: {
         width: '49.5%',
         height: 150,
-        marginBottom: 2,
+        padding: 1
     },
     fivePlusMediaFirstRow: {
         width: '49.5%',
         height: 150,
-        marginBottom: 2,
+        padding: 1
     },
     fivePlusMediaSecondRowLeft: {
         width: '32.66%',
         height: 150,
-        marginBottom: 2,
+        padding: 1
     },
     fivePlusMediaSecondRowMiddle: {
         width: '32.66%',
         height: 150,
-        marginBottom: 2,
+        padding: 1
     },
     fivePlusMediaSecondRowRight: {
         width: '32.66%',
         height: 150,
-        marginBottom: 2,
+        padding: 1
     },
     image: {
         width: '100%',
         height: '100%',
-        borderRadius: 8,
     },
     videoWrapper: {
         position: 'relative',
         width: '100%',
         height: '100%',
-        borderRadius: 8,
+        // borderRadius: 8,
         overflow: 'hidden',
     },
     video: {
@@ -230,7 +228,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        borderRadius: 8,
+        // borderRadius: 8,
     },
     overlayText: {
         color: 'white',
