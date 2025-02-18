@@ -42,7 +42,7 @@ const CallPage = props => {
           config={{
             ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
             onCallEnd: (callID, reason, duration) => {
-              navigation.navigate('Home');
+              navigation.navigate("Chat", { ID_group: params.ID_group })
             },
           }}
         />
