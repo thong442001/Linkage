@@ -14,11 +14,12 @@ import {
 } from '../../rtk/API';
 import Groupcomponent from '../../components/chat/Groupcomponent';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
 
 const HomeChat = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
-
+    const [loading, setloading] = useState(true)
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
@@ -29,7 +30,8 @@ const HomeChat = (props) => {// cần param
         // Call API khi lần đầu vào trang
         callGetAllGroupOfUser(me._id);
 
-        // Thêm listener để gọi lại API khi quay lại trang
+        
+        //Thêm listener để gọi lại API khi quay lại trang
         const focusListener = navigation.addListener('focus', () => {
             callGetAllGroupOfUser(me._id);
         });
@@ -37,6 +39,7 @@ const HomeChat = (props) => {// cần param
         // Cleanup listener khi component bị unmount
         return () => {
             focusListener();
+           
         };
     }, [navigation]);
 
@@ -48,6 +51,7 @@ const HomeChat = (props) => {// cần param
                 .then((response) => {
                     //console.log(response.groups)
                     setGroups(response.groups);
+                    setloading(false)
                 })
                 .catch((error) => {
                     console.log('Error1:', error);
@@ -82,7 +86,13 @@ const HomeChat = (props) => {// cần param
 
             <TextInput style={styles.searchBox} placeholder="Tìm kiếm" />
             {/* groups */}
-            <FlatList
+
+               {
+                   (
+                loading ?
+                <ChatHomeLoading/>
+                :
+                <FlatList
                 data={groups}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
@@ -91,6 +101,8 @@ const HomeChat = (props) => {// cần param
                     </TouchableOpacity>
                 )}
             />
+            )
+        }
         </View >
     )
 }

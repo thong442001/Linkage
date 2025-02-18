@@ -1,5 +1,5 @@
 import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Stories from '../../components/items/Stories'
 import Post from '../../components/items/Post';
@@ -11,6 +11,9 @@ const Home = (props) => {
   // const [stories, setStories] = useState([])
   const { route, navigation } = props;
   const { params } = route;
+
+  const [loading, setloading] = useState(true)
+
 
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
@@ -38,6 +41,7 @@ const Home = (props) => {
       </TouchableOpacity>
     );
   };
+
 
   const headerComponentPost = () => {
     return (
@@ -93,15 +97,19 @@ const Home = (props) => {
         {/* story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
+
+            
+        
             <FlatList
               data={story}
-              renderItem={renderStory}  // Gọi hàm renderStory để vẽ từng story
-              keyExtractor={(item) => item.id} // Mỗi story có một key duy nhất
-              horizontal={true} // Danh sách hiển thị ngang
-              showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
-              ListHeaderComponent={headerComponentStory} // Phần đầu danh sách (nếu có)
-              contentContainerStyle={{ paddingHorizontal: 20 }} // Thêm khoảng cách hai bên
+              renderItem={renderStory}
+              keyExtractor={(item) => item.id}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              ListHeaderComponent={headerComponentStory}
+              contentContainerStyle={{ paddingHorizontal: 20 }}
             />
+            
           </View>
         </View>
       </View>
