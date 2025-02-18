@@ -72,25 +72,6 @@ const Profile = (props) => {
         }
     }
 
-    //call api getAllFriendOfID_user
-    // const callGetAllFriendOfID_user = async () => {
-    //     try {
-    //         await dispatch(getAllFriendOfID_user({ me: params?._id, token: token }))
-    //             .unwrap()
-    //             .then((response) => {
-    //                 console.log("getAllFriendOfID_user: " + response)
-    //                 setFriendRelationships(response.relationships);
-    //                 //setFriends(response.relationships);
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error1 getAllFriendOfID_user:', error);
-    //             });
-
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-
     //guiLoiMoiKetBan
     const callGuiLoiMoiKetBan = async () => {
         try {
