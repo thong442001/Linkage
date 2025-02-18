@@ -77,6 +77,7 @@ const Home = (props) => {
     );
   };
 
+
   const headerComponentPost = () => {
     return (
       <View>
@@ -131,15 +132,19 @@ const Home = (props) => {
         {/* story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
+
+
+
             <FlatList
               data={story}
-              renderItem={renderStory}  // Gọi hàm renderStory để vẽ từng story
-              keyExtractor={(item) => item.id} // Mỗi story có một key duy nhất
-              horizontal={true} // Danh sách hiển thị ngang
-              showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
-              ListHeaderComponent={headerComponentStory} // Phần đầu danh sách (nếu có)
-              contentContainerStyle={{ paddingHorizontal: 20 }} // Thêm khoảng cách hai bên
+              renderItem={renderStory}
+              keyExtractor={(item) => item.id}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              ListHeaderComponent={headerComponentStory}
+              contentContainerStyle={{ paddingHorizontal: 20 }}
             />
+
           </View>
         </View>
       </View>

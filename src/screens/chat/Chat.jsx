@@ -340,11 +340,10 @@ const Chat = (props) => {// cần ID_group (param)
 
     const goBack = () => {
         navigation.navigate("HomeChat");
-        //navigation.goBack();
     };
 
     const toSettingChat = () => {
-        navigation.navigate("SettingChat", { ID_group: group._id });
+        navigation.navigate("SettingChat", { ID_group : group._id }) ;                   
     };
 
     useEffect(() => {

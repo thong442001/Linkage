@@ -1,54 +1,57 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { checkPhone } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const Screen2 = (props) => {
     const { route, navigation } = props;
     const { params } = route;
 
     const dispatch = useDispatch();
-    const [phone, setPhone] = useState('')
+    const [phone, setPhone] = useState('');
+    const [error, setError] = useState('');
 
-    // console.log(params.first_name);
-    // console.log(params.last_name);
-    // console.log(params.dateOfBirth);
-    // console.log(params.sex);
+    function isValidPhone(phone) {
+        return /^(84|0[3|5|7|8|9])[0-9]{8}$/.test(phone);
+    }
 
     const check = () => {
-        if (phone != '') {
-            navigation.navigate('CreatePasswordScreen', {
-                first_name: params.first_name,
-                last_name: params.last_name,
-                dateOfBirth: params.dateOfBirth,
-                sex: params.sex,
-                phone: phone,
-                email: null,
-            })
-        } else {
-            console.log("Thiếu ");
+        if (!phone.trim()) {
+            setError('Vui lòng nhập số điện thoại.');
+            return;
         }
+
+        if (!isValidPhone(phone)) {
+            setError('Số điện thoại không hợp lệ.');
+            return;
+        }
+
+        setError('');
+        callAPICheckPhone();
     };
+
 
     const callAPICheckPhone = () => {
-        dispatch(checkPhone({ phone: phone }))
-            .unwrap()
-            .then((response) => {
-                //console.log(response);
-                if (response.status) {
-                    handleTiep()
-                } else {
-                    console.log(response.message);
-                }
+        dispatch(checkPhone({ phone }))
+    .unwrap()
+    .then((response) => {
+        console.log("Response từ API:", response); 
+        if (response.status) {
+            handleTiep();
+        } else {
+            Alert.alert('Lỗi', response.message);
+        }
+    })
+    .catch((error) => {
+        Alert.alert('Lỗi', 'Đã xảy ra lỗi khi kiểm tra số điện thoại.');
+        console.log('Error:', error);
+    });
 
-            })
-            .catch((error) => {
-                console.log('Error:', error);
-            });
     };
+
 
     const handleTiep = () => {
         navigation.navigate('CreatePasswordScreen', {
@@ -58,7 +61,7 @@ const Screen2 = (props) => {
             sex: params.sex,
             phone: phone,
             email: null,
-        })
+        });
     };
 
     return (
@@ -67,16 +70,22 @@ const Screen2 = (props) => {
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
-            <Text style={styles.label}>Số di động của bạn là gì ?</Text>
+            <Text style={styles.label}>Số di động của bạn là gì?</Text>
             <Text style={styles.label2}>Nhập số di động có thể dùng để liên lạc với bạn.</Text>
 
             <TextInput
                 value={phone}
-                onChangeText={setPhone}
+                onChangeText={(text) => {
+                    setPhone(text);
+                    setError('');
+                }}
                 placeholderTextColor={'#8C96A2'}
                 placeholder="Số điện thoại"
-                style={styles.inputDate}
+                style={[styles.inputDate, error && { borderColor: 'red' }]}
+                keyboardType="phone-pad"
             />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
 
             <Pressable style={styles.button} onPress={check}>
@@ -103,71 +112,63 @@ const Screen2 = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: width * 0.04,
-        backgroundColor: '#f0f4ff',
+        padding: 20,
+        backgroundColor: '#fff',
     },
     iconBack: {
-        marginVertical: height * 0.02,
+        marginBottom: 20,
     },
     label: {
-        color: 'black',
-        fontSize: height * 0.03,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: height * 0.01,
     },
     label2: {
-        fontSize: height * 0.018,
-        color: '#1C2931',
-        fontWeight: '450',
-        marginBottom: height * 0.02,
+        fontSize: 16,
+        color: '#555',
+        marginBottom: 10,
     },
     inputDate: {
-        borderWidth: 1,
+        height: 50,
         borderColor: '#ccc',
-        borderRadius: width * 0.03,
-        padding: height * 0.015,
-        backgroundColor: '#fff',
-        marginVertical: height * 0.02,
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        fontSize: 16,
+        marginBottom: 5,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 14,
+        marginBottom: 10,
     },
     infoText: {
-        fontSize: height * 0.018,
-        color: 'black',
+        fontSize: 14,
+        color: '#777',
+        marginBottom: 20,
     },
     button: {
-        marginVertical: height * 0.02,
-        backgroundColor: '#0064E0',
-        paddingVertical: height * 0.015,
-        borderRadius: width * 0.05,
+        backgroundColor: '#007bff',
+        paddingVertical: 12,
+        borderRadius: 8,
         alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
-        fontSize: width * 0.045,
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     containerButton: {
-        width: width * 0.92,
-    },
-    linkText: {
-        color: 'black',
-        fontWeight: '500',
-        fontSize: width * 0.04,
-        marginTop: height * 0.01,
-    },
-    buttonNextSceen: {
-        borderWidth: 1,
-        borderColor: '#CED5DF',
-        height: height * 0.06,
-        width: width * 0.92,
-        paddingVertical: height * 0.01,
-        borderRadius: 25,
-        justifyContent: 'center',
+        marginTop: 20,
         alignItems: 'center',
     },
+    buttonNextSceen: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+    },
     buttonTextNextScreen: {
-        fontWeight: '500',
-        fontSize: height * 0.02,
-        color: 'black'
-    }
+        fontSize: 16,
+        color: '#007bff',
+    },
 });
 
 export default Screen2;

@@ -194,7 +194,7 @@ export default function MessageComponent({
                       style={styles.reactionButton}
                       onPress={() => {
                         onIcon(message._id, reaction._id);
-                        setMenuVisible(false);// tắc modal
+                        setMenuVisible(false);
                       }}
                     >
                       <Text style={styles.reactionText}>{reaction.icon}</Text>

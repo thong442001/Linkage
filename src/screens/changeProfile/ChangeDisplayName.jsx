@@ -3,13 +3,14 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector } from 'react-redux';
 
+
 const { width, height } = Dimensions.get('window');
 
 const ChangeDisplayName = (props) => {
     const { navigation } = props;
 
     const me = useSelector(state => state.app.user);
-
+    
 
     const [firstName, setFirstname] = useState('')
 

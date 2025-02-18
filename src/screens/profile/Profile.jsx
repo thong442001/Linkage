@@ -24,6 +24,8 @@ import {
 import { Snackbar } from 'react-native-paper';// thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS'
 import ProfileS from '../../styles/screens/profile/ProfileS'
+import SelectAvatarDialog from '../../components/dialog/SelectAvatarDialog'
+import styles from '../../styles/screens/friend/FriendNoti'
 const Profile = (props) => {
     const { route, navigation } = props;
     const { params } = route;
@@ -31,6 +33,7 @@ const Profile = (props) => {
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
+    const [isAlertVisible, setAlertVisible] = useState(false);
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -185,7 +188,10 @@ const Profile = (props) => {
                     <View >
                         <View>
                             <Image style={ProfileS.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
-                            <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
+                            <View style={ProfileS.viewImagePick}>
+                             <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
+                              <Icon name="image-outline" style={ProfileS.imageIcon} size={25} />
+                            </View>
                         </View>
                         <View style={ProfileS.boxBackground}>
                             <Text style={ProfileS.name}>{user?.first_name} {user?.last_name}</Text>

@@ -200,6 +200,20 @@ const ProfileS = StyleSheet.create({
         color: 'white',
         fontWeight: '600',
     },
+    viewImagePick: {
+        flexDirection: 'row',
+        backgroundColor: 'lightblue', 
+        position: 'relative', 
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    
+    imageIcon: {
+        position: 'absolute', 
+        bottom: 10,  
+        right: 10,  
+        color: '#fff', 
+    }
 })
 
 export default ProfileS
