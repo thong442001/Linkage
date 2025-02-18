@@ -83,27 +83,32 @@ export default function Groupcomponent({ item }) {
           </View>
         }
         {/* tin nhắn mới nhất */}
-        <View style={styles.vMessageNew}>
-          {/* name */}
-          {
-            me._id != item.messageLatest.sender.ID_user
-              ? <Text
-                style={styles.messageName}>
-                {item.messageLatest.sender.displayName}: </Text>
-              : <Text
-                style={styles.messageName}>
-                Bạn: </Text>
-          }
+        {
+          item.messageLatest != null
+          && (
+            <View style={styles.vMessageNew}>
+              {/* name */}
+              {
+                me._id != item.messageLatest.sender.ID_user
+                  ? <Text
+                    style={styles.messageName}>
+                    {item.messageLatest.sender.displayName}: </Text>
+                  : <Text
+                    style={styles.messageName}>
+                    Bạn: </Text>
+              }
+              {/* content */}
+              <Text
+                style={styles.messageContent}
+                numberOfLines={1}
+              >{item.messageLatest.content}</Text>
+              {/* thời gian */}
+              <Text style={styles.messageNewTime}>{formatTime(item.messageLatest.createdAt)}</Text>
+            </View>
+          )
+        }
 
 
-          {/* content */}
-          <Text
-            style={styles.messageContent}
-            numberOfLines={1}
-          >{item.messageLatest.content}</Text>
-          {/* thời gian */}
-          <Text style={styles.messageNewTime}>{formatTime(item.messageLatest.createdAt)}</Text>
-        </View>
       </View>
 
     </View >

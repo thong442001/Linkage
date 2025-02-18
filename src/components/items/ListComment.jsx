@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         flex: 1,
         marginTop: 10,
+        marginHorizontal: 20
     },
     boxInteract: {
         marginLeft: 30,
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     boxContent: {
         marginLeft: 15,
         padding: 10,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#d9d9d9',
         borderRadius: 10,
         paddingLeft: 15,
         maxWidth: '85%', // Đảm bảo comment không quá dài

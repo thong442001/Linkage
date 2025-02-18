@@ -13,14 +13,18 @@ const styles = StyleSheet.create({
     },
     dotContainer: {
         position: 'absolute',
-        bottom: height * 0.05, 
-        width: '100%', 
+        bottom: height * 0.05,
+        width: '100%',
         alignItems: 'center',
     },
     headerText: {
         fontWeight: 'bold',
-        fontSize: width * 0.06, 
+        fontSize: width * 0.06,
         textAlign: 'center',
+    },
+    logo: {
+        width: 83,
+        height: 83,
     }
 });
 

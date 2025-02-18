@@ -15,6 +15,7 @@ import {
 
 import { Snackbar } from 'react-native-paper';// thông báo (ios and android)
 import { useSelector } from 'react-redux';
+import Video from 'react-native-video';
 
 export default function MessageComponent({
   currentUserID,
@@ -108,10 +109,19 @@ export default function MessageComponent({
                   {message.content}
                 </Text>
                 : ((message.type == 'image'
-                  && <Image
-                    style={[styles.messageText, isCurrentUser && styles.currentUserText]}
+                  ? <Image
+                    style={[styles.messageImage, isCurrentUser && styles.currentUserText]}
                     source={{ uri: message.content }}
-                  />))
+                  />
+                  : (message.type == 'video'
+                    &&
+                    <Video
+                      source={{ uri: message.content }} // URL video
+                      style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
+                      controls={true} // Hiển thị điều khiển video
+                      resizeMode="contain" // Cách hiển thị video
+                    />
+                  )))
               ))
           }
           {/* thời gian */}
@@ -347,5 +357,17 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 14,
     textAlign: "center",
+  },
+  //img
+  messageImage: {
+    width: 200,
+    height: 200,
+    //borderRadius: 10,
+  },
+  //video
+  messageVideo: {
+    width: 250,
+    height: 250,
+    //borderRadius: 10,
   },
 });

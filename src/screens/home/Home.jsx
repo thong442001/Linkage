@@ -1,14 +1,11 @@
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useMemo, useRef, useState } from 'react'
+import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Stories from '../../components/items/Stories'
 import Post from '../../components/items/Post';
 import { useSelector } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import Comment from '../../components/comment/Comment';
 
 const Home = (props) => {
   // const [stories, setStories] = useState([])
@@ -18,21 +15,29 @@ const Home = (props) => {
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
 
-  const Information = () => {
-    
-  }
+  const story = useSelector(state => state.app.stories);
+
   const headerComponentStory = () => {
     return (
-      <View style={HomeS.boxStory}>
+      <TouchableOpacity style={HomeS.boxStory} onPress={() => navigation.navigate(oStackHome.PostStory.name)}>
         <Image style={HomeS.imageStory} source={{ uri: me?.avatar }} />
         <View style={HomeS.backGround}>
           <View style={HomeS.addStory}>
             <Icon name="add-circle" size={30} color="#0064E0" />
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     )
   }
+
+
+  const renderStory = ({ item }) => {
+    return (
+      <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { StoryView: item })}>
+        <Stories stories={item} />
+      </TouchableOpacity>
+    );
+  };
 
   const headerComponentPost = () => {
     return (
@@ -44,12 +49,14 @@ const Home = (props) => {
               <TouchableOpacity style={HomeS.iconsPadding}>
                 <Icon name="add-circle" size={30} color="gray" />
               </TouchableOpacity>
+              {/* to Search */}
               <TouchableOpacity
                 style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.Search.name)}
               >
                 <Icon name="search" size={30} color="gray" />
               </TouchableOpacity>
+              {/* to HomeChat */}
               <TouchableOpacity
                 style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.HomeChat.name)}
@@ -61,7 +68,7 @@ const Home = (props) => {
           <View style={HomeS.line}></View>
           <View style={HomeS.header2}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Profile')}
+              onPress={() => navigation.navigate('Profile', { ID_user: me._id })}
             >
               <Image
                 style={HomeS.image}
@@ -73,8 +80,8 @@ const Home = (props) => {
               onPress={() => navigation.navigate('UpPost')}
               style={HomeS.textInput}
               placeholder="Bạn đang nghĩ gì ?"
-              // editable={false} ngan nhap lieu
-              // selectTextOnFocus={false}
+            // editable={false} ngan nhap lieu
+            // selectTextOnFocus={false}
             />
             <View style={HomeS.icons}>
               <View style={HomeS.iconsPadding2}>
@@ -87,14 +94,13 @@ const Home = (props) => {
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
             <FlatList
-              data={data}
-              renderItem={({ item }) => <Stories stories={item} />}
-              keyExtractor={(item) => item.id}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              ListHeaderComponent={headerComponentStory}
-              contentContainerStyle={{ paddingHorizontal: 20 }}
-              
+              data={story}
+              renderItem={renderStory}  // Gọi hàm renderStory để vẽ từng story
+              keyExtractor={(item) => item.id} // Mỗi story có một key duy nhất
+              horizontal={true} // Danh sách hiển thị ngang
+              showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn ngang
+              ListHeaderComponent={headerComponentStory} // Phần đầu danh sách (nếu có)
+              contentContainerStyle={{ paddingHorizontal: 20 }} // Thêm khoảng cách hai bên
             />
           </View>
         </View>
@@ -155,7 +161,6 @@ const Home = (props) => {
       title: 'Hôm nay trời đẹp quá',
     },
   ]
-
 
   return (
     <View style={HomeS.container}>

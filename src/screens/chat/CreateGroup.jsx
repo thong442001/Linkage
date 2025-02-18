@@ -13,10 +13,10 @@ import {
     getAllFriendOfID_user,
     addGroup,
 } from '../../rtk/API';
-import FriendAddGroup from '../../components/chat/FriendAddGroup ';
+import FriendAdd from '../../components/chat/FriendAdd';
 
 
-const CreateGroup = (props) => {
+const CreateGroup = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
 
@@ -132,10 +132,11 @@ const CreateGroup = (props) => {
                 keyExtractor={(item) => item._id}
                 extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
                 renderItem={({ item }) => (
-                    <FriendAddGroup
+                    <FriendAdd
                         item={item}
                         onToggle={toggleSelectUser}
                         selectedUsers={selectedUsers}
+                        membersGroup={[]}
                     />
                 )}
             />

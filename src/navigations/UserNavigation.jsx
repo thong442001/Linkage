@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 const UserStack = createNativeStackNavigator();
 import Screen1 from '../screens/Register/Screen1';
@@ -6,7 +6,7 @@ import Screen2 from '../screens/Register/Screen2';
 import Screen3 from '../screens/Register/Screen3';
 import Login from '../screens/login/Login';
 import CreatePasswordScreen from '../screens/Register/CreatePasswordScreen';
-
+import Comment from '../components/comment/Comment';
 import FindWithEmail from '../screens/forgot_password/FindWithEmail';
 import FindWithPhone from '../screens/forgot_password/FindWithPhone';
 import CheckEmail from '../screens/forgot_password/CheckEmail';
@@ -27,7 +27,7 @@ const UserNavigation = () => {
             <UserStack.Screen name="CheckEmail" component={CheckEmail} />
             <UserStack.Screen name="CreateNewPassWord" component={CreateNewPassWord} />
         </UserStack.Navigator>
-    )
-}
+    );
+};
 
-export default UserNavigation
+export default UserNavigation;
