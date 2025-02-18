@@ -34,6 +34,8 @@ const Chat = (props) => {// cần ID_group (param)
     const [group, setGroup] = useState(null);
     const [groupAvatar, setGroupAvatar] = useState(null); // Ảnh đại diện nhóm
     const [groupName, setGroupName] = useState(null); // Tên nhóm
+    const [ID_user, setID_user] = useState(null);
+    const [myUsername, setmyUsername] = useState(null);
 
     const [socket, setSocket] = useState(null);
     const [message, setMessage] = useState('');
@@ -45,7 +47,15 @@ const Chat = (props) => {// cần ID_group (param)
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-
+    // call video
+    const onCallvieo = () => {
+        if (!group) return;
+        if (group.isPrivate == true) {
+            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
+        } else {
+            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
+        }
+    };
     //up lên cloudiary
     const uploadFile = async (file) => {
         try {
@@ -260,17 +270,38 @@ const Chat = (props) => {// cần ID_group (param)
                     //console.log("thong show data: ", response);
                     setGroup(response.group)
                     if (response.group.isPrivate == true) {
+                        // lấy tên của mình
+                        const myUser = response.group.members.find(user => user._id === me._id);
+                        console.log(response.group.members);
+                        if (myUser) {
+                            setID_user(myUser._id);
+                            setmyUsername((myUser.first_name + " " + myUser.last_name));
+                        } else {
+                            console.log("⚠️ Không tìm thấy người dùng");
+                        }
                         // chat private
+
                         const otherUser = response.group.members.find(user => user._id !== me._id);
+
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
                             //setGroupName(otherUser.displayName);
+
                             setGroupAvatar(otherUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
                         }
                     } else {
-                        // group 
+                        // group
+                        // lấy tên của mình
+                        const myUser = response.group.members.find(user => user._id === me._id);
+                        console.log(response.group.members);
+                        if (myUser) {
+                            setID_user(myUser._id);
+                            setmyUsername((myUser.first_name + " " + myUser.last_name));
+                        } else {
+                            console.log("⚠️ Không tìm thấy người dùng");
+                        }
                         if (response.group.avatar == null) {
                             setGroupAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
                         } else {
@@ -340,10 +371,11 @@ const Chat = (props) => {// cần ID_group (param)
 
     const goBack = () => {
         navigation.navigate("HomeChat");
+        // navigation.goBack();
     };
 
     const toSettingChat = () => {
-        navigation.navigate("SettingChat", { ID_group : group._id }) ;                   
+        navigation.navigate("SettingChat", { ID_group: group._id });
     };
 
     useEffect(() => {
@@ -399,6 +431,7 @@ const Chat = (props) => {// cần ID_group (param)
                     onGoBack={goBack}
                     isPrivate={group?.isPrivate}
                     onToSettingChat={toSettingChat}
+                    onCallVideo={onCallvieo}
                 />
             }
             <FlatList
