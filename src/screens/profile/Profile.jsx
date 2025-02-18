@@ -16,8 +16,6 @@ import Friends from '../../components/items/Friends'
 import { useDispatch, useSelector } from 'react-redux';
 import {
     joinGroupPrivate,
-    getUser,
-    getRelationshipAvsB,// relationships
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
     huyLoiMoiKetBan,
@@ -37,6 +35,7 @@ const Profile = (props) => {
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
     const [relationship, setRelationship] = useState(null);
+    const [friendRelationships, setFriendRelationships] = useState(null);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
@@ -44,6 +43,7 @@ const Profile = (props) => {
 
     useEffect(() => {
         callAllProfile();
+        //callGetAllFriendOfID_user();
         //fetchData();
     }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
@@ -57,18 +57,10 @@ const Profile = (props) => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    //console.log("callGuiLoiMoiKetBan: ", response);
-                    if (response.posts && response.user) {
-                        // Gán thông tin user vào từng bài post
-                        const updatedPosts = response.posts.map(post => ({
-                            ...post,
-                            user: response.user // Thêm thông tin user vào mỗi post
-                        }));
-
-                        setUser(response.user);
-                        setPosts(updatedPosts);
-                        setRelationship(response.relationship);
-                    }
+                    setUser(response.user);
+                    setPosts(response.posts);
+                    setRelationship(response.relationship);
+                    setFriendRelationships(response.friends);
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
@@ -80,74 +72,18 @@ const Profile = (props) => {
         }
     }
 
-    // const onGetUser = async (userId) => {
+    //call api getAllFriendOfID_user
+    // const callGetAllFriendOfID_user = async () => {
     //     try {
-    //         await dispatch(getUser({ userId: userId, token: token }))
+    //         await dispatch(getAllFriendOfID_user({ me: params?._id, token: token }))
     //             .unwrap()
     //             .then((response) => {
-    //                 console.log(response);
-    //                 setUser(response.user);
+    //                 console.log("getAllFriendOfID_user: " + response)
+    //                 setFriendRelationships(response.relationships);
+    //                 //setFriends(response.relationships);
     //             })
     //             .catch((error) => {
-    //                 console.log('Error:', error);
-    //             });
-
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-
-    // const onGetPosts = async (userId) => {
-    //     try {
-    //         await dispatch(myPost({ userId: userId, token: token }))
-    //             .unwrap()
-    //             .then((response) => {
-    //                 //console.log(response);
-    //                 setPosts(response.posts);
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error:', error);
-    //             });
-
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-
-    // const fetchData = async () => {
-    //     let userId = params?._id || me?._id;  // Nếu có params._id thì là bạn bè, không thì là chính mình
-    //     setUser(params?._id ? null : me); // Nếu là mình thì lấy từ Redux
-
-    //     if (userId && params?._id) {
-    //         await onGetUser(userId);
-    //     }
-    //     //await onGetPosts(userId);
-
-    //     //get relationship
-    //     if (params?._id !== me._id) {
-    //         if (params?._id != null || params?._id != '') {
-    //             await getRelation();
-    //         }
-    //     }
-    //     // nếu ko có relationship là trang cá nhân của bản thân
-
-    // };
-
-    //tìm mối quan hệ
-    // const getRelation = async () => {
-    //     try {
-    //         const paramsAPI = {
-    //             ID_user: params?._id,
-    //             me: me._id,
-    //         }
-    //         await dispatch(getRelationshipAvsB(paramsAPI))
-    //             .unwrap()
-    //             .then((response) => {
-    //                 //console.log(response);
-    //                 setRelationship(response.relationship);
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error2 getRelationshipAvsB:', error);
+    //                 console.log('Error1 getAllFriendOfID_user:', error);
     //             });
 
     //     } catch (error) {
@@ -249,54 +185,6 @@ const Profile = (props) => {
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id)
     }
-
-    const data = [
-        {
-            id: 1,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 2,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 3,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 4,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 5,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 6,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 7,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 8,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 9,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-    ]
 
     const headerFriends = () => {
         return (
@@ -416,13 +304,34 @@ const Profile = (props) => {
                             <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
                         </View>
                         <View style={ProfileS.listFriends}>
+
                             <FlatList
-                                data={data.slice(0, 6)}
-                                renderItem={({ item }) => <Friends friends={item} />}
-                                keyExtractor={(item) => item.id}
+                                data={(friendRelationships || []).slice(0, 6)}
+                                renderItem={({ item }) => (
+                                    //console.log("friend: " + item.ID_userA._id);
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (item.ID_userA._id == params?._id) {
+                                                navigation.navigate("TabHome",
+                                                    { screen: "Profile", params: { _id: item.ID_userB._id } })
+                                            } else {
+                                                navigation.navigate("TabHome",
+                                                    { screen: "Profile", params: { _id: item.ID_userA._id } })
+                                            }
+                                        }}
+                                    >
+                                        <Friends relationship={item}
+                                            ID_user={params?._id}
+                                        />
+                                    </TouchableOpacity>
+
+                                )}
+                                keyExtractor={(item) => item._id}
                                 numColumns={3}
                                 showsVerticalScrollIndicator={false}
                             />
+
+
                         </View>
                     </View>
                 </View>

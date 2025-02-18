@@ -76,10 +76,10 @@ const PostItem = ({ post }) => {
     return (
         <View style={styles.postContainer}>
             <View style={styles.header}>
-                <Image source={{ uri: post?.user?.avatar }} style={styles.avatar} />
+                <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                 <View style={styles.userInfo}>
                     <View style={{ marginLeft: 20 }}>
-                        <Text style={styles.name}>{post?.user?.first_name + " " + post?.user?.last_name}</Text>
+                        <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
                         <View style={styles.boxName}>
                             <Text style={styles.time}>{post.status}</Text>
                             {/* <Icon name="earth" size={12} color="gray" /> */}
