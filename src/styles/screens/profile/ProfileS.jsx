@@ -201,19 +201,9 @@ const ProfileS = StyleSheet.create({
         fontWeight: '600',
     },
     viewImagePick: {
-        flexDirection: 'row',
-        backgroundColor: 'lightblue', 
-        position: 'relative', 
-        alignItems: 'center',
-        justifyContent: 'center',
+       alignItems:'flex-end'
     },
-    
-    imageIcon: {
-        position: 'absolute', 
-        bottom: 10,  
-        right: 10,  
-        color: '#fff', 
-    }
+  
 })
 
 export default ProfileS
