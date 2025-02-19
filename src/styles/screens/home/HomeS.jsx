@@ -15,6 +15,10 @@ const HomeS = StyleSheet.create({
     },
     box: {
         backgroundColor: "#fff",
+        marginBottom: 4
+    },
+    box1: {
+        backgroundColor: "#fff",
     },
     title: {
         fontSize: 32,

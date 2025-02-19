@@ -212,10 +212,12 @@ const UpPost = (props) => {
                     <Text style={UpPostS.txtCreate}>Tạo bài viết</Text>
                 </View>
                 <TouchableOpacity
-                    style={UpPostS.btnPost}
+                    style={caption == "" ? UpPostS.btnPost : UpPostS.btnPost2}
                     onPress={callAddPost}
+                    disabled={caption == ""} // Nếu caption rỗng thì không nhấn được
                 >
-                    <Text style={UpPostS.txtUpPost}>Đăng bài</Text>
+                    {/* hi */}
+                    <Text style={ caption == "" ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
                 </TouchableOpacity>
             </View>
             <View style={UpPostS.line}></View>

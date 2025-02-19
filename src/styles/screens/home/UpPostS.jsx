@@ -19,7 +19,8 @@ const UpPostS = StyleSheet.create({
     },
     txtCreate: {
         fontSize: 20,
-        marginLeft: 10
+        marginLeft: 10,
+        color: 'black'
     },
     btnPost: {
         backgroundColor: '#D9D9D9',
@@ -61,7 +62,8 @@ const UpPostS = StyleSheet.create({
     },
     txtName: {
         fontSize: 19,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: 'black'
     },
     btnStatus: {
         backgroundColor: '#B2D5F8',
@@ -94,7 +96,8 @@ const UpPostS = StyleSheet.create({
     },
     txtIcon: {
         fontSize: 15,
-        marginLeft: 10
+        marginLeft: 10,
+        color: 'black'
     },
     // model
     modalOverlay: {

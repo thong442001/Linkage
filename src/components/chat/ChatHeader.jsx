@@ -31,19 +31,19 @@ export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSett
                     <TouchableOpacity
                         onPress={onCallVideo}
                     >
-                        <FontAwesome name="phone" size={24} color="#007bff60" />
+                        <FontAwesome name="phone" size={24} color="#007bff" />
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={onCallVideo}
                     >
-                        <FontAwesome name="video-camera" size={24} color="#007bff60" />
+                        <FontAwesome name="video-camera" size={24} color="#007bff" />
                     </TouchableOpacity>
                     {
                         isPrivate == false
                         && <TouchableOpacity
                             onPress={onToSettingChat}
                         >
-                            <Icon name="alert-circle-sharp" size={24} color="#007bff60" />
+                            <Icon name="alert-circle-sharp" size={24} color="#007bff" />
                         </TouchableOpacity>
                     }
                 </View>

@@ -81,7 +81,7 @@ const Home = (props) => {
   const headerComponentPost = () => {
     return (
       <View>
-        <View style={HomeS.box}>
+        <View style={HomeS.box1}>
           <View style={HomeS.header}>
             <Text style={HomeS.title}>Linkage</Text>
             <View style={HomeS.icons}>
@@ -132,9 +132,6 @@ const Home = (props) => {
         {/* story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
-
-
-
             <FlatList
               data={story}
               renderItem={renderStory}
@@ -163,7 +160,7 @@ const Home = (props) => {
             showsHorizontalScrollIndicator={false}
             ListHeaderComponent={headerComponentPost}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 50 }}
+            contentContainerStyle={{ paddingBottom: 3 }}
           />
         </View>
       </View>

@@ -15,7 +15,7 @@ import {
 import Groupcomponent from '../../components/chat/Groupcomponent';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
-
+import Icon from 'react-native-vector-icons/Ionicons'
 const HomeChat = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
@@ -30,7 +30,7 @@ const HomeChat = (props) => {// cần param
         // Call API khi lần đầu vào trang
         callGetAllGroupOfUser(me._id);
 
-        
+
         //Thêm listener để gọi lại API khi quay lại trang
         const focusListener = navigation.addListener('focus', () => {
             callGetAllGroupOfUser(me._id);
@@ -39,7 +39,7 @@ const HomeChat = (props) => {// cần param
         // Cleanup listener khi component bị unmount
         return () => {
             focusListener();
-           
+
         };
     }, [navigation]);
 
@@ -82,27 +82,35 @@ const HomeChat = (props) => {// cần param
                     <MaterialIcons name="group-add" size={24} color="black" />
                 </TouchableOpacity>
             </View>
-
-
-            <TextInput style={styles.searchBox} placeholder="Tìm kiếm" />
+            <View style={styles.inputSearch}>
+                <View style={{ marginLeft: '3%' }}>
+                    <Icon name="search-outline" size={25} color='black' />
+                </View>
+                <TextInput
+                    style={styles.search}
+                    placeholder='Search'
+                    placeholderTextColor={"#ADB5BD"}
+                    onPress={() => navigation.navigate("Search")}
+                />
+            </View>
             {/* groups */}
 
-               {
-                   (
-                loading ?
-                <ChatHomeLoading/>
-                :
-                <FlatList
-                data={groups}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
-                        <Groupcomponent item={item} />
-                    </TouchableOpacity>
-                )}
-            />
-            )
-        }
+            {
+                (
+                    loading ?
+                        <ChatHomeLoading />
+                        :
+                        <FlatList
+                            data={groups}
+                            keyExtractor={(item) => item._id}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
+                                    <Groupcomponent item={item} />
+                                </TouchableOpacity>
+                            )}
+                        />
+                )
+            }
         </View >
     )
 }
@@ -113,7 +121,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        padding: 20,
+        // padding: 20,
+        paddingHorizontal: 20,
+        // paddingTop: 20
     },
     header: {
         fontSize: 24,
@@ -131,7 +141,19 @@ const styles = StyleSheet.create({
     vHeader: {
         flexDirection: 'row',
         //width: Dimensions.get('window').width,
-        justifyContent: 'space-around',
-        marginBottom: 10,
+        justifyContent: 'space-between',
+        marginVertical: 20
     },
+    inputSearch: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F7F7FC',
+        padding: 3,
+        borderRadius: 10,
+        marginBottom: 20
+      },
+      search: {
+        flex: 1,
+        padding: 10,
+      }
 });
