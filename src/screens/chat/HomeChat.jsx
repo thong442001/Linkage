@@ -90,7 +90,6 @@ const HomeChat = (props) => {// cần param
                     style={styles.search}
                     placeholder='Search'
                     placeholderTextColor={"#ADB5BD"}
-                    onPress={() => navigation.navigate("Search")}
                 />
             </View>
             {/* groups */}
@@ -151,9 +150,9 @@ const styles = StyleSheet.create({
         padding: 3,
         borderRadius: 10,
         marginBottom: 20
-      },
-      search: {
+    },
+    search: {
         flex: 1,
         padding: 10,
-      }
+    }
 });

@@ -217,7 +217,7 @@ const UpPost = (props) => {
                     disabled={caption == ""} // Nếu caption rỗng thì không nhấn được
                 >
                     {/* hi */}
-                    <Text style={ caption == "" ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
+                    <Text style={caption == "" ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
                 </TouchableOpacity>
             </View>
             <View style={UpPostS.line}></View>
