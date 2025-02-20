@@ -39,6 +39,7 @@ const Profile = (props) => {
     const [posts, setPosts] = useState([]);
     const [relationship, setRelationship] = useState(null);
     const [friendRelationships, setFriendRelationships] = useState(null);
+    const [stories, setStories] = useState([]);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
@@ -60,10 +61,12 @@ const Profile = (props) => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then((response) => {
+                    console.log("stories: " + response.stories)
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
                     setFriendRelationships(response.friends);
+                    setStories(response.stories);
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
@@ -189,8 +192,8 @@ const Profile = (props) => {
                         <View>
                             <Image style={ProfileS.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
                             <View style={ProfileS.viewImagePick}>
-                             <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
-                              <Icon name="image-outline" style={ProfileS.imageIcon} size={25} />
+                                <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
+                                <Icon name="image-outline" style={ProfileS.imageIcon} size={25} />
                             </View>
                         </View>
                         <View style={ProfileS.boxBackground}>
@@ -326,7 +329,7 @@ const Profile = (props) => {
                 <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
                     <View style={ProfileS.boxLive}>
                         <View style={ProfileS.title2}>
-                            <Text style={{ fontSize: 16, fontWeight: "bold" }}>Bài viết</Text>
+                            <Text style={{ fontSize: 16, fontWeight: "bold", color: 'black' }}>Bài viết</Text>
                             <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
                         </View>
                         <View style={ProfileS.boxAllThink}>
@@ -342,14 +345,14 @@ const Profile = (props) => {
                         <TouchableOpacity style={ProfileS.btnLivestream}>
                             <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                                 <Icon name="videocam" size={20} color="red" />
-                                <Text>Phát trực tiếp</Text>
+                                <Text style={{ marginLeft: 5, color: 'black' }}>Phát trực tiếp</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={ProfileS.btnManage}>
                         <View style={ProfileS.boxManange}>
                             <Icon2 name="comment-text" size={17} color="black" />
-                            <Text style={{ fontSize: 13 }}>  Quản lí bài viết</Text>
+                            <Text style={{ fontSize: 13, color: "black" }}>  Quản lí bài viết</Text>
                         </View>
                     </TouchableOpacity>
                 </View>

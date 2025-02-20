@@ -145,10 +145,12 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 15,
         fontWeight: 'bold',
+        color: 'black'
     },
     caption: {
         marginBottom: 10,
         fontSize: 14,
+        color: 'black'
     },
     mediaContainer: {
         flexDirection: 'row',
@@ -239,7 +241,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginTop: 10,
-        paddingTop: 10,
+        paddingVertical: 10,
         borderTopWidth: 0.5,
         borderTopColor: '#ddd',
     },
@@ -250,6 +252,7 @@ const styles = StyleSheet.create({
     actionText: {
         marginLeft: 5,
         fontSize: 14,
+        color: 'black'
     },
 });
 

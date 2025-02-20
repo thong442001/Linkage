@@ -79,7 +79,10 @@ export default function Groupcomponent({ item }) {
         {
           (avatar != null)
           && <View style={styles.chatInfo}>
-            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.name}
+              numberOfLines={1} // Số dòng tối đa
+              ellipsizeMode="tail" // Cách hiển thị dấu 3 chấm (tail: ở cuối)
+            >{name}</Text>
           </View>
         }
         {/* tin nhắn mới nhất */}
@@ -107,10 +110,7 @@ export default function Groupcomponent({ item }) {
             </View>
           )
         }
-
-
       </View>
-
     </View >
   );
 }
@@ -120,8 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    marginBottom: 5
   },
   avatar: {
     width: 50,
@@ -142,6 +141,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: "black",
+    width: "70%"
   },
   time: {
     fontSize: 12,

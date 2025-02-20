@@ -19,6 +19,7 @@ const ProfileS = StyleSheet.create({
     titleName: {
         fontSize: 20,
         fontWeight: 'bold',
+        color: 'black'
     },
     boxHeader: {
         backgroundColor: "#fff",
@@ -49,6 +50,7 @@ const ProfileS = StyleSheet.create({
     name: {
         fontSize: 24,
         fontWeight: 'bold',
+        color:'black'
     },
     friendNumber: {
         fontSize: 13,
@@ -79,6 +81,7 @@ const ProfileS = StyleSheet.create({
         fontSize: 13,
         fontWeight: 'bold',
         marginVertical: 11,
+        color:'gray'
     },
     btnMore: {
         backgroundColor: '#D9D9D9',
@@ -104,7 +107,8 @@ const ProfileS = StyleSheet.create({
     },
     textFriend: {
         fontSize: 16,
-        fontWeight: "bold"
+        fontWeight: "bold",
+        color:'black'
     },
     textSeeAll: {
         color: "#0064E099"
