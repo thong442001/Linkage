@@ -521,6 +521,7 @@ export const editAvatarOfUser = createAsyncThunk(
   }
 );
 
+
 export const editBackgroundOfUser = createAsyncThunk(
   'user/editBackgroundOfUser',
   async (data, { rejectWithValue }) => {

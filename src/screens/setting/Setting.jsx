@@ -11,7 +11,6 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../rtk/Reducer';
-
 const Setting = (props) => {
 
   const { route, navigation } = props;
@@ -20,11 +19,12 @@ const Setting = (props) => {
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-
-
+  
   const onRegister = () => {
     dispatch(logout())
   };
+
+  
 
   return (
     <View style={styles.container}>
@@ -36,7 +36,7 @@ const Setting = (props) => {
             uri: me.avatar,
           }}
         />
-        <Text style={styles.text}>{me.first_name} {me.last_name}</Text>
+        <Text style={styles.text}>{me.first_name}{me.last_name}</Text>
         <Icon
           name="sort-desc"
           size={30}

@@ -1,62 +1,106 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useSelector } from 'react-redux';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { editNameOfUser } from '../../rtk/API';
+import { changeName } from '../../rtk/Reducer';
 
 const { width, height } = Dimensions.get('window');
 
-const ChangeDisplayName = (props) => {
-    const { navigation } = props;
-
+const ChangeDisplayName = ({ navigation }) => {
     const me = useSelector(state => state.app.user);
-    
+    const dispatch = useDispatch();
 
-    const [firstName, setFirstname] = useState('')
+    const [first_name, setFirstname] = useState('');
+    const [last_name, setLastName] = useState('');
+    const [loading, setLoading] = useState(false); 
 
 
-    
+
+    const validateName = (name) => {
+        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]{1,30}$/;
+        return regex.test(name);
+    };
+
+    const onChangeNameUser = async () => {
+        if (!first_name.trim() || !last_name.trim()) {
+            Alert.alert('Thông báo', "Vui lòng nhập đầy đủ họ và tên mới.");
+            return;
+        }
+
+        if (!validateName(first_name) || !validateName(last_name)) {
+            Alert.alert('Thông báo', "Tên không hợp lệ! Không được chứa số, ký tự đặc biệt và không quá 30 ký tự.");
+            return;
+        }
+
+        setLoading(true);
+
+        const data = { ID_user: me._id, first_name, last_name };
+
+        setTimeout(() => {
+            dispatch(editNameOfUser(data))
+                .unwrap()
+                .then(() => {
+                    dispatch(changeName({ first_name, last_name }));
+                    setFirstname('')
+                    setLastName('')
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }, 2000);
+    };
+
+
     return (
         <View style={styles.container}>
             <Pressable onPress={() => navigation.goBack()}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
-            <Text>{me.first_name} {me.last_name}</Text>
-            <Text style={styles.label}>Thay đổi tên </Text>
 
+            <Text>{me.first_name}{me.last_name}</Text>
+            <Text style={styles.label}>Thay đổi tên</Text>
 
             <View style={styles.inputContainer}>
                 <TextInput
                     placeholderTextColor={'#8C96A2'}
-                    placeholder="Tên mới"
+                    placeholder="Nhập tên mới"
                     style={styles.input}
+                    value={first_name}
+                    onChangeText={setFirstname}
                 />
-
             </View>
 
             <View style={styles.inputContainer}>
                 <TextInput
                     placeholderTextColor={'#8C96A2'}
-                    placeholder="Nhập mật khẩu"
+                    placeholder="Nhập họ mới"
                     style={styles.input}
-                    
+                    value={last_name}
+                    onChangeText={setLastName}
                 />
-
             </View>
 
-           
             <View style={styles.passInfoContainer}>
-                <Pressable onPress={() => navigation.navigate('FindWithEmail')}>
-                <Text style={styles.textBlue}>Bạn quên mật khẩu ư?</Text>
-                </Pressable>
-                
-              
+                <Text style={styles.textBlue}>Tên của bạn sẽ là: {first_name}{last_name}</Text>
             </View>
-
 
             <Pressable
-                style={styles.button } >
-                <Text style={styles.buttonText}>Đổi tên</Text>
+                style={[
+                    styles.button,
+                    (loading || !first_name.trim() || !last_name.trim()) && styles.buttonDisabled,
+                ]}
+                onPress={onChangeNameUser}
+                disabled={loading || !first_name.trim() || !last_name.trim()}
+            >
+                {loading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Text style={styles.buttonText}>Đổi tên</Text>
+                )}
             </Pressable>
         </View>
     );
@@ -77,49 +121,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: height * 0.01,
     },
-    label2: {
-        fontSize: height * 0.018,
-        color: '#1C2931',
-        fontWeight: '450',
-        marginBottom: height * 0.02,
-    },
-    inputDate: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: width * 0.03,
-        padding: height * 0.015,
-        backgroundColor: '#fff',
-        marginVertical: height * 0.01,
-    },
-    button: {
-        position: 'absolute',
-        bottom: width * 0.04,
-        left: 0,
-        right: 0,
-        marginHorizontal: width * 0.03,
-        marginVertical: height * 0.02,
-        backgroundColor: '#0064E0',
-        paddingVertical: height * 0.015,
-        borderRadius: width * 0.1,
-        alignItems: 'center',
-    },
-    buttonOpacity: {
-        position: 'absolute',
-        bottom: width * 0.04,
-        left: 0,
-        right: 0,
-        marginHorizontal: width * 0.03,
-        marginVertical: height * 0.02,
-        backgroundColor: '#0064E0',
-        paddingVertical: height * 0.015,
-        borderRadius: width * 0.1,
-        alignItems: 'center',
-        opacity: 0.5,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: width * 0.045,
-    },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -135,18 +136,34 @@ const styles = StyleSheet.create({
         fontSize: width * 0.04,
         color: 'black',
     },
-    eyeIcon: {
-        marginLeft: width * 0.02,
-    },
     passInfoContainer: {
         paddingVertical: width * 0.01,
         flexDirection: 'column',
         paddingHorizontal: width * 0.02,
-
     },
     textBlue: {
         color: '#0064E0',
-    }
+    },
+    button: {
+        position: 'absolute',
+        bottom: width * 0.04,
+        left: 0,
+        right: 0,
+        marginHorizontal: width * 0.03,
+        marginVertical: height * 0.02,
+        backgroundColor: '#0064E0',
+        paddingVertical: height * 0.015,
+        borderRadius: width * 0.1,
+        alignItems: 'center',
+    },
+    buttonDisabled: {
+        backgroundColor: '#A0A0A0',
+    },
+    buttonText: {
+        fontWeight: '450',
+        color: '#fff',
+        fontSize: width * 0.045,
+    },
 });
 
 export default ChangeDisplayName;
