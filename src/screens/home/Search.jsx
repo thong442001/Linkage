@@ -16,7 +16,7 @@ const Search = (props) => {
 
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filteredProducts, setFilteredProducts] = useState([]); // Tạo state cho danh sách sản phẩm sau khi lọc.
+    const [filteredProducts, setFilteredProducts] = useState([]); 
 
     const getData = async () => {
         try {
@@ -31,7 +31,7 @@ const Search = (props) => {
                 });
 
             // if (result.payload && result.payload.users) {
-
+                
             // }
             // console.log(result);
         } catch (error) {

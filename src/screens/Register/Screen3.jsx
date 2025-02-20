@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { checkEmail } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
@@ -11,25 +11,30 @@ const Screen3 = (props) => {
     const { params } = route;
 
     const dispatch = useDispatch();
-    const [email, setEmail] = useState('')
-
+    const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
     const check = () => {
-        if (email != '') {
+        if (validateEmail(email)) {
             callAPICheckEamil();
         } else {
-            console.log("Thiếu ");
+            setError('Email không hợp lệ');
         }
+    };
+
+    const validateEmail = (email) => {
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        return emailPattern.test(email);
     };
 
     const callAPICheckEamil = () => {
         dispatch(checkEmail({ email: email }))
             .unwrap()
             .then((response) => {
-                //console.log(response);
                 if (response.status) {
-                    handleTiep()
+                    handleTiep();
                 } else {
-                    console.log(response.message);
+                    console.log("Lỗi: " + response.message);
+                    setError(response.message)
                 }
             })
             .catch((error) => {
@@ -45,9 +50,8 @@ const Screen3 = (props) => {
             sex: params.sex,
             phone: null,
             email: email,
-        })
+        });
     };
-
 
     return (
         <View style={styles.container}>
@@ -63,8 +67,10 @@ const Screen3 = (props) => {
                 onChangeText={setEmail}
                 placeholderTextColor={'#8C96A2'}
                 placeholder="Email"
-                style={styles.inputDate}
+                style={[styles.inputDate, error && { borderColor: 'red' }]}
             />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua email</Text>
 
             <Pressable style={styles.button} onPress={check}>
@@ -116,6 +122,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         marginVertical: height * 0.02,
     },
+    errorText: {
+        color: 'red',
+        fontSize: height * 0.018,
+        marginBottom: height * 0.015,
+    },
     infoText: {
         fontSize: height * 0.018,
         color: 'black',
@@ -133,12 +144,6 @@ const styles = StyleSheet.create({
     },
     containerButton: {
         width: width * 0.92,
-    },
-    linkText: {
-        color: 'black',
-        fontWeight: '500',
-        fontSize: width * 0.04,
-        marginTop: height * 0.01,
     },
     buttonNextSceen: {
         borderWidth: 1,

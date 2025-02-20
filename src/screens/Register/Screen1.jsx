@@ -1,88 +1,166 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import DatePicker from 'react-native-date-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
 
 const { width, height } = Dimensions.get('window');
 
 const Screen1 = (props) => {
     const { route, navigation } = props;
-    const { params } = route;
 
-    const [first_name, setFirst_name] = useState('')
-    const [last_name, setLast_name] = useState('')
-    const [dateOfBirth, setDateOfBirth] = useState('')
+    const [first_name, setFirst_name] = useState('');
+    const [last_name, setLast_name] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState('');
+    const [open, setOpen] = useState(false);
+    const [gender, setGender] = useState('Nữ');
+    const [date, setDate] = useState(new Date());
+    const [showErrorFirstName, setShowErrorFirstName] = useState(false);
+    const [showErrorLastName, setShowErrorLastName] = useState(false);
+    const [showErrorDate, setShowErrorDate] = useState(false);
 
-    const [gender, setGender] = useState('');
 
-    const handleTiep = () => {
-        if (first_name != ''
-            && last_name != ''
-            && dateOfBirth != ''
-            && gender != '') {
-            navigation.navigate('Screen2', {
-                first_name: first_name,
-                last_name: last_name,
-                dateOfBirth: dateOfBirth,
-                sex: gender,
-            })
+    const validateForm = () => {
+        let isValid = true;
+        const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/;
+
+        if (!first_name.trim() || !first_name.match(nameRegex)) {
+            setShowErrorFirstName(true);
+            isValid = false;
         } else {
-            console.log("Thiếu ");
+            setShowErrorFirstName(false);
+        }
+
+        if (!last_name.trim() || !last_name.match(nameRegex)) {
+            setShowErrorLastName(true);
+            isValid = false;
+        } else {
+            setShowErrorLastName(false);
+        }
+
+        if (!dateOfBirth.trim()) {
+            setShowErrorDate(true);
+            isValid = false;
+        } else {
+            setShowErrorDate(false);
+        }
+
+        const today = new Date();
+        const birthDate = new Date(date);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        const dayDiff = today.getDate() - birthDate.getDate();
+
+        if (age < 12 || (age === 12 && monthDiff < 0) || (age === 12 && monthDiff === 0 && dayDiff < 0)) {
+            setShowErrorDate(true);
+            isValid = false;
+        } else {
+            setShowErrorDate(false);
+        }
+
+
+
+        return isValid;
+    };
+
+    const handleNext = () => {
+        if (validateForm()) {
+            navigation.navigate('Screen2', {
+                first_name,
+                last_name,
+                dateOfBirth,
+                sex: gender,
+            });
         }
     };
 
-    const CustomRadioButton = ({ label, value, description }) => {
-        return (
-            <Pressable
-                onPress={() => {
-                    setGender(value)
-                    console.log(gender);
-                }}
-                style={styles.radioContainer}
-            >
-                <View style={styles.radioContent}>
-                    <Text style={[styles.radioLabel, gender === value && styles.selectedText]}>{label}</Text>
-                    {description && <Text style={styles.description}>{description}</Text>}
-                </View>
-                <View style={[styles.radioCircle, gender === value && styles.radioCircleSelected]} />
-            </Pressable>
-        );
-    };
+    const CustomRadioButton = ({ label, value, description }) => (
+        <Pressable
+            onPress={() => setGender(value)}
+            style={styles.radioContainer}
+        >
+            <View style={styles.radioContent}>
+                <Text style={[styles.radioLabel, gender === value && styles.selectedText]}>{label}</Text>
+                {description && <Text style={styles.description}>{description}</Text>}
+            </View>
+            <View style={[styles.radioCircle, gender === value && styles.radioCircleSelected]} />
+        </Pressable>
+    );
 
     return (
         <View style={styles.container}>
             <Pressable onPress={() => navigation.navigate('Login')}>
                 <Icon style={styles.iconBack} name="angle-left" size={35} color="black" />
             </Pressable>
-            <Text style={styles.label}>Bạn tên gì ?</Text>
+
+            <Text style={styles.label}>Bạn tên gì?</Text>
             <Text style={styles.label2}>Nhập tên bạn sử dụng trong đời thực</Text>
+
             <View style={styles.nameContainer}>
                 <TextInput
                     value={first_name}
-                    onChangeText={setFirst_name}
+                    onChangeText={(text) => {
+                        setFirst_name(text);
+                        setShowErrorFirstName(!text.trim().match(/^[A-Za-zÀ-ỹ\s]+$/));
+                    }}
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Họ"
-                    style={[styles.input, { marginRight: width * 0.02 }]} // điều chỉnh margin dựa trên width
+                    style={showErrorFirstName ? styles.inputNameUserError : styles.input}
                 />
+
                 <TextInput
                     value={last_name}
-                    onChangeText={setLast_name}
+                    onChangeText={(text) => {
+                        setLast_name(text);
+                        setShowErrorLastName(!text.trim().match(/^[A-Za-zÀ-ỹ\s]+$/));
+                    }}
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Tên"
-                    style={styles.input}
+                    style={showErrorLastName ? styles.inputNameUserError : styles.input}
                 />
             </View>
 
-            <Text style={styles.label}>Ngày sinh của bạn là khi nào ?</Text>
+            <Text style={styles.label}>Ngày sinh của bạn là khi nào?</Text>
             <Text style={styles.label2}>Chọn ngày sinh của bạn</Text>
 
-            <TextInput
-                value={dateOfBirth}
-                onChangeText={setDateOfBirth}
-                placeholderTextColor={'#8C96A2'}
-                placeholder="Ngày sinh"
-                style={styles.inputDate}
+            {/* TextInput để mở DatePicker */}
+            <Pressable onPress={() => setOpen(true)}>
+                <TextInput
+                    value={dateOfBirth}
+                    placeholderTextColor={'#8C96A2'}
+                    placeholder="Ngày sinh"
+                    style={showErrorDate ? styles.inputDateError : styles.inputDate}
+                    editable={false}
+                />
+            </Pressable>
+
+            {/* Date Picker */}
+            <DatePicker
+                modal
+                open={open}
+                date={date}
+                mode="date"
+                onConfirm={(selectDate) => {
+                    setOpen(false);
+                    setDate(selectDate);
+                    const formattedDate = selectDate.toLocaleDateString('vi-VN');
+                    setDateOfBirth(formattedDate);
+
+                    // Kiểm tra tuổi ngay sau khi chọn
+                    const today = new Date();
+                    const birthDate = new Date(selectDate);
+                    const age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+                    const dayDiff = today.getDate() - birthDate.getDate();
+
+                    if (age < 12 || (age === 12 && monthDiff < 0) || (age === 12 && monthDiff === 0 && dayDiff < 0)) {
+                        setShowErrorDate(true);
+                    } else {
+                        setShowErrorDate(false);
+                    }
+                }}
+                onCancel={() => setOpen(false)}
             />
+
 
             <Text style={styles.label}>Giới tính của bạn là gì?</Text>
             <View style={styles.radioGroup}>
@@ -90,17 +168,10 @@ const Screen1 = (props) => {
                 <View style={styles.separator} />
                 <CustomRadioButton label="Nam" value="Nam" />
                 <View style={styles.separator} />
-                <CustomRadioButton
-                    label="Lựa chọn khác"
-                    value="Khác"
-                    description="Chọn Tùy chọn khác nếu bạn thuộc giới tính khác hoặc không muốn tiết lộ"
-                />
+                <CustomRadioButton label="Lựa chọn khác" value="Khác" description="Chọn Tùy chọn khác nếu bạn thuộc giới tính khác hoặc không muốn tiết lộ" />
             </View>
 
-            <Pressable
-                style={styles.button}
-                onPress={() => handleTiep()}
-            >
+            <Pressable style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
         </View>
@@ -135,6 +206,16 @@ const styles = StyleSheet.create({
         flex: 1,
         borderWidth: 1,
         borderColor: '#ccc',
+        marginRight: width * 0.02,
+        borderRadius: width * 0.02,
+        padding: width * 0.03,
+        backgroundColor: '#fff',
+    },
+    inputNameUserError: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: 'red',
+        marginRight: width * 0.02,
         borderRadius: width * 0.02,
         padding: width * 0.03,
         backgroundColor: '#fff',
@@ -142,6 +223,14 @@ const styles = StyleSheet.create({
     inputDate: {
         borderWidth: 1,
         borderColor: '#ccc',
+        borderRadius: width * 0.02,
+        padding: width * 0.03,
+        backgroundColor: '#fff',
+        marginVertical: height * 0.02,
+    },
+    inputDateError: {
+        borderWidth: 1,
+        borderColor: 'red',
         borderRadius: width * 0.02,
         padding: width * 0.03,
         backgroundColor: '#fff',
@@ -156,8 +245,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
-        elevation: 2,
     },
+
     radioContainer: {
         flexDirection: 'row',
         alignItems: 'center',

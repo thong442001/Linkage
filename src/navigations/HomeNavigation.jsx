@@ -1,5 +1,4 @@
 import React from 'react'
-// import Icon from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -18,7 +17,9 @@ const oTab = {
   Profile: { name: 'Profile', component: Profile },
   Setting: { name: 'Setting', component: Setting }
 }
+
 const Tab = createBottomTabNavigator();
+
 const TabHome = () => {
   const me = useSelector(state => state.app.user);
   //console.log(theme);
@@ -102,16 +103,45 @@ const TabHome = () => {
 
 //stack home
 import Search from '../screens/home/Search';
+import PostStory from '../screens/story/PostStory';
 import Story from '../screens/story/Story';
 import Chat from '../screens/chat/Chat';
 import HomeChat from '../screens/chat/HomeChat';
+import CreateGroup from '../screens/chat/CreateGroup';
+import SettingChat from '../screens/chat/SettingChat';
+import MembersGroup from '../screens/chat/MembersGroup';
+import AddFriendGroup from '../screens/chat/AddFriendGroup';
+import AvtNameGroup from '../screens/chat/AvtNameGroup';
+import UpPost from '../screens/home/UpPost';
+import PostDetail from '../screens/home/PostDetail';
+import Comment from '../components/comment/Comment';
+import StoryViewer from '../screens/story/StoryViewer';
+import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
+import ChangePassWord from '../screens/changeProfile/ChangePassWord';
+import CallPage from '../screens/call/CallPage';
+import CallGroup from '../screens/call/CallGroup';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
+  PostStory: { name: 'PostStory', component: PostStory },
   Story: { name: 'Story', component: Story },
+  StoryViewer: { name: 'StoryViewer', component: StoryViewer },
   Chat: { name: 'Chat', component: Chat },
   HomeChat: { name: 'HomeChat', component: HomeChat },
+  CreateGroup: { name: 'CreateGroup', component: CreateGroup },
+  SettingChat: { name: 'SettingChat', component: SettingChat },
+  MembersGroup: { name: 'MembersGroup', component: MembersGroup },
+  AddFriendGroup: { name: 'AddFriendGroup', component: AddFriendGroup },
+  AvtNameGroup: { name: 'AvtNameGroup', component: AvtNameGroup },
+  UpPost: { name: 'UpPost', component: UpPost },
+  PostDetail: { name: 'PostDetail', component: PostDetail },
+  Comment: { name: 'Comment', component: Comment },
+  Home: { name: 'Home', component: Home },
+  ChangeDisplayName: { name: 'ChangeDisplayName', component: ChangeDisplayName },
+  ChangePassWord: { name: 'ChangePassWord', component: ChangePassWord },
+  CallPage: { name: 'CallPage', component: CallPage },
+  CallGroup: { name: 'CallGroup', component: CallGroup },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -133,7 +163,7 @@ const HomeNavigation = () => {
   )
 }
 
-//stack add post
+// //stack change profile
 // import SelectImage from '../components/screens/SelectImage';
 // import UpPost from '../components/screens/UpPost';
 // const oStackAddPost = {

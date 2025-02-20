@@ -1,83 +1,93 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { register } from '../../rtk/API';
+import { register } from '../../rtk/API'; 
 import { useDispatch } from 'react-redux';
-
 const { width, height } = Dimensions.get('window');
 
-const CreatePasswordScreen = (props) => {
-
-    const { route, navigation } = props;
-    const { params } = route;
-
+const CreateNewPassWord = ({ route, navigation }) => {
+    const { first_name, last_name, dateOfBirth, sex, email, phone } = route.params; 
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [validPassword, setValidPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); 
     const dispatch = useDispatch();
 
-    const [password, setPassword] = useState('');
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    
+    const validatePassword = (text) => {
+        const hasUpperCase = /[A-Z]/.test(text); // Kiểm tra chữ in hoa
+        const hasLowerCase = /[a-z]/.test(text); // Kiểm tra chữ thường
+        const hasNumber = /\d/.test(text); // Kiểm tra chữ số
+        const hasSpecialChar = /[^a-zA-Z0-9]/.test(text); // Kiểm tra ký tự đặc biệt
+        const minLength = text.length >= 8; // Kiểm tra độ dài tối thiểu
 
-    const togglePasswordVisibility = () => {
-        setIsPasswordVisible(!isPasswordVisible);
-    };
-
-    const onRegister = () => {
-        console.log(params.email);
-        console.log(params.phone);
-        const userDataRegister = {
-            first_name: params.first_name,
-            last_name: params.last_name,
-            dateOfBirth: params.dateOfBirth,
-            sex: params.sex,
-            email: params.email,
-            phone: params.phone,
-            password: password,
-        };
-        if (password != '') {
-            dispatch(register(userDataRegister))
-                .unwrap()
-                .then((response) => {
-                    console.log(response);
-                    navigation.navigate('Login');
-                })
-                .catch((error) => {
-                    console.log('Error:', error);
-                });
+        if (!minLength) {
+            setError('Mật khẩu phải có ít nhất 8 ký tự.');
+        } else if (!hasUpperCase) {
+            setError('Mật khẩu phải chứa ít nhất một chữ cái in hoa.');
+        } else if (!hasLowerCase) {
+            setError('Mật khẩu phải chứa ít nhất một chữ cái thường.');
+        } else if (!hasNumber) {
+            setError('Mật khẩu phải chứa ít nhất một chữ số.');
+        } else if (hasSpecialChar) {
+            setError('Mật khẩu không được chứa ký tự đặc biệt.');
         } else {
-            console.log('THieu password');
+            setError('');
         }
 
+        setPassword(text);
+        setValidPassword(minLength && hasUpperCase && hasLowerCase && hasNumber && !hasSpecialChar);
+    };
+
+    // Hàm xử lý đăng ký
+    const handleRegister = () => {
+        const userData = { first_name, last_name, dateOfBirth, sex, email, phone, password }; 
+        dispatch(register(userData)) 
+            .unwrap()
+            .then(() => {
+                navigation.navigate('Login');
+            })
+            .catch((err) => {
+                console.error(err);
+                setError('Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.');
+            });
     };
 
     return (
         <View style={styles.container}>
             <Pressable onPress={() => navigation.goBack()}>
-                <Icon style={styles.iconBack} name="angle-left" size={30} color="black" />
+                <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
-            <Text style={styles.title}>Tạo mật khẩu</Text>
-            <Text style={styles.description}>
-                Tạo mật khẩu gồm ít nhất 6 chữ cái hoặc chữ số. Bạn nên chọn mật khẩu thật khó đoán
+            <Text style={styles.label}>Tạo mật khẩu</Text>
+            <Text style={styles.label2}>
+                Tạo mật khẩu gồm ít nhất 8 ký tự, bao gồm chữ cái in hoa, chữ cái thường và chữ số.
+                Bạn nên chọn mật khẩu thật khó đoán.
             </Text>
 
             <View style={styles.inputContainer}>
                 <TextInput
-                    placeholderTextColor={'#8C96A2'}
-                    style={styles.input}
-                    placeholder="Mật khẩu"
-                    secureTextEntry={!isPasswordVisible}
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={validatePassword} // Kiểm tra ngay khi nhập
+                    placeholderTextColor={'black'}
+                    placeholder="Mật khẩu mới"
+                    color={'black'}
+                    secureTextEntry={!showPassword} // Nếu showPassword là true thì mật khẩu sẽ hiện ra
+                    style={[styles.inputDate, error ? styles.inputError : null]} // Đổi màu khi lỗi
                 />
-                <Pressable onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-                    <Icon name={isPasswordVisible ? 'eye' : 'eye-slash'} size={20} color="#A0A0A0" />
+                <Pressable onPress={() => setShowPassword(!showPassword)} >
+                    <Icon name={showPassword ? "eye-slash" : "eye"} size={width * 0.06} color="black" />
                 </Pressable>
             </View>
 
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
             <Pressable
-                style={styles.button}
-                onPress={() => onRegister()}
+                style={[styles.button, validPassword ? null : styles.buttonDisabled]} 
+                onPress={handleRegister} // Gọi hàm handleRegister khi nhấn nút
+                disabled={!validPassword} // Chặn nếu mật khẩu không hợp lệ
             >
-                <Text style={styles.buttonText}>Tạo</Text>
+                <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
         </View>
     );
@@ -87,50 +97,58 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: width * 0.04,
-        backgroundColor: '#EFF5FF',
+        backgroundColor: '#f0f4ff',
     },
     iconBack: {
-        marginBottom: height * 0.02,
+        marginVertical: height * 0.02,
     },
-    title: {
-        fontSize: width * 0.07,
-        fontWeight: 'bold',
+    label: {
         color: 'black',
+        fontSize: height * 0.03,
+        fontWeight: 'bold',
         marginBottom: height * 0.01,
     },
-    description: {
-        fontSize: width * 0.04,
-        color: 'black',
-        marginBottom: height * 0.03,
+    label2: {
+        fontSize: height * 0.018,
+        color: '#1C2931',
+        fontWeight: '450',
+        marginBottom: height * 0.02,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: '#ccc',
         borderRadius: width * 0.03,
-        paddingHorizontal: width * 0.04,
-        backgroundColor: '#FFFFFF',
-        marginBottom: height * 0.03,
+        paddingHorizontal: width * 0.03,
+        marginVertical: height * 0.02,
     },
-    input: {
+    inputDate: {
         flex: 1,
-        fontSize: width * 0.045,
-        color: 'black',
+        paddingVertical: height * 0.015,
     },
-    eyeIcon: {
-        marginLeft: width * 0.02,
+    inputError: {
+        borderColor: 'red', 
+    },
+    errorText: {
+        color: 'red',
+        fontSize: height * 0.018,
+        marginBottom: height * 0.015,
     },
     button: {
+        marginVertical: height * 0.02,
         backgroundColor: '#0064E0',
         paddingVertical: height * 0.015,
-        borderRadius: width * 0.07,
+        borderRadius: width * 0.05,
         alignItems: 'center',
     },
+    buttonDisabled: {
+        backgroundColor: '#A0A0A0', // Màu xám nếu có lỗi
+    },
     buttonText: {
-        color: '#FFFFFF',
+        color: '#fff',
         fontSize: width * 0.045,
     },
 });
 
-export default CreatePasswordScreen;
+export default CreateNewPassWord;

@@ -127,6 +127,24 @@ export const joinGroupPrivate = createAsyncThunk(
     }
   }
 );
+export const addGroup = createAsyncThunk(
+  'group/addGroup',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/addGroup', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const getGroupID = createAsyncThunk(
   'group/getGroupID',
@@ -182,6 +200,7 @@ export const getMessagesGroup = createAsyncThunk(
   }
 );
 
+
 export const getAllReaction = createAsyncThunk(
   'reaction/getAllReaction',
   async (data, { rejectWithValue }) => {
@@ -200,44 +219,342 @@ export const getAllReaction = createAsyncThunk(
   }
 );
 
-// /// test token
-// export const getAllUsers = createAsyncThunk(
-//   'user/getAllUsers',
-//   async (data, { rejectWithValue }) => {
-//     try {
-//       const response =
-//         await AxiosHelper()
-//           .get('user/getAllUsers', data);
-//       //console.log(response)
-//       if (response.status == true) {
-//         return response;
-//       } else {
-//         return rejectWithValue(response.data.message);
-//       }
-//     } catch (error) {
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
+// ******* relationships *******
 
-// export const addPost = createAsyncThunk(
-//   'post/addPost',
-//   async (data, { rejectWithValue }) => {
-//     try {
-//       const response =
-//         await AxiosHelper()
-//           .post('post/add', data);
-//       //console.log(response)
-//       if (response.status == true) {
-//         return response;
-//       } else {
-//         return rejectWithValue(response.data.message);
-//       }
-//     } catch (error) {
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
+export const getRelationshipAvsB = createAsyncThunk(
+  'relationship/getRelationshipAvsB',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('relationship/getRelationshipAvsB', data);
+      console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const guiLoiMoiKetBan = createAsyncThunk(
+  'relationship/guiLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post(`relationship/guiLoiMoiKetBan`, data);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const chapNhanLoiMoiKetBan = createAsyncThunk(
+  'relationship/chapNhanLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post(`relationship/chapNhanLoiMoiKetBan`, data);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const huyLoiMoiKetBan = createAsyncThunk(
+  'relationship/huyLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post(`relationship/huyLoiMoiKetBan`, data);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllLoiMoiKetBan = createAsyncThunk(
+  'relationship/getAllLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`relationship/getAllLoiMoiKetBan?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllFriendOfID_user = createAsyncThunk(
+  'relationship/getAllLoiMoiKetBan',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`relationship/getAllFriendOfID_user?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// nhóm chat
+export const addtMembers = createAsyncThunk(
+  'group/addtMembers',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/addtMembers', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteMember = createAsyncThunk(
+  'group/deleteMember',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/deleteMember', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const passKey = createAsyncThunk(
+  'group/passKey',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/passKey', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteGroup = createAsyncThunk(
+  'group/deleteGroup',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/deleteGroup', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const editAvtNameGroup = createAsyncThunk(
+  'group/editAvtNameGroup',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/editAvtNameGroup', data);
+      //console.log(response)
+      if (response.status == true) {
+        console.log(response?.message)
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// post
+export const addPost = createAsyncThunk(
+  'post/addPost',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response =
+        await AxiosHelper()
+          .post('post/addPost', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//allProfile
+export const allProfile = createAsyncThunk(
+  'post/allProfile',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('post/allProfile', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// all post in home
+export const getAllPostsInHome = createAsyncThunk(
+  'post/getAllPostsInHome',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`post/getAllPostsInHome?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+// Tài ( edit user)
+export const editNameOfUser = createAsyncThunk(
+  'user/editNameOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editNameOfUser', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const editAvatarOfUser = createAsyncThunk(
+  'user/editAvatarOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editAvatarOfUser', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const editBackgroundOfUser = createAsyncThunk(
+  'user/editBackgroundOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editBackgroundOfUser', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// "status": true, message: "Đổi password thành công"
+// "status": false, message: "Sai mật khẩu cũ"
+// nhớ khi call check "status"
+export const editPasswordOfUser = createAsyncThunk(
+  'user/editPasswordOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editPasswordOfUser', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 
 

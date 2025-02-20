@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: width * 0.05,
     justifyContent: 'center',
-    alignItems: 'center',  
+    alignItems: 'center',
     backgroundColor: '#ECF5FA',
   },
   viewLogo: {
@@ -17,6 +17,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     resizeMode: 'contain',
+    width: 83,
+    height: 83,
   },
   formInput: {
     marginBottom: height * 0.02,
@@ -43,7 +45,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.04,
     marginBottom: height * 0.02,
   },
-  formSectionLogin:{
+  formSectionLogin: {
     marginBottom: height * 0.25,
   }
 });

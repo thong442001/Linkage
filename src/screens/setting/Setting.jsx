@@ -1,5 +1,6 @@
 import {
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -47,24 +48,30 @@ const Setting = (props) => {
         <Icon name="user-circle" size={30} color="black" />
         <Text style={styles.text}>Thông tin các nhân</Text>
       </View>
-      <View style={styles.container_item1}>
-        <Icon name="lock" size={30} color="black" />
-        <Text style={styles.text}>Quyền riêng tư</Text>
+
+      <Pressable onPress={() => navigation.navigate('ChangePassWord')}>
+        <View style={styles.container_item1}>
+          <Icon name="lock" size={30} color="black" />
+          <Text style={styles.text}>Đổi mật khẩu</Text>
+        </View>
+      </Pressable>
+
+      <Pressable onPress={() => navigation.navigate('ChangeDisplayName')}>
+        <View style={styles.container_item1}>
+          <Icon name="lock" size={30} color="black" />
+          <Text style={styles.text}>Đổi tên</Text>
+        </View>
+      </Pressable>
+
+
+      <View style={styles.btnLogout}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={onRegister}>
+          <Text style={styles.text_button}>Đăng xuất</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.container_item1}>
-        <Icon name="language" size={30} color="black" />
-        <Text style={styles.text}>Thay đổi ngôn ngữ</Text>
-      </View>
-      <View style={styles.container_item1}>
-        <Icon name="moon-o" size={30} color="black" />
-        <Text style={styles.text}>Chế độ tối</Text>
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={onRegister}
-      >
-        <Text style={styles.text_button}>Đăng xuất</Text>
-      </TouchableOpacity>
+
     </View>
   );
 };
@@ -127,15 +134,22 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-    height: 40,
+    height: 50,
     backgroundColor: '#E1E6EA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 170,
+    borderRadius: 10,
   },
   text_button: {
     color: 'black',
     fontSize: 16,
     fontWeight: '600',
   },
+  btnLogout: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 10,
+  }
 });
