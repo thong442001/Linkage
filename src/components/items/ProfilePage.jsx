@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -7,6 +7,42 @@ import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import Icon4 from 'react-native-vector-icons/FontAwesome5';
 
 const PostItem = ({ post }) => {
+    // time 
+    const [timeAgo, setTimeAgo] = useState(post.createdAt);
+
+    useEffect(() => {
+        const updateDiff = () => {
+            const now = Date.now();
+            const createdTime = new Date(post.createdAt).getTime(); // Chuyển từ ISO sang timestamp
+
+            if (isNaN(createdTime)) {
+                setTimeAgo("Không xác định");
+                return;
+            }
+
+            const diffMs = now - createdTime;
+            if (diffMs < 0) {
+                setTimeAgo("Vừa xong");
+                return;
+            }
+
+            const seconds = Math.floor(diffMs / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) setTimeAgo(`${days} ngày trước`);
+            else if (hours > 0) setTimeAgo(`${hours} giờ trước`);
+            else if (minutes > 0) setTimeAgo(`${minutes} phút trước`);
+            else setTimeAgo(`${seconds} giây trước`);
+        };
+
+        updateDiff();
+        const interval = setInterval(updateDiff, 1000);
+
+        return () => clearInterval(interval);
+    }, [post.createdAt]);
+
     const hasCaption = post?.caption?.trim() !== '';
     const hasMedia = post?.medias?.length > 0;
 
@@ -81,7 +117,7 @@ const PostItem = ({ post }) => {
                     <View style={{ marginLeft: 20 }}>
                         <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
                         <View style={styles.boxName}>
-                            <Text style={styles.time}>{post.status}</Text>
+                            <Text style={styles.time}>{timeAgo}</Text>
                             {/* <Icon name="earth" size={12} color="gray" /> */}
                             {
                                 getIcon(post.status)
