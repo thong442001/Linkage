@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     addPost,
 } from '../../rtk/API';
+import Video from 'react-native-video';
 const UpPost = (props) => {
     const { navigation } = props;
 
@@ -29,6 +30,7 @@ const UpPost = (props) => {
     });
     const [caption, setCaption] = useState('');
     const [medias, setMedias] = useState([]);
+
 
     const [tags, setTags] = useState([]);
 
@@ -48,7 +50,58 @@ const UpPost = (props) => {
         },
     ];
 
-    //up lên cloudiary
+
+    const hasMedia = medias?.length > 0;
+    const isVideo = (uri) => uri?.endsWith('.mp4') || uri?.endsWith('.mov');
+    const renderMediaGrid = (medias) => {
+        const mediaCount = medias.length;
+
+        if (mediaCount === 0) return null;
+
+        return (
+            <View style={UpPostS.mediaContainer}>
+                {medias.slice(0, 5).map((uri, index) => (
+                    <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
+                        {isVideo(uri) ? (
+                            <View style={UpPostS.videoWrapper}>
+                                <Video source={{ uri }} style={UpPostS.video} resizeMode="cover" paused />
+                                <View style={UpPostS.playButton}>
+                                    <Icon name="play-circle" size={40} color="white" />
+                                </View>
+                            </View>
+                        ) : (
+                            <Image source={{ uri }} style={UpPostS.image} resizeMode="cover" />
+                        )}
+
+                        {index === 4 && mediaCount > 5 && (
+                            <View style={UpPostS.overlay}>
+                                <Text style={UpPostS.overlayText}>+{mediaCount - 5}</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                ))}
+            </View>
+        );
+    };
+
+    const getMediaStyle = (count, index) => {
+        if (count === 1) {
+            return UpPostS.singleMedia;
+        } else if (count === 2) {
+            return UpPostS.doubleMedia;
+        } else if (count === 3) {
+            return index === 0 ? UpPostS.tripleMediaFirst : UpPostS.tripleMediaSecond;
+        } else if (count === 4) {
+            return UpPostS.quadMedia;
+        } else { // 5+ media
+            if (index < 2) return UpPostS.fivePlusMediaFirstRow;
+            else if (index === 2) return UpPostS.fivePlusMediaSecondRowLeft;
+            else if (index === 3) return UpPostS.fivePlusMediaSecondRowMiddle;
+            else return UpPostS.fivePlusMediaSecondRowRight;
+        }
+    };
+
+    // Hàm tải lên một file lên Cloudinary
     const uploadFile = async (file) => {
         try {
             const data = new FormData();
@@ -64,36 +117,46 @@ const UpPost = (props) => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            //console.log(file.type.type);
+
             const fileUrl = response.data.secure_url;
             console.log('🌍 Link file Cloudinary:', fileUrl);
-            setMedias((prev) => [...prev, fileUrl]);
-
+            return fileUrl; // Trả về URL file đã tải lên
         } catch (error) {
             console.log('uploadFile -> ', error.response ? error.response.data : error.message);
-            console.log("lỗi khi tải file")
+            console.log("Lỗi khi tải file");
+            return null; // Trả về null nếu có lỗi
         }
     };
 
-    //mở thư viện
+    // Hàm tải lên nhiều file cùng lúc
+    const uploadMultipleFiles = async (files) => {
+        try {
+            const uploadedUrls = await Promise.all(files.map(file => uploadFile(file)));
+            const validUrls = uploadedUrls.filter(url => url !== null); // Loại bỏ file lỗi
+            setMedias(prev => [...prev, ...validUrls]); // Cập nhật danh sách medias
+        } catch (error) {
+            console.log('uploadMultipleFiles -> ', error);
+        }
+    };
+
+    // Mở thư viện và chọn nhiều ảnh/video
     const onOpenGallery = async () => {
         try {
             const options = {
-                mediaType: 'mixed',
+                mediaType: 'mixed', // Chọn cả ảnh và video
                 quality: 1,
+                selectionLimit: 0, // Cho phép chọn nhiều file
             };
 
             launchImageLibrary(options, async (response) => {
-                //console.log(response);
                 if (response.didCancel) {
-                    console.log("đã hủy")
+                    console.log("Đã hủy");
                 } else if (response.errorMessage) {
-                    console.log("lỗi khi mở thư viện")
+                    console.log("Lỗi khi mở thư viện");
                 } else {
-                    const selectedFile = response.assets[0];
-                    console.log('📂 File đã chọn:', selectedFile.uri);
-
-                    await uploadFile(selectedFile);
+                    const selectedFiles = response.assets;
+                    console.log('📂 Các file đã chọn:', selectedFiles);
+                    await uploadMultipleFiles(selectedFiles); // Gọi hàm upload tất cả file
                 }
             });
         } catch (error) {
@@ -149,20 +212,24 @@ const UpPost = (props) => {
                     <Text style={UpPostS.txtCreate}>Tạo bài viết</Text>
                 </View>
                 <TouchableOpacity
-                    style={UpPostS.btnPost}
+                    style={caption == "" ? UpPostS.btnPost : UpPostS.btnPost2}
                     onPress={callAddPost}
+                    disabled={caption == ""} // Nếu caption rỗng thì không nhấn được
                 >
-                    <Text style={UpPostS.txtUpPost}>Đăng bài</Text>
+                    {/* hi */}
+                    <Text style={ caption == "" ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
                 </TouchableOpacity>
             </View>
             <View style={UpPostS.line}></View>
             <View style={[UpPostS.boxMargin, { flex: 1 }]}>
                 <View style={UpPostS.boxInfor}>
                     <Image style={UpPostS.avatar}
-                        source={require("../../../assets/images/person.jpg")}
+                        source={{ uri: me.avatar }}
                     />
                     <View style={{ marginLeft: 15 }}>
-                        <Text style={UpPostS.txtName}>Kenny</Text>
+                        <Text style={UpPostS.txtName}>
+                            {me.first_name + " " + me.last_name}
+                        </Text>
                         <View style={UpPostS.boxStatus}>
                             <TouchableOpacity
                                 style={UpPostS.btnStatus}
@@ -184,8 +251,15 @@ const UpPost = (props) => {
                         style={UpPostS.txtInput}
                         multiline={true}
                     />
+                    {/* medias */}
+                    {hasMedia && renderMediaGrid(medias)}
                 </View>
+
             </View>
+
+
+
+
             <View style={UpPostS.boxItems2}>
                 <View >
                     <View style={UpPostS.line}></View>
@@ -232,7 +306,7 @@ const UpPost = (props) => {
             < Modal
                 transparent={true}  // Cho phép nền của modal trong suốt, giúp nhìn thấy nền bên dưới modal.
                 visible={modalVisible}  // Điều khiển việc modal có hiển thị hay không dựa trên trạng thái `modalVisible`.
-                animationType="slide"  // Hiệu ứng khi modal xuất hiện. Ở đây là kiểu "slide" từ dưới lên.
+                animationType="fade"  // Hiệu ứng khi modal xuất hiện. Ở đây là kiểu "slide" từ dưới lên.
                 onRequestClose={() => setModalVisible(false)}  // Khi modal bị yêu cầu đóng (ví dụ trên Android khi bấm nút back), hàm này sẽ được gọi để đóng modal.
             >
                 <TouchableOpacity

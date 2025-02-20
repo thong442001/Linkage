@@ -34,6 +34,8 @@ const Chat = (props) => {// cần ID_group (param)
     const [group, setGroup] = useState(null);
     const [groupAvatar, setGroupAvatar] = useState(null); // Ảnh đại diện nhóm
     const [groupName, setGroupName] = useState(null); // Tên nhóm
+    const [ID_user, setID_user] = useState(null);
+    const [myUsername, setmyUsername] = useState(null);
 
     const [socket, setSocket] = useState(null);
     const [message, setMessage] = useState('');
@@ -45,7 +47,15 @@ const Chat = (props) => {// cần ID_group (param)
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-
+    // call video
+    const onCallvieo = () => {
+        if (!group) return;
+        if (group.isPrivate == true) {
+            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
+        } else {
+            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
+        }
+    };
     //up lên cloudiary
     const uploadFile = async (file) => {
         try {
@@ -260,17 +270,38 @@ const Chat = (props) => {// cần ID_group (param)
                     //console.log("thong show data: ", response);
                     setGroup(response.group)
                     if (response.group.isPrivate == true) {
+                        // lấy tên của mình
+                        const myUser = response.group.members.find(user => user._id === me._id);
+                        console.log(response.group.members);
+                        if (myUser) {
+                            setID_user(myUser._id);
+                            setmyUsername((myUser.first_name + " " + myUser.last_name));
+                        } else {
+                            console.log("⚠️ Không tìm thấy người dùng");
+                        }
                         // chat private
+
                         const otherUser = response.group.members.find(user => user._id !== me._id);
+
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
                             //setGroupName(otherUser.displayName);
+
                             setGroupAvatar(otherUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
                         }
                     } else {
-                        // group 
+                        // group
+                        // lấy tên của mình
+                        const myUser = response.group.members.find(user => user._id === me._id);
+                        console.log(response.group.members);
+                        if (myUser) {
+                            setID_user(myUser._id);
+                            setmyUsername((myUser.first_name + " " + myUser.last_name));
+                        } else {
+                            console.log("⚠️ Không tìm thấy người dùng");
+                        }
                         if (response.group.avatar == null) {
                             setGroupAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
                         } else {
@@ -340,10 +371,11 @@ const Chat = (props) => {// cần ID_group (param)
 
     const goBack = () => {
         navigation.navigate("HomeChat");
+        // navigation.goBack();
     };
 
     const toSettingChat = () => {
-        navigation.navigate("SettingChat", { ID_group : group._id }) ;                   
+        navigation.navigate("SettingChat", { ID_group: group._id });
     };
 
     useEffect(() => {
@@ -399,11 +431,12 @@ const Chat = (props) => {// cần ID_group (param)
                     onGoBack={goBack}
                     isPrivate={group?.isPrivate}
                     onToSettingChat={toSettingChat}
+                    onCallVideo={onCallvieo}
                 />
             }
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
-                contentContainerStyle={{ flexGrow: 1 }}
+                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10 }}
                 data={messages || []}
                 renderItem={({ item }) => (
                     <Messagecomponent
@@ -417,6 +450,8 @@ const Chat = (props) => {// cần ID_group (param)
                 keyExtractor={(item) => item._id}
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                 onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                // showsHorizontalScrollIndicator = {false}
+                showsVerticalScrollIndicator={false}
             />
             {/* bàn phím */}
             {
@@ -455,8 +490,11 @@ const Chat = (props) => {// cần ID_group (param)
                 {/* Thư Viện */}
                 <View style={styles.librarySelect}>
                     <Pressable
-                        onPress={onOpenGallery}>
-                        <Icon name="image" size={25} />
+                        onPress={onOpenGallery}
+                    >
+                        <View>
+                            <Icon name="image" size={25} />
+                        </View>
                     </Pressable>
 
                 </View>
@@ -467,14 +505,22 @@ const Chat = (props) => {// cần ID_group (param)
                     value={message}
                     onChangeText={setMessage}
                 />
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     onPress={() => sendMessage('text', message)}
                     style={styles.sendButton}
                 >
                     <Text style={styles.sendText}>Send</Text>
+                </TouchableOpacity> */}
+                <TouchableOpacity
+                    onPress={() => sendMessage('text', message)}
+                    style={styles.sendButton}
+                >
+                    <View>
+                        <Icon name="send" size={25} color='#007bff' />
+                    </View>
+                    {/* <Text style={styles.sendText}>Send</Text> */}
                 </TouchableOpacity>
             </View>
-
         </View >
     )
 }
@@ -486,10 +532,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
+        marginRight: 10
     },
     container: {
         flex: 1,
-        padding: 10,
         backgroundColor: 'white',
     },
     messageContainer: {
@@ -514,31 +560,30 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#ffffff',
         padding: 10,
         flexDirection: 'row',
         alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#ccc',
+        // borderTopWidth: 1,
+        // borderTopColor: '#ccc',
         justifyContent: 'space-between',  // Chia đều khoảng cách giữa các phần
 
     },
     input: {
-        flex: 0.95,
-        borderWidth: 1,
+        flex: 1,
+        // borderWidth: 1,
         padding: 10,
         borderRadius: 20,
         color: 'black',
-        height: 40,
-        borderColor: 'gray',
-        paddingHorizontal: 10,
-        marginBottom: 10,
+        // borderColor: 'gray',
+        backgroundColor: '#d9d9d9d9',
+        // paddingHorizontal: 10,
     },
     sendButton: {
         marginLeft: 10,
-        backgroundColor: '#007bff',
-        padding: 10,
-        borderRadius: 20,
+        // backgroundColor: '#007bff',
+        // padding: 10,
+        // borderRadius: 20,
     },
     sendText: {
         color: '#fff',

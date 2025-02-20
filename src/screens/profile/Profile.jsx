@@ -7,6 +7,7 @@ import {
     FlatList,
     TouchableWithoutFeedback,
     Modal,
+    Pressable,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -16,8 +17,6 @@ import Friends from '../../components/items/Friends'
 import { useDispatch, useSelector } from 'react-redux';
 import {
     joinGroupPrivate,
-    getUser,
-    getRelationshipAvsB,// relationships
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
     huyLoiMoiKetBan,
@@ -28,18 +27,33 @@ import HomeS from '../../styles/screens/home/HomeS'
 import ProfileS from '../../styles/screens/profile/ProfileS'
 import SelectAvatarDialog from '../../components/dialog/SelectAvatarDialog'
 import styles from '../../styles/screens/friend/FriendNoti'
+import { useBottomSheet } from '../../context/BottomSheetContext';
 const Profile = (props) => {
     const { route, navigation } = props;
     const { params } = route;
+
+    const { openBottomSheet } = useBottomSheet();
+
 
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
     const [isAlertVisible, setAlertVisible] = useState(false);
+    const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
+
+
+
+
+
+  const closeBottomSheet = () => {
+    setBottomSheetVisible(false);
+  };
+
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
     const [relationship, setRelationship] = useState(null);
+    const [friendRelationships, setFriendRelationships] = useState(null);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
@@ -47,9 +61,41 @@ const Profile = (props) => {
 
     useEffect(() => {
         callAllProfile();
+        //callGetAllFriendOfID_user();
         //fetchData();
     }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
+
+    
+
+
+    //bottom sheet
+    const detail_selection_image = () => {
+        return (
+          <View style={ProfileS.containerBottomSheet}>
+            <View style={ProfileS.rectangle}>
+              <View style={ProfileS.lineBottomSheet}></View>
+            </View>
+      
+            {/* Các tùy chọn */}
+            <TouchableOpacity style={ProfileS.option}>
+                <View style={ProfileS.anhBia}>
+                    <Icon name='images'size={25} />
+              </View>
+              <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
+            </TouchableOpacity>
+      
+            <TouchableOpacity style={ProfileS.option}>
+                <View style={ProfileS.anhBia}>
+                    <Icon name='images'size={25} />
+              </View>
+              <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      };
+
+    
     //callAllProfile
     const callAllProfile = async () => {
         try {
@@ -60,18 +106,10 @@ const Profile = (props) => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    //console.log("callGuiLoiMoiKetBan: ", response);
-                    if (response.posts && response.user) {
-                        // Gán thông tin user vào từng bài post
-                        const updatedPosts = response.posts.map(post => ({
-                            ...post,
-                            user: response.user // Thêm thông tin user vào mỗi post
-                        }));
-    
-                        setUser(response.user);
-                        setPosts(updatedPosts);
-                        setRelationship(response.relationship);
-                    }
+                    setUser(response.user);
+                    setPosts(response.posts);
+                    setRelationship(response.relationship);
+                    setFriendRelationships(response.friends);
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
@@ -82,81 +120,6 @@ const Profile = (props) => {
             console.log(error)
         }
     }
-
-    // const onGetUser = async (userId) => {
-    //     try {
-    //         await dispatch(getUser({ userId: userId, token: token }))
-    //             .unwrap()
-    //             .then((response) => {
-    //                 console.log(response);
-    //                 setUser(response.user);
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error:', error);
-    //             });
-
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-
-    // const onGetPosts = async (userId) => {
-    //     try {
-    //         await dispatch(myPost({ userId: userId, token: token }))
-    //             .unwrap()
-    //             .then((response) => {
-    //                 //console.log(response);
-    //                 setPosts(response.posts);
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error:', error);
-    //             });
-
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-
-    // const fetchData = async () => {
-    //     let userId = params?._id || me?._id;  // Nếu có params._id thì là bạn bè, không thì là chính mình
-    //     setUser(params?._id ? null : me); // Nếu là mình thì lấy từ Redux
-
-    //     if (userId && params?._id) {
-    //         await onGetUser(userId);
-    //     }
-    //     //await onGetPosts(userId);
-
-    //     //get relationship
-    //     if (params?._id !== me._id) {
-    //         if (params?._id != null || params?._id != '') {
-    //             await getRelation();
-    //         }
-    //     }
-    //     // nếu ko có relationship là trang cá nhân của bản thân
-
-    // };
-
-    //tìm mối quan hệ
-    // const getRelation = async () => {
-    //     try {
-    //         const paramsAPI = {
-    //             ID_user: params?._id,
-    //             me: me._id,
-    //         }
-    //         await dispatch(getRelationshipAvsB(paramsAPI))
-    //             .unwrap()
-    //             .then((response) => {
-    //                 //console.log(response);
-    //                 setRelationship(response.relationship);
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error2 getRelationshipAvsB:', error);
-    //             });
-
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
 
     //guiLoiMoiKetBan
     const callGuiLoiMoiKetBan = async () => {
@@ -253,66 +216,6 @@ const Profile = (props) => {
         await getID_groupPrivate(params?._id, me?._id)
     }
 
-
-    const dataPost = [
-        {
-            id: 1,
-            name: 'Kenny',
-            image: ['https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/04/anh-bien-4.jpg'],
-            avata: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Andrzej_Person_Kancelaria_Senatu.jpg/1200px-Andrzej_Person_Kancelaria_Senatu.jpg',
-            time: '1 giờ trước',
-            title: 'Hôm nay trời đẹp quá',
-        },
-    ]
-
-    const data = [
-        {
-            id: 1,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 2,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 3,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 4,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 5,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 6,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 7,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 8,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-        {
-            id: 9,
-            name: "Kenny",
-            image: "https://t3.ftcdn.net/jpg/02/43/12/34/360_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg"
-        },
-    ]
-
     const headerFriends = () => {
         return (
             <View style={ProfileS.container1}>
@@ -332,8 +235,10 @@ const Profile = (props) => {
                         <View>
                             <Image style={ProfileS.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
                             <View style={ProfileS.viewImagePick}>
+
+                        
                              <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
-                              <Icon name="image-outline" style={ProfileS.imageIcon} size={25} />
+
                             </View>
                         </View>
                         <View style={ProfileS.boxBackground}>
@@ -411,7 +316,7 @@ const Profile = (props) => {
                                             <Text style={ProfileS.textAddStory}>+ Thêm vào tin</Text>
                                         </TouchableOpacity>
                                         <View style={ProfileS.boxEdit}>
-                                            <TouchableOpacity style={ProfileS.btnEdit}>
+                                            <TouchableOpacity style={ProfileS.btnEdit} onPress={ () => {openBottomSheet(25, detail_selection_image )} }>
                                                 <Text style={ProfileS.textEdit}>Chỉnh sửa trang cá nhân</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity style={ProfileS.btnMore}>
@@ -434,13 +339,34 @@ const Profile = (props) => {
                             <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
                         </View>
                         <View style={ProfileS.listFriends}>
+
                             <FlatList
-                                data={data.slice(0, 6)}
-                                renderItem={({ item }) => <Friends friends={item} />}
-                                keyExtractor={(item) => item.id}
+                                data={(friendRelationships || []).slice(0, 6)}
+                                renderItem={({ item }) => (
+                                    //console.log("friend: " + item.ID_userA._id);
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            if (item.ID_userA._id == params?._id) {
+                                                navigation.navigate("TabHome",
+                                                    { screen: "Profile", params: { _id: item.ID_userB._id } })
+                                            } else {
+                                                navigation.navigate("TabHome",
+                                                    { screen: "Profile", params: { _id: item.ID_userA._id } })
+                                            }
+                                        }}
+                                    >
+                                        <Friends relationship={item}
+                                            ID_user={params?._id}
+                                        />
+                                    </TouchableOpacity>
+
+                                )}
+                                keyExtractor={(item) => item._id}
                                 numColumns={3}
                                 showsVerticalScrollIndicator={false}
                             />
+
+
                         </View>
                     </View>
                 </View>
@@ -448,7 +374,7 @@ const Profile = (props) => {
                 <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
                     <View style={ProfileS.boxLive}>
                         <View style={ProfileS.title2}>
-                            <Text style={{ fontSize: 16, fontWeight: "bold" }}>Bài viết</Text>
+                            <Text style={{ fontSize: 16, fontWeight: "bold", color: 'black' }}>Bài viết</Text>
                             <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
                         </View>
                         <View style={ProfileS.boxAllThink}>
@@ -464,14 +390,14 @@ const Profile = (props) => {
                         <TouchableOpacity style={ProfileS.btnLivestream}>
                             <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                                 <Icon name="videocam" size={20} color="red" />
-                                <Text>   Phát trực tiếp</Text>
+                                <Text style = {{marginLeft: 5, color: 'black'}}>Phát trực tiếp</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={ProfileS.btnManage}>
                         <View style={ProfileS.boxManange}>
                             <Icon2 name="comment-text" size={17} color="black" />
-                            <Text style={{ fontSize: 13 }}>  Quản lí bài viết</Text>
+                            <Text style={{ fontSize: 13, color: "black" }}>  Quản lí bài viết</Text>
                         </View>
                     </TouchableOpacity>
                 </View>

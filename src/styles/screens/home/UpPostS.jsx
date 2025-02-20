@@ -19,7 +19,8 @@ const UpPostS = StyleSheet.create({
     },
     txtCreate: {
         fontSize: 20,
-        marginLeft: 10
+        marginLeft: 10,
+        color: 'black'
     },
     btnPost: {
         backgroundColor: '#D9D9D9',
@@ -61,7 +62,8 @@ const UpPostS = StyleSheet.create({
     },
     txtName: {
         fontSize: 19,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: 'black'
     },
     btnStatus: {
         backgroundColor: '#B2D5F8',
@@ -94,7 +96,8 @@ const UpPostS = StyleSheet.create({
     },
     txtIcon: {
         fontSize: 15,
-        marginLeft: 10
+        marginLeft: 10,
+        color: 'black'
     },
     // model
     modalOverlay: {
@@ -118,6 +121,110 @@ const UpPostS = StyleSheet.create({
         fontSize: 16,
         color: '#000',
     },
+    // medias
+    mediaContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    singleMedia: {
+        width: '100%',
+        height: 300,
+        marginBottom: 2,
+    },
+    doubleMedia: {
+        width: '49.5%',
+        height: 200,
+        marginBottom: 2,
+    },
+    tripleMediaFirst: {
+        width: '100%',
+        height: 250,
+        marginBottom: 2,
+    },
+    tripleMediaSecond: {
+        width: '49.5%',
+        height: 150,
+        marginBottom: 2,
+    },
+    quadMedia: {
+        width: '49.5%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaFirstRow: {
+        width: '49.5%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaSecondRowLeft: {
+        width: '32.66%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaSecondRowMiddle: {
+        width: '32.66%',
+        height: 150,
+        marginBottom: 2,
+    },
+    fivePlusMediaSecondRowRight: {
+        width: '32.66%',
+        height: 150,
+        marginBottom: 2,
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+    },
+    videoWrapper: {
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    video: {
+        width: '100%',
+        height: '100%',
+    },
+    playButton: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: [{ translateX: -20 }, { translateY: -20 }],
+    },
+    overlay: {
+        position: 'absolute',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 8,
+    },
+    overlayText: {
+        color: 'white',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    // interactions: {
+    //     flexDirection: 'row',
+    //     justifyContent: 'space-around',
+    //     marginTop: 10,
+    //     paddingTop: 10,
+    //     borderTopWidth: 0.5,
+    //     borderTopColor: '#ddd',
+    // },
+    // action: {
+    //     flexDirection: 'row',
+    //     alignItems: 'center',
+    // },
+    // actionText: {
+    //     marginLeft: 5,
+    //     fontSize: 14,
+    // },
 })
 
 export default UpPostS

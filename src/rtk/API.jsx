@@ -464,6 +464,24 @@ export const allProfile = createAsyncThunk(
   }
 );
 
+// all post in home
+export const getAllPostsInHome = createAsyncThunk(
+  'post/getAllPostsInHome',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`post/getAllPostsInHome?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 // /// test token
 // export const getAllUsers = createAsyncThunk(

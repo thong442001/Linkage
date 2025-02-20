@@ -1,7 +1,44 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-
+const {width, height} = Dimensions.get('window')
 const ProfileS = StyleSheet.create({
+    anhBia:{
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#e4e2de',
+        padding: height * 0.008, 
+        borderRadius: height * 0.03, 
+        marginHorizontal: width * 0.02,
+        width: height * 0.05, 
+        height: height * 0.05, 
+    },
+    containerBottomSheet: {
+        backgroundColor: "#c8c7c5",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+      },
+      rectangle: {
+        alignItems: "center",
+        marginBottom: 10,
+      },
+      lineBottomSheet: {
+        width: 50,
+        height: 5,
+        backgroundColor: "#fff",
+        borderRadius: 10,
+      },
+      option: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        borderBottomColor: "#eee",
+      },
+      optionText: {
+        fontSize: 16,
+        fontWeight: "500",
+      },
     container1: {
         flex: 1,
         backgroundColor: "#A1A6AD"
@@ -19,6 +56,7 @@ const ProfileS = StyleSheet.create({
     titleName: {
         fontSize: 20,
         fontWeight: 'bold',
+        color: 'black'
     },
     boxHeader: {
         backgroundColor: "#fff",
@@ -49,6 +87,7 @@ const ProfileS = StyleSheet.create({
     name: {
         fontSize: 24,
         fontWeight: 'bold',
+        color:'black'
     },
     friendNumber: {
         fontSize: 13,
@@ -79,6 +118,7 @@ const ProfileS = StyleSheet.create({
         fontSize: 13,
         fontWeight: 'bold',
         marginVertical: 11,
+        color:'gray'
     },
     btnMore: {
         backgroundColor: '#D9D9D9',
@@ -104,7 +144,8 @@ const ProfileS = StyleSheet.create({
     },
     textFriend: {
         fontSize: 16,
-        fontWeight: "bold"
+        fontWeight: "bold",
+        color:'black'
     },
     textSeeAll: {
         color: "#0064E099"

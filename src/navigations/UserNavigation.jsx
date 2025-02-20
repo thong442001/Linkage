@@ -6,7 +6,6 @@ import Screen2 from '../screens/register/Screen2';
 import Screen3 from '../screens/register/Screen3';
 import Login from '../screens/login/Login';
 import CreatePasswordScreen from '../screens/register/CreatePasswordScreen';
-import Comment from '../components/comment/Comment';
 import FindWithEmail from '../screens/forgot_password/FindWithEmail';
 import FindWithPhone from '../screens/forgot_password/FindWithPhone';
 import CheckEmail from '../screens/forgot_password/CheckEmail';

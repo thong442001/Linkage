@@ -1,24 +1,59 @@
 import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Stories from '../../components/items/Stories'
-import Post from '../../components/items/Post';
-import { useSelector } from 'react-redux';
+import ProfilePage from '../../components/items/ProfilePage';
+import { useSelector, useDispatch } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
-
+import {
+  getAllPostsInHome
+} from '../../rtk/API';
 const Home = (props) => {
   // const [stories, setStories] = useState([])
   const { route, navigation } = props;
   const { params } = route;
-
-  const [loading, setloading] = useState(true)
-
-
+  const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
 
+  const [posts, setPosts] = useState(null);
   const story = useSelector(state => state.app.stories);
+
+  useEffect(() => {
+    //console.log('1');
+    // Call API khi lần đầu vào trang
+    callGetAllPostsInHome(me._id);
+
+    // Thêm listener để gọi lại API khi quay lại trang
+    const focusListener = navigation.addListener('focus', () => {
+      callGetAllPostsInHome(me._id);
+      //console.log('2');
+    });
+
+    // Cleanup listener khi component bị unmount
+    return () => {
+      focusListener();
+    };
+  }, [navigation]);
+
+  //call api getAllGroupOfUser
+  const callGetAllPostsInHome = async (ID_user) => {
+    try {
+      await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
+        .unwrap()
+        .then((response) => {
+          //console.log(response)
+          setPosts(response.posts);
+        })
+        .catch((error) => {
+          console.log('Error getAllPostsInHome:: ', error);
+        });
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const headerComponentStory = () => {
     return (
@@ -46,7 +81,7 @@ const Home = (props) => {
   const headerComponentPost = () => {
     return (
       <View>
-        <View style={HomeS.box}>
+        <View style={HomeS.box1}>
           <View style={HomeS.header}>
             <Text style={HomeS.title}>Linkage</Text>
             <View style={HomeS.icons}>
@@ -97,9 +132,6 @@ const Home = (props) => {
         {/* story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
-
-            
-        
             <FlatList
               data={story}
               renderItem={renderStory}
@@ -109,66 +141,12 @@ const Home = (props) => {
               ListHeaderComponent={headerComponentStory}
               contentContainerStyle={{ paddingHorizontal: 20 }}
             />
-            
+
           </View>
         </View>
       </View>
     )
   }
-
-  const data = [
-    {
-      id: 1,
-      name: 'Kenny',
-      image: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/04/anh-bien-4.jpg',
-      avata: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Andrzej_Person_Kancelaria_Senatu.jpg/1200px-Andrzej_Person_Kancelaria_Senatu.jpg'
-    },
-    {
-      id: 2,
-      name: 'Henry',
-      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKFYJLwRyqjBk-O1RB0na6l08l5Invpcq5A&s',
-      avata: 'https://www.shutterstock.com/image-photo/handsome-indian-male-office-employee-260nw-2278702237.jpg'
-    },
-    {
-      id: 3,
-      name: 'John',
-      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrNXaVKjl0ywihdE-KRHXIA6nevtd2IksdVw&s',
-      avata: 'https://t3.ftcdn.net/jpg/02/35/92/68/360_F_235926813_VGqvkvucMfZ0T16NLwhkN9C8hUS0vbOH.jpg'
-    },
-  ]
-
-  const dataPost = [
-    {
-      id: 1,
-      name: 'Kenny',
-      image: ['https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/04/anh-bien-4.jpg'],
-      avata: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Andrzej_Person_Kancelaria_Senatu.jpg/1200px-Andrzej_Person_Kancelaria_Senatu.jpg',
-      time: '1 giờ trước',
-      title: 'Hôm nay trời đẹp quá',
-    },
-    {
-      id: 2,
-      name: 'Henry',
-      image: ['https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKFYJLwRyqjBk-O1RB0na6l08l5Invpcq5A&s',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKFYJLwRyqjBk-O1RB0na6l08l5Invpcq5A&s',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKFYJLwRyqjBk-O1RB0na6l08l5Invpcq5A&s'
-      ],
-      avata: 'https://www.shutterstock.com/image-photo/handsome-indian-male-office-employee-260nw-2278702237.jpg',
-      time: '5 giờ trước',
-      title: 'Hôm nay trời đẹp quá',
-    },
-    {
-      id: 3,
-      name: 'John',
-      image:
-        ['https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrNXaVKjl0ywihdE-KRHXIA6nevtd2IksdVw&s',
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfKFYJLwRyqjBk-O1RB0na6l08l5Invpcq5A&s'
-        ],
-      avata: 'https://t3.ftcdn.net/jpg/02/35/92/68/360_F_235926813_VGqvkvucMfZ0T16NLwhkN9C8hUS0vbOH.jpg',
-      time: '1 ngày trước',
-      title: 'Hôm nay trời đẹp quá',
-    },
-  ]
 
   return (
     <View style={HomeS.container}>
@@ -176,12 +154,13 @@ const Home = (props) => {
       <View>
         <View style={HomeS.post}>
           <FlatList
-            data={dataPost}
-            renderItem={({ item }) => <Post post={item} />}
-            keyExtractor={(item) => item.id}
+            data={posts}
+            renderItem={({ item }) => <ProfilePage post={item} />}
+            keyExtractor={(item) => item._id}
             showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
             ListHeaderComponent={headerComponentPost}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 3 }}
           />
         </View>
       </View>
