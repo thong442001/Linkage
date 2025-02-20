@@ -54,6 +54,7 @@ const Profile = (props) => {
     const [posts, setPosts] = useState([]);
     const [relationship, setRelationship] = useState(null);
     const [friendRelationships, setFriendRelationships] = useState(null);
+    const [stories, setStories] = useState([]);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
@@ -106,10 +107,12 @@ const Profile = (props) => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then((response) => {
+                    console.log("stories: " + response.stories)
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
                     setFriendRelationships(response.friends);
+                    setStories(response.stories);
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
@@ -390,7 +393,7 @@ const Profile = (props) => {
                         <TouchableOpacity style={ProfileS.btnLivestream}>
                             <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                                 <Icon name="videocam" size={20} color="red" />
-                                <Text style = {{marginLeft: 5, color: 'black'}}>Phát trực tiếp</Text>
+                                <Text style={{ marginLeft: 5, color: 'black' }}>Phát trực tiếp</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

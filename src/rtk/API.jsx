@@ -452,7 +452,7 @@ export const allProfile = createAsyncThunk(
     try {
       const response = await AxiosHelper()
         .post('post/allProfile', data);
-      console.log(response)
+      //console.log(response)
       if (response.status == true) {
         return response;
       } else {
@@ -483,27 +483,78 @@ export const getAllPostsInHome = createAsyncThunk(
   }
 );
 
-// /// test token
-// export const getAllUsers = createAsyncThunk(
-//   'user/getAllUsers',
-//   async (data, { rejectWithValue }) => {
-//     try {
-//       const response =
-//         await AxiosHelper()
-//           .get('user/getAllUsers', data);
-//       //console.log(response)
-//       if (response.status == true) {
-//         return response;
-//       } else {
-//         return rejectWithValue(response.data.message);
-//       }
-//     } catch (error) {
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
 
+// Tài ( edit user)
+export const editNameOfUser = createAsyncThunk(
+  'user/editNameOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editNameOfUser', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
+export const editAvatarOfUser = createAsyncThunk(
+  'user/editAvatarOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editAvatarOfUser', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const editBackgroundOfUser = createAsyncThunk(
+  'user/editBackgroundOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editBackgroundOfUser', data);
+      //console.log(response)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// "status": true, message: "Đổi password thành công"
+// "status": false, message: "Sai mật khẩu cũ"
+// nhớ khi call check "status"
+export const editPasswordOfUser = createAsyncThunk(
+  'user/editPasswordOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editPasswordOfUser', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 
 

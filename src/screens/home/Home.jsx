@@ -18,6 +18,7 @@ const Home = (props) => {
   const token = useSelector(state => state.app.token);
 
   const [posts, setPosts] = useState(null);
+  const [stories, setStories] = useState([]);
   const story = useSelector(state => state.app.stories);
 
   useEffect(() => {
@@ -43,8 +44,9 @@ const Home = (props) => {
       await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
         .unwrap()
         .then((response) => {
-          //console.log(response)
+          console.log("stories: " + response.stories)
           setPosts(response.posts);
+          setStories(response.stories)
         })
         .catch((error) => {
           console.log('Error getAllPostsInHome:: ', error);

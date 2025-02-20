@@ -30,8 +30,7 @@ const UpPost = (props) => {
     });
     const [caption, setCaption] = useState('');
     const [medias, setMedias] = useState([]);
-
-
+    const [typePost, setTypePost] = useState('Normal');
     const [tags, setTags] = useState([]);
 
     // Các tùy chọn trạng thái
@@ -176,6 +175,7 @@ const UpPost = (props) => {
                 caption: caption,
                 medias: medias,
                 status: selectedOption.name,
+                type: typePost,
                 ID_post_shared: null,
                 tags: tags,
             }
@@ -217,7 +217,7 @@ const UpPost = (props) => {
                     disabled={caption == ""} // Nếu caption rỗng thì không nhấn được
                 >
                     {/* hi */}
-                    <Text style={ caption == "" ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
+                    <Text style={caption == "" ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
                 </TouchableOpacity>
             </View>
             <View style={UpPostS.line}></View>
