@@ -35,7 +35,7 @@ export const BottomSheetProvider = ({ children }) => {
                 enablePanDownToClose={true}
                 handleComponent={null}
             >
-                <BottomSheetView style={{ backgroundColor: 'white', height: '100%' }}>
+                <BottomSheetView style={{ backgroundColor: '#D9D9D9', height: '100%', borderTopEndRadius: 20, borderTopStartRadius: 20 }}>
                     <View style={{ flex: 1, padding: 20 }}>
                         {content}
                     </View>

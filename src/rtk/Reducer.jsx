@@ -2,18 +2,28 @@ import { createSlice } from "@reduxjs/toolkit";
 import { login } from "./API";
 
 const initialState = {
-    user: null, 
+    user: null,
     messageLogin: null,
-    token: '', 
+    token: '',
     refreshToken: '',
     reactions: null,
-    stories: {}, // Luôn khởi tạo là mảng
+    stories: {},
 };
 
 const appSlice = createSlice({
     name: "app",
     initialState,
-    reducers: { 
+    reducers: {
+        changeName: (state, action) => {
+            state.user.first_name = action.payload.first_name;
+            state.user.last_name = action.payload.last_name;
+        },
+        changeAvatar: (state, action) => {
+            state.user.avatar = action.payload
+        },
+        changeBackground: (state, action) => {
+            state.user.background = action.payload
+        },
         resetToken: (state, action) => {
             state.token = action.payload;
         },
@@ -35,7 +45,7 @@ const appSlice = createSlice({
                 return;
             }
             console.log("Adding story:", action.payload);
-            state.stories = [...(state.stories || []), action.payload]; 
+            state.stories = [...(state.stories || []), action.payload];
         },
 
         removeStory: (state, action) => {
@@ -73,5 +83,5 @@ const appSlice = createSlice({
     }
 });
 
-export const { resetToken, logout, setReactions, addStory, removeStory } = appSlice.actions;
+export const { resetToken, logout, setReactions, addStory, removeStory, changeName, changeAvatar, changeBackground } = appSlice.actions;
 export default appSlice.reducer;

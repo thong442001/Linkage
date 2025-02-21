@@ -7,6 +7,7 @@ import {
     FlatList,
     TouchableWithoutFeedback,
     Modal,
+    Pressable,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -26,14 +27,180 @@ import HomeS from '../../styles/screens/home/HomeS'
 import ProfileS from '../../styles/screens/profile/ProfileS'
 import SelectAvatarDialog from '../../components/dialog/SelectAvatarDialog'
 import styles from '../../styles/screens/friend/FriendNoti'
+import { useBottomSheet } from '../../context/BottomSheetContext';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { editAvatarOfUser, editBackgroundOfUser } from '../../rtk/API'
+import { changeAvatar, changeBackground } from '../../rtk/Reducer'
+import axios from 'axios'
+
 const Profile = (props) => {
     const { route, navigation } = props;
     const { params } = route;
 
+    const { openBottomSheet, closeBottomSheet } = useBottomSheet();
+
+
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
-    const [isAlertVisible, setAlertVisible] = useState(false);
+    const [avatar, setavatar] = useState('')
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isImageModalVisible, setImageModalVisible] = useState(false);
+
+
+    const openImageModal = (imageUrl) => {
+        setSelectedImage(imageUrl);
+        setImageModalVisible(true);
+    };
+
+    const closeImageModal = () => {
+        setImageModalVisible(false);
+        setSelectedImage(null);
+    };
+
+
+    //up lên cloudiary
+    const uploadFile = async (file) => {
+        try {
+            const data = new FormData();
+            data.append('file', {
+                uri: file.uri,
+                type: file.type,
+                name: file.fileName
+            });
+            data.append('upload_preset', 'ml_default');
+
+            const response = await axios.post('https://api.cloudinary.com/v1_1/ddbolgs7p/upload', data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            console.log("📂 Response từ Cloudinary:", response.data); // Kiểm tra dữ liệu nhận về
+
+            if (!response.data.secure_url) {
+                throw new Error("Không nhận được secure_url từ Cloudinary!");
+            }
+
+            const fileUrl = response.data.secure_url;
+            console.log('🌍 Link file Cloudinary:', fileUrl);
+            setavatar(fileUrl);
+            return fileUrl;
+        } catch (error) {
+            console.error('Lỗi uploadFile:', error.response ? error.response.data : error.message);
+            return null;
+        }
+    };
+
+
+    //đổi ảnh bìa
+    const onOpenGalleryChangeAvatar = async () => {
+        try {
+            const options = { mediaType: 'image', quality: 1 };
+
+            launchImageLibrary(options, async (response) => {
+                if (response.didCancel) {
+                    console.log("Đã hủy chọn ảnh");
+                    return;
+                }
+
+                if (response.errorMessage) {
+                    console.log("Lỗi khi mở thư viện:", response.errorMessage);
+                    return;
+                }
+
+                const selectedFile = response.assets?.[0];
+                if (!selectedFile) {
+                    console.log("Không có ảnh nào được chọn!");
+                    return;
+                }
+
+                console.log('📂 File đã chọn:', selectedFile.uri);
+
+                const fileUrl = await uploadFile(selectedFile);
+                if (!fileUrl) {
+                    console.log("❌ Upload ảnh thất bại!");
+                    return;
+                }
+
+                const data = { ID_user: me._id, avatar: fileUrl };
+                dispatch(editAvatarOfUser(data))
+                    .unwrap()
+                    .then((res) => {
+                        console.log("🔥 Cập nhật avatar response:", res);
+                        if (res.status) {
+                            dispatch(changeAvatar(fileUrl));
+                            console.log("✅ Đổi avatar thành công");
+                            closeBottomSheet();
+                        } else {
+                            console.log("❌ Đổi avatar thất bại");
+                        }
+                    })
+                    .catch((err) => {
+                        console.log("❌ Lỗi khi gửi API đổi avatar:", err);
+                    });
+            });
+        } catch (error) {
+            console.log("Lỗi onOpenGallery:", error);
+        }
+    };
+
+
+
+    //đổi ảnh bìa
+    const onOpenGalleryChangeBackground = async () => {
+        try {
+            const options = { mediaType: 'image', quality: 1 };
+
+            launchImageLibrary(options, async (response) => {
+                if (response.didCancel) {
+                    console.log("Đã hủy chọn ảnh");
+                    return;
+                }
+
+                if (response.errorMessage) {
+                    console.log("Lỗi khi mở thư viện:", response.errorMessage);
+                    return;
+                }
+
+                const selectedFile = response.assets?.[0];
+                if (!selectedFile) {
+                    console.log("Không có ảnh nào được chọn!");
+                    return;
+                }
+
+                console.log('📂 File đã chọn:', selectedFile.uri);
+
+                const fileUrl = await uploadFile(selectedFile);
+                if (!fileUrl) {
+                    console.log("❌ Upload ảnh thất bại!");
+                    return;
+                }
+
+                const data = { ID_user: me._id, background: fileUrl };
+                dispatch(editBackgroundOfUser(data))
+                    .unwrap()
+                    .then((res) => {
+                        console.log("🔥 Cập nhật background response:", res);
+                        if (res.status) {
+                            dispatch(changeBackground(fileUrl))
+                            console.log("✅ Đổi background thành công");
+                            closeBottomSheet();
+                        } else {
+                            console.log("❌ Đổi background thất bại");
+                        }
+                    })
+                    .catch((err) => {
+                        console.log("❌ Lỗi khi gửi API đổi background:", err);
+                    });
+            });
+        } catch (error) {
+            console.log("Lỗi onOpenGallery:", error);
+        }
+    };
+
+
+
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -50,6 +217,37 @@ const Profile = (props) => {
         //callGetAllFriendOfID_user();
         //fetchData();
     }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
+
+
+
+
+
+    //bottom sheet
+    const detail_selection_image = () => {
+        return (
+            <View style={ProfileS.containerBottomSheet}>
+                <View style={ProfileS.rectangle}>
+                    <View style={ProfileS.lineBottomSheet}></View>
+                </View>
+
+                {/* Các tùy chọn */}
+                <TouchableOpacity style={ProfileS.option} onPress={onOpenGalleryChangeAvatar}>
+                    <View style={ProfileS.anhBia}>
+                        <Icon name='images' size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={ProfileS.option} onPress={onOpenGalleryChangeBackground}>
+                    <View style={ProfileS.anhBia}>
+                        <Icon name='images' size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
 
     //callAllProfile
     const callAllProfile = async () => {
@@ -190,17 +388,69 @@ const Profile = (props) => {
                     </Snackbar>
                     <View >
                         <View>
-                            <Image style={ProfileS.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
-                            <View style={ProfileS.viewImagePick}>
+
+                            <Pressable onPress={() => openImageModal(user?.background)}>
+                                {
+                                    user?.background != null
+                                        ? <Image
+                                            style={ProfileS.backGroundImage}
+                                            // source={{ uri: user?.background }}
+                                            source={{ uri: user?.avatar }}
+                                        />
+                                        : <Image
+                                            style={ProfileS.backGroundImage}
+                                            source={require('./../../../assets/images/phongcanh.jpg')}
+                                        />
+                                }
+                            </Pressable>
+
+                            <Pressable onPress={() => openImageModal(user?.avatar)}>
                                 {
                                     user != null
-                                    && <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
+                                    && <Image
+                                        style={ProfileS.avata}
+                                        source={{ uri: user?.avatar }}
+                                    />
                                 }
-                                <Icon name="image-outline" style={ProfileS.imageIcon} size={25} />
-                            </View>
+                            </Pressable>
+
+
+                            <Modal
+                                visible={isImageModalVisible}
+                                transparent={true}
+                                animationType="fade"
+                                onRequestClose={closeImageModal}
+                            >
+                                <View style={ProfileS.modalContainer}>
+                                    <TouchableWithoutFeedback onPress={closeImageModal}>
+                                        <View style={ProfileS.modalBackground} />
+                                    </TouchableWithoutFeedback>
+
+                                    {
+                                        selectedImage ? (
+                                            <Image
+                                                source={{ uri: selectedImage }}
+                                                style={ProfileS.fullImage}
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <Image
+                                                source={require('./../../../assets/images/phongcanh.jpg')}
+                                                style={ProfileS.fullImage}
+                                                resizeMode="contain"
+                                            />
+                                        )
+                                    }
+
+                                    <TouchableOpacity style={ProfileS.closeButton} onPress={closeImageModal}>
+                                        <Icon name="close-circle-outline" size={40} color={'white'} />
+                                    </TouchableOpacity>
+                                </View>
+                            </Modal>
+
                         </View>
                         <View style={ProfileS.boxBackground}>
-                            <Text style={ProfileS.name}>{user?.first_name} {user?.last_name}</Text>
+                            <Text style={ProfileS.name}> {user?.first_name} {user?.last_name}</Text>
                             <View style={ProfileS.boxInformation}>
                                 <Text style={ProfileS.friendNumber}>500 </Text>
                                 <Text style={[ProfileS.friendNumber, { color: "#D6D6D6" }]}> Người bạn</Text>
@@ -274,7 +524,7 @@ const Profile = (props) => {
                                             <Text style={ProfileS.textAddStory}>+ Thêm vào tin</Text>
                                         </TouchableOpacity>
                                         <View style={ProfileS.boxEdit}>
-                                            <TouchableOpacity style={ProfileS.btnEdit}>
+                                            <TouchableOpacity style={ProfileS.btnEdit} onPress={() => { openBottomSheet(25, detail_selection_image) }}>
                                                 <Text style={ProfileS.textEdit}>Chỉnh sửa trang cá nhân</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity style={ProfileS.btnMore}>

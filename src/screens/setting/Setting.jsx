@@ -11,7 +11,6 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../rtk/Reducer';
-
 const Setting = (props) => {
 
   const { route, navigation } = props;
@@ -20,11 +19,12 @@ const Setting = (props) => {
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-
-
+  
   const onRegister = () => {
     dispatch(logout())
   };
+
+  
 
   return (
     <View style={styles.container}>

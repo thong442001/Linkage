@@ -1,7 +1,44 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-
+const {width, height} = Dimensions.get('window')
 const ProfileS = StyleSheet.create({
+    anhBia:{
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#e4e2de',
+        padding: height * 0.008, 
+        borderRadius: height * 0.03, 
+        marginHorizontal: width * 0.02,
+        width: height * 0.05, 
+        height: height * 0.05, 
+    },
+    containerBottomSheet: {
+        backgroundColor: "#D9D9D9",
+        borderTopLeftRadius: width * 0.2,
+        borderTopRightRadius: width * 0.2,
+        paddingVertical: width * 0.05,
+        paddingHorizontal: width * 0.05,
+      },
+      rectangle: {
+        alignItems: "center",
+        marginBottom: width * 0.01,
+      },
+      lineBottomSheet: {
+        width: width * 0.15,
+        height: height *  0.006,
+        backgroundColor: "#fff",
+        borderRadius: width * 0.1,
+      },
+      option: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: width * 0.03,
+        borderBottomColor: "#eee",
+      },
+      optionText: {
+        fontSize: height * 0.02,      
+        fontWeight: "500",
+      },
     container1: {
         flex: 1,
         backgroundColor: "#A1A6AD"
@@ -13,11 +50,11 @@ const ProfileS = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginHorizontal: 20,
-        marginVertical: 11,
+        marginHorizontal: width * 0.05,
+        marginVertical: height * 0.014,
     },
     titleName: {
-        fontSize: 20,
+        fontSize: height * 0.025,
         fontWeight: 'bold',
         color: 'black'
     },
@@ -25,22 +62,22 @@ const ProfileS = StyleSheet.create({
         backgroundColor: "#fff",
     },
     backGroundImage: {
-        height: 170,
+        height: height * 0.22,
         width: '100%',
     },
     avata: {
-        width: 136,
-        height: 136,
-        borderRadius: 320,
+        width: height * 0.17,
+        height: height * 0.17,
+        borderRadius: height * 0.085,
         borderColor: '#fff',
         borderWidth: 2,
         position: 'absolute',
-        bottom: -68,
-        left: 20,
+        bottom: -height * 0.085,
+        left: width * 0.05,
     },
     boxBackground: {
-        marginHorizontal: 20,
-        marginVertical: 20,
+        marginHorizontal: width * 0.05,
+        marginVertical: height * 0.03,
         marginTop: "20%",
 
     },
@@ -48,90 +85,90 @@ const ProfileS = StyleSheet.create({
         flexDirection: 'row',
     },
     name: {
-        fontSize: 24,
+        fontSize: height * 0.03,
         fontWeight: 'bold',
         color:'black'
     },
     friendNumber: {
-        fontSize: 13,
+        fontSize: height * 0.016,
         fontWeight: 'bold',
     },
     btnAddStory: {
         backgroundColor: '#0064E0',
-        borderRadius: 8,
-        marginVertical: 10,
+        borderRadius: height * 0.01,
+        marginVertical: height * 0.013,
     },
     textAddStory: {
         color: '#FFFFFF',
         textAlign: 'center',
-        marginVertical: 11,
+        marginVertical: height * 0.014,
     },
     boxEdit: {
+        borderRadius: height * 0.01,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     btnEdit: {
         backgroundColor: '#D9D9D9',
-        borderRadius: 8,
+        borderRadius: height * 0.01,
         flex: 4,
         alignItems: 'center',
     },
     textEdit: {
-        fontSize: 13,
+        fontSize: height * 0.016,
         fontWeight: 'bold',
-        marginVertical: 11,
+        marginVertical: height * 0.015,
         color:'gray'
     },
     btnMore: {
         backgroundColor: '#D9D9D9',
-        borderRadius: 8,
+        borderRadius: height * 0.01,
         flex: 1,
         alignItems: 'center',
-        padding: 8,
-        marginLeft: 13,
+        padding: height * 0.01,
+        marginLeft: width * 0.03,
     },
     boxFriends: {
-        marginHorizontal: 20
+        marginHorizontal: width * 0.05,
     },
     title: {
         flexDirection: 'row',
         alignItems: "center",
         justifyContent: "space-between",
-        marginVertical: 14
+        marginVertical: height * 0.02
     },
     textFriendNumber2: {
-        fontSize: 12,
+        fontSize: width * 0.03, // Tỷ lệ theo chiều rộng
         color: "#BEBEBE",
         fontWeight: "bold"
     },
     textFriend: {
-        fontSize: 16,
+        fontSize: width * 0.04,
         fontWeight: "bold",
-        color:'black'
+        color: 'black'
     },
     textSeeAll: {
         color: "#0064E099"
     },
     listFriends: {
         alignItems: "center",
-        marginVertical: 19,
+        marginVertical: height * 0.02,
     },
     boxLive: {
-        marginHorizontal: 20,
-        marginVertical: 15
+        marginHorizontal: width * 0.05,
+        marginVertical: height * 0.02
     },
     avataStatus: {
-        width: 40,
-        height: 40,
-        borderRadius: 180,
-
+        width: width * 0.1,
+        height: width * 0.1,
+        borderRadius: width * 0.5, // Làm tròn dựa trên kích thước avatar
     },
     boxAllThink: {
         flexDirection: "row",
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 10
+        marginTop: height * 0.01
     },
     boxThink: {
         flexDirection: 'row',
@@ -143,18 +180,18 @@ const ProfileS = StyleSheet.create({
         justifyContent: 'space-between'
     },
     boxLivestream: {
-        paddingVertical: 17,
+        paddingVertical: height * 0.02,
         backgroundColor: '#D9D9D999',
-        marginVertical: 10
+        marginVertical: height * 0.015
     },
     btnLivestream: {
-        marginHorizontal: 20,
+        marginHorizontal: width * 0.05,
         backgroundColor: "#FFFFFF",
-        width: 130,
-        height: 40,
+        width: width * 0.35,
+        height: height * 0.05,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 15,
+        borderRadius: width * 0.04,
     },
     boxManange: {
         flexDirection: 'row',
@@ -163,12 +200,12 @@ const ProfileS = StyleSheet.create({
     },
     btnManage: {
         backgroundColor: '#D9D9D9',
-        marginHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 5,
-        marginBottom: 10
+        marginHorizontal: width * 0.05,
+        paddingVertical: height * 0.015,
+        borderRadius: width * 0.02,
+        marginBottom: height * 0.015
     },
-    //modal
+    // Modal styles
     overlay: {
         flex: 1,
         justifyContent: 'center',
@@ -176,48 +213,63 @@ const ProfileS = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     dialog: {
-        borderRadius: 14,
-        width: 336,
-        height: 194,
+        borderRadius: width * 0.04,
+        width: width * 0.9,
+        height: height * 0.25,
         alignItems: 'center',
         backgroundColor: '#FFFF',
         justifyContent: 'space-evenly',
     },
     btnXacNhan: {
-        width: 140,
-        height: 40,
+        width: width * 0.4,
+        height: height * 0.06,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#0064E0',
-        borderRadius: 30,
+        borderRadius: width * 0.08,
     },
     btnXoa: {
-        width: 140,
-        height: 40,
+        width: width * 0.4,
+        height: height * 0.06,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#A6A6A6',
-        borderRadius: 30,
+        borderRadius: width * 0.08,
     },
     text_button: {
-        fontSize: 16,
+        fontSize: width * 0.04,
         color: 'white',
         fontWeight: '600',
     },
     viewImagePick: {
-        flexDirection: 'row',
-        backgroundColor: 'lightblue', 
-        position: 'relative', 
-        alignItems: 'center',
-        justifyContent: 'center',
+       alignItems: 'flex-end'
     },
-    
-    imageIcon: {
-        position: 'absolute', 
-        bottom: 10,  
-        right: 10,  
-        color: '#fff', 
-    }
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalBackground: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+    },
+    fullImage: {
+        width: '100%',
+        height: '80%',
+    },
+    closeButton: {
+        position: 'absolute',
+        bottom: height * 0.05,
+        paddingHorizontal: width * 0.05,
+        paddingVertical: height * 0.015,
+        borderRadius: width * 0.02,
+    },
+    closeButtonText: {
+        color: '#000',
+        fontSize: width * 0.04,
+        fontWeight: 'bold',
+    },
 })
 
 export default ProfileS

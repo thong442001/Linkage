@@ -56,6 +56,7 @@ const Chat = (props) => {// cần ID_group (param)
             navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
         }
     };
+    
     //up lên cloudiary
     const uploadFile = async (file) => {
         try {

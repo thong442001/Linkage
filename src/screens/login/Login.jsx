@@ -34,6 +34,10 @@ const Login = (props) => {
     return /^(84|0[3|5|7|8|9])[0-9]{8}$/.test(phone);
   }
 
+  function isValidPassword(password) {
+    // Kiểm tra mật khẩu chỉ chứa chữ cái và số, không chứa ký tự đặc biệt
+    return /^[A-Za-z0-9]{8,}$/.test(password);
+  }
 
   const validateForm = () => {
     let isValid = true;
@@ -53,8 +57,8 @@ const Login = (props) => {
     if (!password.trim()) {
       setErrorPassword('Vui lòng nhập mật khẩu.');
       isValid = false;
-    } else if (password.length < 6) {
-      setErrorPassword('Mật khẩu phải có ít nhất 6 ký tự.');
+    } else if (!isValidPassword(password)) {
+      setErrorPassword('Mật khẩu phải có ít nhất 8 ký tự và không chứa ký tự đặc biệt.');
       isValid = false;
     } else {
       setErrorPassword('');
@@ -93,8 +97,7 @@ const Login = (props) => {
         console.log(response);
       })
       .catch((error) => {
-        isValid = false;
-        setErrorPassword('Mật khẩu hoặc email sai!');
+        setErrorPassword(error)
       });
   };
 
@@ -127,6 +130,7 @@ const Login = (props) => {
               setErrorPassword('');
             }}
           />
+
           {errorPassword ? <Text style={styles.errorText}>{errorPassword}</Text> : null}
         </View>
 

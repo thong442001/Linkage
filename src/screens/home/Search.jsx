@@ -1,15 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import {View, FlatList, TouchableOpacity, Text, Modal} from 'react-native';
-import {CustomTextInputSearch} from '../../components/textinputs/CustomTextInput';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, TouchableOpacity, Text, Modal } from 'react-native';
+import { CustomTextInputSearch } from '../../components/textinputs/CustomTextInput';
 import SearchItem from '../../components/items/SearchItem';
-import {useDispatch, useSelector} from 'react-redux';
-import {getAllUsers} from '../../rtk/API';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllUsers } from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../styles/screens/search/SearchStyles'; // Import file styles
 
 const Search = props => {
-  const {route, navigation} = props;
+  const { route, navigation } = props;
   const dispatch = useDispatch();
   const token = useSelector(state => state.app.token);
 
@@ -28,7 +28,7 @@ const Search = props => {
 
   const getData = async () => {
     try {
-      const response = await dispatch(getAllUsers({token})).unwrap();
+      const response = await dispatch(getAllUsers({ token })).unwrap();
       setData(response.users);
     } catch (error) {
       console.log('Error:', error);
@@ -116,13 +116,13 @@ const Search = props => {
           <FlatList
             data={searchHistory}
             keyExtractor={item => item._id}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => {
                   saveSearch(item);
                   navigation.navigate('TabHome', {
                     screen: 'Profile',
-                    params: {_id: item._id},
+                    params: { _id: item._id },
                   });
                 }}>
                 <SearchItem
@@ -147,7 +147,7 @@ const Search = props => {
                 <Text style={styles.modalTitle}>Xác nhận xóa</Text>
                 <Text style={styles.modalText}>
                   Bạn có chắc chắn muốn xóa{' '}
-                  <Text style={{fontWeight: 'bold'}}>
+                  <Text style={{ fontWeight: 'bold' }}>
                     {selectedUser?.first_name} {selectedUser?.last_name}
                   </Text>{' '}
                   khỏi lịch sử tìm kiếm?
@@ -173,13 +173,13 @@ const Search = props => {
       <FlatList
         data={filteredProducts}
         keyExtractor={item => item._id}
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => {
               saveSearch(item);
               navigation.navigate('TabHome', {
                 screen: 'Profile',
-                params: {_id: item._id},
+                params: { _id: item._id },
               });
             }}>
             <SearchItem user={item} />
