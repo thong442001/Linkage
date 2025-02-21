@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import React, { useEffect } from 'react';
 import {
   ZegoUIKitPrebuiltCall,
@@ -7,9 +7,9 @@ import {
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import { request, PERMISSIONS } from 'react-native-permissions';
 
-const callGroup = props => {
-  const {route, navigation} = props;
-  const {params} = route;
+const CallGroup = props => {
+  const { route, navigation } = props;
+  const { params } = route;
   console.log(params);
   useEffect(() => {
     // Yêu cầu quyền truy cập camera và microphone
@@ -17,7 +17,7 @@ const callGroup = props => {
       try {
         const cameraPermission = await request(PERMISSIONS.ANDROID.CAMERA);
         const microphonePermission = await request(PERMISSIONS.ANDROID.RECORD_AUDIO);
-        
+
         if (cameraPermission === 'granted' && microphonePermission === 'granted') {
           console.log("Permissions granted");
         } else {
@@ -54,7 +54,7 @@ const callGroup = props => {
   }
 };
 
-export default callGroup;
+export default CallGroup;
 
 const styles = StyleSheet.create({
   container: {
