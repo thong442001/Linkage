@@ -50,15 +50,15 @@ const Login = (props) => {
     }
 
     // Kiểm tra mật khẩu
-    // if (!password.trim()) {
-    //   setErrorPassword('Vui lòng nhập mật khẩu.');
-    //   isValid = false;
-    // } else if (password.length < 6) {
-    //   setErrorPassword('Mật khẩu phải có ít nhất 6 ký tự.');
-    //   isValid = false;
-    // } else {
-    //   setErrorPassword('');
-    // }
+    if (!password.trim()) {
+      setErrorPassword('Vui lòng nhập mật khẩu.');
+      isValid = false;
+    } else if (password.length < 6) {
+      setErrorPassword('Mật khẩu phải có ít nhất 6 ký tự.');
+      isValid = false;
+    } else {
+      setErrorPassword('');
+    }
 
     return isValid;
   };
@@ -93,7 +93,8 @@ const Login = (props) => {
         console.log(response);
       })
       .catch((error) => {
-        console.error(error);
+        isValid = false;
+        setErrorPassword('Mật khẩu hoặc email sai!');
       });
   };
 
