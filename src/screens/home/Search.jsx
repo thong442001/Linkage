@@ -52,7 +52,7 @@ const Search = (props) => {
 
             const filtered = data.filter((a) => {
                 const displayName = (a.first_name + " " + a.last_name).toLowerCase();
-                return displayName.includes(query.toLowerCase());
+                return displayName.includes(query.toLowerCase()) 
                 //const displayName = a.first_name + a.last_name;
                 //displayName.toLowerCase().includes(query.toLowerCase());
                 //a.displayName.toLowerCase().includes(query.toLowerCase())

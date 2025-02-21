@@ -7,7 +7,7 @@ import {
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import { request, PERMISSIONS } from 'react-native-permissions';
 
-const callGroup = props => {
+const CallGroup = props => {
   const {route, navigation} = props;
   const {params} = route;
   console.log(params);
@@ -54,7 +54,7 @@ const callGroup = props => {
   }
 };
 
-export default callGroup;
+export default CallGroup;
 
 const styles = StyleSheet.create({
   container: {
