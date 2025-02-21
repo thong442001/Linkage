@@ -192,7 +192,10 @@ const Profile = (props) => {
                         <View>
                             <Image style={ProfileS.backGroundImage} source={require('./../../../assets/images/phongcanh.jpg')} />
                             <View style={ProfileS.viewImagePick}>
-                                <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
+                                {
+                                    user != null
+                                    && <Image style={ProfileS.avata} source={{ uri: user?.avatar }} />
+                                }
                                 <Icon name="image-outline" style={ProfileS.imageIcon} size={25} />
                             </View>
                         </View>

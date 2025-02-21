@@ -94,7 +94,7 @@ const Login = (props) => {
       })
       .catch((error) => {
         isValid = false;
-        setErrorPassword('Mật khẩu sai');
+        setErrorPassword('Mật khẩu hoặc email sai!');
       });
   };
 

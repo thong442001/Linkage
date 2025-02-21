@@ -17,14 +17,10 @@ export default function Groupcomponent({ item }) {
   useEffect(() => {
     if (item.isPrivate == true) {
       const otherUser = item.members.find(user => user._id !== me._id);
-      if (item.avatar == null) {
-        if (otherUser) {
-          setAvatar(otherUser.avatar);
-        } else {
-          console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
-        }
+      if (otherUser) {
+        setAvatar(otherUser.avatar);
       } else {
-        setAvatar(item.avatar);
+        console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
       }
 
       if (item.name == null) {
