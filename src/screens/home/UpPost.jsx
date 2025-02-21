@@ -33,6 +33,8 @@ const UpPost = (props) => {
     const [typePost, setTypePost] = useState('Normal');
     const [tags, setTags] = useState([]);
 
+    const [Flag, setFlag] = useState(false)
+
     // Các tùy chọn trạng thái
     const status = [
         {
@@ -250,6 +252,8 @@ const UpPost = (props) => {
                         placeholder='Bạn đang nghĩ gì?'
                         style={UpPostS.txtInput}
                         multiline={true}
+                        placeholderTextColor={"gray"}
+                        onPress={() => setFlag(true)}
                     />
                     {/* medias */}
                     {hasMedia && renderMediaGrid(medias)}
@@ -261,8 +265,12 @@ const UpPost = (props) => {
 
 
             <View style={UpPostS.boxItems2}>
-                <View >
-                    <View style={UpPostS.line}></View>
+                <View
+                    style={Flag == true ? UpPostS.BoxInter : UpPostS.BoxInter1}
+                >
+                    {
+                        Flag == true ? <View></View> : <View style={UpPostS.line}></View>
+                    }
 
                     <TouchableOpacity
                         style={UpPostS.btnIcon}
@@ -270,36 +278,35 @@ const UpPost = (props) => {
                     >
                         <View style={UpPostS.boxItems}>
                             <Icon name="image-outline" size={30} color="#33a850" />
-                            <Text style={UpPostS.txtIcon}>Ảnh/video</Text>
+                            {
+                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Ảnh/video</Text>
+                            }
                         </View>
                     </TouchableOpacity>
-                    <View style={UpPostS.line}></View>
+                    <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
 
                     <TouchableOpacity style={UpPostS.btnIcon}>
                         <View style={UpPostS.boxItems}>
                             <Icon name="pricetag" size={30} color="#48a1ff" />
-                            <Text style={UpPostS.txtIcon}>Gắn thẻ</Text>
+                            {
+                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Gắn thẻ</Text>
+                            }
                         </View>
                     </TouchableOpacity>
-                    <View style={UpPostS.line}></View>
 
-                    {/* <TouchableOpacity style={UpPostS.btnIcon}>
-                        <View style={UpPostS.boxItems}>
-                            <Icon name="happy-outline" size={30} color="#f9dd25" />
-                            <Text style={UpPostS.txtIcon}>Cảm xúc</Text>
-                        </View>
-
-                    </TouchableOpacity> */}
-                    <View style={UpPostS.line}></View>
+                    <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
 
                     <TouchableOpacity style={UpPostS.btnIcon}>
                         <View style={UpPostS.boxItems}>
                             <Icon name="videocam-outline" size={30} color="#fcb13c" />
-                            <Text style={UpPostS.txtIcon}>Video trực tiếp</Text>
+                            {
+                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Video trực tiếp</Text>
+                            }
                         </View>
                     </TouchableOpacity>
-                    <View style={UpPostS.line}></View>
-
+                    {
+                        Flag == true ? <View></View> : <View style={UpPostS.line}></View>
+                    }
                 </View>
             </View>
             {/* Modal để hiển thị danh sách */}
