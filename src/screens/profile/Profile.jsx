@@ -426,7 +426,7 @@ const Profile = (props) => {
 
                         </View>
                         <View style={ProfileS.boxBackground}>
-                            <Text style={ProfileS.name}>{user?.first_name}{user?.last_name}</Text>
+                            <Text style={ProfileS.name}> {user?.first_name} {user?.last_name}</Text>
                             <View style={ProfileS.boxInformation}>
                                 <Text style={ProfileS.friendNumber}>500 </Text>
                                 <Text style={[ProfileS.friendNumber, { color: "#D6D6D6" }]}> Người bạn</Text>
@@ -600,7 +600,7 @@ const Profile = (props) => {
                             <Icon name="chevron-back" size={20} color="black" />
                         </View>
                     </TouchableOpacity>
-                    <Text style={ProfileS.titleName}>{user?.first_name}{user?.last_name}</Text>
+                    <Text style={ProfileS.titleName}>{user?.first_name} {user?.last_name}</Text>
                     <View>
                         <Icon name="search" size={20} color="black" />
                     </View>

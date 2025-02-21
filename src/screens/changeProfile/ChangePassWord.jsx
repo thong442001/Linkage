@@ -32,8 +32,23 @@ const ChangePassWord = (props) => {
     }, [passwordNew, passwordOLd, RePass]);
 
     const onChangePassWord = async () => {
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!$@%])[A-Za-z\d!$@%]{8,}$/;
+    
+        if (!passwordRegex.test(passwordNew)) {
+            Alert.alert(
+                'Lỗi',
+                'Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ cái, số và ký tự đặc biệt (!$@%)'
+            );
+            return;
+        }
+    
         if (passwordNew === passwordOLd) {
             Alert.alert('Lỗi', 'Mật khẩu mới không được trùng với mật khẩu cũ');
+            return;
+        }
+    
+        if (passwordNew !== RePass) {
+            Alert.alert('Lỗi', 'Mật khẩu nhập lại không khớp');
             return;
         }
     
@@ -45,14 +60,13 @@ const ChangePassWord = (props) => {
             dispatch(editPasswordOfUser(data))
                 .unwrap()
                 .then((response) => {
-                    console.log(response.status);
-                    if(response.status === true){
-                        Alert.alert('Thông báo','Đổi mật khẩu thành công');
-                    }else{
-                        Alert.alert('Thông báo','Thông tin không chính xác');
+                    if (response.status === true) {
+                        Alert.alert('Thông báo', 'Đổi mật khẩu thành công');
+                    } else {
+                        Alert.alert('Thông báo', 'Thông tin không chính xác');
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error(error);
                 })
                 .finally(() => {
@@ -62,6 +76,7 @@ const ChangePassWord = (props) => {
         }, 2000);
     };
     
+    
 
     return (
         <View style={styles.container}>
@@ -70,7 +85,7 @@ const ChangePassWord = (props) => {
             </Pressable>
             <Text>{me.first_name} {me.last_name}</Text>
             <Text style={styles.label}>Thay đổi mật khẩu</Text>
-            <Text style={styles.label2}>Mật khẩu của bạn phải có tối thiểu 6 ký tự, đồng thời bao gồm cả chữ số, chữ cái và ký tự đặc biệt (!$@%).</Text>
+            <Text style={styles.label2}>Mật khẩu của bạn phải có tối thiểu 8 ký tự, đồng thời bao gồm cả chữ số, chữ cái và ký tự đặc biệt (!$@%).</Text>
 
             {/* Ô nhập mật khẩu cũ */}
             <View style={styles.inputContainer}>

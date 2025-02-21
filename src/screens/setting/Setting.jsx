@@ -36,7 +36,7 @@ const Setting = (props) => {
             uri: me.avatar,
           }}
         />
-        <Text style={styles.text}>{me.first_name}{me.last_name}</Text>
+        <Text style={styles.text}>{me.first_name} {me.last_name}</Text>
         <Icon
           name="sort-desc"
           size={30}
