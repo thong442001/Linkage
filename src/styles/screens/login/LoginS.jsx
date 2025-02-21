@@ -2,6 +2,10 @@ import { Dimensions, StyleSheet } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
+  errorText:{
+    color: 'red',
+    fontWeight: '400'
+  },
   container: {
     flex: 1,
     paddingHorizontal: width * 0.05,

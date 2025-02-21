@@ -32,12 +32,12 @@ const ChangePassWord = (props) => {
     }, [passwordNew, passwordOLd, RePass]);
 
     const onChangePassWord = async () => {
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!$@%])[A-Za-z\d!$@%]{8,}$/;
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     
         if (!passwordRegex.test(passwordNew)) {
             Alert.alert(
                 'Lỗi',
-                'Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ cái, số và ký tự đặc biệt (!$@%)'
+                'Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt.'
             );
             return;
         }
