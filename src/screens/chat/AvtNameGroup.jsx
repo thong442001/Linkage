@@ -9,6 +9,7 @@ import {
     Dimensions,
 } from "react-native";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getGroupID,
@@ -26,7 +27,7 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
 
     const [AvtGroup, setAvtGroup] = useState(null);
     const [nameGroup, setNameGroup] = useState(null);
-
+    const [isEditing, setIsEditing] = useState(false);// input name
     useEffect(() => {
         // Call API khi lần đầu vào trang
         callGetGroupID();
@@ -187,38 +188,47 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
                         {/* Name group */}
                         <TextInput
                             style={styles.searchBox}
-                            value={nameGroup}
+                            value={isEditing ? nameGroup : "Nhóm chưa có tên"}
+                            onFocus={() => {
+                                if (!isEditing) {
+                                    setNameGroup("");
+                                    setIsEditing(true);
+                                }
+                            }}
                             onChangeText={setNameGroup}
                         />
+                        <TouchableOpacity
+                            style={styles.addMemberButton}
+                            onPress={onOpenGallery}
+                        >
+                            <View style={styles.boxUpImage}>
+                                <Icon name="image" size={30} color="black" />
+                            </View>
+                            <Text style={styles.addMemberText}>Tải ảnh lên</Text>
+                        </TouchableOpacity>
                     </View>
                 )
             }
-
-
             {/* Nút vào thư viện */}
-            {
+            {/* {
                 AvtGroup != null
                 && (
-
-                    <TouchableOpacity
-                        style={styles.addMemberButton}
-                        onPress={onOpenGallery}
-                    >
-                        <FontAwesome name="area-chart" size={30} color="black" />
-                        <Text style={styles.addMemberText}>Tải lên</Text>
-                    </TouchableOpacity>
+                    
                 )
-            }
+            } */}
 
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    containerAll: {
         flex: 1,
         backgroundColor: "#F5F5F5",
-        padding: 20,
+    },
+    container: {
+        marginTop: 20,
+        flexDirection: 'column',
     },
     vHeader: {
         flexDirection: 'row',
@@ -266,12 +276,25 @@ const styles = StyleSheet.create({
     addMemberButton: {
         alignItems: "center",
         marginTop: 20,
+       
     },
     addMemberText: {
         fontSize: 14,
         color: "black",
         marginTop: 5,
     },
+    boxUpImage: {
+        backgroundColor: '#d9d9d960',
+        padding: 10,
+        borderRadius: 100
+    },
+    searchBox: {
+        borderColor: 'gray',
+        borderRadius: 10,
+        borderWidth: 0.5,
+        padding:10,
+        marginTop:20
+    }
 });
 
 export default AvtNameGroup

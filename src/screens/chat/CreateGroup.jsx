@@ -100,57 +100,64 @@ const CreateGroup = (props) => {// cần param
     };
 
     return (
-        <View style={styles.container}>
-            {/* header */}
-            <View
-                style={styles.vHeader}
-            >
-                {/* Nút quay lại */}
-                <TouchableOpacity onPress={() => navigation.navigate("HomeChat")}>
-                    <Text style={styles.headerBlue}>Hủy</Text>
-                </TouchableOpacity>
-                <Text style={styles.header}>Tạo nhóm</Text>
-                {/* Nút tạo group */}
-                <TouchableOpacity onPress={taogGroup}>
-                    <Text style={styles.headerBlue}>Tạo</Text>
-                </TouchableOpacity>
-            </View>
-            {/* ten nhóm */}
-            <Text style={styles.txtGrey}>Tên nhóm (không bắt buộc)</Text>
-            <TextInput
-                style={styles.searchBox}
-                placeholder="Nhập tên nhóm..."
-                value={nameGroup}
-                onChangeText={setNameGroup}
-            />
+        <View style={styles.containerAll}>
+            <View style={styles.container}>
+                {/* header */}
+                <View
+                    style={styles.vHeader}
+                >
+                    {/* Nút quay lại */}
+                    <TouchableOpacity onPress={() => navigation.navigate("HomeChat")}>
+                        <Text style={styles.txtHuy}>Hủy</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.header}>Tạo nhóm</Text>
+                    {/* Nút tạo group */}
+                    <TouchableOpacity
+                        onPress={taogGroup}
+                        disabled={selectedUsers.length < 3}
+                    >
+                        <Text style={[styles.txtTao, selectedUsers.length > 2 && { color: "blue" }]}>Tạo</Text>
+                    </TouchableOpacity>
+                </View>
+                {/* ten nhóm */}
+                <Text style={styles.txtGrey}>Tên nhóm (không bắt buộc)</Text>
+                <TextInput
+                    style={styles.searchBox}
+                    placeholder="Nhập tên nhóm..."
+                    value={nameGroup}
+                    onChangeText={setNameGroup}
+                />
 
-            {/* <TextInput style={styles.searchBox} placeholder="Tìm kiếm" /> */}
-            {/* gợi ý */}
-            <Text style={styles.txtGrey}>Gợi ý</Text>
-            <FlatList
-                data={friends}
-                keyExtractor={(item) => item._id}
-                extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
-                renderItem={({ item }) => (
-                    <FriendAdd
-                        item={item}
-                        onToggle={toggleSelectUser}
-                        selectedUsers={selectedUsers}
-                        membersGroup={[]}
-                    />
-                )}
-            />
-        </View >
+                {/* <TextInput style={styles.searchBox} placeholder="Tìm kiếm" /> */}
+                {/* gợi ý */}
+                <Text style={styles.txtGrey}>Gợi ý</Text>
+                <FlatList
+                    data={friends}
+                    keyExtractor={(item) => item._id}
+                    extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
+                    renderItem={({ item }) => (
+                        <FriendAdd
+                            item={item}
+                            onToggle={toggleSelectUser}
+                            selectedUsers={selectedUsers}
+                            membersGroup={[]}
+                        />
+                    )}
+                />
+            </View >
+        </View>
     )
 }
 
 export default CreateGroup
 
 const styles = StyleSheet.create({
-    container: {
+    containerAll: {
         flex: 1,
         backgroundColor: '#fff',
-        padding: 20,
+    },
+    container: {
+        marginHorizontal: 20
     },
     header: {
         fontSize: 24,
@@ -159,25 +166,32 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width * 0.5,
         textAlign: 'center',
     },
-    headerBlue: {
+    txtHuy: {
         fontSize: 16,
         color: "blue",
         textAlign: 'center',
     },
+    txtTao: {
+        fontSize: 16,
+        color: "grey",
+        textAlign: 'center',
+    },
     searchBox: {
         backgroundColor: '#eee',
-        borderRadius: 20,
-        padding: 10,
+        borderRadius: 10,
+        padding: 15,
         marginBottom: 15,
     },
     vHeader: {
         flexDirection: 'row',
         //width: Dimensions.get('window').width,
-        justifyContent: 'space-around',
-        marginBottom: 10,
+        justifyContent: 'space-between',
+        marginVertical: 15,
+        alignItems: "center",
     },
     txtGrey: {
         fontSize: 16,
         color: "#797979",
+        marginBottom: 10
     },
 });
