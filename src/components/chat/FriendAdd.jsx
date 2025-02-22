@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-
+import Icon from 'react-native-vector-icons/Ionicons';
 export default function FriendAdd({ item, onToggle, selectedUsers, membersGroup }) {
   const me = useSelector(state => state.app.user);
   const [ID_friend, setID_friend] = useState(null);
@@ -36,17 +36,19 @@ export default function FriendAdd({ item, onToggle, selectedUsers, membersGroup 
       onPress={() => onToggle(ID_friend)}
       disabled={isJoined}
     >
-      {avatar && <Image source={{ uri: avatar }} style={styles.avatar} />}
-
-      <View style={styles.vTxt}>
-        {name && (
-          <View style={styles.chatInfo}>
-            <Text style={styles.name}>{name}</Text>
+      <View style={styles.boxSelect}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {avatar && <Image source={{ uri: avatar }} style={styles.avatar} />}
+          <View style={styles.vTxt}>
+            {name && (
+              <View style={styles.chatInfo}>
+                <Text style={styles.name}>{name}</Text>
+              </View>
+            )}
           </View>
-        )}
+        </View>
+        {isSelected ? <Icon name="checkmark-circle-sharp" size={25} color="blue" /> : <Icon name="radio-button-off" size={25} color="gray" />}
       </View>
-
-      {isSelected ? <Text>✔</Text> : <Text>○</Text>}
     </TouchableOpacity>
   );
 }
@@ -56,9 +58,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    opacity: 1,
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#ddd',
+    // opacity: 1,
   },
   avatar: {
     width: 50,
@@ -67,16 +69,23 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   chatInfo: {
-    flex: 1,
+    marginLeft: 10
   },
   name: {
     fontSize: 16,
     fontWeight: 'bold',
     color: "black",
   },
-  vTxt: {
-    flexDirection: 'column',
+  // vTxt: {
+  //   flexDirection: 'column',
+  //   flex: 1,
+  // },
+  boxSelect: {
     flex: 1,
-  },
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10
+  }
 });
 

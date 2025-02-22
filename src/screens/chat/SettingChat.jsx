@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getGroupID,
@@ -131,7 +132,7 @@ const SettingChat = (props) => { // cần ID_group (param)
                         style={styles.backButton}
                         onPress={goBack}
                     >
-                        <FontAwesome name="chevron-left" size={24} color="black" />
+                        <Icon name="arrow-back" size={24} color="black" />
                     </TouchableOpacity>
                 )
             }
@@ -184,7 +185,9 @@ const SettingChat = (props) => { // cần ID_group (param)
                             style={styles.addMemberButton}
                             onPress={toAddFriendGroup}
                         >
-                            <FontAwesome name="user-plus" size={30} color="black" />
+                            <View style = {styles.boxIconAdd}>
+                                <Icon name="person-add" size={23} color="black" />
+                            </View>
                             <Text style={styles.addMemberText}>Thêm</Text>
                         </TouchableOpacity>
                     )
@@ -256,10 +259,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginTop: 10,
+        color: 'black'
     },
     changeGroupInfo: {
         color: "blue",
-        marginTop: 5,
+        marginTop: 8,
     },
     addMemberButton: {
         alignItems: "center",
@@ -287,6 +291,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         marginLeft: 10,
+        color: 'black'
     },
     leaveChatButton: {
         flexDirection: "row",
@@ -298,6 +303,11 @@ const styles = StyleSheet.create({
         color: "red",
         marginLeft: 10,
     },
+    boxIconAdd:{
+        backgroundColor: '#d9d9d960',
+        padding: 10,
+        borderRadius: 100
+    }
 });
 
 export default SettingChat

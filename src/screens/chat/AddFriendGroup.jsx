@@ -15,7 +15,7 @@ import {
     addtMembers
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
-
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const AddFriendGroup = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
@@ -127,59 +127,70 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
     };
 
     return (
-        <View style={styles.container}>
-            {/* header */}
-            <View
-                style={styles.vHeader}
-            >
-                {/* Nút quay lại */}
-                <TouchableOpacity
-                    onPress={toMembersGroup}
+        <View style={styles.containerAll}>
+            <View style={styles.container}>
+                {/* header */}
+                <View
+                    style={styles.vHeader}
                 >
-                    <Text style={styles.headerBlue}>Hủy</Text>
-                </TouchableOpacity>
-                <Text style={styles.header}>Chọn người</Text>
-                {/* Nút add ng */}
-                <TouchableOpacity
-                    onPress={handleAddMembers}
-                >
-                    <Text style={styles.headerBlue}>Thêm</Text>
-                </TouchableOpacity>
-            </View>
-            {/* search friend */}
-            <TextInput
-                style={styles.searchBox}
-                placeholder="Tìm kiếm"
-            // value={nameGroup}
-            // onChangeText={setNameGroup}
-            />
-
-            {/* gợi ý */}
-            <Text style={styles.txtGrey}>Gợi ý</Text>
-            <FlatList
-                data={friends}
-                keyExtractor={(item) => item._id}
-                extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
-                renderItem={({ item }) => (
-                    <FriendAdd
-                        item={item}
-                        onToggle={toggleSelectUser}
-                        selectedUsers={selectedUsers}
-                        membersGroup={membersGroup}
+                    {/* Nút quay lại */}
+                    <TouchableOpacity
+                        onPress={toMembersGroup}
+                    >
+                        <Text style={styles.headerBlue}>Hủy</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.header}>Thêm người</Text>
+                    {/* Nút add ng */}
+                    <TouchableOpacity
+                        onPress={handleAddMembers}
+                    >
+                        <Text style={styles.headerBlue}>Thêm</Text>
+                    </TouchableOpacity>
+                </View>
+                {/* search friend */}
+                <View style={styles.boxSearch}>
+                    <View style={{paddingLeft: 10}}>
+                        <Icon name="search-outline" size={25} color='black' />
+                    </View>
+                    <TextInput
+                        style={styles.searchBox}
+                        placeholder="Tìm kiếm"
+                    // value={nameGroup}
+                    // onChangeText={setNameGroup}
                     />
-                )}
-            />
-        </View >
+                </View>
+
+
+                {/* gợi ý */}
+                <Text style={styles.txtGrey}>Gợi ý</Text>
+                <FlatList
+                    data={friends}
+                    keyExtractor={(item) => item._id}
+                    extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
+                    renderItem={({ item }) => (
+                        <FriendAdd
+                            item={item}
+                            onToggle={toggleSelectUser}
+                            selectedUsers={selectedUsers}
+                            membersGroup={membersGroup}
+                        />
+                    )}
+                />
+            </View >
+        </View>
     )
 }
 
 export default AddFriendGroup
 
 const styles = StyleSheet.create({
-    container: {
+    containerAll: {
         flex: 1,
         backgroundColor: '#fff',
-        padding: 20,
+    },
+    container: {
+        // padding: 20,,
+        marginHorizontal: 20,
     },
     header: {
         fontSize: 24,
@@ -194,19 +205,26 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     searchBox: {
-        backgroundColor: '#eee',
-        borderRadius: 20,
-        padding: 10,
-        marginBottom: 15,
+
+        padding: 15,
+        flex: 1
     },
     vHeader: {
         flexDirection: 'row',
         //width: Dimensions.get('window').width,
-        justifyContent: 'space-around',
-        marginBottom: 10,
+        justifyContent: 'space-between',
+        marginVertical: 20,
+        alignItems: 'center'
     },
     txtGrey: {
         fontSize: 16,
         color: "#797979",
     },
+    boxSearch: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 20,
+        backgroundColor: '#eee',
+        borderRadius: 20,
+    }
 });

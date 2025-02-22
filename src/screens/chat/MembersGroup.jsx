@@ -16,6 +16,7 @@ import {
     deleteMember,
     passKey,
 } from '../../rtk/API';
+import Icon from 'react-native-vector-icons/Ionicons';
 const MembersGroup = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -137,7 +138,7 @@ const MembersGroup = (props) => {// cần ID_group (param)
                 <TouchableOpacity
                     onPress={toSettingChat}
                 >
-                    <FontAwesome name="chevron-left" size={24} color="black" />
+                    <Icon name="arrow-back" size={23} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.header}>Thành viên</Text>
                 {/* Nút add new member  */}
@@ -149,7 +150,7 @@ const MembersGroup = (props) => {// cần ID_group (param)
                             <TouchableOpacity
                                 onPress={toAddFriendGroup}
                             >
-                                <FontAwesome name="user-plus" size={24} color="black" />
+                                <Icon name="person-add" size={23} color="black" />
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity>
@@ -161,21 +162,24 @@ const MembersGroup = (props) => {// cần ID_group (param)
                 }
             </View>
 
-            <Text style={styles.txtGrey}>Tất cả</Text>
-            <FlatList
-                data={membersGroup}
-                keyExtractor={(item) => item._id}
-                extraData={membersGroup}
-                renderItem={({ item }) => (
-                    <ItemFriendInGroup
-                        item={item}
-                        ID_admin={membersGroup[0]._id}
-                        toProfile={toProfile}
-                        handleXoa={handleXoa}
-                        handlePassKey={handlePassKey}
-                    />
-                )}
-            />
+            <View style={{ marginHorizontal: 20 }}>
+                <Text style={styles.txtGrey}>Tất cả</Text>
+                <FlatList
+                    data={membersGroup}
+                    keyExtractor={(item) => item._id}
+                    extraData={membersGroup}
+                    renderItem={({ item }) => (
+                        <ItemFriendInGroup
+                            item={item}
+                            ID_admin={membersGroup[0]._id}
+                            toProfile={toProfile}
+                            handleXoa={handleXoa}
+                            handlePassKey={handlePassKey}
+                        />
+                    )}
+                />
+            </View>
+
         </View >
     )
 }
@@ -186,7 +190,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        padding: 20,
+        // padding: 20,
     },
     header: {
         fontSize: 24,
@@ -208,12 +212,21 @@ const styles = StyleSheet.create({
     },
     vHeader: {
         flexDirection: 'row',
-        //width: Dimensions.get('window').width,
-        justifyContent: 'space-around',
-        marginBottom: 10,
+        // width: Dimensions.get('window').width,
+        justifyContent: 'space-between',
+        marginBottom: 20,
+        backgroundColor: "#ffffff",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5, // Chỉ có tác dụng trên Android
+        paddingVertical: 15,
+        paddingHorizontal: 15
     },
     txtGrey: {
         fontSize: 16,
         color: "#797979",
+        marginBottom: 10
     },
 });
