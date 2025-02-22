@@ -1,5 +1,5 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, { useEffect } from 'react';
+import {StyleSheet, Text, View,Image} from 'react-native';
+import React, { useEffect,useState } from 'react';
 import {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
@@ -9,13 +9,14 @@ import { request, PERMISSIONS } from 'react-native-permissions';
 const CallPage = props => {
   const {route, navigation} = props;
   const {params} = route;
-  console.log(params);
+console.log("avatar",params.MyAvatar);
   useEffect(() => {
-    // Yêu cầu quyền truy cập camera và microphone
     const requestPermissions = async () => {
       try {
-        const cameraPermission = await request(PERMISSIONS.ANDROID.CAMERA);
-        const microphonePermission = await request(PERMISSIONS.ANDROID.RECORD_AUDIO);
+        const [cameraPermission, microphonePermission] = await Promise.all([
+          request(PERMISSIONS.ANDROID.CAMERA),
+          request(PERMISSIONS.ANDROID.RECORD_AUDIO)
+        ]);
         
         if (cameraPermission === 'granted' && microphonePermission === 'granted') {
           console.log("Permissions granted");
@@ -40,21 +41,53 @@ const CallPage = props => {
           userName={params?.MyUsername}
           callID={params?.ID_group}
           config={{
-            ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
+            // Bật camera & mic khi vào phòng
+            turnOnCameraWhenJoining: params?.status,
+            turnOnMicrophoneWhenJoining: true,
+            useSpeakerWhenJoining:  params?.status,
+        
+            // Hiển thị avatar khi tắt camera
+            showUserAvatarInAudioMode: true,
+            avatarUrl: "https://i.pravatar.cc/300", 
+        
+            // Hiển thị tên người dùng trên video
+            showUserNameOnVideo: true,
+        
+            // Cấu hình thanh điều khiển
+            topMenuBarConfig: {
+              isVisible: true, // Hiển thị thanh menu trên
+            },
+            bottomMenuBarConfig: {
+              isVisible: true, // Hiển thị thanh menu dưới
+            },
+            avatarBuilder: ({ userInfo }) => {
+              // Kiểm tra nếu userID khớp với người dùng hiện tại
+              if (userInfo.userID === params?.id_user) {
+                return (
+                  <View style={{ width: '100%', height: '100%' }}>
+                    <Image
+                      style={{ width: '100%', height: '100%' }}
+                      resizeMode="cover"
+                      source={{ uri: params?.MyAvatar }}
+                    />
+                  </View>
+                );
+              }
+              // Trả về null nếu không có avatar tùy chỉnh
+              return null;
+            },
+        
+            // Khi cuộc gọi kết thúc, quay về màn hình chat
             onCallEnd: (callID, reason, duration) => {
               navigation.navigate("Chat", { ID_group: params.ID_group });
-              return;
             },
           }}
-          // config={{
-          //   ...GROUP_VOICE_CALL_CONFIG,
-          //   onHangUp: () => {props.navigation.navigate('HomePage')},
-          // }}
         />
       </View>
     );
   } catch (error) {
     console.error('Error initializing ZegoUIKitPrebuiltCall: ', error);
+    return null;
   }
 };
 

@@ -36,6 +36,7 @@ const Chat = (props) => {// cần ID_group (param)
     const [groupName, setGroupName] = useState(null); // Tên nhóm
     const [ID_user, setID_user] = useState(null);
     const [myUsername, setmyUsername] = useState(null);
+    const [myAvatar, setmyAvatar] = useState(null);
 
     const [socket, setSocket] = useState(null);
     const [message, setMessage] = useState('');
@@ -46,14 +47,24 @@ const Chat = (props) => {// cần ID_group (param)
 
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const [status, setstatus] = useState(false);
 
     // call video
     const onCallvieo = () => {
         if (!group) return;
         if (group.isPrivate == true) {
-            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
+            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername ,status: true});
         } else {
-            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername });
+            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername,status: true });
+        }
+    };
+     // call audio
+     const onCallAudio = () => {
+        if (!group) return;
+        if (group.isPrivate == true) {
+            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername ,status: false,MyAvatar: myAvatar});
+        } else {
+            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername,status: false,MyAvatar: myAvatar });
         }
     };
     
@@ -277,6 +288,8 @@ const Chat = (props) => {// cần ID_group (param)
                         if (myUser) {
                             setID_user(myUser._id);
                             setmyUsername((myUser.first_name + " " + myUser.last_name));
+                            setmyAvatar(myUser.avatar);
+                            
                         } else {
                             console.log("⚠️ Không tìm thấy người dùng");
                         }
@@ -300,6 +313,7 @@ const Chat = (props) => {// cần ID_group (param)
                         if (myUser) {
                             setID_user(myUser._id);
                             setmyUsername((myUser.first_name + " " + myUser.last_name));
+                            setmyAvatar(myUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy người dùng");
                         }
@@ -433,6 +447,7 @@ const Chat = (props) => {// cần ID_group (param)
                     isPrivate={group?.isPrivate}
                     onToSettingChat={toSettingChat}
                     onCallVideo={onCallvieo}
+                    onCallAudio={onCallAudio}
                 />
             }
             <FlatList
