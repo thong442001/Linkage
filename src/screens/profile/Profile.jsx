@@ -215,7 +215,6 @@ const Profile = (props) => {
     useEffect(() => {
         callAllProfile();
         //callGetAllFriendOfID_user();
-        //fetchData();
     }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
 
@@ -259,12 +258,13 @@ const Profile = (props) => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log("stories: " + response.stories)
+                    // console.log("stories: " + response.stories)
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
                     setFriendRelationships(response.friends);
                     setStories(response.stories);
+                    console.log("stories: " + response.stories[0].medias[0]);
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
@@ -379,7 +379,6 @@ const Profile = (props) => {
                     <Snackbar
                         visible={dialogReLoad}
                         onDismiss={() => {
-                            fetchData();
                             setDialogreload(false);
                         }}
                         duration={1000}

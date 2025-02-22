@@ -1,22 +1,40 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-const Stories = ({stories , isSelected }) => {
-  console.log("Props received in Stories:", stories); // Kiểm tra props nhận được
-  if (!stories) return null; // Kiểm tra nếu stories không tồn tại
- 
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React from 'react';
+import { oStackHome } from '../../navigations/HomeNavigation';
+import { useNavigation } from '@react-navigation/native';
+const Stories = ({ StoryPost }) => {
+  console.log('Props received in Stories:', StoryPost.user._id); // Kiểm tra props nhận được
+
+  const navigation = useNavigation();
+  // if (!StoryPost) return null; // Kiểm tra nếu stories không tồn tại
+
+  const allMedias = StoryPost.stories.flatMap(story => story.medias);
+  // console.log("Danh sách ảnh từ tất cả stories:", allMedias);
+
+  const firstImages = StoryPost.stories.map(story => story.medias?.[0] || null);
+  // console.log("firstImage:", firstImages); // Kiểm tra props nhận được
+
   return (
-    <View style={styles.boxStory}>
-      <Image style={styles.imageStories} source={  stories.image } />
-      <Image style={[styles.avataStories, isSelected && styles.selectedBorder]} source={ stories.avatar } />
+    <TouchableOpacity
+      style={styles.boxStory}
+      onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { StoryView: StoryPost, currentUserId: StoryPost.user._id })}>
+      <Image style={styles.imageStories} source={{ uri: firstImages[0] }} />
+
+      <Image
+        style={styles.avataStories}
+        source={{ uri: StoryPost.user.avatar }}
+      />
       <View style={styles.backGround}></View>
-      <Text style={styles.name}>{stories.name}</Text>
-    </View>
+      <Text style={styles.name}>
+        {StoryPost?.user?.first_name + ' ' + StoryPost?.user?.last_name}
+      </Text>
+    </TouchableOpacity>
   );
 };
-export default Stories
+export default Stories;
 
 const styles = StyleSheet.create({
-  boxStory:{
+  boxStory: {
     marginLeft: 10,
   },
   imageStories: {
@@ -32,7 +50,7 @@ const styles = StyleSheet.create({
     borderColor: '#1190FF',
     position: 'absolute',
     left: 8,
-    top: 7
+    top: 7,
   },
   name: {
     fontWeight: 'bold',
@@ -40,7 +58,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     position: 'absolute',
     bottom: 9,
-    left: 8
+    left: 8,
   },
   backGround: {
     width: 123,
@@ -52,6 +70,6 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   selectedBorder: {
-    borderColor: "gray", // Viền xám khi được chọn
+    borderColor: 'gray', // Viền xám khi được chọn
   },
-})
+});

@@ -7,7 +7,7 @@ const initialState = {
     token: '',
     refreshToken: '',
     reactions: null,
-    stories: {},
+    //stories: [],
 };
 
 const appSlice = createSlice({
@@ -32,30 +32,30 @@ const appSlice = createSlice({
             state.user = null;
             state.token = '';
             state.refreshToken = '';
-            state.stories = []; // Xóa luôn danh sách stories khi logout
+            //state.stories = []; // Xóa luôn danh sách stories khi logout
         },
 
         setReactions: (state, action) => {
             state.reactions = action.payload;
         },
 
-        addStory: (state, action) => {
-            if (!action.payload) {
-                console.error("addStory: action.payload is undefined!");
-                return;
-            }
-            console.log("Adding story:", action.payload);
-            state.stories = [...(state.stories || []), action.payload];
-        },
+        // addStory: (state, action) => {
+        //     if (!action.payload) {
+        //         console.error("addStory: action.payload is undefined!");
+        //         return;
+        //     }
+        //     console.log("Adding story:", action.payload);
+        //     state.stories = [...(state.stories || []), action.payload];
+        // },
 
-        removeStory: (state, action) => {
-            if (!state.stories || !Array.isArray(state.stories)) {
-                console.error("removeStory: state.stories is not an array!");
-                return;
-            }
-            console.log("Removing story with ID:", action.payload);
-            state.stories = state.stories.filter(story => story?.id !== action.payload);
-        }
+        // removeStory: (state, action) => {
+        //     if (!state.stories || !Array.isArray(state.stories)) {
+        //         console.error("removeStory: state.stories is not an array!");
+        //         return;
+        //     }
+        //     console.log("Removing story with ID:", action.payload);
+        //     state.stories = state.stories.filter(story => story?.id !== action.payload);
+        // }
     },
 
     extraReducers: (builder) => {
@@ -83,5 +83,5 @@ const appSlice = createSlice({
     }
 });
 
-export const { resetToken, logout, setReactions, addStory, removeStory, changeName, changeAvatar, changeBackground } = appSlice.actions;
+export const { resetToken, logout, setReactions, changeName, changeAvatar, changeBackground } = appSlice.actions;
 export default appSlice.reducer;
