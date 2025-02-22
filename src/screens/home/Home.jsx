@@ -140,7 +140,7 @@ const Home = (props) => {
                 // console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
                 return <Stories StoryPost={item} />; // Đúng props
               }}
-              keyExtractor={(item) => item._id}
+              keyExtractor={(item, index) => item?._id ? item._id.toString() : `story-${index}`}
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               ListHeaderComponent={headerComponentStory}

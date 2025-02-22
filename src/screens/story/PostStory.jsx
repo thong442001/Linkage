@@ -1,48 +1,44 @@
 import React, { useEffect, useState } from "react";
-import { View, Image, StyleSheet, PermissionsAndroid, Platform, ActivityIndicator, Alert } from "react-native";
-import * as ImagePicker from "react-native-image-picker";
+import {
+  View,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  Alert
+} from "react-native";
+import { launchImageLibrary } from 'react-native-image-picker';
 import axios from "axios";
 import { oStackHome } from "../../navigations/HomeNavigation";
 
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload'; // Thay <your-cloud-name> bằng tên Cloudinary của bạn
-const UPLOAD_PRESET = 'ml_default'; // Thay bằng upload preset đã cấu hình trên Cloudinary
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
+const UPLOAD_PRESET = 'ml_default';
 
 const PostStory = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    pickImage(); // Khi mở trang, tự động chọn ảnh
+    onOpenGallery();
   }, []);
 
-  const requestGalleryPermission = async () => {
-    if (Platform.OS === "android") {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn("Lỗi cấp quyền:", err);
-        return false;
-      }
-    }
-    return true; // iOS không cần xin quyền
-  };
+  const onOpenGallery = async () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+      selectionLimit: 1,
+    };
 
-  const pickImage = async () => {
-    const hasPermission = await requestGalleryPermission();
-    if (!hasPermission) {
-      alert("Bạn cần cấp quyền để truy cập thư viện ảnh!");
-      return;
-    }
-    ImagePicker.launchImageLibrary({ mediaType: "photo" }, async (response) => {
-      if (!response.didCancel && !response.error && response.assets) {
-        const imageUri = response.assets[0].uri;
-        setSelectedImage(imageUri);
-        await uploadToCloudinary(imageUri);
+    launchImageLibrary(options, async (response) => {
+      if (response.didCancel) {
+        console.log("Đã hủy chọn ảnh");
+        navigation.goBack(); // Quay lại nếu không chọn ảnh
+      } else if (response.errorMessage) {
+        Alert.alert("Lỗi", "Không thể mở thư viện ảnh!");
+        navigation.goBack();
       } else {
-        navigation.goBack(); // Nếu hủy chọn ảnh, quay lại trang trước
+        const selectedFile = response.assets[0];
+        setSelectedImage(selectedFile.uri);
+        await uploadToCloudinary(selectedFile.uri);
       }
     });
   };
@@ -52,7 +48,7 @@ const PostStory = ({ navigation }) => {
     const formData = new FormData();
     formData.append("file", {
       uri: imageUri,
-      type: "image/jpeg", // Hoặc có thể là 'image/png'
+      type: "image/jpeg",
       name: "upload.jpg",
     });
     formData.append("upload_preset", UPLOAD_PRESET);
@@ -73,12 +69,12 @@ const PostStory = ({ navigation }) => {
   };
 
   const postStory = (imageUrl) => {
-    navigation.replace(oStackHome.Story.name, { newStory: imageUrl }); // Chuyển sang màn hình Story với URL ảnh
+    navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
   };
 
   return (
     <View style={styles.container}>
-      {loading ? <ActivityIndicator size="large" color="#0000ff" /> : null}
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {selectedImage && !loading && <Image source={{ uri: selectedImage }} style={styles.image} />}
     </View>
   );

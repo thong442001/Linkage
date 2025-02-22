@@ -63,6 +63,13 @@ const Setting = (props) => {
         </View>
       </Pressable>
 
+      <Pressable onPress={() => navigation.navigate('ChangeDisplayName')}>
+        <View style={styles.container_item1}>
+          <Icon name="lock" size={30} color="black" />
+          <Text style={styles.text}>Đổi tên</Text>
+        </View>
+      </Pressable>
+
 
       <View style={styles.btnLogout}>
         <TouchableOpacity

@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
     time: {
         fontSize: 11,
         marginRight: 4,
+        color: 'grey'
     },
     name: {
         fontSize: 15,
