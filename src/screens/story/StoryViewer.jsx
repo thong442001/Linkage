@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Image,
@@ -9,95 +9,142 @@ import {
   Text,
   TouchableWithoutFeedback,
   TouchableOpacity,
-  TextInput,
-  FlatList,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {useSelector, useDispatch} from 'react-redux';
-import {getUser} from '../../rtk/Reducer';
-import {oStackHome} from '../../navigations/HomeNavigation';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-const {width, height} = Dimensions.get('window');
-const emojis = ['❤️', '😂', '👍', '🔥', '😢', '👏'];
+const { width, height } = Dimensions.get('window');
+const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 
-const Story = ({route}) => {
-  const {StoryView} = route.params;
+const Story = () => {
+  const route = useRoute();
+  const { StoryView, currentUserId } = route.params || {};
   const navigation = useNavigation();
-  const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [completedIndices, setCompletedIndices] = useState([]);
-  const progress = useRef(new Animated.Value(0)).current;
-  const [message, setMessage] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState(null);
+  const emojiScale = useRef(new Animated.Value(1)).current; // Giá trị scale ban đầu
 
-  const token = useSelector(state => state.app.token);
-  const user = useSelector(state => state.app.user);
+  const progressBars = useRef(StoryView.stories.map(() => new Animated.Value(0))).current;
+
+  if (!StoryView || !StoryView.stories || StoryView.stories.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: 'white' }}>Không có dữ liệu Story</Text>
+      </View>
+    );
+  }
+
+  const startProgress = (index) => {
+    progressBars[index].setValue(0);
+    Animated.timing(progressBars[index], {
+      toValue: 1,
+      duration: 5000,
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) handleNextStory();
+    });
+  };
 
   useEffect(() => {
-    if (!user && token) {
-      dispatch(getUser(token));
-    }
-  }, [user, token, dispatch]);
+    startProgress(currentIndex);
+  }, [currentIndex]);
 
-  const handlePress = event => {
-    const {locationX} = event.nativeEvent;
-    if (locationX < width / 2) {
-      setCurrentIndex(prevIndex => Math.max(prevIndex - 1, 0));
+  const handleNextStory = () => {
+    if (currentIndex + 1 < StoryView.stories.length) {
+      progressBars[currentIndex].setValue(1);
+      setCurrentIndex((prevIndex) => prevIndex + 1);
+      setSelectedEmoji(null); // Reset emoji khi chuyển story
     } else {
-      setCurrentIndex(prevIndex => prevIndex + 1);
+      navigation.goBack();
     }
+  };
+
+  const handlePrevStory = () => {
+    if (currentIndex > 0) {
+      progressBars[currentIndex].setValue(0);
+      setCurrentIndex((prevIndex) => prevIndex - 1);
+      setSelectedEmoji(null); // Reset emoji khi chuyển story
+    }
+  };
+
+  const handlePress = (event) => {
+    const { locationX } = event.nativeEvent;
+    if (locationX < width / 2) {
+      handlePrevStory();
+    } else {
+      handleNextStory();
+    }
+  };
+
+  // Xử lý chọn emoji và thêm hiệu ứng nảy lên
+  const handleSelectEmoji = (emoji) => {
+    setSelectedEmoji(emoji);
+    emojiScale.setValue(1); // Reset scale về ban đầu
+    Animated.sequence([
+      Animated.timing(emojiScale, {
+        toValue: 1.5, // Nảy lên
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(emojiScale, {
+        toValue: 1, // Trở lại kích thước bình thường
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   return (
     <TouchableWithoutFeedback onPress={handlePress}>
       <View style={styles.container}>
-        <Image source={StoryView.image} style={styles.image} />
+        <View style={styles.progressBarContainer}>
+          {StoryView.stories.map((_, index) => (
+            <View key={index} style={styles.progressBarBackground}>
+              <Animated.View
+                style={[
+                  styles.progressBar,
+                  {
+                    width: progressBars[index].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  },
+                ]}
+              />
+            </View>
+          ))}
+        </View>
+
+        <Image
+          source={{ uri: StoryView.stories[currentIndex]?.medias[0] }}
+          style={styles.image}
+        />
 
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
-            <Image source={StoryView.avatar} style={styles.avatar} />
+            <Image source={{ uri: StoryView.user.avatar }} style={styles.avatar} />
             <Text style={styles.username}>
-              {StoryView.name} {StoryView.last_name}
+              {StoryView.user.first_name + ' ' + StoryView.user.last_name}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.exitButton}
-            onPress={() => navigation.navigate(oStackHome.TabHome.name)}>
+          <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
             <Text style={styles.exitText}>❌</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Thanh chọn biểu cảm */}
         <View style={styles.emojiContainer}>
-          <FlatList
-            data={emojis}
-            horizontal
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexGrow: 1,
-            }}
-            renderItem={({item}) => (
-              <TouchableOpacity style={styles.emojiButton}>
-                <Text style={styles.emojiText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
+          {emojis.map((emoji, index) => (
+            <TouchableOpacity key={index} onPress={() => handleSelectEmoji(emoji)}>
+              <Text style={styles.emoji}>{emoji}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* Thanh gửi tin nhắn */}
-        <View style={styles.messageContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Gửi tin nhắn..."
-            placeholderTextColor="#aaa"
-            value={message}
-            onChangeText={setMessage}
-          />
-          <TouchableOpacity style={styles.sendButton}>
-            <Text style={styles.sendText}>📩</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Emoji được chọn với hiệu ứng animation */}
+        {selectedEmoji && (
+          <Animated.View style={[styles.selectedEmojiContainer, { transform: [{ scale: emojiScale }] }]}>
+            <Text style={styles.selectedEmoji}>{selectedEmoji}</Text>
+          </Animated.View>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -111,9 +158,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: StatusBar.currentHeight || 0,
   },
+  progressBarContainer: {
+    position: 'absolute',
+    top: 15,
+    left: 10,
+    right: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  progressBarBackground: {
+    flex: 1,
+    height: 5,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    marginHorizontal: 2,
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#fff',
+  },
   image: {
     width,
-    height: height,
+    height,
     resizeMode: 'cover',
   },
   headerContainer: {
@@ -150,43 +217,26 @@ const styles = StyleSheet.create({
   },
   emojiContainer: {
     position: 'absolute',
-    bottom: 80,
-    left: 0,
-    right: 0,
+    bottom: 100,
     flexDirection: 'row',
     justifyContent: 'center',
-    padding: 8,
-    borderRadius: 10,
+    width: '100%',
   },
-
-  emojiButton: {
-    padding: 8,
-  },
-  emojiText: {
+  emoji: {
     fontSize: 30,
+    marginHorizontal: 10,
+    color: '#fff',
   },
-  messageContainer: {
+  selectedEmojiContainer: {
     position: 'absolute',
-    bottom: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 25,
-    paddingHorizontal: 10,
-    width: '90%',
+    bottom: 30,
+    alignSelf: 'center',
   },
-  input: {
-    flex: 1,
-    paddingVertical: 8,
-    color: 'white',
-    fontSize: 16,
-  },
-  sendButton: {
-    padding: 10,
-  },
-  sendText: {
-    fontSize: 20,
-    color: 'white',
+  selectedEmoji: {
+    fontSize: 50,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 10,
   },
 });
 

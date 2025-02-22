@@ -19,7 +19,7 @@ const Home = (props) => {
 
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
-  const story = useSelector(state => state.app.stories);
+  // const story = useSelector(state => state.app.stories);
 
   useEffect(() => {
     //console.log('1');
@@ -73,8 +73,8 @@ const Home = (props) => {
 
   const renderStory = ({ item }) => {
     return (
-      <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { StoryView: item })}>
-        <Stories stories={item} />
+      <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name ,{story: item})}>
+        <Stories StoryPost={item} />
       </TouchableOpacity>
     );
   };
@@ -135,9 +135,12 @@ const Home = (props) => {
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
             <FlatList
-              data={story}
-              renderItem={renderStory}
-              keyExtractor={(item) => item.id}
+              data={stories}
+            renderItem={({ item }) => {
+              // console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
+              return <Stories StoryPost={item} />; // Đúng props
+            }}
+              keyExtractor={(item) => item._id}
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               ListHeaderComponent={headerComponentStory}

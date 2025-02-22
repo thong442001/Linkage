@@ -61,12 +61,13 @@ const Profile = (props) => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log("stories: " + response.stories)
+                    // console.log("stories: " + response.stories)
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
                     setFriendRelationships(response.friends);
                     setStories(response.stories);
+                    console.log("stories: " + response.stories[0].medias[0]);
                 })
                 .catch((error) => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
