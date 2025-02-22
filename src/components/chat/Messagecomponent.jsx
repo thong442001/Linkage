@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   messageTime: {
     fontSize: 10,
     color: "#aaa",
-    marginVertical:5,
+    marginVertical: 5,
     marginLeft: 5,
     alignSelf: "flex-start",
   },
