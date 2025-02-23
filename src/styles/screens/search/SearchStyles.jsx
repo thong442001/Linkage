@@ -6,6 +6,15 @@ export default StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: 'white',
   },
+  containerHistory:{
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    flexDirection:'row'
+  },
+  textAllhistry:{
+    color:'#007AFF'
+  },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -21,7 +30,6 @@ export default StyleSheet.create({
   historyTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    paddingHorizontal: 20,
     color: 'black',
   },
   modalOverlay: {

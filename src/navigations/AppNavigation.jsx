@@ -56,6 +56,7 @@ const AppNavigation = () => {
           : (user ? <HomeNavigation /> : <UserNavigation />)
           
       }
+      
     </NavigationContainer>
   );
 }

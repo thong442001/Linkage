@@ -12,9 +12,11 @@ const SearchItem = ({user, onDelete}) => {
           {user.first_name} {user.last_name}
         </Text>
       </View>
-      <TouchableOpacity onPress={onDelete}>
-        <Icon name="ellipsis-horizontal" size={25} color="#B3B3B3" />
-      </TouchableOpacity>
+      {onDelete && (
+        <TouchableOpacity onPress={() => onDelete(user._id)}>
+          <Icon name="close" size={20} color="#B3B3B3" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
