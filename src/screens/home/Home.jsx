@@ -44,7 +44,7 @@ const Home = (props) => {
       await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
         .unwrap()
         .then((response) => {
-          console.log("stories: " + response.stories)
+          // console.log("stories: " + response.stories)
           setPosts(response.posts);
           setStories(response.stories)
         })
@@ -137,7 +137,7 @@ const Home = (props) => {
             <FlatList
               data={stories}
               renderItem={({ item }) => {
-                // console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
+                console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
                 return <Stories StoryPost={item} />; // Đúng props
               }}
               keyExtractor={(item, index) => item?._id ? item._id.toString() : `story-${index}`}
@@ -160,7 +160,10 @@ const Home = (props) => {
         <View style={HomeS.post}>
           <FlatList
             data={posts}
-            renderItem={({ item }) => <ProfilePage post={item} />}
+            renderItem={({ item }) => {
+                        //  console.log("🎞 Rendering post:", item); // Kiểm tra dữ liệu truyền vào
+            return <ProfilePage post={item} />; 
+          }}
             keyExtractor={(item) => item._id}
             showsHorizontalScrollIndicator={false}
             ListHeaderComponent={headerComponentPost}

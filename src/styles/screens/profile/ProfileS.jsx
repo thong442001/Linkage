@@ -75,6 +75,10 @@ const ProfileS = StyleSheet.create({
         bottom: -height * 0.085,
         left: width * 0.05,
     },
+    avatarWithStory: {
+        borderColor: "#0064E0", // Nếu có stories thì viền xanh
+        borderWidth:5,
+      },
     boxBackground: {
         marginHorizontal: width * 0.05,
         marginVertical: height * 0.03,

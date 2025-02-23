@@ -18,6 +18,8 @@ const PostDetail = (props) => {
       title: 'Hôm nay trời đẹp quá',
     },
   ]
+
+  console.log('Post', post)
   return (
     // dùng tam flatlist để hiển thị chi tiết bài viết
     <View style={PostDetailS.container}>
