@@ -1,78 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, TouchableOpacity, Text, Modal } from 'react-native';
-import { CustomTextInputSearch } from '../../components/textinputs/CustomTextInput';
+import React, {useState, useEffect} from 'react';
+import {View, FlatList, TouchableOpacity, Text, Modal} from 'react-native';
+import {CustomTextInputSearch} from '../../components/textinputs/CustomTextInput';
 import SearchItem from '../../components/items/SearchItem';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers } from '../../rtk/API';
+import {useDispatch, useSelector} from 'react-redux';
+import {getAllUsers} from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../styles/screens/search/SearchStyles'; // Import file styles
-
+import {addSearch, removeSearch, clearHistory} from '../../rtk/Reducer';
 const Search = props => {
-  const { route, navigation } = props;
+  const {route, navigation} = props;
   const dispatch = useDispatch();
   const token = useSelector(state => state.app.token);
 
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchHistory, setSearchHistory] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    loadSearchHistory();
     getData();
   }, []);
 
   const getData = async () => {
     try {
-      const response = await dispatch(getAllUsers({ token })).unwrap();
+      const response = await dispatch(getAllUsers({token})).unwrap();
       setData(response.users);
     } catch (error) {
       console.log('Error:', error);
     }
   };
-
-  const loadSearchHistory = async () => {
-    try {
-      const history = await AsyncStorage.getItem('searchHistory');
-      if (history) setSearchHistory(JSON.parse(history));
-    } catch {
-      console.log('Lỗi lấy lịch sử tìm kiếm');
-    }
+  // lấy lịch sử tìm kiếm
+  const searchHistory = useSelector(state => state.app.history) || [];
+  //thêm làm lịch sử tìm kiếm
+  const saveSearch = user => {
+    dispatch(addSearch(user));
   };
-
-  const saveSearch = async user => {
-    try {
-      let history = await AsyncStorage.getItem('searchHistory');
-      history = history
-        ? JSON.parse(history).filter(item => item._id !== user._id)
-        : [];
-      history.unshift(user);
-      if (history.length > 10) history.pop();
-      await AsyncStorage.setItem('searchHistory', JSON.stringify(history));
-    } catch (error) {
-      console.log('Lỗi lưu lịch sử:', error);
-    }
+  //xóa người tìm kiếm được chọn
+  const deleteSearchItem = userID => {
+    dispatch(removeSearch(userID));
   };
-
-  const deleteSearchItem = async () => {
-    if (!selectedUser) return;
-    try {
-      const updatedHistory = searchHistory.filter(
-        item => item._id !== selectedUser._id,
-      );
-      setSearchHistory(updatedHistory);
-      await AsyncStorage.setItem(
-        'searchHistory',
-        JSON.stringify(updatedHistory),
-      );
-      setModalVisible(false);
-    } catch (error) {
-      console.log('Lỗi xóa lịch sử:', error);
-    }
+  // xóa tất cả lịch sử
+  const clearHistorySearch = () => {
+    setModalVisible(true);
   };
 
   const handleSearch = query => {
@@ -112,26 +84,27 @@ const Search = props => {
 
       {!isSearching && searchHistory.length > 0 && (
         <View>
+          <View style={styles.containerHistory}>
           <Text style={styles.historyTitle}>Lịch sử tìm kiếm</Text>
+          <TouchableOpacity onPress={clearHistorySearch}>
+            <Text style={styles.textAllhistry}>Xóa tất cả</Text>
+          </TouchableOpacity>
+          </View>
+         
+
           <FlatList
             data={searchHistory}
             keyExtractor={item => item._id}
-            renderItem={({ item }) => (
+            renderItem={({item}) => (
               <TouchableOpacity
                 onPress={() => {
                   saveSearch(item);
                   navigation.navigate('TabHome', {
                     screen: 'Profile',
-                    params: { _id: item._id },
+                    params: {_id: item._id},
                   });
                 }}>
-                <SearchItem
-                  user={item}
-                  onDelete={() => {
-                    setSelectedUser(item);
-                    setModalVisible(true); // Hiện modal xác nhận xóa
-                  }}
-                />
+                <SearchItem user={item} onDelete={deleteSearchItem} />
               </TouchableOpacity>
             )}
           />
@@ -146,11 +119,7 @@ const Search = props => {
               <View style={styles.modalContainer}>
                 <Text style={styles.modalTitle}>Xác nhận xóa</Text>
                 <Text style={styles.modalText}>
-                  Bạn có chắc chắn muốn xóa{' '}
-                  <Text style={{ fontWeight: 'bold' }}>
-                    {selectedUser?.first_name} {selectedUser?.last_name}
-                  </Text>{' '}
-                  khỏi lịch sử tìm kiếm?
+                  Bạn có chắc muốn xóa tất cả lịch sử ?
                 </Text>
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
@@ -159,7 +128,9 @@ const Search = props => {
                     <Text>Hủy</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={deleteSearchItem}
+                    onPress={() => {
+                      dispatch(clearHistory());
+                    }}
                     style={styles.deleteButton}>
                     <Text style={styles.deleteText}>Xóa</Text>
                   </TouchableOpacity>
@@ -173,13 +144,13 @@ const Search = props => {
       <FlatList
         data={filteredProducts}
         keyExtractor={item => item._id}
-        renderItem={({ item }) => (
+        renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => {
               saveSearch(item);
               navigation.navigate('TabHome', {
                 screen: 'Profile',
-                params: { _id: item._id },
+                params: {_id: item._id},
               });
             }}>
             <SearchItem user={item} />

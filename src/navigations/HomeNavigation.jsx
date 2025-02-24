@@ -32,28 +32,33 @@ const TabHome = () => {
           if (route.name === 'Home') {
             name = "home"
             color = focused
-              ? "#121212"
-              : "gray"
+              ? "#0064E0"
+              : "black"
+            size = 30
           } else if (route.name === 'Friend') {
             name = "users";
             color = focused
-              ? "#121212"
-              : "gray"
+              ? "#0064E0"
+              : "black"
+              size = 25
           } else if (route.name === 'Notification') {
             name = "bell-o";
             color = focused
-              ? "#121212"
-              : "gray"
+              ? "#0064E0"
+              : "black"
+              size = 25
           } else if (route.name === 'Profile') {
             name = "user-circle-o";
             color = focused
-              ? "#121212"
-              : "gray"
+              ? "#0064E0"
+              : "black"
+              size = 25
           } else if (route.name === 'Setting') {
             name = "server";
             color = focused
-              ? "#121212"
-              : "gray"
+              ? "#0064E0"
+              : "black"
+              size = 25
           }
 
           return <FontAwesome name={name} size={size} color={color} />;

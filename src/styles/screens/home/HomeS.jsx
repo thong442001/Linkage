@@ -4,12 +4,13 @@ import React from 'react'
 const HomeS = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#A1A6AD"
+        backgroundColor: "#DEDEDE"
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginVertical: 14,
+        alignItems: 'center',
+        marginTop: 10,
         marginHorizontal: 20,
 
     },
@@ -21,11 +22,12 @@ const HomeS = StyleSheet.create({
         backgroundColor: "#fff",
     },
     title: {
-        fontSize: 32,
+        fontSize: 28,
         color: "#0064E0",
         fontWeight: "bold",
     },
     icons: {
+        alignItems: "center",
         flexDirection: 'row'
     },
     iconsPadding: {
@@ -43,11 +45,11 @@ const HomeS = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginVertical: 14,
+        marginVertical: 10,
         marginHorizontal: 20,
     },
     image: {
-        marginRight: 15,
+        marginRight: 5,
         width: 42,
         height: 42,
         borderRadius: 50,
@@ -56,10 +58,8 @@ const HomeS = StyleSheet.create({
     },
     textInput: {
         flex: 1,
-        borderWidth: 1,
         borderColor: '#D9D9D9',
         borderRadius: 28,
-        paddingLeft: 10,
         height: 42,
     },
     story: {
@@ -71,8 +71,8 @@ const HomeS = StyleSheet.create({
 
     },
     imageStory: {
-        width: 123,
-        height: 192,
+        width: 110,
+        height: 170,
         borderRadius: 10,
     },
     backGround: {
@@ -97,6 +97,10 @@ const HomeS = StyleSheet.create({
         borderRadius: 50,
         position: 'absolute',
         top: -15
+    },
+    logo:{
+        flexDirection:'row',
+        alignItems: 'center',
     }
 })
 

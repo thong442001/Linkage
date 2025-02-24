@@ -114,7 +114,7 @@ dependencies {
     implementation project(':react-native-vector-icons')
     implementation("androidx.activity:activity:1.9.+")
     implementation project(':react-native-permissions')
-
+implementation project(':zego-express-engine-reactnative')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

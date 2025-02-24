@@ -48,7 +48,6 @@ console.log("avatar",params.MyAvatar);
         
             // Hiển thị avatar khi tắt camera
             showUserAvatarInAudioMode: true,
-            avatarUrl: "https://i.pravatar.cc/300", 
         
             // Hiển thị tên người dùng trên video
             showUserNameOnVideo: true,
