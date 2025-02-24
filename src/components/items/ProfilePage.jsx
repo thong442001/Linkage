@@ -14,7 +14,7 @@ import {
 const PostItem = ({ post }) => {
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
-    const [isDeleted, setisDeleted] = useState(post._destroy || false); 
+    const [isDeleted, setisDeleted] = useState(post._destroy || false);
     const [modalVisible, setModalVisible] = useState(false);
     const dispatch = useDispatch();
 
@@ -118,38 +118,29 @@ const PostItem = ({ post }) => {
     };
     // console.log('Post ne', post._destroy)
 
-    const handleDeletePost = async () => {
-        try {
-            const paramsAPI = {
-                _destroy: true,
-            };
-    
-            console.log("Xóa bài viết với params:", paramsAPI);
-    
-            await dispatch(addPost({ id: post._id, data: paramsAPI })) // Gửi yêu cầu cập nhật bài viết
-                .unwrap()
-                .then((response) => {
-                    console.log("Xóa thành công:", response);
-                    setisDeleted(true); // Cập nhật UI để ẩn bài viết
-                    setModalVisible(false); // Đóng modal
-                })
-                .catch((error) => {
-                    console.log("Lỗi khi xóa bài viết:", error);
-                });
-        } catch (error) {
-            console.log("Lỗi trong handleDeletePost:", error);
-        }
-    };
-    
+    // const handleDeletePost = async () => {
+    //     try {
+    //         const paramsAPI = {
+    //             _destroy: true,
+    //         };
 
-    // setisDeleted(true); // Cập nhật trạng thái _destroy thành true
-    // setModalVisible(false); // Đóng modal
-     const callAddPost = async () => {
-           
-        }
-    
+    //         console.log("Xóa bài viết với params:", paramsAPI);
 
-    if (isDeleted) return null;
+    //         await dispatch(addPost({ id: post._id, data: paramsAPI })) // Gửi yêu cầu cập nhật bài viết
+    //             .unwrap()
+    //             .then((response) => {
+    //                 console.log("Xóa thành công:", response);
+    //                 //setisDeleted(true); // Cập nhật UI để ẩn bài viết
+    //                 setModalVisible(false); // Đóng modal
+    //             })
+    //             .catch((error) => {
+    //                 console.log("Lỗi khi xóa bài viết:", error);
+    //             });
+    //     } catch (error) {
+    //         console.log("Lỗi trong handleDeletePost:", error);
+    //     }
+    // };
+
 
     return (
         <View style={styles.postContainer}>
@@ -169,25 +160,27 @@ const PostItem = ({ post }) => {
                 </View>
 
                 <TouchableOpacity onPress={() => setModalVisible(true)}>
-                <Icon name="ellipsis-horizontal" size={22} color="black" />
-            </TouchableOpacity>
-
-
-            {/* Modal hiển thị lựa chọn */}
-            <Modal
-                transparent={true}
-                animationType="fade"
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity style={styles.overlay} onPress={() => setModalVisible(false)}>
-                    <View style={styles.modalContent}>
-                        <TouchableOpacity onPress={handleDeletePost}>
-                            <Text style={styles.deleteText}>🗑️ Xóa bài viết</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <Icon name="ellipsis-horizontal" size={22} color="black" />
                 </TouchableOpacity>
-            </Modal>
+
+
+                {/* Modal hiển thị lựa chọn */}
+                <Modal
+                    transparent={true}
+                    animationType="fade"
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <TouchableOpacity style={styles.overlay} onPress={() => setModalVisible(false)}>
+                        <View style={styles.modalContent}>
+                            <TouchableOpacity
+                            // onPress={handleDeletePost}
+                            >
+                                <Text style={styles.deleteText}>🗑️ Xóa bài viết</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
             </View>
 
             {hasCaption && <Text style={styles.caption}>{post?.caption}</Text>}

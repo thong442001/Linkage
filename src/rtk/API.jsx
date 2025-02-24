@@ -559,4 +559,59 @@ export const editPasswordOfUser = createAsyncThunk(
 
 
 
+// Qthong
 
+// đổi _destroy ( api này dùng cho xóa bài post và phục hồi bài post)
+// params: _id
+export const changeDestroyPost = createAsyncThunk(
+  'post/changeDestroyPost',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('post/changeDestroyPost', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Xóa vĩnh viễn bài post 
+// params: _id
+export const deletePost = createAsyncThunk(
+  'post/changeDestroyPost',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('post/deletePost', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// api lấy các bài post user đã xóa (trang thùng rác)
+// params: {
+// me: ID_user(_id của mình trong user._id redux) 
+// token: token(APT get phải chuyền token trong params) 
+// response.posts
+export const getPostsUserIdDestroyTrue = createAsyncThunk(
+  'post/getPostsUserIdDestroyTrue',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`post/getPostsUserIdDestroyTrue?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
