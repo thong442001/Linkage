@@ -63,10 +63,10 @@ const Setting = (props) => {
         </View>
       </Pressable>
 
-      <Pressable onPress={() => navigation.navigate('ChangeDisplayName')}>
+      <Pressable onPress={() => navigation.navigate('Trash')}>
         <View style={styles.container_item1}>
-          <Icon name="lock" size={30} color="black" />
-          <Text style={styles.text}>Đổi tên</Text>
+          <Icon name="trash" size={30} color="black" />
+          <Text style={styles.text}>Thùng rác</Text>
         </View>
       </Pressable>
 

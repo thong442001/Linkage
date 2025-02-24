@@ -181,7 +181,7 @@ const UpPost = (props) => {
                 ID_post_shared: null,
                 tags: tags,
             }
-            console.log(paramsAPI);
+            console.log("push",paramsAPI);
             await dispatch(addPost(paramsAPI))
                 .unwrap()
                 .then((response) => {

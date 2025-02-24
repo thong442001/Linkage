@@ -508,9 +508,7 @@ const Chat = (props) => {// cần ID_group (param)
                     <Pressable
                         onPress={onOpenGallery}
                     >
-                        <View>
-                            <Icon name="image" size={25} />
-                        </View>
+                        <Icon name="image" size={25} color="#007bff" />
                     </Pressable>
 
                 </View>

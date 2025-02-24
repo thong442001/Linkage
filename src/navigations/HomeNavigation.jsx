@@ -122,6 +122,7 @@ import PostDetail from '../screens/home/PostDetail';
 import Comment from '../components/comment/Comment';
 import StoryViewer from '../screens/story/StoryViewer';
 import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
+import Trash from '../screens/setting/Trash';
 import ChangePassWord from '../screens/changeProfile/ChangePassWord';
 import CallPage from '../screens/call/CallPage';
 import CallGroup from '../screens/call/CallGroup';
@@ -144,6 +145,7 @@ const oStackHome = {
   Comment: { name: 'Comment', component: Comment },
   Home: { name: 'Home', component: Home },
   ChangeDisplayName: { name: 'ChangeDisplayName', component: ChangeDisplayName },
+  Trash: { name: 'Trash', component: Trash },
   ChangePassWord: { name: 'ChangePassWord', component: ChangePassWord },
   CallPage: { name: 'CallPage', component: CallPage },
   CallGroup: { name: 'CallGroup', component: CallGroup },

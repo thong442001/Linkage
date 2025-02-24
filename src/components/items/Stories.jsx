@@ -3,7 +3,7 @@ import React from 'react';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import { useNavigation } from '@react-navigation/native';
 const Stories = ({ StoryPost }) => {
-  console.log('Props received in Stories:', StoryPost.user._id); // Kiểm tra props nhận được
+  // console.log('Props received in Stories:', StoryPost.user._id); // Kiểm tra props nhận được
 
   const navigation = useNavigation();
   // if (!StoryPost) return null; // Kiểm tra nếu stories không tồn tại
@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     bottom: 0,
+    
   },
   selectedBorder: {
     borderColor: 'gray', // Viền xám khi được chọn
