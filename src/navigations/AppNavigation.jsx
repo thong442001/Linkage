@@ -16,7 +16,7 @@ const AppNavigation = () => {
   const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
   const reactions = useSelector(state => state.app.reactions)
   //console.log("****: " + reactions)
-  
+
   useEffect(() => {
     //reactions
     if (reactions == null) {
@@ -54,7 +54,7 @@ const AppNavigation = () => {
         isSplashVisible
           ? <Welcome />  // Hiển thị màn hình chào trước
           : (user ? <HomeNavigation /> : <UserNavigation />)
-          
+
       }
     </NavigationContainer>
   );
