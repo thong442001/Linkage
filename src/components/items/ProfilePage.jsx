@@ -14,7 +14,7 @@ import {
 const PostItem = ({ post }) => {
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
-    const [isDeleted, setisDeleted] = useState(post._destroy || false);
+    //const [isDeleted, setisDeleted] = useState(post._destroy || false);
     const [modalVisible, setModalVisible] = useState(false);
     const dispatch = useDispatch();
 
