@@ -2,9 +2,19 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
 const HomeS = StyleSheet.create({
+    noPostsContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,  // Có thể điều chỉnh khoảng cách
+      },
+      noPostsText: {
+        fontSize: 16,
+        color: 'gray',
+      },
     container: {
         flex: 1,
-        backgroundColor: "#DEDEDE"
+        backgroundColor: "#ffffff"
     },
     header: {
         flexDirection: 'row',

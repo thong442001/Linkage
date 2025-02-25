@@ -3,6 +3,8 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { register } from '../../rtk/API'; 
 import { useDispatch } from 'react-redux';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 const { width, height } = Dimensions.get('window');
 
 const CreateNewPassWord = ({ route, navigation }) => {
@@ -11,47 +13,52 @@ const CreateNewPassWord = ({ route, navigation }) => {
     const [error, setError] = useState('');
     const [validPassword, setValidPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false); 
+    const [successVisible, setSuccessVisible] = useState(false); 
+    const [failed, setfailed] = useState(false);
+
     const dispatch = useDispatch();
 
     
     const validatePassword = (text) => {
-        const hasUpperCase = /[A-Z]/.test(text); // Kiểm tra chữ in hoa
-        const hasLowerCase = /[a-z]/.test(text); // Kiểm tra chữ thường
-        const hasNumber = /\d/.test(text); // Kiểm tra chữ số
-        const hasSpecialChar = /[^a-zA-Z0-9]/.test(text); // Kiểm tra ký tự đặc biệt
-        const minLength = text.length >= 8; // Kiểm tra độ dài tối thiểu
-
-        if (!minLength) {
-            setError('Mật khẩu phải có ít nhất 8 ký tự.');
-        } else if (!hasUpperCase) {
-            setError('Mật khẩu phải chứa ít nhất một chữ cái in hoa.');
-        } else if (!hasLowerCase) {
-            setError('Mật khẩu phải chứa ít nhất một chữ cái thường.');
-        } else if (!hasNumber) {
-            setError('Mật khẩu phải chứa ít nhất một chữ số.');
-        } else if (hasSpecialChar) {
-            setError('Mật khẩu không được chứa ký tự đặc biệt.');
+        // Yêu cầu: ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    
+        if (!passwordRegex.test(text)) {
+            setError('Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt.');
         } else {
             setError('');
         }
-
+    
         setPassword(text);
-        setValidPassword(minLength && hasUpperCase && hasLowerCase && hasNumber && !hasSpecialChar);
+        setValidPassword(passwordRegex.test(text));
     };
-
+    
     // Hàm xử lý đăng ký
     const handleRegister = () => {
+        if (!validPassword) {
+            setError('Vui lòng nhập mật khẩu hợp lệ.');
+            return;
+        }
+    
         const userData = { first_name, last_name, dateOfBirth, sex, email, phone, password }; 
         dispatch(register(userData)) 
             .unwrap()
             .then(() => {
+                setSuccessVisible(true)
+                setTimeout(() => {
+                    setSuccessVisible(false);
+                }, 2000); 
                 navigation.navigate('Login');
             })
             .catch((err) => {
                 console.error(err);
-                setError('Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.');
+                setfailed(true)
+                setTimeout(() => {
+                    setfailed(false);
+                }, 2000); 
             });
     };
+    
 
     return (
         <View style={styles.container}>
@@ -61,7 +68,7 @@ const CreateNewPassWord = ({ route, navigation }) => {
 
             <Text style={styles.label}>Tạo mật khẩu</Text>
             <Text style={styles.label2}>
-                Tạo mật khẩu gồm ít nhất 8 ký tự, bao gồm chữ cái in hoa, chữ cái thường và chữ số.
+                Tạo mật khẩu gồm ít nhất 6 ký tự, bao gồm chữ cái thường và chữ số.
                 Bạn nên chọn mật khẩu thật khó đoán.
             </Text>
 
@@ -89,6 +96,9 @@ const CreateNewPassWord = ({ route, navigation }) => {
             >
                 <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
+
+            <SuccessModal visible={successVisible} message="Tạo tài khoản thành công!"/>
+            <FailedModal visible={failed} message="Đã có lỗi xảy ra! Vui lòng thử lại"/>
         </View>
     );
 };
