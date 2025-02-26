@@ -7,7 +7,7 @@ const initialState = {
   token: '',
   refreshToken: '',
   reactions: null,
-  stories: {},
+  // stories: {},
   history: [],
 };
 

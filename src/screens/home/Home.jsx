@@ -6,18 +6,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Stories from '../../components/items/Stories';
 import ProfilePage from '../../components/items/ProfilePage';
-import { useSelector, useDispatch } from 'react-redux';
-import { oStackHome } from '../../navigations/HomeNavigation';
+import {useSelector, useDispatch} from 'react-redux';
+import {oStackHome} from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
-import { getAllPostsInHome } from '../../rtk/API';
+import {getAllPostsInHome} from '../../rtk/API';
 const Home = props => {
   // const [stories, setStories] = useState([])
-  const { route, navigation } = props;
-  const { params } = route;
+  const {route, navigation} = props;
+  const {params} = route;
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
@@ -46,9 +46,9 @@ const Home = props => {
   //call api getAllGroupOfUser
   const callGetAllPostsInHome = async ID_user => {
     try {
-      await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
+      await dispatch(getAllPostsInHome({me: ID_user, token: token}))
         .unwrap()
-        .then((response) => {
+        .then(response => {
           // console.log("stories: " + response.stories)
           setPosts(response.posts);
           setStories(response.stories);
@@ -66,7 +66,7 @@ const Home = props => {
       <TouchableOpacity
         style={HomeS.boxStory}
         onPress={() => navigation.navigate(oStackHome.PostStory.name)}>
-        <Image style={HomeS.imageStory} source={{ uri: me?.avatar }} />
+        <Image style={HomeS.imageStory} source={{uri: me?.avatar}} />
         <View style={HomeS.backGround}>
           <View style={HomeS.addStory}>
             <Icon name="add-circle" size={30} color="#0064E0" />
@@ -76,13 +76,13 @@ const Home = props => {
     );
   };
 
-  const renderStory = ({ item }) => {
-    return (
-      <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { story: item })}>
-        <Stories StoryPost={item} />
-      </TouchableOpacity>
-    );
-  };
+  // const renderStory = ({ item }) => {
+  //   return (
+  //     <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { story: item })}>
+  //       <Stories StoryPost={item} />
+  //     </TouchableOpacity>
+  //   );
+  // };
 
   const headerComponentPost = () => {
     return (
@@ -91,7 +91,7 @@ const Home = props => {
           <View style={HomeS.header}>
             <View style={HomeS.logo}>
               <Image
-                style={{ width: 15, height: 22 }}
+                style={{width: 15, height: 22}}
                 source={require('../../../assets/images/LK.png')}
               />
               <Text style={HomeS.title}>inkage</Text>
@@ -117,8 +117,8 @@ const Home = props => {
           </View>
           <View style={HomeS.header2}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Profile', { ID_user: me._id })}>
-              <Image style={HomeS.image} source={{ uri: me?.avatar }} />
+              onPress={() => navigation.navigate('Profile', {ID_user: me._id})}>
+              <Image style={HomeS.image} source={{uri: me?.avatar}} />
             </TouchableOpacity>
 
             <TextInput
@@ -126,8 +126,8 @@ const Home = props => {
               style={HomeS.textInput}
               placeholder="Bạn đang nghĩ gì ?"
               placeholderTextColor={'black'}
-            // editable={false} ngan nhap lieu
-            // selectTextOnFocus={false}
+              // editable={false} ngan nhap lieu
+              // selectTextOnFocus={false}
             />
             <View style={HomeS.icons}>
               <View style={HomeS.iconsPadding2}>
@@ -137,19 +137,21 @@ const Home = props => {
           </View>
         </View>
         {/* story */}
-        <View style={[HomeS.box, { marginTop: 4 }]}>
+        <View style={[HomeS.box, {marginTop: 4}]}>
           <View style={HomeS.story}>
             <FlatList
               data={stories}
-              renderItem={({ item }) => {
-                console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
+              renderItem={({item}) => {
+                // console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
                 return <Stories StoryPost={item} />; // Đúng props
               }}
-              keyExtractor={(item, index) => item?._id ? item._id.toString() : `story-${index}`}
+              keyExtractor={(item, index) =>
+                item?._id ? item._id.toString() : `story-${index}`
+              }
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               ListHeaderComponent={headerComponentStory}
-              contentContainerStyle={{ paddingHorizontal: 20 }}
+              contentContainerStyle={{paddingHorizontal: 20}}
             />
           </View>
         </View>
@@ -164,15 +166,15 @@ const Home = props => {
         <View style={HomeS.post}>
           <FlatList
             data={posts}
-            renderItem={({ item }) => {
-                        //  console.log("🎞 Rendering post:", item); // Kiểm tra dữ liệu truyền vào
-            return <ProfilePage post={item} />; 
-          }}
-            keyExtractor={(item) => item._id}
+            renderItem={({item}) => {
+              console.log('🎞 Rendering post:', item); // Kiểm tra dữ liệu truyền vào
+              return <ProfilePage post={item} />;
+            }}
+            keyExtractor={item => item._id}
             showsHorizontalScrollIndicator={false}
             ListHeaderComponent={headerComponentPost}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 3 }}
+            contentContainerStyle={{paddingBottom: 3}}
           />
         </View>
       </View>
