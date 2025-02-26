@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import {
     addPost,
 } from '../../rtk/API';
-
+const { width, height } = Dimensions.get('window');
 const PostItem = ({ post }) => {
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
@@ -145,8 +145,8 @@ const PostItem = ({ post }) => {
     return (
         <View style={styles.postContainer}>
             <View style={styles.header}>
-                <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                 <View style={styles.userInfo}>
+                    <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                     <View style={{ marginLeft: 20 }}>
                         <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
                         <View style={styles.boxName}>
@@ -207,42 +207,44 @@ const PostItem = ({ post }) => {
 const styles = StyleSheet.create({
     postContainer: {
         backgroundColor: '#fff',
-        padding: 10,
-        marginBottom: 10,
+        padding: width * 0.025, // 2.5% chiều rộng màn hình
+        marginBottom: height * 0.015, // 1.5% chiều cao màn hình
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 10,
+        marginBottom: height * 0.015,
     },
     avatar: {
-        width: 42,
-        height: 42,
-        borderRadius: 50,
+        width: width * 0.11, // 11% chiều rộng màn hình
+        height: width * 0.11,
+        borderRadius: width * 0.25, // Bo tròn ảnh đại diện
     },
     userInfo: {
         flex: 1,
-        marginLeft: 0,
+        marginLeft: width * 0.01,
+        alignItems:'center',
+        flexDirection:'row'
     },
     boxName: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     time: {
-        fontSize: 11,
-        marginRight: 4,
-        color: 'grey'
+        fontSize: width * 0.028, // 2.8% chiều rộng màn hình
+        marginRight: width * 0.01,
+        color: 'grey',
     },
     name: {
-        fontSize: 15,
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         fontWeight: 'bold',
-        color: 'black'
+        color: 'black',
     },
     caption: {
-        marginBottom: 10,
-        fontSize: 14,
-        color: 'black'
+        marginBottom: height * 0.015,
+        fontSize: width * 0.035, // 3.5% chiều rộng màn hình
+        color: 'black',
     },
     mediaContainer: {
         flexDirection: 'row',
@@ -250,47 +252,47 @@ const styles = StyleSheet.create({
     },
     singleMedia: {
         width: '100%',
-        height: 300,
+        height: height * 0.4, // 40% chiều cao màn hình
     },
     doubleMedia: {
         width: '49.5%',
-        height: 300,
-        padding: 1
+        height: height * 0.4,
+        padding: 1,
     },
     tripleMediaFirst: {
         width: '100%',
-        height: 250,
-        padding: 1
+        height: height * 0.33, // 33% chiều cao màn hình
+        padding: 1,
     },
     tripleMediaSecond: {
         width: '49.5%',
-        height: 150,
-        padding: 1
+        height: height * 0.2, // 20% chiều cao màn hình
+        padding: 1,
     },
     quadMedia: {
         width: '49.5%',
-        height: 150,
-        padding: 1
+        height: height * 0.2,
+        padding: 1,
     },
     fivePlusMediaFirstRow: {
         width: '49.5%',
-        height: 150,
-        padding: 1
+        height: height * 0.2,
+        padding: 1,
     },
     fivePlusMediaSecondRowLeft: {
         width: '32.66%',
-        height: 150,
-        padding: 1
+        height: height * 0.2,
+        padding: 1,
     },
     fivePlusMediaSecondRowMiddle: {
         width: '32.66%',
-        height: 150,
-        padding: 1
+        height: height * 0.2,
+        padding: 1,
     },
     fivePlusMediaSecondRowRight: {
         width: '32.66%',
-        height: 150,
-        padding: 1
+        height: height * 0.2,
+        padding: 1,
     },
     image: {
         width: '100%',
@@ -300,7 +302,6 @@ const styles = StyleSheet.create({
         position: 'relative',
         width: '100%',
         height: '100%',
-        // borderRadius: 8,
         overflow: 'hidden',
     },
     video: {
@@ -322,18 +323,17 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        // borderRadius: 8,
     },
     overlayText: {
         color: 'white',
-        fontSize: 24,
+        fontSize: width * 0.06, // 6% chiều rộng màn hình
         fontWeight: 'bold',
     },
     interactions: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginTop: 10,
-        paddingVertical: 10,
+        marginTop: height * 0.015,
+        paddingVertical: height * 0.015,
         borderTopWidth: 0.5,
         borderTopColor: '#ddd',
     },
@@ -342,12 +342,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     actionText: {
-        marginLeft: 5,
-        fontSize: 14,
-        color: 'black'
+        marginLeft: width * 0.015,
+        fontSize: width * 0.035,
+        color: 'black',
     },
-    modalContent: { backgroundColor: "blue", padding: 15, borderRadius: 10, width: 200, alignItems: "center", opacity: 0.9 },
-    deleteText: { color: "red", fontSize: 16, fontWeight: "bold", padding: 10 },
+    modalContent: {
+        backgroundColor: "blue",
+        padding: width * 0.04,
+        borderRadius: width * 0.05,
+        width: width * 0.5,
+        alignItems: "center",
+        opacity: 0.9,
+    },
+    deleteText: {
+        color: "red",
+        fontSize: width * 0.04,
+        fontWeight: "bold",
+        padding: width * 0.025,
+    },
 });
 
 export default PostItem;

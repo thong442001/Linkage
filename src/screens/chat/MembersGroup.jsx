@@ -17,6 +17,7 @@ import {
     passKey,
 } from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons';
+const { width, height } = Dimensions.get('window');
 const MembersGroup = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -190,43 +191,42 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        // padding: 20,
-    },
-    header: {
-        fontSize: 24,
+        // padding: width * 0.05, // Nếu cần padding
+      },
+      header: {
+        fontSize: width * 0.06, // 6% chiều rộng màn hình
         fontWeight: 'bold',
         color: "black",
-        width: Dimensions.get('window').width * 0.5,
+        width: width * 0.5, // 50% chiều rộng màn hình
         textAlign: 'center',
-    },
-    headerBlue: {
-        fontSize: 16,
+      },
+      headerBlue: {
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "blue",
         textAlign: 'center',
-    },
-    searchBox: {
+      },
+      searchBox: {
         backgroundColor: '#eee',
-        borderRadius: 20,
-        padding: 10,
-        marginBottom: 15,
-    },
-    vHeader: {
+        borderRadius: width * 0.05, // 5% chiều rộng màn hình
+        padding: width * 0.025, // 2.5% chiều rộng màn hình
+        marginBottom: height * 0.02, // 2% chiều cao màn hình
+      },
+      vHeader: {
         flexDirection: 'row',
-        // width: Dimensions.get('window').width,
         justifyContent: 'space-between',
-        marginBottom: 20,
+        marginBottom: height * 0.025, // 2.5% chiều cao màn hình
         backgroundColor: "#ffffff",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-        elevation: 5, // Chỉ có tác dụng trên Android
-        paddingVertical: 15,
-        paddingHorizontal: 15
-    },
-    txtGrey: {
-        fontSize: 16,
+        elevation: 5, // Tác dụng trên Android
+        paddingVertical: height * 0.02, // 2% chiều cao màn hình
+        paddingHorizontal: width * 0.04, // 4% chiều rộng màn hình
+      },
+      txtGrey: {
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "#797979",
-        marginBottom: 10
-    },
+        marginBottom: height * 0.015, // 1.5% chiều cao màn hình
+      }
 });

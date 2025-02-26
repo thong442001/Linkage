@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, ScrollView } from "react-native";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,6 +8,7 @@ import {
     deleteMember,
     deleteGroup,
 } from '../../rtk/API';
+const { width, height } = Dimensions.get('window');
 const SettingChat = (props) => { // cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -122,115 +123,114 @@ const SettingChat = (props) => { // cần ID_group (param)
     };
 
     return (
-        <View style={styles.container}>
+            <View style={styles.container}>
 
-            {/* Nút Back */}
-            {
-                group != null
-                && (
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={goBack}
-                    >
-                        <Icon name="arrow-back" size={24} color="black" />
-                    </TouchableOpacity>
-                )
-            }
-            {/* Ảnh đại diện nhóm */}
-            {
-                group != null
-                && (
-                    <View style={styles.groupAvatarContainer}>
-                        <Image source={{ uri: group.avatar }} style={styles.avatar} />
-                        {/* Name group */}
-                        {
-                            group.name == null
-                                ? (
-                                    <Text
-                                        style={styles.groupName}
-                                    >
-                                        Nhóm chưa có tên
-                                    </Text>
-                                ) : (
-                                    <Text
-                                        style={styles.groupName}
-                                    >
-                                        {group.name}
-                                    </Text>
-                                )
-                        }
-                        {/* đổi name vs avt group */}
-                        {
-                            group.members[0]._id == me._id
-                            && (
-                                <TouchableOpacity
-                                    onPress={toAvtNameGroup}
-                                >
-                                    <Text style={styles.changeGroupInfo}>Đổi tên hoặc ảnh</Text>
-                                </TouchableOpacity>
-                            )
-                        }
-                    </View>
-                )
-            }
-
-
-            {/* Nút Thêm thành viên */}
-            {
-                group != null
-                && (
-                    group.members[0]._id == me._id
+                {/* Nút Back */}
+                {
+                    group != null
                     && (
                         <TouchableOpacity
-                            style={styles.addMemberButton}
-                            onPress={toAddFriendGroup}
+                            style={styles.backButton}
+                            onPress={goBack}
                         >
-                            <View style = {styles.boxIconAdd}>
-                                <Icon name="person-add" size={23} color="black" />
-                            </View>
-                            <Text style={styles.addMemberText}>Thêm</Text>
+                            <Icon name="arrow-back" size={24} color="black" />
                         </TouchableOpacity>
                     )
-                )
-            }
+                }
+                {/* Ảnh đại diện nhóm */}
+                {
+                    group != null
+                    && (
+                        <View style={styles.groupAvatarContainer}>
+                            <Image source={{ uri: group.avatar }} style={styles.avatar} />
+                            {/* Name group */}
+                            {
+                                group.name == null
+                                    ? (
+                                        <Text
+                                            style={styles.groupName}
+                                        >
+                                            Nhóm chưa có tên
+                                        </Text>
+                                    ) : (
+                                        <Text
+                                            style={styles.groupName}
+                                        >
+                                            {group.name}
+                                        </Text>
+                                    )
+                            }
+                            {/* đổi name vs avt group */}
+                            {
+                                group.members[0]._id == me._id
+                                && (
+                                    <TouchableOpacity
+                                        onPress={toAvtNameGroup}
+                                    >
+                                        <Text style={styles.changeGroupInfo}>Đổi tên hoặc ảnh</Text>
+                                    </TouchableOpacity>
+                                )
+                            }
+                        </View>
+                    )
+                }
 
-            {/* Thông tin về đoạn chat */}
-            {
-                group != null
-                && (
-                    <View style={styles.chatInfoContainer}>
 
-                        <TouchableOpacity
-                            style={styles.infoItem}
-                            onPress={toMembersGroup}
-                        >
-                            <Text style={styles.infoText}>Xem thành viên trong nhóm chat</Text>
-                        </TouchableOpacity>
+                {/* Nút Thêm thành viên */}
+                {
+                    group != null
+                    && (
+                        group.members[0]._id == me._id
+                        && (
+                            <TouchableOpacity
+                                style={styles.addMemberButton}
+                                onPress={toAddFriendGroup}
+                            >
+                                <View style={styles.boxIconAdd}>
+                                    <Icon name="person-add" size={23} color="black" />
+                                </View>
+                                <Text style={styles.addMemberText}>Thêm</Text>
+                            </TouchableOpacity>
+                        )
+                    )
+                }
 
-                        <TouchableOpacity
-                            style={styles.leaveChatButton}
-                            onPress={handleRoiNhom}
-                        >
-                            <Text style={styles.leaveChatText}>Rời khỏi nhóm chat</Text>
-                        </TouchableOpacity>
+                {/* Thông tin về đoạn chat */}
+                {
+                    group != null
+                    && (
+                        <View style={styles.chatInfoContainer}>
 
-                        {
-                            group.members[0]._id == me._id
-                            && (
-                                <TouchableOpacity
-                                    style={styles.leaveChatButton}
-                                    onPress={handleGiaiTan}
-                                >
-                                    <Text style={styles.leaveChatText}>Giải tán nhóm chat</Text>
-                                </TouchableOpacity>
-                            )
-                        }
-                    </View>
-                )
-            }
+                            <TouchableOpacity
+                                style={styles.infoItem}
+                                onPress={toMembersGroup}
+                            >
+                                <Text style={styles.infoText}>Xem thành viên trong nhóm chat</Text>
+                            </TouchableOpacity>
 
+                            <TouchableOpacity
+                                style={styles.leaveChatButton}
+                                onPress={handleRoiNhom}
+                            >
+                                <Text style={styles.leaveChatText}>Rời khỏi nhóm chat</Text>
+                            </TouchableOpacity>
 
-        </View>
+                            {
+                                group.members[0]._id == me._id
+                                && (
+                                    <TouchableOpacity
+                                        style={styles.leaveChatButton}
+                                        onPress={handleGiaiTan}
+                                    >
+                                        <Text style={styles.leaveChatText}>Giải tán nhóm chat</Text>
+                                    </TouchableOpacity>
+                                )
+                            }
+                        </View>
+                    )
+                }
+
+            </View>
     );
 };
 
@@ -238,75 +238,75 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F5F5F5",
-        padding: 20,
+        padding: width * 0.05, // 5% chiều rộng màn hình
     },
     backButton: {
         position: "absolute",
-        top: 20,
-        left: 10,
-        padding: 10,
+        top: height * 0.03, // 3% chiều cao màn hình
+        left: width * 0.02, // 2% chiều rộng màn hình
+        padding: width * 0.025, // 2.5% chiều rộng màn hình
     },
     groupAvatarContainer: {
         alignItems: "center",
-        marginTop: 50,
+        marginTop: height * 0.07, // 7% chiều cao màn hình
     },
     avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: width * 0.25, // 25% chiều rộng màn hình
+        height: width * 0.25, // 25% chiều rộng màn hình
+        borderRadius: width * 0.125, // 12.5% chiều rộng màn hình
     },
     groupName: {
-        fontSize: 18,
+        fontSize: width * 0.045, // 4.5% chiều rộng màn hình
         fontWeight: "bold",
-        marginTop: 10,
-        color: 'black'
+        marginTop: height * 0.015, // 1.5% chiều cao màn hình
+        color: 'black',
     },
     changeGroupInfo: {
         color: "blue",
-        marginTop: 8,
+        marginTop: height * 0.01, // 1% chiều cao màn hình
     },
     addMemberButton: {
         alignItems: "center",
-        marginTop: 20,
+        marginTop: height * 0.025, // 2.5% chiều cao màn hình
     },
     addMemberText: {
-        fontSize: 14,
+        fontSize: width * 0.035, // 3.5% chiều rộng màn hình
         color: "black",
-        marginTop: 5,
+        marginTop: height * 0.007, // 0.7% chiều cao màn hình
     },
     chatInfoContainer: {
-        marginTop: 30,
+        marginTop: height * 0.04, // 4% chiều cao màn hình
         backgroundColor: "white",
-        borderRadius: 10,
-        padding: 10,
+        borderRadius: width * 0.025, // 2.5% chiều rộng màn hình
+        padding: width * 0.03, // 3% chiều rộng màn hình
     },
     infoItem: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 15,
+        padding: height * 0.02, // 2% chiều cao màn hình
         borderBottomWidth: 1,
         borderBottomColor: "#E0E0E0",
     },
     infoText: {
         flex: 1,
-        fontSize: 16,
-        marginLeft: 10,
-        color: 'black'
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
+        marginLeft: width * 0.03, // 3% chiều rộng màn hình
+        color: 'black',
     },
     leaveChatButton: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 15,
+        padding: height * 0.02, // 2% chiều cao màn hình
     },
     leaveChatText: {
-        fontSize: 16,
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "red",
-        marginLeft: 10,
+        marginLeft: width * 0.03, // 3% chiều rộng màn hình
     },
-    boxIconAdd:{
+    boxIconAdd: {
         backgroundColor: '#d9d9d960',
-        padding: 10,
-        borderRadius: 100
+        padding: width * 0.03, // 3% chiều rộng màn hình
+        borderRadius: width * 0.2, // 20% chiều rộng màn hình
     }
 });
 
