@@ -71,6 +71,7 @@ const UpPost = (props) => {
                                 </View>
                             </View>
                         ) : (
+                            
                             <Image source={{ uri }} style={UpPostS.image} resizeMode="cover" />
                         )}
 
