@@ -48,7 +48,7 @@ const Home = props => {
 
   const callGetAllPostsInHome = async (ID_user) => {
     try {
-      setloading(true)
+      //setloading(true)
       await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
         .unwrap()
         .then(response => {
