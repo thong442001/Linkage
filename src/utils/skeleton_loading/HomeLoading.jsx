@@ -1,51 +1,152 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
-
-// Lấy kích thước màn hình
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window'); // Lấy kích thước màn hình
 
 const HomeLoading = () => {
   return (
     <SkeletonPlaceholder>
-      {[...Array(8)].map((_, index) => (
-        <SkeletonPlaceholder.Item
-          key={index}
-          flexDirection="row"
-          alignItems="center"
-          paddingVertical={10}
-          borderBottomWidth={1}
-          borderBottomColor={'#ddd'}
-          width={width * 0.9} // Chiều rộng item = 90% màn hình
-          alignSelf="center" // Căn giữa trên màn hình
-        >
-          {/* Avatar Skeleton */}
-          <SkeletonPlaceholder.Item
-            width={width * 0.12} // Avatar = 12% chiều rộng màn hình
-            height={width * 0.12} // Avatar hình vuông
-            borderRadius={width * 0.06} // Bo tròn theo avatar
-            marginRight={10}
-          />
+      <View style={HomeS.container}>
+        <View style={HomeS.header2}>
+          <View style={HomeS.image} />
+          <View style={{
+            width: width * 0.78, 
+            height: 42,
+            borderRadius: 28,
+            marginHorizontal: 5,
+            backgroundColor: '#E0E0E0'
+          }} />
+        </View>
 
-          {/* Thông tin Skeleton */}
-          <SkeletonPlaceholder.Item marginLeft={10} width={width * 0.6}>
-            <SkeletonPlaceholder.Item
-              width={width * 0.4} // Tên user = 40% chiều rộng
-              height={20}
-              borderRadius={4}
-            />
-            <SkeletonPlaceholder.Item
-              marginTop={6}
-              width={width * 0.3} // Tin nhắn preview = 30% chiều rộng
-              height={20}
-              borderRadius={4}
-            />
-          </SkeletonPlaceholder.Item>
-        </SkeletonPlaceholder.Item>
-      ))}
+        <View style={HomeS.story}>
+          <View style={HomeS.boxStory}>
+            <View style={HomeS.imageStory} />
+            <View style={HomeS.backGround}>
+              <View style={{ width: width * 0.15, height: 15, borderRadius: 4 }} />
+            </View>
+          </View>
+          <View style={[HomeS.boxStory, { marginHorizontal: 10 }]}>
+            <View style={HomeS.imageStory} />
+            <View style={HomeS.backGround}>
+              <View style={{ width: width * 0.15, height: 15, borderRadius: 4 }} />
+            </View>
+          </View>
+        </View>
+
+        <View style={HomeS.postBox}>
+          <View style={HomeS.postHeader}>
+            <View style={HomeS.postAvatar} />
+            <View style={HomeS.postInfo}>
+              <View style={HomeS.namePlaceholder} />
+              <View style={HomeS.timePlaceholder} />
+            </View>
+          </View>
+
+          <View style={HomeS.imageGrid}>
+            <View style={HomeS.postImage} />
+          </View>
+
+          <View style={HomeS.postHeader}>
+            <View style={HomeS.postAvatar} />
+            <View style={HomeS.postInfo}>
+              <View style={HomeS.namePlaceholder} />
+              <View style={HomeS.timePlaceholder} />
+            </View>
+          </View>
+          <View style={HomeS.imageGrid}>
+            <View style={HomeS.postImage} />
+          </View>
+        </View>
+      </View>
     </SkeletonPlaceholder>
   );
 };
 
 export default HomeLoading;
+
+const HomeS = StyleSheet.create({
+  container: {
+    padding: 10,
+    top: 30,
+  },
+  postBox: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
+  postHeader: {
+    marginVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  postAvatar: {
+    width: width * 0.1, // Tỷ lệ theo chiều rộng màn hình
+    height: width * 0.1,
+    borderRadius: (width * 0.1) / 2,
+    backgroundColor: '#E0E0E0',
+  },
+  postInfo: {
+    marginLeft: 10,
+    justifyContent: 'center',
+  },
+  namePlaceholder: {
+    width: width * 0.25, // Tỷ lệ theo chiều rộng màn hình
+    height: 15,
+    borderRadius: 4,
+    backgroundColor: '#E0E0E0',
+  },
+  timePlaceholder: {
+    width: width * 0.15, // Tỷ lệ theo chiều rộng màn hình
+    height: 12,
+    borderRadius: 4,
+    backgroundColor: '#E0E0E0',
+    marginTop: 5,
+  },
+  imageGrid: {
+    flexDirection: 'column',
+  },
+  postImage: {
+    width: '100%',
+    height: height * 0.2, // Tỷ lệ theo chiều cao màn hình
+    borderRadius: 8,
+    backgroundColor: '#E0E0E0',
+  },
+  story: {
+    flexDirection: 'row',
+    marginVertical: 9,
+    marginHorizontal: 10,
+  },
+  imageStory: {
+    width: width * 0.28, // Tỷ lệ theo chiều rộng màn hình
+    height: height * 0.22, // Tỷ lệ theo chiều cao màn hình
+    borderRadius: 10,
+  },
+  backGround: {
+    backgroundColor: '#fff',
+    height: height * 0.07, // Tỷ lệ theo chiều cao màn hình
+    width: '100%',
+    position: 'absolute',
+    bottom: -0.1,
+    borderBottomLeftRadius: 9,
+    borderBottomRightRadius: 9,
+    alignItems: 'center',
+  },
+  boxStory: {
+    borderColor: '#D9D9D9',
+    borderRadius: 11,
+  },
+  header2: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  image: {
+    marginHorizontal: 10,
+    width: width * 0.1, // Tỷ lệ theo chiều rộng màn hình
+    height: width * 0.1,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: '#D9D9D9',
+  },
+});

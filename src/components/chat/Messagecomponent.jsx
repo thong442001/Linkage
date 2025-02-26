@@ -79,7 +79,9 @@ export default function MessageComponent({
 
       {/* Nhấn giữ tin nhắn để mở menu */}
       <TouchableWithoutFeedback onLongPress={() => {
-        message._destroy != true && handleLongPress()
+        if (message._destroy != true) {
+          handleLongPress()
+        }
       }}>
         <View>
           <View>
@@ -185,7 +187,6 @@ export default function MessageComponent({
               <View
                 style={[styles.reactionBar]}
               >
-                //
                 {/* reaction biểu cảm */}
                 {
                   reactions.map((reaction, index) => (

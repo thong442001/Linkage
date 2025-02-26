@@ -4,18 +4,15 @@ import {
   View,
   TouchableOpacity,
   Image,
-  Pressable
+  Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import styles from '../../styles/screens/login/LoginS';
 import { useDispatch } from 'react-redux';
 import { login } from '../../rtk/API';
-
-import ButtonCreateNewAccount
-  from '../../components/button/ButtonCreateNewAccount';
-import {
-  CustomTextInputEmail,
-  CustomTextInputPassword
-} from '../../components/textinputs/CustomTextInput';
+import ButtonCreateNewAccount from '../../components/button/ButtonCreateNewAccount';
+import { CustomTextInputEmail, CustomTextInputPassword } from '../../components/textinputs/CustomTextInput';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
 
 const Login = (props) => {
   const { navigation } = props;
@@ -25,6 +22,7 @@ const Login = (props) => {
   const [password, setPassword] = useState('');
   const [errorEmailPhone, setErrorEmailPhone] = useState('');
   const [errorPassword, setErrorPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   function isValidEmail(email) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
@@ -35,14 +33,11 @@ const Login = (props) => {
   }
 
   function isValidPassword(password) {
-    // Kiểm tra mật khẩu chỉ chứa chữ cái và số, không chứa ký tự đặc biệt
-    return /^[A-Za-z0-9]{8,}$/.test(password);
+    return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password);
   }
 
   const validateForm = () => {
     let isValid = true;
-
-    // Kiểm tra email hoặc số điện thoại
     if (!emailVsPhone.trim()) {
       setErrorEmailPhone('Vui lòng nhập số điện thoại hoặc email.');
       isValid = false;
@@ -53,56 +48,46 @@ const Login = (props) => {
       setErrorEmailPhone('');
     }
 
-    // Kiểm tra mật khẩu
     if (!password.trim()) {
       setErrorPassword('Vui lòng nhập mật khẩu.');
       isValid = false;
     } else if (!isValidPassword(password)) {
-      setErrorPassword('Mật khẩu phải có ít nhất 8 ký tự và không chứa ký tự đặc biệt.');
+      setErrorPassword('Mật khẩu phải có ít nhất 6 ký tự.');
       isValid = false;
     } else {
       setErrorPassword('');
     }
-
     return isValid;
   };
 
   const checkLogin = () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
-    const checkEmail = isValidEmail(emailVsPhone);
-    if (checkEmail) {
-      const dataEmail = {
-        email: emailVsPhone,
-        phone: '',
-        password: password,
-      };
-      onLogin(dataEmail);
-    } else {
-      const dataPhone = {
-        email: '',
-        phone: emailVsPhone,
-        password: password,
-      };
-      onLogin(dataPhone);
-    }
+    const data = isValidEmail(emailVsPhone)
+      ? { email: emailVsPhone, phone: '', password }
+      : { email: '', phone: emailVsPhone, password };
+
+    onLogin(data);
   };
 
   const onLogin = (data) => {
+    setLoading(true);
     dispatch(login(data))
       .unwrap()
       .then((response) => {
         console.log(response);
+        setLoading(false);
       })
       .catch((error) => {
-        setErrorPassword(error)
+        setErrorPassword(error);
+        setLoading(false);
       });
   };
 
   return (
     <View style={styles.container}>
+      <LoadingModal visible={loading} /> 
+
       <View style={styles.viewLogo}>
         <Image
           style={styles.logo}
@@ -130,7 +115,6 @@ const Login = (props) => {
               setErrorPassword('');
             }}
           />
-
           {errorPassword ? <Text style={styles.errorText}>{errorPassword}</Text> : null}
         </View>
 

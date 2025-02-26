@@ -32,6 +32,8 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { editAvatarOfUser, editBackgroundOfUser } from '../../rtk/API';
 import { changeAvatar, changeBackground } from '../../rtk/Reducer';
 import axios from 'axios';
+import ProfileLoading from '../../utils/skeleton_loading/ProfileLoading';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
 
 const Profile = props => {
     const { route, navigation } = props;
@@ -55,6 +57,7 @@ const Profile = props => {
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
     const [dialogReLoad, setDialogreload] = useState(false);
+    const [loading, setloading] = useState(true)
 
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
@@ -65,6 +68,8 @@ const Profile = props => {
         setImageModalVisible(false);
         setSelectedImage(null);
     };
+
+
 
     //up lên cloudiary
     const uploadFile = async file => {
@@ -214,6 +219,7 @@ const Profile = props => {
 
     useEffect(() => {
         callAllProfile();
+
         //callGetAllFriendOfID_user();
     }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
@@ -250,6 +256,7 @@ const Profile = props => {
     //callAllProfile
     const callAllProfile = async () => {
         try {
+            setloading(true)
             const paramsAPI = {
                 ID_user: params?._id,
                 me: me._id,
@@ -271,14 +278,17 @@ const Profile = props => {
                         },
                         stories: response.stories || []
                     });
+                    setloading(false);
                     console.log('stories: ' + stories);
                 })
                 .catch(error => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
+                    setloading(false);
                     setDialogreload(true);
                 });
         } catch (error) {
             console.log(error);
+            setloading(false);
         }
     };
 
@@ -377,6 +387,9 @@ const Profile = props => {
     };
 
     const headerFriends = () => {
+        if (loading) {
+            return <ProfileLoading />
+        }
         return (
             <View style={ProfileS.container1}>
                 <View style={ProfileS.boxHeader}>
@@ -396,7 +409,7 @@ const Profile = props => {
                                     <Image
                                         style={ProfileS.backGroundImage}
                                         // source={{ uri: user?.background }}
-                                        source={{ uri: user?.avatar }}
+                                        source={{ uri: user?.background }}
                                     />
                                 ) : (
                                     <Image
@@ -560,6 +573,7 @@ const Profile = props => {
                         </View>
                     </View>
                 </View>
+
                 <View style={[ProfileS.boxHeader, { marginVertical: 7 }]}>
                     <View style={ProfileS.boxFriends}>
                         <View style={ProfileS.title}>
@@ -569,7 +583,9 @@ const Profile = props => {
                             </View>
                             <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
                         </View>
+
                         <View style={ProfileS.listFriends}>
+                            <LoadingModal visible={loading} />
                             <FlatList
                                 data={(friendRelationships || []).slice(0, 6)}
                                 renderItem={({ item }) => (
@@ -644,6 +660,8 @@ const Profile = props => {
         );
     };
 
+
+
     return (
         <View style={ProfileS.container}>
             <View style={ProfileS.boxHeader}>
@@ -664,6 +682,7 @@ const Profile = props => {
             <View style={HomeS.line}></View>
             <View>
                 <View>
+
                     <View style={ProfileS.post}>
                         <FlatList
                             data={posts}

@@ -2,9 +2,9 @@ import { Dimensions, StyleSheet } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
-  errorText:{
+  errorText: {
     color: 'red',
-    fontWeight: '400'
+    fontWeight: '400',
   },
   container: {
     flex: 1,
@@ -51,7 +51,17 @@ const styles = StyleSheet.create({
   },
   formSectionLogin: {
     marginBottom: height * 0.25,
-  }
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Nền mờ cho modal
+  },
+  loadingAnimation: {
+    width: 150,
+    height: 150,
+  },
 });
 
 

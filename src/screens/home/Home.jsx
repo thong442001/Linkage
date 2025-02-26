@@ -14,6 +14,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
 import { getAllPostsInHome } from '../../rtk/API';
+import HomeLoading from '../../utils/skeleton_loading/HomeLoading';
+import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 const Home = props => {
   // const [stories, setStories] = useState([])
   const { route, navigation } = props;
@@ -21,10 +23,11 @@ const Home = props => {
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-
+  const [loading, setloading] = useState(true)
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
   // const story = useSelector(state => state.app.stories);
+
 
   useEffect(() => {
     //console.log('1');
@@ -52,6 +55,7 @@ const Home = props => {
           // console.log("stories: " + response.stories)
           setPosts(response.posts);
           setStories(response.stories);
+          setloading(false)
         })
         .catch(error => {
           console.log('Error getAllPostsInHome:: ', error);
@@ -139,6 +143,8 @@ const Home = props => {
         {/* story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
+
+            
             <FlatList
               data={stories}
               renderItem={({ item }) => {
@@ -161,23 +167,24 @@ const Home = props => {
     <View style={HomeS.container}>
       {/* post */}
       <View>
-        <View style={HomeS.post}>
-          <FlatList
-            data={posts}
-            renderItem={({ item }) => {
-                        //  console.log("🎞 Rendering post:", item); // Kiểm tra dữ liệu truyền vào
-            return <ProfilePage post={item} />; 
+        <FlatList
+          data={posts}
+          renderItem={({ item }) => {
+            return <ProfilePage post={item} />;
           }}
-            keyExtractor={(item) => item._id}
-            showsHorizontalScrollIndicator={false}
-            ListHeaderComponent={headerComponentPost}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 3 }}
-          />
-        </View>
+          keyExtractor={(item) => item._id}
+          showsHorizontalScrollIndicator={false}
+          ListHeaderComponent={headerComponentPost}  // Header của post sẽ luôn hiển thị
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 3 }}
+          ListEmptyComponent={  
+            <NothingHome/>
+          }
+        />
       </View>
     </View>
   );
+  
 };
 
 export default Home;
