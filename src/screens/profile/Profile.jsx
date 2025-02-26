@@ -271,7 +271,6 @@ const Profile = props => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    // console.log("stories: " + response.stories)
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
@@ -286,7 +285,6 @@ const Profile = props => {
                         stories: response.stories || []
                     });
                     setloading(false);
-                    console.log('stories: ' + stories);
                 })
                 .catch(error => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
@@ -298,10 +296,6 @@ const Profile = props => {
             setloading(false);
         }
     };
-
-    //   const hasMeStories = stories?.stories.length > 0 ? stories : {};
-
-    //console.log('hasMeStories: ', hasMeStories);
 
     //guiLoiMoiKetBan
     const callGuiLoiMoiKetBan = async () => {
@@ -389,15 +383,15 @@ const Profile = props => {
         }
     };
 
-
+    // call api callChangeDestroyPost
     const callChangeDestroyPost = async (ID_post) => {
         try {
-            console.log('Xóa bài viết với ID:', ID_post);
+            //console.log('Xóa bài viết với ID:', ID_post);
 
             await dispatch(changeDestroyPost({ _id: ID_post }))
                 .unwrap()
                 .then(response => {
-                    console.log('Xóa thành công:', response);
+                    //console.log('Xóa thành công:', response);
                     setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
                 })
                 .catch(error => {
@@ -407,6 +401,45 @@ const Profile = props => {
             console.log('Lỗi trong callChangeDestroyPost:', error);
         }
     };
+
+    // Hàm cập nhật bài post sau khi thả biểu cảm
+    const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
+        setPosts(prevPosts =>
+            prevPosts.map(post => {
+                if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
+
+                // Tìm reaction của user hiện tại
+                const existingReactionIndex = post.post_reactions.findIndex(
+                    reaction => reaction.ID_user._id === me._id
+                );
+
+                let updatedReactions = [...post.post_reactions];
+
+                if (existingReactionIndex !== -1) {
+                    // Nếu user đã thả reaction, cập nhật reaction mới
+                    updatedReactions[existingReactionIndex] = {
+                        ...updatedReactions[existingReactionIndex],
+                        ID_reaction: newReaction
+                    };
+                } else {
+                    // Nếu user chưa thả reaction, thêm mới
+                    updatedReactions.push({
+                        _id: ID_post_reaction, // ID của reaction mới từ server
+                        ID_user: {
+                            _id: me._id,
+                            first_name: me.first_name, // Sửa lại đúng key
+                            last_name: me.last_name,
+                            avatar: me.avatar,
+                        },
+                        ID_reaction: newReaction
+                    });
+                }
+
+                return { ...post, post_reactions: updatedReactions };
+            })
+        );
+    };
+
 
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id);
@@ -717,6 +750,7 @@ const Profile = props => {
                                     post={item}
                                     ID_user={me._id}
                                     onDelete={() => callChangeDestroyPost(item._id)}
+                                    updatePostReaction={updatePostReaction}
                                 />
                             }
                             keyExtractor={item => item._id}
