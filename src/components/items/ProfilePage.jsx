@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
     userInfo: {
         flex: 1,
         marginLeft: width * 0.01,
-        alignItems:'center',
-        flexDirection:'row'
+        alignItems: 'center',
+        flexDirection: 'row'
     },
     boxName: {
         flexDirection: 'row',
