@@ -1,16 +1,16 @@
 import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-const {width, height} = Dimensions.get('window')
+const { width, height } = Dimensions.get('window')
 const ProfileS = StyleSheet.create({
-    anhBia:{
+    anhBia: {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#e4e2de',
-        padding: height * 0.008, 
-        borderRadius: height * 0.03, 
+        padding: height * 0.008,
+        borderRadius: height * 0.03,
         marginHorizontal: width * 0.02,
-        width: height * 0.05, 
-        height: height * 0.05, 
+        width: height * 0.05,
+        height: height * 0.05,
     },
     containerBottomSheet: {
         backgroundColor: "#D9D9D9",
@@ -18,27 +18,27 @@ const ProfileS = StyleSheet.create({
         borderTopRightRadius: width * 0.2,
         paddingVertical: width * 0.05,
         paddingHorizontal: width * 0.05,
-      },
-      rectangle: {
+    },
+    rectangle: {
         alignItems: "center",
         marginBottom: width * 0.01,
-      },
-      lineBottomSheet: {
+    },
+    lineBottomSheet: {
         width: width * 0.15,
-        height: height *  0.006,
+        height: height * 0.006,
         backgroundColor: "#fff",
         borderRadius: width * 0.1,
-      },
-      option: {
+    },
+    option: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: width * 0.03,
         borderBottomColor: "#eee",
-      },
-      optionText: {
-        fontSize: height * 0.02,      
+    },
+    optionText: {
+        fontSize: height * 0.02,
         fontWeight: "500",
-      },
+    },
     container1: {
         flex: 1,
         backgroundColor: "#A1A6AD"
@@ -77,8 +77,8 @@ const ProfileS = StyleSheet.create({
     },
     avatarWithStory: {
         borderColor: "#0064E0", // Nếu có stories thì viền xanh
-        borderWidth:5,
-      },
+        borderWidth: 5,
+    },
     boxBackground: {
         marginHorizontal: width * 0.05,
         marginVertical: height * 0.03,
@@ -91,7 +91,7 @@ const ProfileS = StyleSheet.create({
     name: {
         fontSize: height * 0.03,
         fontWeight: 'bold',
-        color:'black'
+        color: 'black'
     },
     friendNumber: {
         fontSize: height * 0.016,
@@ -123,7 +123,7 @@ const ProfileS = StyleSheet.create({
         fontSize: height * 0.016,
         fontWeight: 'bold',
         marginVertical: height * 0.015,
-        color:'gray'
+        color: 'gray'
     },
     btnMore: {
         backgroundColor: '#D9D9D9',
@@ -246,7 +246,7 @@ const ProfileS = StyleSheet.create({
         fontWeight: '600',
     },
     viewImagePick: {
-       alignItems: 'flex-end'
+        alignItems: 'flex-end'
     },
     modalContainer: {
         flex: 1,
