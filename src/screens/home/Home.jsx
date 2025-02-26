@@ -14,48 +14,38 @@ import { useSelector, useDispatch } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
 import { getAllPostsInHome } from '../../rtk/API';
-import HomeLoading from '../../utils/skeleton_loading/HomeLoading';
+import HomeLoading from '../../utils/skeleton_loading/HomeLoading';  // Đảm bảo đã import component này
 import NothingHome from '../../utils/animation/homeanimation/NothingHome';
+
 const Home = props => {
-  // const [stories, setStories] = useState([])
   const { route, navigation } = props;
-  const { params } = route;
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-  const [loading, setloading] = useState(true)
+  const [loading, setloading] = useState(true); // Quản lý trạng thái loading
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
-  // const story = useSelector(state => state.app.stories);
-
 
   useEffect(() => {
-    //console.log('1');
-    // Call API khi lần đầu vào trang
     callGetAllPostsInHome(me._id);
 
-    // Thêm listener để gọi lại API khi quay lại trang
     const focusListener = navigation.addListener('focus', () => {
       callGetAllPostsInHome(me._id);
-      //console.log('2');
     });
 
-    // Cleanup listener khi component bị unmount
     return () => {
       focusListener();
     };
   }, [navigation]);
 
-  //call api getAllGroupOfUser
   const callGetAllPostsInHome = async ID_user => {
     try {
       await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
         .unwrap()
-        .then((response) => {
-          // console.log("stories: " + response.stories)
+        .then(response => {
           setPosts(response.posts);
           setStories(response.stories);
-          setloading(false)
+          setloading(false); // Kết thúc tải dữ liệu
         })
         .catch(error => {
           console.log('Error getAllPostsInHome:: ', error);
@@ -80,18 +70,12 @@ const Home = props => {
     );
   };
 
-  const renderStory = ({ item }) => {
-    return (
-      <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { story: item })}>
-        <Stories StoryPost={item} />
-      </TouchableOpacity>
-    );
-  };
-
   const headerComponentPost = () => {
     return (
       <View>
+        {/* Nội dung phần header của post */}
         <View style={HomeS.box1}>
+          {/* Logo, search, chat icons */}
           <View style={HomeS.header}>
             <View style={HomeS.logo}>
               <Image
@@ -100,18 +84,15 @@ const Home = props => {
               />
               <Text style={HomeS.title}>inkage</Text>
             </View>
-
             <View style={HomeS.icons}>
               <TouchableOpacity style={HomeS.iconsPadding}>
                 <Icon name="add" size={25} color="black" />
               </TouchableOpacity>
-              {/* to Search */}
               <TouchableOpacity
                 style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.Search.name)}>
                 <Icon name="search" size={20} color="black" />
               </TouchableOpacity>
-              {/* to HomeChat */}
               <TouchableOpacity
                 style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.HomeChat.name)}>
@@ -119,19 +100,18 @@ const Home = props => {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Input to post */}
           <View style={HomeS.header2}>
             <TouchableOpacity
               onPress={() => navigation.navigate('Profile', { ID_user: me._id })}>
               <Image style={HomeS.image} source={{ uri: me?.avatar }} />
             </TouchableOpacity>
-
             <TextInput
               onPress={() => navigation.navigate('UpPost')}
               style={HomeS.textInput}
               placeholder="Bạn đang nghĩ gì ?"
               placeholderTextColor={'black'}
-            // editable={false} ngan nhap lieu
-            // selectTextOnFocus={false}
             />
             <View style={HomeS.icons}>
               <View style={HomeS.iconsPadding2}>
@@ -140,17 +120,13 @@ const Home = props => {
             </View>
           </View>
         </View>
-        {/* story */}
+
+        {/* Story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
-
-            
             <FlatList
               data={stories}
-              renderItem={({ item }) => {
-                console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
-                return <Stories StoryPost={item} />; // Đúng props
-              }}
+              renderItem={({ item }) => <Stories StoryPost={item} />}
               keyExtractor={(item, index) => item?._id ? item._id.toString() : `story-${index}`}
               horizontal={true}
               showsHorizontalScrollIndicator={false}
@@ -165,26 +141,23 @@ const Home = props => {
 
   return (
     <View style={HomeS.container}>
-      {/* post */}
-      <View>
+      {/* Nếu đang tải dữ liệu, hiển thị HomeLoading */}
+      {loading ? (
+        <HomeLoading />
+      ) : (
         <FlatList
           data={posts}
-          renderItem={({ item }) => {
-            return <ProfilePage post={item} />;
-          }}
-          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => <ProfilePage post={item} />}
+          keyExtractor={item => item._id}
           showsHorizontalScrollIndicator={false}
-          ListHeaderComponent={headerComponentPost}  // Header của post sẽ luôn hiển thị
+          ListHeaderComponent={headerComponentPost}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 3 }}
-          ListEmptyComponent={  
-            <NothingHome/>
-          }
+          ListEmptyComponent={<NothingHome />}
         />
-      </View>
+      )}
     </View>
   );
-  
 };
 
 export default Home;

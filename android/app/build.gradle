@@ -114,8 +114,8 @@ dependencies {
     implementation project(':react-native-vector-icons')
     implementation("androidx.activity:activity:1.9.+")
     implementation project(':react-native-permissions')
-implementation project(':zego-express-engine-reactnative')
-implementation 'com.airbnb.android:lottie:3.4.0'
+    implementation project(':zego-express-engine-reactnative')
+    implementation 'com.airbnb.android:lottie:3.4.0'
 
 
 
