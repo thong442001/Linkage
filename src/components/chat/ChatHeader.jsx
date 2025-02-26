@@ -1,8 +1,8 @@
 import React from 'react'
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from "react-native";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+const { width, height } = Dimensions.get('window');
 export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat, onCallVideo,onCallAudio }) {
 
     return (
@@ -56,41 +56,41 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: "#ffffff",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: height * 0.002 }, // Tự động điều chỉnh bóng
         shadowOpacity: 0.2,
-        shadowRadius: 4,
+        shadowRadius: width * 0.01,
         elevation: 5, // Chỉ có tác dụng trên Android
-    },
-    headerContainer: {
+      },
+      headerContainer: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 15,
-    },
-    userInfo: {
+        padding: width * 0.04, // 4% chiều rộng màn hình
+      },
+      userInfo: {
         flexDirection: "row",
         alignItems: "center",
         flex: 1,
-        marginLeft: 15,
-    },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-    },
-    userName: {
-        width: 100,
-        fontSize: 16,
+        marginLeft: width * 0.04, // 4% chiều rộng màn hình
+      },
+      avatar: {
+        width: width * 0.11, // 11% chiều rộng màn hình
+        height: width * 0.11,
+        borderRadius: (width * 0.11) / 2,
+      },
+      userName: {
+        width: width * 0.35, // 30% chiều rộng màn hình
+        fontSize: width * 0.045, // 4.5% chiều rộng màn hình
         fontWeight: "bold",
         color: "black",
-        marginLeft: 10
-    },
-    lastSeen: {
-        fontSize: 12,
+        marginLeft: width * 0.025, // 2.5% chiều rộng màn hình
+      },
+      lastSeen: {
+        fontSize: width * 0.03, // 3% chiều rộng màn hình
         color: "gray",
-    },
-    actionIcons: {
+      },
+      actionIcons: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 15,
-    },
+        gap: width * 0.04, // 4% chiều rộng màn hình
+      },
 });

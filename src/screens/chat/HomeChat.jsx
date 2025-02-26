@@ -16,6 +16,9 @@ import Groupcomponent from '../../components/chat/Groupcomponent';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
 import Icon from 'react-native-vector-icons/Ionicons'
+
+const { width, height } = Dimensions.get('window');
+
 const HomeChat = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
@@ -122,39 +125,36 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        // padding: 20,
-        paddingHorizontal: 20,
-        // paddingTop: 20
+        paddingHorizontal: width * 0.05, // 5% chiều rộng màn hình
     },
     header: {
-        fontSize: 24,
+        fontSize: width * 0.06, // 6% chiều rộng màn hình
         fontWeight: 'bold',
         color: "black",
-        width: Dimensions.get('window').width * 0.5,
+        width: width * 0.5, // Chiếm 50% chiều rộng màn hình
         textAlign: 'center',
     },
     searchBox: {
         backgroundColor: '#eee',
-        borderRadius: 20,
-        padding: 10,
-        marginBottom: 15,
+        borderRadius: width * 0.05, // 5% chiều rộng màn hình
+        padding: width * 0.025, // 2.5% chiều rộng màn hình
+        marginBottom: height * 0.02, // 2% chiều cao màn hình
     },
     vHeader: {
         flexDirection: 'row',
-        //width: Dimensions.get('window').width,
         justifyContent: 'space-between',
-        marginVertical: 20
+        marginVertical: height * 0.025, // 2.5% chiều cao màn hình
     },
     inputSearch: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#F7F7FC',
-        padding: 3,
-        borderRadius: 10,
-        marginBottom: 20
+        padding: width * 0.01, // 1% chiều rộng màn hình
+        borderRadius: width * 0.025, // 2.5% chiều rộng màn hình
+        marginBottom: height * 0.025, // 2.5% chiều cao màn hình
     },
     search: {
         flex: 1,
-        padding: 10,
+        padding: width * 0.025, // 2.5% chiều rộng màn hình
     }
 });

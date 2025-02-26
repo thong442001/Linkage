@@ -16,7 +16,7 @@ import {
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+const { width, height } = Dimensions.get('window');
 const AddFriendGroup = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -187,44 +187,41 @@ const styles = StyleSheet.create({
     containerAll: {
         flex: 1,
         backgroundColor: '#fff',
-    },
-    container: {
-        // padding: 20,,
-        marginHorizontal: 20,
-    },
-    header: {
-        fontSize: 24,
+      },
+      container: {
+        marginHorizontal: width * 0.05, // 5% chiều rộng màn hình
+      },
+      header: {
+        fontSize: width * 0.06, // 6% chiều rộng màn hình
         fontWeight: 'bold',
         color: "black",
-        width: Dimensions.get('window').width * 0.5,
+        width: width * 0.5, // 50% chiều rộng màn hình
         textAlign: 'center',
-    },
-    headerBlue: {
-        fontSize: 16,
+      },
+      headerBlue: {
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "blue",
         textAlign: 'center',
-    },
-    searchBox: {
-
-        padding: 15,
-        flex: 1
-    },
-    vHeader: {
+      },
+      searchBox: {
+        padding: height * 0.02, // 2% chiều cao màn hình
+        flex: 1,
+      },
+      vHeader: {
         flexDirection: 'row',
-        //width: Dimensions.get('window').width,
         justifyContent: 'space-between',
-        marginVertical: 20,
-        alignItems: 'center'
-    },
-    txtGrey: {
-        fontSize: 16,
+        marginVertical: height * 0.02, // 2% chiều cao màn hình
+        alignItems: 'center',
+      },
+      txtGrey: {
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "#797979",
-    },
-    boxSearch: {
+      },
+      boxSearch: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 20,
+        marginVertical: height * 0.02, // 2% chiều cao màn hình
         backgroundColor: '#eee',
-        borderRadius: 20,
-    }
+        borderRadius: width * 0.05, // 5% chiều rộng màn hình
+      },
 });

@@ -15,7 +15,7 @@ import {
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
 
-
+const { width, height } = Dimensions.get('window');
 const CreateGroup = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
@@ -155,43 +155,42 @@ const styles = StyleSheet.create({
     containerAll: {
         flex: 1,
         backgroundColor: '#fff',
-    },
-    container: {
-        marginHorizontal: 20
-    },
-    header: {
-        fontSize: 24,
+      },
+      container: {
+        marginHorizontal: width * 0.05, // 5% chiều rộng màn hình
+      },
+      header: {
+        fontSize: width * 0.06, // 6% chiều rộng màn hình
         fontWeight: 'bold',
         color: "black",
-        width: Dimensions.get('window').width * 0.5,
+        width: width * 0.5, // 50% chiều rộng màn hình
         textAlign: 'center',
-    },
-    txtHuy: {
-        fontSize: 16,
+      },
+      txtHuy: {
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "blue",
         textAlign: 'center',
-    },
-    txtTao: {
-        fontSize: 16,
+      },
+      txtTao: {
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "grey",
         textAlign: 'center',
-    },
-    searchBox: {
+      },
+      searchBox: {
         backgroundColor: '#eee',
-        borderRadius: 10,
-        padding: 15,
-        marginBottom: 15,
-    },
-    vHeader: {
+        borderRadius: width * 0.025, // 2.5% chiều rộng màn hình
+        padding: height * 0.018, // 1.8% chiều cao màn hình
+        marginBottom: height * 0.018, // 1.8% chiều cao màn hình
+      },
+      vHeader: {
         flexDirection: 'row',
-        //width: Dimensions.get('window').width,
         justifyContent: 'space-between',
-        marginVertical: 15,
+        marginVertical: height * 0.018, // 1.8% chiều cao màn hình
         alignItems: "center",
-    },
-    txtGrey: {
-        fontSize: 16,
+      },
+      txtGrey: {
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "#797979",
-        marginBottom: 10
-    },
+        marginBottom: height * 0.012, // 1.2% chiều cao màn hình
+      },
 });
