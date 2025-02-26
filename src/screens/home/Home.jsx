@@ -44,8 +44,6 @@ const Home = props => {
   // }, [navigation]);
 
 
-
-
   const callGetAllPostsInHome = async (ID_user) => {
     try {
       setloading(true)
@@ -84,7 +82,7 @@ const Home = props => {
 
   useFocusEffect(
     useCallback(() => {
-      console.log('123');
+      //console.log('123');
       callGetAllPostsInHome(me._id); // Gọi API load dữ liệu
     }, [])
   );

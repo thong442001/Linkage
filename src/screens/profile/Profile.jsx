@@ -217,11 +217,12 @@ const Profile = props => {
     };
 
 
-
-    // useEffect(() => {
-    //     callAllProfile();
-    //     //callGetAllFriendOfID_user();
-    // }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
+    // Chạy lại nếu params._id hoặc me thay đổi
+    // để vào trang profile bạn bè
+    useEffect(() => {
+        callAllProfile();
+        //callGetAllFriendOfID_user();
+    }, [params?._id, me]);
 
     useFocusEffect(
         useCallback(() => {
