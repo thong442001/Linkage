@@ -6,19 +6,24 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useEffect, useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Stories from '../../components/items/Stories';
 import ProfilePage from '../../components/items/ProfilePage';
 import { useSelector, useDispatch } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
-import { getAllPostsInHome } from '../../rtk/API';
+import {
+  getAllPostsInHome,
+  changeDestroyPost
+} from '../../rtk/API';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';  // Đảm bảo đã import component này
 import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 
 const Home = props => {
   const { route, navigation } = props;
+  const { params } = route;
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
@@ -26,20 +31,24 @@ const Home = props => {
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
 
-  useEffect(() => {
-    callGetAllPostsInHome(me._id);
+  // useEffect(() => {
+  //   callGetAllPostsInHome(me._id);
 
-    const focusListener = navigation.addListener('focus', () => {
-      callGetAllPostsInHome(me._id);
-    });
+  //   const focusListener = navigation.addListener('focus', () => {
+  //     callGetAllPostsInHome(me._id);
+  //   });
 
-    return () => {
-      focusListener();
-    };
-  }, [navigation]);
+  //   return () => {
+  //     focusListener();
+  //   };
+  // }, [navigation]);
 
-  const callGetAllPostsInHome = async ID_user => {
+
+
+
+  const callGetAllPostsInHome = async (ID_user) => {
     try {
+      setloading(true)
       await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
         .unwrap()
         .then(response => {
@@ -54,6 +63,31 @@ const Home = props => {
       console.log(error);
     }
   };
+
+  const callChangeDestroyPost = async (ID_post) => {
+    try {
+      console.log('Xóa bài viết với ID:', ID_post);
+
+      await dispatch(changeDestroyPost({ _id: ID_post }))
+        .unwrap()
+        .then(response => {
+          console.log('Xóa thành công:', response);
+          setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+        })
+        .catch(error => {
+          console.log('Lỗi khi xóa bài viết:', error);
+        });
+    } catch (error) {
+      console.log('Lỗi trong callChangeDestroyPost:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log('123');
+      callGetAllPostsInHome(me._id); // Gọi API load dữ liệu
+    }, [])
+  );
 
   const headerComponentStory = () => {
     return (
@@ -147,7 +181,11 @@ const Home = props => {
       ) : (
         <FlatList
           data={posts}
-          renderItem={({ item }) => <ProfilePage post={item} />}
+          renderItem={({ item }) => <ProfilePage
+            post={item}
+            ID_user={me._id}
+            onDelete={() => callChangeDestroyPost(item._id)}
+          />}
           keyExtractor={item => item._id}
           showsHorizontalScrollIndicator={false}
           ListHeaderComponent={headerComponentPost}

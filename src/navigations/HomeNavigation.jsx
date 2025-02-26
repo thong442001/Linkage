@@ -40,25 +40,25 @@ const TabHome = () => {
             color = focused
               ? "#0064E0"
               : "black"
-              size = 25
+            size = 25
           } else if (route.name === 'Notification') {
             name = "bell-o";
             color = focused
               ? "#0064E0"
               : "black"
-              size = 25
+            size = 25
           } else if (route.name === 'Profile') {
             name = "user-circle-o";
             color = focused
               ? "#0064E0"
               : "black"
-              size = 25
+            size = 25
           } else if (route.name === 'Setting') {
             name = "server";
             color = focused
               ? "#0064E0"
               : "black"
-              size = 25
+            size = 25
           }
 
           return <FontAwesome name={name} size={size} color={color} />;

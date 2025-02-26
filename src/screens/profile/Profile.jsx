@@ -9,7 +9,7 @@ import {
     Modal,
     Pressable,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
@@ -21,6 +21,7 @@ import {
     chapNhanLoiMoiKetBan,
     huyLoiMoiKetBan,
     allProfile, // allProfile
+    changeDestroyPost, // changeDestroy
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS';
@@ -34,7 +35,7 @@ import { changeAvatar, changeBackground } from '../../rtk/Reducer';
 import axios from 'axios';
 import ProfileLoading from '../../utils/skeleton_loading/ProfileLoading';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
-
+import { useFocusEffect } from '@react-navigation/native';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -217,11 +218,16 @@ const Profile = props => {
 
 
 
-    useEffect(() => {
-        callAllProfile();
+    // useEffect(() => {
+    //     callAllProfile();
+    //     //callGetAllFriendOfID_user();
+    // }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
 
-        //callGetAllFriendOfID_user();
-    }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
+    useFocusEffect(
+        useCallback(() => {
+            callAllProfile(); // Gọi API load dữ liệu
+        }, [])
+    );
 
     //bottom sheet
     const detail_selection_image = () => {
@@ -379,6 +385,25 @@ const Profile = props => {
                 });
         } catch (error) {
             console.log(error);
+        }
+    };
+
+
+    const callChangeDestroyPost = async (ID_post) => {
+        try {
+            console.log('Xóa bài viết với ID:', ID_post);
+
+            await dispatch(changeDestroyPost({ _id: ID_post }))
+                .unwrap()
+                .then(response => {
+                    console.log('Xóa thành công:', response);
+                    setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+                })
+                .catch(error => {
+                    console.log('Lỗi khi xóa bài viết:', error);
+                });
+        } catch (error) {
+            console.log('Lỗi trong callChangeDestroyPost:', error);
         }
     };
 
@@ -686,7 +711,13 @@ const Profile = props => {
                     <View style={ProfileS.post}>
                         <FlatList
                             data={posts}
-                            renderItem={({ item }) => <ProfilePage post={item} />}
+                            renderItem={({ item }) =>
+                                <ProfilePage
+                                    post={item}
+                                    ID_user={me._id}
+                                    onDelete={() => callChangeDestroyPost(item._id)}
+                                />
+                            }
                             keyExtractor={item => item._id}
                             showsHorizontalScrollIndicator={false}
                             ListHeaderComponent={headerFriends}

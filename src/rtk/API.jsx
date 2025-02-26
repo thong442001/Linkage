@@ -580,7 +580,7 @@ export const changeDestroyPost = createAsyncThunk(
 // Xóa vĩnh viễn bài post 
 // params: _id
 export const deletePost = createAsyncThunk(
-  'post/changeDestroyPost',
+  'post/deletePost',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()

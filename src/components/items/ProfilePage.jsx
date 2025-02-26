@@ -5,13 +5,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
 import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import Icon4 from 'react-native-vector-icons/FontAwesome5';
-import { Modal } from 'react-native-paper';
+import { useBottomSheet } from '../../context/BottomSheetContext';
 import { useDispatch } from 'react-redux';
-import {
-    addPost,
-} from '../../rtk/API';
 const { width, height } = Dimensions.get('window');
-const PostItem = ({ post }) => {
+const PostItem = ({ post, ID_user, onDelete = () => { }, onDeleteVinhVien = () => { } }) => {
+    const { openBottomSheet, closeBottomSheet } = useBottomSheet();
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
     //const [isDeleted, setisDeleted] = useState(post._destroy || false);
@@ -116,30 +114,8 @@ const PostItem = ({ post }) => {
             else return styles.fivePlusMediaSecondRowRight;
         }
     };
-    // console.log('Post ne', post._destroy)
 
-    // const handleDeletePost = async () => {
-    //     try {
-    //         const paramsAPI = {
-    //             _destroy: true,
-    //         };
 
-    //         console.log("Xóa bài viết với params:", paramsAPI);
-
-    //         await dispatch(addPost({ id: post._id, data: paramsAPI })) // Gửi yêu cầu cập nhật bài viết
-    //             .unwrap()
-    //             .then((response) => {
-    //                 console.log("Xóa thành công:", response);
-    //                 //setisDeleted(true); // Cập nhật UI để ẩn bài viết
-    //                 setModalVisible(false); // Đóng modal
-    //             })
-    //             .catch((error) => {
-    //                 console.log("Lỗi khi xóa bài viết:", error);
-    //             });
-    //     } catch (error) {
-    //         console.log("Lỗi trong handleDeletePost:", error);
-    //     }
-    // };
 
 
     return (
@@ -159,28 +135,44 @@ const PostItem = ({ post }) => {
                     </View>
                 </View>
 
-                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <TouchableOpacity
+                    disabled={ID_user != post.ID_user._id}
+                    onPress={() =>
+                        openBottomSheet(
+                            25,
+                            <View>
+                                <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
+                                    style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                    <Text style={[styles.deleteText,]}
+                                    >{
+                                            post._destroy ? (
+                                                "Phục hồi"
+                                            ) : "Xóa bài viết"
+                                        }
+                                    </Text>
+                                </TouchableOpacity>
+                                {
+                                    post._destroy && (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                onDeleteVinhVien()
+                                                closeBottomSheet()
+                                            }}
+                                            style={styles.deleteButton}>
+                                            <Text style={styles.deleteText}
+                                            >Xóa vĩnh viễn
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )
+                                }
+                            </View>,
+                        )
+                    }
+
+                >
                     <Icon name="ellipsis-horizontal" size={22} color="black" />
                 </TouchableOpacity>
 
-
-                {/* Modal hiển thị lựa chọn */}
-                <Modal
-                    transparent={true}
-                    animationType="fade"
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                >
-                    <TouchableOpacity style={styles.overlay} onPress={() => setModalVisible(false)}>
-                        <View style={styles.modalContent}>
-                            <TouchableOpacity
-                            // onPress={handleDeletePost}
-                            >
-                                <Text style={styles.deleteText}>🗑️ Xóa bài viết</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
-                </Modal>
             </View>
 
             {hasCaption && <Text style={styles.caption}>{post?.caption}</Text>}
@@ -346,19 +338,18 @@ const styles = StyleSheet.create({
         fontSize: width * 0.035,
         color: 'black',
     },
-    modalContent: {
-        backgroundColor: "blue",
-        padding: width * 0.04,
-        borderRadius: width * 0.05,
-        width: width * 0.5,
-        alignItems: "center",
-        opacity: 0.9,
+    deleteButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        backgroundColor: '#ff4d4d', // Màu nền đỏ
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 10,
     },
     deleteText: {
-        color: "red",
-        fontSize: width * 0.04,
-        fontWeight: "bold",
-        padding: width * 0.025,
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'white', // Màu chữ trắng
     },
 });
 

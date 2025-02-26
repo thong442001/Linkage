@@ -87,7 +87,8 @@ const UpPostS = StyleSheet.create({
     },
     txtInput: {
         fontSize: 23,
-        marginTop: 10
+        marginTop: 10,
+        color: 'black',
     },
     boxItems: {
         flexDirection: 'row',

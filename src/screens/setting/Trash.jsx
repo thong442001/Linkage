@@ -1,6 +1,10 @@
 import { Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { getPostsUserIdDestroyTrue } from '../../rtk/API';
+import {
+  getPostsUserIdDestroyTrue,
+  changeDestroyPost,
+  deletePost,
+} from '../../rtk/API';
 import HomeS from '../../styles/screens/home/HomeS';
 import ProfilePage from '../../components/items/ProfilePage';
 import { oStackHome } from '../../navigations/HomeNavigation';
@@ -49,6 +53,42 @@ const Trash = props => {
     }
   };
 
+  const callDeletePost = async (ID_post) => {
+    try {
+      //console.log('Xóa bài viết với ID:', ID_post);
+
+      await dispatch(deletePost({ _id: ID_post }))
+        .unwrap()
+        .then(response => {
+          console.log('Xóa vĩnh viễn thành công:', response);
+          setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+        })
+        .catch(error => {
+          console.log('Lỗi khi xóa ĩnh viễn bài viết:', error);
+        });
+    } catch (error) {
+      console.log('Lỗi trong callDeletePost:', error);
+    }
+  };
+
+  const callChangeDestroyPost = async (ID_post) => {
+    try {
+      console.log('Xóa bài viết với ID:', ID_post);
+
+      await dispatch(changeDestroyPost({ _id: ID_post }))
+        .unwrap()
+        .then(response => {
+          console.log('Xóa thành công:', response);
+          setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+        })
+        .catch(error => {
+          console.log('Lỗi khi xóa bài viết:', error);
+        });
+    } catch (error) {
+      console.log('Lỗi trong callChangeDestroyPost:', error);
+    }
+  };
+
   return (
     <View style={HomeS.container}>
       {/* post */}
@@ -59,7 +99,12 @@ const Trash = props => {
               data={posts}
               renderItem={({ item }) =>
                 //console.log('📌 Post data thùng rác   :', item);
-                <ProfilePage post={item} />
+                <ProfilePage
+                  post={item}
+                  ID_user={me._id}
+                  onDelete={() => callChangeDestroyPost(item._id)}
+                  onDeleteVinhVien={() => callDeletePost(item._id)}
+                />
               }
               keyExtractor={item => item._id}
               showsHorizontalScrollIndicator={false}

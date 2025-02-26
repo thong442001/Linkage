@@ -1,7 +1,7 @@
 import axios from 'axios';
-import {store} from '../rtk/Store';
-import {logout} from '../rtk/Reducer';
-import {resetToken} from '../rtk/Reducer';
+import { store } from '../rtk/Store';
+import { logout } from '../rtk/Reducer';
+import { resetToken } from '../rtk/Reducer';
 
 const AxiosHelper = (token = '', contentType = 'application/json') => {
     const axiosInstance = axios.create({
@@ -30,7 +30,7 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
     }, async (error) => {
         const x = error?.config;
         if (error.response.status == 403 && !x?.sent) {
-            console.error("403, token hết hạn");
+            console.log("403, token hết hạn");
             x.sent = true;
             //gọi api refreshToken
             //gọi api refreshToken`https://192.168.2.17:3001/user/refreshToken`
@@ -43,7 +43,7 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
                     x.headers['Authorization'] = `Bearer ${response.data?.token}`;
                 })
                 .catch(async function (error) {
-                    console.error("token hết hạn");
+                    console.log("token hết hạn");
                     // refreshToken hết hạn đăng xuất ra
                     await store.dispatch(logout());
                 });
@@ -55,7 +55,7 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
         return Promise.reject(error.message);
     });
 
-  return axiosInstance;
+    return axiosInstance;
 };
 
 export default AxiosHelper;
