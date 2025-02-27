@@ -219,15 +219,15 @@ const Profile = props => {
 
     // Chạy lại nếu params._id hoặc me thay đổi
     // để vào trang profile bạn bè
-    useEffect(() => {
-        callAllProfile();
-        //callGetAllFriendOfID_user();
-    }, [params?._id, me]);
+    // useEffect(() => {
+    //     callAllProfile();
+    //     //callGetAllFriendOfID_user();
+    // }, [params?._id, me]);
 
     useFocusEffect(
         useCallback(() => {
             callAllProfile(); // Gọi API load dữ liệu
-        }, [])
+        }, [params?._id, me])
     );
 
     //bottom sheet
