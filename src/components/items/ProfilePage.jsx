@@ -31,7 +31,7 @@ const PostItem = ({
     const reactions = useSelector(state => state.app.reactions)
     const dispatch = useDispatch();
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
-    console.log(post.post_reactions)
+    //console.log(post.post_reactions)
 
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
