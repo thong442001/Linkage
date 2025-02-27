@@ -21,7 +21,7 @@
     "@renzycode/react-native-fb-photo-grid": "^0.1.8",
     "@zegocloud/zego-uikit-prebuilt-call-rn": "^6.3.2",
     "@zegocloud/zego-uikit-rn": "^2.17.2",
-    "axios": "^0.27.2",
+    "axios": "^0.28.0",
     "i": "^0.3.7",
     "install": "^0.13.0",
     "lottie-ios": "^4.5.1",
