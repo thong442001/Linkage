@@ -31,7 +31,7 @@ const PostItem = ({
     const reactions = useSelector(state => state.app.reactions)
     const dispatch = useDispatch();
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
-    //console.log(post.post_reactions)
+    console.log(post.post_reactions)
 
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
@@ -41,14 +41,17 @@ const PostItem = ({
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
     // Lọc danh sách reaction chỉ lấy unique loại reaction
+    const filteredReactions = post.post_reactions.filter(reaction => reaction.ID_reaction !== null);
     const uniqueReactions = [];
     const seenReactions = new Set();
-    post.post_reactions.forEach(reaction => {
+
+    filteredReactions.forEach(reaction => {
         if (!seenReactions.has(reaction.ID_reaction._id)) {
             seenReactions.add(reaction.ID_reaction._id);
             uniqueReactions.push(reaction);
         }
     });
+
 
     // Tìm reaction của chính người dùng hiện tại
     const userReaction = post.post_reactions.find(
