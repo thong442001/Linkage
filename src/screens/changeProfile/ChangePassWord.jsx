@@ -3,6 +3,8 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, ActivityIndic
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector, useDispatch } from 'react-redux';
 import { editPasswordOfUser } from '../../rtk/API';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -15,14 +17,18 @@ const ChangePassWord = (props) => {
     const [passwordOLd, setPasswordOld] = useState('');
     const [RePass, setRepass] = useState('');
     const [btnState, setBtnState] = useState(false);
-    const [isChecked, setIsChecked] = useState(false);
-    const [loading, setLoading] = useState(false); // Trạng thái loading
+    const [loading, setLoading] = useState(false); 
+    const [successVisible, setSuccessVisible] = useState(false); 
+    const [failed, setfailed] = useState(false);
 
-    // Trạng thái hiển thị mật khẩu
+    const [errorOldPassword, setErrorOldPassword] = useState('');
+    const [errorNewPassword, setErrorNewPassword] = useState('');
+    const [errorRePass, setErrorRePass] = useState('');
+
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
-
+    
     useEffect(() => {
         if (passwordNew.trim() && passwordOLd.trim() && RePass.trim()) {
             setBtnState(true);
@@ -32,23 +38,29 @@ const ChangePassWord = (props) => {
     }, [passwordNew, passwordOLd, RePass]);
 
     const onChangePassWord = async () => {
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        let hasError = false;
+        setErrorOldPassword('');
+        setErrorNewPassword('');
+        setErrorRePass('');
+        
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
     
         if (!passwordRegex.test(passwordNew)) {
-            Alert.alert(
-                'Lỗi',
-                'Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt.'
-            );
-            return;
+            setErrorNewPassword('Mật khẩu mới phải có ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt.');
+            hasError = true;
         }
     
         if (passwordNew === passwordOLd) {
-            Alert.alert('Lỗi', 'Mật khẩu mới không được trùng với mật khẩu cũ');
-            return;
+            setErrorOldPassword('Mật khẩu mới không được trùng với mật khẩu cũ.');
+            hasError = true;
         }
     
         if (passwordNew !== RePass) {
-            Alert.alert('Lỗi', 'Mật khẩu nhập lại không khớp');
+            setErrorRePass('Mật khẩu nhập lại không khớp.');
+            hasError = true;
+        }
+    
+        if (hasError) {
             return;
         }
     
@@ -61,9 +73,16 @@ const ChangePassWord = (props) => {
                 .unwrap()
                 .then((response) => {
                     if (response.status === true) {
-                        Alert.alert('Thông báo', 'Đổi mật khẩu thành công');
+                        setSuccessVisible(true); 
+                        setTimeout(() => {
+                            setSuccessVisible(false);
+                            navigation.goBack(); 
+                        }, 2000); 
                     } else {
-                        Alert.alert('Thông báo', 'Thông tin không chính xác');
+                        setfailed(true);
+                        setTimeout(() => {
+                            setfailed(false);
+                        }, 2000);
                     }
                 })
                 .catch((error) => {
@@ -75,8 +94,6 @@ const ChangePassWord = (props) => {
                 });
         }, 2000);
     };
-    
-    
 
     return (
         <View style={styles.container}>
@@ -85,9 +102,8 @@ const ChangePassWord = (props) => {
             </Pressable>
             <Text>{me.first_name} {me.last_name}</Text>
             <Text style={styles.label}>Thay đổi mật khẩu</Text>
-            <Text style={styles.label2}>Mật khẩu của bạn phải có tối thiểu 8 ký tự, đồng thời bao gồm cả chữ số, chữ cái và ký tự đặc biệt (!$@%).</Text>
+            <Text style={styles.label2}>Mật khẩu của bạn phải có tối thiểu 6 ký tự, bao gồm cả chữ số, chữ cái.</Text>
 
-            {/* Ô nhập mật khẩu cũ */}
             <View style={styles.inputContainer}>
                 <TextInput
                     value={passwordOLd}
@@ -101,8 +117,8 @@ const ChangePassWord = (props) => {
                     <Icon name={showOldPassword ? "eye" : "eye-slash"} size={22} color="black" />
                 </Pressable>
             </View>
+            {errorOldPassword ? <Text style={styles.errorText}>{errorOldPassword}</Text> : null}
 
-            {/* Ô nhập mật khẩu mới */}
             <View style={styles.inputContainer}>
                 <TextInput
                     value={passwordNew}
@@ -116,8 +132,8 @@ const ChangePassWord = (props) => {
                     <Icon name={showNewPassword ? "eye" : "eye-slash"} size={22} color="black" />
                 </Pressable>
             </View>
+            {errorNewPassword ? <Text style={styles.errorText}>{errorNewPassword}</Text> : null}
 
-            {/* Ô nhập lại mật khẩu mới */}
             <View style={styles.inputContainer}>
                 <TextInput
                     value={RePass}
@@ -131,18 +147,12 @@ const ChangePassWord = (props) => {
                     <Icon name={showRePassword ? "eye" : "eye-slash"} size={22} color="black" />
                 </Pressable>
             </View>
+            {errorRePass ? <Text style={styles.errorText}>{errorRePass}</Text> : null}
 
             <View style={styles.passInfoContainer}>
                 <Pressable onPress={() => navigation.navigate('FindWithEmail')}>
                     <Text style={styles.textBlue}>Bạn quên mật khẩu ư?</Text>
                 </Pressable>
-
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
-                    <Pressable onPress={() => setIsChecked(!isChecked)} style={{ marginRight: width * 0.02 }}>
-                        <Icon name={isChecked ? "check-square" : "square-o"} size={22} color="black" />
-                    </Pressable>
-                    <Text>Đăng xuất khỏi các thiết bị khác. Hãy chọn mục này nếu người khác từng dùng tài khoản của bạn</Text>
-                </View>
             </View>
 
             <Pressable
@@ -156,6 +166,9 @@ const ChangePassWord = (props) => {
                     <Text style={styles.buttonText}>Đổi mật khẩu</Text>
                 )}
             </Pressable>
+
+            <SuccessModal visible={successVisible} message="Cập nhật mật khẩu thành công!" />
+            <FailedModal visible={failed} message="Cập nhật thất bại! Vui lòng thử lại"/> 
         </View>
     );
 };
@@ -165,6 +178,11 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: width * 0.04,
         backgroundColor: '#f0f4ff',
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 14,
+        marginBottom: 10,
     },
     iconBack: {
         marginVertical: height * 0.02,
@@ -212,21 +230,22 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-        borderRadius: width * 0.03,
-        paddingHorizontal: width * 0.04,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#fff',
+        paddingHorizontal: width * 0.03,
+        
+        borderRadius: width * 0.08,
         marginBottom: height * 0.015,
+        justifyContent: 'space-between',
     },
     input: {
-        flex: 1,
-        fontSize: width * 0.04,
+        fontSize: height * 0.02,
         color: 'black',
+        width: '90%',
     },
     textBlue: {
+        fontSize: height * 0.02,
         color: '#0064E0',
-    }
+    },
 });
 
 export default ChangePassWord;

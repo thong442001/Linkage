@@ -9,7 +9,7 @@ import {
     Modal,
     Pressable,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
@@ -21,6 +21,7 @@ import {
     chapNhanLoiMoiKetBan,
     huyLoiMoiKetBan,
     allProfile, // allProfile
+    changeDestroyPost, // changeDestroy
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS';
@@ -32,7 +33,9 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { editAvatarOfUser, editBackgroundOfUser } from '../../rtk/API';
 import { changeAvatar, changeBackground } from '../../rtk/Reducer';
 import axios from 'axios';
-
+import ProfileLoading from '../../utils/skeleton_loading/ProfileLoading';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
+import { useFocusEffect } from '@react-navigation/native';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -55,6 +58,7 @@ const Profile = props => {
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
     const [dialogReLoad, setDialogreload] = useState(false);
+    const [loading, setloading] = useState(true)
 
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
@@ -65,6 +69,8 @@ const Profile = props => {
         setImageModalVisible(false);
         setSelectedImage(null);
     };
+
+
 
     //up lên cloudiary
     const uploadFile = async file => {
@@ -211,11 +217,18 @@ const Profile = props => {
     };
 
 
-
+    // Chạy lại nếu params._id hoặc me thay đổi
+    // để vào trang profile bạn bè
     useEffect(() => {
         callAllProfile();
         //callGetAllFriendOfID_user();
-    }, [params?._id, me]); // Chạy lại nếu params._id hoặc me thay đổi
+    }, [params?._id, me]);
+
+    useFocusEffect(
+        useCallback(() => {
+            callAllProfile(); // Gọi API load dữ liệu
+        }, [])
+    );
 
     //bottom sheet
     const detail_selection_image = () => {
@@ -250,6 +263,7 @@ const Profile = props => {
     //callAllProfile
     const callAllProfile = async () => {
         try {
+            setloading(true)
             const paramsAPI = {
                 ID_user: params?._id,
                 me: me._id,
@@ -257,7 +271,6 @@ const Profile = props => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    // console.log("stories: " + response.stories)
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
@@ -271,20 +284,18 @@ const Profile = props => {
                         },
                         stories: response.stories || []
                     });
-                    console.log('stories: ' + stories);
+                    setloading(false);
                 })
                 .catch(error => {
                     console.log('Error2 callGuiLoiMoiKetBan:', error);
+                    setloading(false);
                     setDialogreload(true);
                 });
         } catch (error) {
             console.log(error);
+            setloading(false);
         }
     };
-
-    //   const hasMeStories = stories?.stories.length > 0 ? stories : {};
-
-    //console.log('hasMeStories: ', hasMeStories);
 
     //guiLoiMoiKetBan
     const callGuiLoiMoiKetBan = async () => {
@@ -372,11 +383,72 @@ const Profile = props => {
         }
     };
 
+    // call api callChangeDestroyPost
+    const callChangeDestroyPost = async (ID_post) => {
+        try {
+            //console.log('Xóa bài viết với ID:', ID_post);
+
+            await dispatch(changeDestroyPost({ _id: ID_post }))
+                .unwrap()
+                .then(response => {
+                    //console.log('Xóa thành công:', response);
+                    setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+                })
+                .catch(error => {
+                    console.log('Lỗi khi xóa bài viết:', error);
+                });
+        } catch (error) {
+            console.log('Lỗi trong callChangeDestroyPost:', error);
+        }
+    };
+
+    // Hàm cập nhật bài post sau khi thả biểu cảm
+    const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
+        setPosts(prevPosts =>
+            prevPosts.map(post => {
+                if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
+
+                // Tìm reaction của user hiện tại
+                const existingReactionIndex = post.post_reactions.findIndex(
+                    reaction => reaction.ID_user._id === me._id
+                );
+
+                let updatedReactions = [...post.post_reactions];
+
+                if (existingReactionIndex !== -1) {
+                    // Nếu user đã thả reaction, cập nhật reaction mới
+                    updatedReactions[existingReactionIndex] = {
+                        ...updatedReactions[existingReactionIndex],
+                        ID_reaction: newReaction
+                    };
+                } else {
+                    // Nếu user chưa thả reaction, thêm mới
+                    updatedReactions.push({
+                        _id: ID_post_reaction, // ID của reaction mới từ server
+                        ID_user: {
+                            _id: me._id,
+                            first_name: me.first_name, // Sửa lại đúng key
+                            last_name: me.last_name,
+                            avatar: me.avatar,
+                        },
+                        ID_reaction: newReaction
+                    });
+                }
+
+                return { ...post, post_reactions: updatedReactions };
+            })
+        );
+    };
+
+
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id);
     };
 
     const headerFriends = () => {
+        if (loading) {
+            return <ProfileLoading />
+        }
         return (
             <View style={ProfileS.container1}>
                 <View style={ProfileS.boxHeader}>
@@ -396,7 +468,7 @@ const Profile = props => {
                                     <Image
                                         style={ProfileS.backGroundImage}
                                         // source={{ uri: user?.background }}
-                                        source={{ uri: user?.avatar }}
+                                        source={{ uri: user?.background }}
                                     />
                                 ) : (
                                     <Image
@@ -560,6 +632,7 @@ const Profile = props => {
                         </View>
                     </View>
                 </View>
+
                 <View style={[ProfileS.boxHeader, { marginVertical: 7 }]}>
                     <View style={ProfileS.boxFriends}>
                         <View style={ProfileS.title}>
@@ -569,7 +642,9 @@ const Profile = props => {
                             </View>
                             <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
                         </View>
+
                         <View style={ProfileS.listFriends}>
+                            <LoadingModal visible={loading} />
                             <FlatList
                                 data={(friendRelationships || []).slice(0, 6)}
                                 renderItem={({ item }) => (
@@ -644,6 +719,8 @@ const Profile = props => {
         );
     };
 
+
+
     return (
         <View style={ProfileS.container}>
             <View style={ProfileS.boxHeader}>
@@ -664,10 +741,18 @@ const Profile = props => {
             <View style={HomeS.line}></View>
             <View>
                 <View>
+
                     <View style={ProfileS.post}>
                         <FlatList
                             data={posts}
-                            renderItem={({ item }) => <ProfilePage post={item} />}
+                            renderItem={({ item }) =>
+                                <ProfilePage
+                                    post={item}
+                                    ID_user={me._id}
+                                    onDelete={() => callChangeDestroyPost(item._id)}
+                                    updatePostReaction={updatePostReaction}
+                                />
+                            }
                             keyExtractor={item => item._id}
                             showsHorizontalScrollIndicator={false}
                             ListHeaderComponent={headerFriends}

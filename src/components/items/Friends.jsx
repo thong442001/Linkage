@@ -3,7 +3,7 @@ import React from 'react'
 
 
 const Friends = ({ relationship, ID_user }) => {
-    console.log("relationship: " + relationship);
+    //console.log("relationship: " + relationship);
 
     return (
         <View style={styles.box}>
@@ -30,7 +30,7 @@ const Friends = ({ relationship, ID_user }) => {
                             numberOfLines={1} // Số dòng tối đa
                             ellipsizeMode="tail" // Cách hiển thị dấu 3 chấm (tail: ở cuối)
                         >
-                        {`${relationship.ID_userB?.first_name || ''} ${relationship.ID_userB?.last_name || ''}`}
+                            {`${relationship.ID_userB?.first_name || ''} ${relationship.ID_userB?.last_name || ''}`}
                         </Text>
                     ) : (
 
@@ -39,7 +39,7 @@ const Friends = ({ relationship, ID_user }) => {
                             numberOfLines={1} // Số dòng tối đa
                             ellipsizeMode="tail" // Cách hiển thị dấu 3 chấm (tail: ở cuối)
                         >
-                        {`${relationship.ID_userA?.first_name || ''} ${relationship.ID_userA?.last_name || ''}`}
+                            {`${relationship.ID_userA?.first_name || ''} ${relationship.ID_userA?.last_name || ''}`}
                         </Text>
                     )
             }

@@ -1,28 +1,38 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const HomeS = StyleSheet.create({
+    noPostsContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,  // Có thể điều chỉnh khoảng cách
+      },
+      noPostsText: {
+        fontSize: 16,
+        color: 'gray',
+      },
     container: {
         flex: 1,
-        backgroundColor: "#DEDEDE"
+        backgroundColor: "#DDDFE2"
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 10,
-        marginHorizontal: 20,
-
+        marginTop: height * 0.01,
+        marginHorizontal: width * 0.05,
     },
     box: {
         backgroundColor: "#fff",
-        marginBottom: 4
+        marginBottom: height * 0.005
     },
     box1: {
         backgroundColor: "#fff",
     },
     title: {
-        fontSize: 28,
+        fontSize: width * 0.07, // Thay đổi kích thước chữ theo chiều rộng
         color: "#0064E0",
         fontWeight: "bold",
     },
@@ -31,10 +41,10 @@ const HomeS = StyleSheet.create({
         flexDirection: 'row'
     },
     iconsPadding: {
-        paddingLeft: 21
+        paddingLeft: width * 0.05
     },
     iconsPadding2: {
-        paddingLeft: 15,
+        paddingLeft: width * 0.04,
     },
     line: {
         height: 0.5,
@@ -45,64 +55,62 @@ const HomeS = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginVertical: 10,
-        marginHorizontal: 20,
+        marginVertical: height * 0.01,
+        marginHorizontal: width * 0.05,
     },
     image: {
-        marginRight: 5,
-        width: 42,
-        height: 42,
-        borderRadius: 50,
+        marginRight: width * 0.02,
+        width: width * 0.11,
+        height: width * 0.11,
+        borderRadius: width * 0.11 / 2,
         borderWidth: 1,
         borderColor: '#D9D9D9',
     },
     textInput: {
         flex: 1,
         borderColor: '#D9D9D9',
-        borderRadius: 28,
-        height: 42,
+        borderRadius: width * 0.07,
+        borderWidth: 1,
+        height: height * 0.06,
+        padding: width * 0.03
     },
     story: {
         flexDirection: 'row',
-        // marginLeft: 20,
-        marginVertical: 9,
-    },
-    post: {
-
+        marginVertical: height * 0.012,
     },
     imageStory: {
-        width: 110,
-        height: 170,
-        borderRadius: 10,
+        width: width * 0.3,
+        height: height * 0.25,
+        borderRadius: width * 0.025,
     },
     backGround: {
         backgroundColor: '#fff',
-        height: 57,
+        height: height * 0.07,
         width: "100%",
         position: 'absolute',
         bottom: -0.1,
-        borderBottomLeftRadius: 9,
-        borderBottomRightRadius: 9,
+        borderBottomLeftRadius: width * 0.025,
+        borderBottomRightRadius: width * 0.025,
         alignItems: 'center',
     },
     boxStory: {
         borderWidth: 1,
         borderColor: '#D9D9D9',
-        borderRadius: 11,
+        borderRadius: width * 0.03,
+        height: "auto"
     },
     addStory: {
         borderWidth: 1,
         borderColor: '#fff',
         backgroundColor: '#fff',
-        borderRadius: 50,
+        borderRadius: width * 0.12,
         position: 'absolute',
-        top: -15
+        top: -height * 0.02
     },
-    logo:{
-        flexDirection:'row',
+    logo: {
+        flexDirection: 'row',
         alignItems: 'center',
     }
-})
+});
 
-export default HomeS
-
+export default HomeS;

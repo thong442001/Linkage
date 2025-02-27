@@ -4,6 +4,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector, useDispatch } from 'react-redux';
 import { editNameOfUser } from '../../rtk/API';
 import { changeName } from '../../rtk/Reducer';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,6 +16,8 @@ const ChangeDisplayName = ({ navigation }) => {
     const [first_name, setFirstname] = useState('');
     const [last_name, setLastName] = useState('');
     const [loading, setLoading] = useState(false); 
+    const [successVisible, setSuccessVisible] = useState(false); 
+    const [failed, setfailed] = useState(false);
 
 
 
@@ -42,11 +46,19 @@ const ChangeDisplayName = ({ navigation }) => {
                 .unwrap()
                 .then(() => {
                     dispatch(changeName({ first_name, last_name }));
+                    setSuccessVisible(true)
+                    setTimeout(() => {
+                        setSuccessVisible(false);
+                        navigation.goBack(); 
+                    }, 2000); 
                     setFirstname('')
                     setLastName('')
                 })
                 .catch(error => {
                     console.error(error);
+                    setTimeout(() => {
+                        setfailed(false);
+                    }, 2000); 
                 })
                 .finally(() => {
                     setLoading(false);
@@ -61,7 +73,7 @@ const ChangeDisplayName = ({ navigation }) => {
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
-            <Text>{me.first_name}{me.last_name}</Text>
+            <Text>{me.first_name} {me.last_name}</Text>
             <Text style={styles.label}>Thay đổi tên</Text>
 
             <View style={styles.inputContainer}>
@@ -85,7 +97,7 @@ const ChangeDisplayName = ({ navigation }) => {
             </View>
 
             <View style={styles.passInfoContainer}>
-                <Text style={styles.textBlue}>Tên của bạn sẽ là: {first_name}{last_name}</Text>
+                <Text style={styles.textBlue}>Tên của bạn sẽ là: {first_name} {last_name}</Text>
             </View>
 
             <Pressable
@@ -102,6 +114,9 @@ const ChangeDisplayName = ({ navigation }) => {
                     <Text style={styles.buttonText}>Đổi tên</Text>
                 )}
             </Pressable>
+             
+            <SuccessModal visible={successVisible} message="Cập nhật tên thành công"/>
+            <FailedModal visible={failed} message="Cập nhật tên thất bại"/>
         </View>
     );
 };

@@ -6,52 +6,53 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useEffect, useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Stories from '../../components/items/Stories';
 import ProfilePage from '../../components/items/ProfilePage';
 import { useSelector, useDispatch } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
-import { getAllPostsInHome } from '../../rtk/API';
+import {
+  getAllPostsInHome,
+  changeDestroyPost
+} from '../../rtk/API';
+import HomeLoading from '../../utils/skeleton_loading/HomeLoading';  // Đảm bảo đã import component này
+import NothingHome from '../../utils/animation/homeanimation/NothingHome';
+
 const Home = props => {
-  // const [stories, setStories] = useState([])
   const { route, navigation } = props;
   const { params } = route;
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-
+  const [loading, setloading] = useState(true); // Quản lý trạng thái loading
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
-  // const story = useSelector(state => state.app.stories);
 
-  useEffect(() => {
-    //console.log('1');
-    // Call API khi lần đầu vào trang
-    callGetAllPostsInHome(me._id);
+  // useEffect(() => {
+  //   callGetAllPostsInHome(me._id);
 
-    // Thêm listener để gọi lại API khi quay lại trang
-    const focusListener = navigation.addListener('focus', () => {
-      callGetAllPostsInHome(me._id);
-      //console.log('2');
-    });
+  //   const focusListener = navigation.addListener('focus', () => {
+  //     callGetAllPostsInHome(me._id);
+  //   });
 
-    // Cleanup listener khi component bị unmount
-    return () => {
-      focusListener();
-    };
-  }, [navigation]);
+  //   return () => {
+  //     focusListener();
+  //   };
+  // }, [navigation]);
 
-  //call api getAllGroupOfUser
-  const callGetAllPostsInHome = async ID_user => {
+
+  const callGetAllPostsInHome = async (ID_user) => {
     try {
+      setloading(true)
       await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
         .unwrap()
-        .then((response) => {
-          // console.log("stories: " + response.stories)
+        .then(response => {
           setPosts(response.posts);
           setStories(response.stories);
+          setloading(false); // Kết thúc tải dữ liệu
         })
         .catch(error => {
           console.log('Error getAllPostsInHome:: ', error);
@@ -60,6 +61,69 @@ const Home = props => {
       console.log(error);
     }
   };
+
+  const callChangeDestroyPost = async (ID_post) => {
+    try {
+      console.log('Xóa bài viết với ID:', ID_post);
+
+      await dispatch(changeDestroyPost({ _id: ID_post }))
+        .unwrap()
+        .then(response => {
+          console.log('Xóa thành công:', response);
+          setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+        })
+        .catch(error => {
+          console.log('Lỗi khi xóa bài viết:', error);
+        });
+    } catch (error) {
+      console.log('Lỗi trong callChangeDestroyPost:', error);
+    }
+  };
+
+  // Hàm cập nhật bài post sau khi thả biểu cảm
+  const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => {
+        if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
+
+        // Tìm reaction của user hiện tại
+        const existingReactionIndex = post.post_reactions.findIndex(
+          reaction => reaction.ID_user._id === me._id
+        );
+
+        let updatedReactions = [...post.post_reactions];
+
+        if (existingReactionIndex !== -1) {
+          // Nếu user đã thả reaction, cập nhật reaction mới
+          updatedReactions[existingReactionIndex] = {
+            ...updatedReactions[existingReactionIndex],
+            ID_reaction: newReaction
+          };
+        } else {
+          // Nếu user chưa thả reaction, thêm mới
+          updatedReactions.push({
+            _id: ID_post_reaction, // ID của reaction mới từ server
+            ID_user: {
+              _id: me._id,
+              first_name: me.first_name, // Sửa lại đúng key
+              last_name: me.last_name,
+              avatar: me.avatar,
+            },
+            ID_reaction: newReaction
+          });
+        }
+
+        return { ...post, post_reactions: updatedReactions };
+      })
+    );
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      //console.log('123');
+      callGetAllPostsInHome(me._id); // Gọi API load dữ liệu
+    }, [])
+  );
 
   const headerComponentStory = () => {
     return (
@@ -76,18 +140,12 @@ const Home = props => {
     );
   };
 
-  const renderStory = ({ item }) => {
-    return (
-      <TouchableOpacity onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { story: item })}>
-        <Stories StoryPost={item} />
-      </TouchableOpacity>
-    );
-  };
-
   const headerComponentPost = () => {
     return (
       <View>
+        {/* Nội dung phần header của post */}
         <View style={HomeS.box1}>
+          {/* Logo, search, chat icons */}
           <View style={HomeS.header}>
             <View style={HomeS.logo}>
               <Image
@@ -96,18 +154,15 @@ const Home = props => {
               />
               <Text style={HomeS.title}>inkage</Text>
             </View>
-
             <View style={HomeS.icons}>
               <TouchableOpacity style={HomeS.iconsPadding}>
                 <Icon name="add" size={25} color="black" />
               </TouchableOpacity>
-              {/* to Search */}
               <TouchableOpacity
                 style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.Search.name)}>
                 <Icon name="search" size={20} color="black" />
               </TouchableOpacity>
-              {/* to HomeChat */}
               <TouchableOpacity
                 style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate(oStackHome.HomeChat.name)}>
@@ -115,19 +170,18 @@ const Home = props => {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Input to post */}
           <View style={HomeS.header2}>
             <TouchableOpacity
               onPress={() => navigation.navigate('Profile', { ID_user: me._id })}>
               <Image style={HomeS.image} source={{ uri: me?.avatar }} />
             </TouchableOpacity>
-
             <TextInput
               onPress={() => navigation.navigate('UpPost')}
               style={HomeS.textInput}
               placeholder="Bạn đang nghĩ gì ?"
               placeholderTextColor={'black'}
-            // editable={false} ngan nhap lieu
-            // selectTextOnFocus={false}
             />
             <View style={HomeS.icons}>
               <View style={HomeS.iconsPadding2}>
@@ -136,15 +190,13 @@ const Home = props => {
             </View>
           </View>
         </View>
-        {/* story */}
+
+        {/* Story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
           <View style={HomeS.story}>
             <FlatList
               data={stories}
-              renderItem={({ item }) => {
-                console.log("🎞 Rendering Story:", item); // Kiểm tra dữ liệu truyền vào
-                return <Stories StoryPost={item} />; // Đúng props
-              }}
+              renderItem={({ item }) => <Stories StoryPost={item} />}
               keyExtractor={(item, index) => item?._id ? item._id.toString() : `story-${index}`}
               horizontal={true}
               showsHorizontalScrollIndicator={false}
@@ -159,23 +211,27 @@ const Home = props => {
 
   return (
     <View style={HomeS.container}>
-      {/* post */}
-      <View>
-        <View style={HomeS.post}>
-          <FlatList
-            data={posts}
-            renderItem={({ item }) => {
-                        //  console.log("🎞 Rendering post:", item); // Kiểm tra dữ liệu truyền vào
-            return <ProfilePage post={item} />; 
-          }}
-            keyExtractor={(item) => item._id}
-            showsHorizontalScrollIndicator={false}
-            ListHeaderComponent={headerComponentPost}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 3 }}
-          />
-        </View>
-      </View>
+      {/* Nếu đang tải dữ liệu, hiển thị HomeLoading */}
+      {loading ? (
+        <HomeLoading />
+      ) : (
+        <FlatList
+          data={posts}
+          renderItem={({ item }) =>
+            <ProfilePage
+              post={item}
+              ID_user={me._id}
+              onDelete={() => callChangeDestroyPost(item._id)}
+              updatePostReaction={updatePostReaction}
+            />}
+          keyExtractor={item => item._id}
+          showsHorizontalScrollIndicator={false}
+          ListHeaderComponent={headerComponentPost}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 3 }}
+          ListEmptyComponent={<NothingHome />}
+        />
+      )}
     </View>
   );
 };

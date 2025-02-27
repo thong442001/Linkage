@@ -580,7 +580,7 @@ export const changeDestroyPost = createAsyncThunk(
 // Xóa vĩnh viễn bài post 
 // params: _id
 export const deletePost = createAsyncThunk(
-  'post/changeDestroyPost',
+  'post/deletePost',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
@@ -610,6 +610,22 @@ export const getPostsUserIdDestroyTrue = createAsyncThunk(
       } else {
         return rejectWithValue(response.data.message);
       }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// post_reaction
+// params: ID_post, ID_user, ID_reaction
+export const addPost_Reaction = createAsyncThunk(
+  'post_reaction/addPost_Reaction',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('post_reaction/addPost_Reaction', data);
+      //console.log(response?.message)
+      return response;
     } catch (error) {
       return rejectWithValue(error.message);
     }
