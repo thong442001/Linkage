@@ -17,6 +17,9 @@ import {
   CustomTextInputPassword
 } from '../../components/textinputs/CustomTextInput';
 
+import { onUserLogin } from '../../utils/ZegoService'; // Import ZegoService
+
+
 const Login = (props) => {
   const { navigation } = props;
   const dispatch = useDispatch();
@@ -95,7 +98,17 @@ const Login = (props) => {
       .unwrap()
       .then((response) => {
         console.log(response);
+        const userID = response?.user?._id;
+        const userName = response?.user?.first_name + ' '+response?.user?.last_name ;
+        console.log(userName , userID);
+
+        if (userID && userName) {
+          onUserLogin(userID, userName); // Khởi tạo Zego khi đăng nhập thành công
+        } else {
+          console.error("❌ Không thể lấy userID hoặc userName");
+        }
       })
+
       .catch((error) => {
         setErrorPassword(error)
       });

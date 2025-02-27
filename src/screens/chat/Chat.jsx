@@ -22,6 +22,8 @@ import {
 } from '../../rtk/API';
 import ChatHeader from '../../components/chat/ChatHeader';
 import { launchImageLibrary } from 'react-native-image-picker';
+import ZegoUIKitPrebuiltCallService, { ZegoSendCallInvitationButton } from '@zegocloud/zego-uikit-prebuilt-call-rn';
+
 import axios from 'axios';
 const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
@@ -286,7 +288,7 @@ const Chat = (props) => {// cần ID_group (param)
                         const myUser = response.group.members.find(user => user._id === me._id);
                         console.log(response.group.members);
                         if (myUser) {
-                            setID_user(myUser._id);
+                           
                             setmyUsername((myUser.first_name + " " + myUser.last_name));
                             setmyAvatar(myUser.avatar);
                             
@@ -300,7 +302,7 @@ const Chat = (props) => {// cần ID_group (param)
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
                             //setGroupName(otherUser.displayName);
-
+                            setID_user(otherUser._id);
                             setGroupAvatar(otherUser.avatar);
                         } else {
                             console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
@@ -450,6 +452,11 @@ const Chat = (props) => {// cần ID_group (param)
                     onCallAudio={onCallAudio}
                 />
             }
+              <ZegoSendCallInvitationButton
+        invitees={[{ userID: setID_user, userName: groupName }]}
+        isVideoCall={true} // true = gọi video, false = gọi thoại
+        resourceID={"zego_call"} // Định danh tài nguyên cuộc gọi trên ZEGOCLOUD
+      />
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
                 contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10 }}

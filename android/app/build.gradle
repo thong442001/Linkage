@@ -114,6 +114,8 @@ dependencies {
     implementation project(':react-native-vector-icons')
     implementation("androidx.activity:activity:1.9.+")
     implementation project(':react-native-permissions')
+    implementation platform('com.google.firebase:firebase-bom:32.8.0')
+   implementation 'com.google.firebase:firebase-messaging:23.3.1'
 implementation project(':zego-express-engine-reactnative')
 
     if (hermesEnabled.toBoolean()) {
@@ -122,3 +124,4 @@ implementation project(':zego-express-engine-reactnative')
         implementation jscFlavor
     }
 }
+apply plugin: 'com.google.gms.google-services'

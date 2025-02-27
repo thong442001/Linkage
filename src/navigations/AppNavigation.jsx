@@ -1,64 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import HomeNavigation from './HomeNavigation';
 import UserNavigation from './UserNavigation';
 import Welcome from '../screens/welcome/Welcome';
-import {
-  getAllReaction,
-} from '../rtk/API';
+import { getAllReaction } from '../rtk/API';
 import { setReactions } from '../rtk/Reducer';
+import { 
+  ZegoCallInvitationDialog, 
+  ZegoUIKitPrebuiltCallWaitingScreen, 
+  ZegoUIKitPrebuiltCallInCallScreen 
+} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+
+const Stack = createNativeStackNavigator();
 
 const AppNavigation = () => {
-
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
-  const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
-  const reactions = useSelector(state => state.app.reactions)
-  //console.log("****: " + reactions)
-  
+  const [isSplashVisible, setSplashVisible] = useState(true);
+  const reactions = useSelector(state => state.app.reactions);
+
   useEffect(() => {
-    //reactions
     if (reactions == null) {
-      callGetAllReaction()
+      callGetAllReaction();
     }
-    // Hiển thị màn hình chào trong 2 giây
+
     const timeout = setTimeout(() => {
-      setSplashVisible(false);  // Ẩn màn hình chào sau 2 giây
+      setSplashVisible(false);
     }, 2000);
+
     return () => clearTimeout(timeout);
   }, []);
 
-
-  //call api getAllReaction
   const callGetAllReaction = async () => {
     try {
       await dispatch(getAllReaction())
         .unwrap()
-        .then((response) => {
-          //console.log("****: " + response)
+        .then(response => {
           dispatch(setReactions(response.reactions));
         })
-        .catch((error) => {
+        .catch(error => {
           console.log('Error:', error);
         });
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   return (
     <NavigationContainer>
-      {
-        isSplashVisible
-          ? <Welcome />  // Hiển thị màn hình chào trước
-          : (user ? <HomeNavigation /> : <UserNavigation />)
-          
-      }
-      
+      <ZegoCallInvitationDialog />
+      {isSplashVisible ? (
+        <Welcome />
+      ) : (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {user ? (
+            <Stack.Screen name="HomeNavigation" component={HomeNavigation} />
+          ) : (
+            <Stack.Screen name="UserNavigation" component={UserNavigation} />
+          )}
+          <Stack.Screen name="ZegoUIKitPrebuiltCallWaitingScreen" component={ZegoUIKitPrebuiltCallWaitingScreen} />
+          <Stack.Screen name="ZegoUIKitPrebuiltCallInCallScreen" component={ZegoUIKitPrebuiltCallInCallScreen} />
+        </Stack.Navigator>
+      )}
     </NavigationContainer>
   );
-}
+};
 
 export default AppNavigation;

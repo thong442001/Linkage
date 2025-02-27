@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "715770723433",
+    "project_id": "call-fdec9",
+    "storage_bucket": "call-fdec9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:715770723433:android:01df9a469e707c738af6f8",
+        "android_client_info": {
+          "package_name": "com.linkage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBEdhQYybsk_sUQZ4Dcw8IspQE-LAkXSM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:715770723433:android:ee623b9464a0f6b98af6f8",
+        "android_client_info": {
+          "package_name": "com.zegocloud.callexample"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBEdhQYybsk_sUQZ4Dcw8IspQE-LAkXSM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

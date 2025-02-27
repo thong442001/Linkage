@@ -14,6 +14,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import {oStackHome} from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
 import {getAllPostsInHome} from '../../rtk/API';
+
 const Home = props => {
   // const [stories, setStories] = useState([])
   const {route, navigation} = props;
