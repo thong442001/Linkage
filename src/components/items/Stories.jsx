@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   imageStories: {
-    width: 123,
-    height: 192,
+    width: 110,
+    height: 170,
     borderRadius: 10,
   },
   avataStories: {
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     left: 8,
   },
   backGround: {
-    width: 123,
+    width: 110,
     height: 40,
     backgroundColor: 'rgba(0,0,0,0.1)',
     position: 'absolute',
