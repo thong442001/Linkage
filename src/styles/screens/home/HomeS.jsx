@@ -15,7 +15,7 @@ const HomeS = StyleSheet.create({
       },
     container: {
         flex: 1,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#d9d9d9d9"
     },
     header: {
         flexDirection: 'row',
