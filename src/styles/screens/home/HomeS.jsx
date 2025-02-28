@@ -8,14 +8,14 @@ const HomeS = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,  // Có thể điều chỉnh khoảng cách
-      },
-      noPostsText: {
+    },
+    noPostsText: {
         fontSize: 16,
         color: 'gray',
-      },
+    },
     container: {
         flex: 1,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#D9D9D9D9"
     },
     header: {
         flexDirection: 'row',
