@@ -91,7 +91,7 @@ export default function Groupcomponent({ item }) {
                 me._id != item.messageLatest.sender.ID_user
                   ? <Text
                     style={styles.messageName}>
-                    {item.messageLatest.sender.displayName}: </Text>
+                    {item.messageLatest.sender.first_name} {item.messageLatest.sender.last_name}: </Text>
                   : <Text
                     style={styles.messageName}>
                     Bạn: </Text>
