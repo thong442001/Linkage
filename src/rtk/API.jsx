@@ -631,3 +631,52 @@ export const addPost_Reaction = createAsyncThunk(
     }
   }
 );
+
+// Độ 
+export const getChiTietPost = createAsyncThunk(
+  'post/getChiTietPost',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`post/getChiTietPost?ID_post=${data.ID_post}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// params: ID_user, ID_post, content, ID_comment_reply
+export const addComment = createAsyncThunk(
+  'comment/addComment',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('comment/addComment', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// params: ID_comment
+export const setComment_destroyTrue = createAsyncThunk(
+  'comment/setComment_destroyTrue',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('comment/setComment_destroyTrue', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
