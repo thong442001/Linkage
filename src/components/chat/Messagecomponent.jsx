@@ -8,11 +8,8 @@ import {
   Modal,
   TouchableOpacity,
   Dimensions,
+  Clipboard, //copy
 } from "react-native";
-
-// Lỗi copy
-//import Clipboard from '@react-native-clipboard/clipboard';// copy
-
 import { Snackbar } from 'react-native-paper';// thông báo (ios and android)
 import { useSelector } from 'react-redux';
 import Video from 'react-native-video';
@@ -62,7 +59,7 @@ export default function MessageComponent({
 
   // Hàm copy tin nhắn
   const copyToClipboard = (text) => {
-    //Clipboard.setString(text);
+    Clipboard.setString(text);
     setDialogCopyVisible(true)// hiện dialog copy
   };
 
