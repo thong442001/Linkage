@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     StyleSheet,
     FlatList,
-    Dimensions
+    Dimensions,
+    Image
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -30,21 +31,17 @@ const HomeChat = (props) => {// cần param
     const [groups, setGroups] = useState(null);
 
     useEffect(() => {
-        // Call API khi lần đầu vào trang
         callGetAllGroupOfUser(me._id);
-
-
-        //Thêm listener để gọi lại API khi quay lại trang
+    
         const focusListener = navigation.addListener('focus', () => {
             callGetAllGroupOfUser(me._id);
         });
-
-        // Cleanup listener khi component bị unmount
+    
         return () => {
-            focusListener();
-
+            focusListener; // Sửa lỗi này
         };
     }, [navigation]);
+    
 
     //call api getAllGroupOfUser
     const callGetAllGroupOfUser = async (ID_user) => {
@@ -101,18 +98,39 @@ const HomeChat = (props) => {// cần param
                 (
                     loading ?
                         <ChatHomeLoading />
-                        :
-                        <FlatList
-                            data={groups}
-                            keyExtractor={(item) => item._id}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
-                                    <Groupcomponent item={item} />
-                                </TouchableOpacity>
-                            )}
-                            showsVerticalScrollIndicator={false}
-                            showsHorizontalScrollIndicator={false}
-                        />
+
+                        :<View>
+                        <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
+                            <View style={styles.container_item}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Image
+                                        source={{ uri: 'https://static.vecteezy.com/system/resources/previews/010/054/157/non_2x/chat-bot-robot-avatar-in-circle-round-shape-isolated-on-white-background-stock-illustration-ai-technology-futuristic-helper-communication-conversation-concept-in-flat-style-vector.jpg' }}
+                                        style={styles.img}
+                                    />
+                                    <Text style={styles.text_name_AI}>AI Chat</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    
+                        {loading ? <ChatHomeLoading /> : (
+                            <FlatList
+                                data={groups}
+                                keyExtractor={(item) => item._id}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
+                                        <Groupcomponent item={item} />
+                                    </TouchableOpacity>
+                                )}
+                                ListEmptyComponent={
+                                    <Text style={{ textAlign: 'center', color: 'gray', marginTop: 20 }}>
+                                        Bạn chưa có cuộc trò chuyện nào.
+                                    </Text>
+                                }
+                                showsVerticalScrollIndicator={false}
+                            />
+                        )}
+                    </View>
+                    
                 )
             }
         </View >
@@ -156,5 +174,27 @@ const styles = StyleSheet.create({
     search: {
         flex: 1,
         padding: width * 0.025, // 2.5% chiều rộng màn hình
-    }
+    },
+    container_item: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginVertical: 20
+        // width: '100%',
+        // height: '0%',
+        // marginLeft: 12,
+        // backgroundColor: 'black',
+        // borderWidth: 5,
+      },
+      text_name_AI: {
+        fontSize: 20,
+        fontWeight: '500',
+        marginLeft:10,
+        color:"black",
+      },
+      img: {
+        width: 60,
+        height: 60 ,
+        borderRadius: 50,
+      },
 });

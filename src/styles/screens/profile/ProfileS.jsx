@@ -96,6 +96,7 @@ const ProfileS = StyleSheet.create({
     friendNumber: {
         fontSize: height * 0.016,
         fontWeight: 'bold',
+        color: '#D6D6D6'
     },
     btnAddStory: {
         backgroundColor: '#0064E0',

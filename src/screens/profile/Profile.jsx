@@ -542,7 +542,7 @@ const Profile = props => {
                                 {user?.first_name} {user?.last_name}
                             </Text>
                             <View style={ProfileS.boxInformation}>
-                                <Text style={ProfileS.friendNumber}>500 </Text>
+                                <Text style={ProfileS.friendNumber}>{friendRelationships.length} </Text>
                                 <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
                                     {' '}
                                     Người bạn
@@ -638,7 +638,7 @@ const Profile = props => {
                         <View style={ProfileS.title}>
                             <View>
                                 <Text style={ProfileS.textFriend}>Bạn bè</Text>
-                                <Text style={ProfileS.textFriendNumber2}>500 Người bạn</Text>
+                                <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} Người bạn</Text>
                             </View>
                             <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
                         </View>

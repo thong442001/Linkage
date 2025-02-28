@@ -40,13 +40,16 @@ const PostItem = ({
     const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
-    // const uniqueReactions = Array.from(
-    //     new Map(
-    //         post.post_reactions
-    //             .filter(reaction => reaction.ID_reaction !== null)
-    //             .map(reaction => [reaction.ID_reaction._id, reaction])
-    //     ).values()
-    // );
+    // Cảnh
+    // post_reactions: list của reaction của post
+    // lọc reactions 
+    const uniqueReactions = Array.from(
+        new Map(
+            post.post_reactions
+                .filter(reaction => reaction.ID_reaction !== null)
+                .map(reaction => [reaction.ID_reaction._id, reaction])
+        ).values()
+    );
 
 
     // Tìm reaction của chính người dùng hiện tại
@@ -260,7 +263,7 @@ const PostItem = ({
             {hasCaption && <Text style={styles.caption}>{post?.caption}</Text>}
             {hasMedia && renderMediaGrid(post?.medias)}
             {/* reactions of post */}
-            {/* {
+            {
                 post.post_reactions.length > 0 &&
                 (
                     <View
@@ -279,7 +282,7 @@ const PostItem = ({
                         >{post.post_reactions.length}</Text>
                     </View>
                 )
-            } */}
+            }
             <View style={styles.interactions}>
                 <TouchableOpacity
                     ref={reactionRef} // Gắn ref vào đây
@@ -288,9 +291,9 @@ const PostItem = ({
                         userReaction &&
                         { backgroundColor: 'blue' }
                     ]}
-                // onLongPress={() => {
-                //     handleLongPress();
-                // }}
+                    onLongPress={() => {
+                        handleLongPress();
+                    }}
                 >
                     {/* <Icon2 name="like" size={25} color="black" /> */}
                     <Text

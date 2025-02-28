@@ -174,7 +174,7 @@ const Home = props => {
           {/* Input to post */}
           <View style={HomeS.header2}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Profile', { ID_user: me._id })}>
+              onPress={() => navigation.navigate('Profile', { _id: me._id })}>
               <Image style={HomeS.image} source={{ uri: me?.avatar }} />
             </TouchableOpacity>
             <TextInput
