@@ -98,10 +98,10 @@ const PostItem = ({
         };
 
         updateDiff();
-        const interval = setInterval(updateDiff, 1000);
+        // const interval = setInterval(updateDiff, 1000);
 
-        return () => clearInterval(interval);
-    }, [post.createdAt]);
+        // return () => clearInterval(interval);
+    }, []);
 
     const callAddPost_Reaction = async (ID_reaction, name, icon) => {
         try {
