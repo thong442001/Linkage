@@ -133,11 +133,7 @@ const Trash = props => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-<<<<<<< HEAD
       <Ionicons name="arrow-back" size={30} color="#000" />
-=======
-        <Ionicons name="arrow-back" size={30} color="#000" />
->>>>>>> 79ea33373f3bb88d463a0e872140be75167f7c00
       </TouchableOpacity>
       <View>
         <View style={styles.post}>
