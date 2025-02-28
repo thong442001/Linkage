@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native'
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import {
   getPostsUserIdDestroyTrue,
@@ -10,6 +10,7 @@ import ProfilePage from '../../components/items/ProfilePage';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
 
 
 const Trash = props => {
@@ -90,10 +91,12 @@ const Trash = props => {
   };
 
   return (
-    <View style={HomeS.container}>
-      {/* post */}
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <Ionicons name="arrow-back" size={30} color="#000" />
+      </TouchableOpacity>
       <View>
-        <View style={HomeS.post}>
+        <View style={styles.post}>
           {posts && posts.length > 0 ? (
             <FlatList
               data={posts}
@@ -121,5 +124,36 @@ const Trash = props => {
     </View>
   );
 };
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    backgroundColor: 'transparent', // Xóa nền để phù hợp với màu đen
+    padding: 10,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#333',
+    marginBottom: 20,
+  },
 
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: 'gray',
+  },
+});
 export default Trash;
