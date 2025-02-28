@@ -40,6 +40,9 @@ const PostItem = ({
     const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
+    // Cảnh
+    // post_reactions: list của reaction của post
+    // lọc reactions 
     const uniqueReactions = Array.from(
         new Map(
             post.post_reactions

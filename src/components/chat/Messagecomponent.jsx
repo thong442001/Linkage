@@ -31,6 +31,9 @@ export default function MessageComponent({
   const messageRef = useRef(null); // ref để tham chiếu tới tin nhắn
   const [dialogCopyVisible, setDialogCopyVisible] = useState(false);// dialog copy
 
+
+  // Cảnh
+  // message_reactionList: list reactions của tin nhắn
   //console.log(message?.message_reactionList);
 
   const formatTime = (timestamp) => {
