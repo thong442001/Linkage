@@ -34,6 +34,7 @@ const appSlice = createSlice({
       state.token = '';
       state.refreshToken = '';
       state.stories = []; // Xóa luôn danh sách stories khi logout
+      state.history =[];
     },
 
     setReactions: (state, action) => {
