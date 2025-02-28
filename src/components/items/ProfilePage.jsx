@@ -1,20 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    View,
+    Text,
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    Dimensions,
+    Modal,
+    TouchableWithoutFeedback,
+} from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
 import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import Icon4 from 'react-native-vector-icons/FontAwesome5';
 import { useBottomSheet } from '../../context/BottomSheetContext';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 const { width, height } = Dimensions.get('window');
-const PostItem = ({ post, ID_user, onDelete = () => { }, onDeleteVinhVien = () => { } }) => {
+import {
+    addPost_Reaction, // thả biểu cảm
+} from '../../rtk/API';
+const PostItem = ({
+    post,
+    ID_user,
+    onDelete = () => { },
+    onDeleteVinhVien = () => { },
+    updatePostReaction = () => { },
+}) => {
+    const me = useSelector(state => state.app.user)
+    const reactions = useSelector(state => state.app.reactions)
+    const dispatch = useDispatch();
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
+    //console.log(post.post_reactions)
+
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
-    //const [isDeleted, setisDeleted] = useState(post._destroy || false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const dispatch = useDispatch();
+
+    const [reactionsVisible, setReactionsVisible] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
+    const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
+
+    // const uniqueReactions = Array.from(
+    //     new Map(
+    //         post.post_reactions
+    //             .filter(reaction => reaction.ID_reaction !== null)
+    //             .map(reaction => [reaction.ID_reaction._id, reaction])
+    //     ).values()
+    // );
+
+
+    // Tìm reaction của chính người dùng hiện tại
+    const userReaction = post.post_reactions.find(
+        (reaction) => reaction.ID_user._id === ID_user
+    );
+
+    const handleLongPress = () => {
+        if (reactionRef.current) {
+            reactionRef.current.measure((x, y, width, height, pageX, pageY) => {
+                setMenuPosition({
+                    top: pageY - 57,
+                    left: pageX,
+                    right: pageX,
+                });
+                setReactionsVisible(true);
+            });
+        }
+    };
 
     useEffect(() => {
         const updateDiff = () => {
@@ -48,6 +99,37 @@ const PostItem = ({ post, ID_user, onDelete = () => { }, onDeleteVinhVien = () =
 
         return () => clearInterval(interval);
     }, [post.createdAt]);
+
+    const callAddPost_Reaction = async (ID_reaction, name, icon) => {
+        try {
+            const paramsAPI = {
+                ID_post: post._id,
+                ID_user: me._id,
+                ID_reaction: ID_reaction,
+            };
+            await dispatch(addPost_Reaction(paramsAPI))
+                .unwrap()
+                .then(response => {
+                    console.log(response.message);
+                    const newReaction = {
+                        _id: ID_reaction,
+                        name: name,
+                        icon: icon,
+                    };
+                    // params: ID_post, newReaction, ID_post_reaction
+                    updatePostReaction(
+                        post._id,
+                        newReaction,
+                        response.post_reaction._id,
+                    )
+                })
+                .catch(error => {
+                    console.log('Lỗi call api addPost_Reaction', error);
+                });
+        } catch (error) {
+            console.log('Lỗi trong addPost_Reaction:', error);
+        }
+    };
 
     const hasCaption = post?.caption?.trim() !== '';
     const hasMedia = post?.medias?.length > 0;
@@ -177,11 +259,54 @@ const PostItem = ({ post, ID_user, onDelete = () => { }, onDeleteVinhVien = () =
 
             {hasCaption && <Text style={styles.caption}>{post?.caption}</Text>}
             {hasMedia && renderMediaGrid(post?.medias)}
-
+            {/* reactions of post */}
+            {/* {
+                post.post_reactions.length > 0 &&
+                (
+                    <View
+                        style={[styles.vReactionsOfPost]}
+                    >
+                        {
+                            uniqueReactions.map((reaction, index) => (
+                                <Text
+                                    key={index}
+                                //style={styles.reactionText}
+                                >{reaction.ID_reaction.icon}</Text>
+                            ))
+                        }
+                        <Text
+                            style={styles.slReactionsOfPost}
+                        >{post.post_reactions.length}</Text>
+                    </View>
+                )
+            } */}
             <View style={styles.interactions}>
-                <TouchableOpacity style={styles.action}>
-                    <Icon2 name="like" size={25} color="black" />
-                    <Text style={styles.actionText}>Thích</Text>
+                <TouchableOpacity
+                    ref={reactionRef} // Gắn ref vào đây
+                    style={[
+                        styles.action,
+                        userReaction &&
+                        { backgroundColor: 'blue' }
+                    ]}
+                // onLongPress={() => {
+                //     handleLongPress();
+                // }}
+                >
+                    {/* <Icon2 name="like" size={25} color="black" /> */}
+                    <Text
+                        style={styles.actionText}
+                    >
+                        {userReaction ? userReaction.ID_reaction.icon : "👍"} {/* Nếu đã react, hiển thị icon đó */}
+                    </Text>
+                    <Text
+                        style={[
+                            styles.actionText,
+                            userReaction &&
+                            { color: 'white' }
+                        ]}
+                    >
+                        {userReaction ? userReaction.ID_reaction.name : "Thích"} {/* Nếu đã react, hiển thị icon đó */}
+                    </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.action}>
                     <Icon3 name="comment" size={20} color="black" />
@@ -192,6 +317,50 @@ const PostItem = ({ post, ID_user, onDelete = () => { }, onDeleteVinhVien = () =
                     <Text style={styles.actionText}>Chia sẻ</Text>
                 </TouchableOpacity>
             </View>
+
+
+            {/* reactions biểu cảm */}
+            < Modal
+                visible={reactionsVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setReactionsVisible(false)}
+            >
+                <TouchableWithoutFeedback
+                    onPress={() => setReactionsVisible(false)}
+                >
+                    <View style={styles.overlay}>
+                        <View
+                            style={[
+                                {
+                                    position: "absolute",
+                                    top: menuPosition.top,
+                                    left: 10,
+                                }
+                            ]} // Cập nhật vị trí reactions
+                        >
+                            <View
+                                style={[styles.reactionBar]}
+                            >
+                                {
+                                    reactions.map((reaction, index) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={styles.reactionButton}
+                                            onPress={() => {
+                                                callAddPost_Reaction(reaction._id, reaction.name, reaction.icon)
+                                                setReactionsVisible(false);
+                                            }}
+                                        >
+                                            <Text style={styles.reactionText}>{reaction.icon}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                }
+                            </View>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal >
         </View>
     );
 };
@@ -308,7 +477,7 @@ const styles = StyleSheet.create({
     },
     overlay: {
         position: 'absolute',
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        //backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         top: 0,
@@ -350,6 +519,34 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: 'white', // Màu chữ trắng
+    },
+    //reaction
+    reactionBar: {
+        position: 'absolute',
+        flexDirection: "row",
+        backgroundColor: "#FFFF",
+        padding: 10,
+        borderRadius: 20,
+    },
+    reactionButton: {
+        marginHorizontal: 5,
+    },
+    reactionText: {
+        fontSize: 15,
+        color: "#000",
+        alignSelf: 'flex-end'
+    },
+    // reaction of post
+    vReactionsOfPost: {
+        flexDirection: 'row',
+        width: '100%',
+        height: 20,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+    },
+    slReactionsOfPost: {
+        color: 'black',
+        marginHorizontal: 5,
     },
 });
 
