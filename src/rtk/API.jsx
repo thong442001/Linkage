@@ -615,3 +615,19 @@ export const getPostsUserIdDestroyTrue = createAsyncThunk(
     }
   }
 );
+
+// post_reaction
+// params: ID_post, ID_user, ID_reaction
+export const addPost_Reaction = createAsyncThunk(
+  'post_reaction/addPost_Reaction',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('post_reaction/addPost_Reaction', data);
+      //console.log(response?.message)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);

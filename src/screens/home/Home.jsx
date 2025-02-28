@@ -44,11 +44,9 @@ const Home = props => {
   // }, [navigation]);
 
 
-
-
   const callGetAllPostsInHome = async (ID_user) => {
     try {
-      //setloading(true)
+      setloading(true)
       await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
         .unwrap()
         .then(response => {
@@ -82,9 +80,47 @@ const Home = props => {
     }
   };
 
+  // Hàm cập nhật bài post sau khi thả biểu cảm
+  const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => {
+        if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
+
+        // Tìm reaction của user hiện tại
+        const existingReactionIndex = post.post_reactions.findIndex(
+          reaction => reaction.ID_user._id === me._id
+        );
+
+        let updatedReactions = [...post.post_reactions];
+
+        if (existingReactionIndex !== -1) {
+          // Nếu user đã thả reaction, cập nhật reaction mới
+          updatedReactions[existingReactionIndex] = {
+            ...updatedReactions[existingReactionIndex],
+            ID_reaction: newReaction
+          };
+        } else {
+          // Nếu user chưa thả reaction, thêm mới
+          updatedReactions.push({
+            _id: ID_post_reaction, // ID của reaction mới từ server
+            ID_user: {
+              _id: me._id,
+              first_name: me.first_name, // Sửa lại đúng key
+              last_name: me.last_name,
+              avatar: me.avatar,
+            },
+            ID_reaction: newReaction
+          });
+        }
+
+        return { ...post, post_reactions: updatedReactions };
+      })
+    );
+  };
+
   useFocusEffect(
     useCallback(() => {
-      console.log('123');
+      //console.log('123');
       callGetAllPostsInHome(me._id); // Gọi API load dữ liệu
     }, [])
   );
@@ -181,11 +217,13 @@ const Home = props => {
       ) : (
         <FlatList
           data={posts}
-          renderItem={({ item }) => <ProfilePage
-            post={item}
-            ID_user={me._id}
-            onDelete={() => callChangeDestroyPost(item._id)}
-          />}
+          renderItem={({ item }) =>
+            <ProfilePage
+              post={item}
+              ID_user={me._id}
+              onDelete={() => callChangeDestroyPost(item._id)}
+              updatePostReaction={updatePostReaction}
+            />}
           keyExtractor={item => item._id}
           showsHorizontalScrollIndicator={false}
           ListHeaderComponent={headerComponentPost}
