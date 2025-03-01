@@ -275,12 +275,12 @@ export const chapNhanLoiMoiKetBan = createAsyncThunk(
   }
 );
 
-export const huyLoiMoiKetBan = createAsyncThunk(
-  'relationship/huyLoiMoiKetBan',
+export const setRelationNguoiLa = createAsyncThunk(
+  'relationship/setRelationNguoiLa',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
-        .post(`relationship/huyLoiMoiKetBan`, data);
+        .post(`relationship/setRelationNguoiLa`, data);
       //console.log(response.status)
       if (response.status == true) {
         return response;
@@ -673,6 +673,21 @@ export const setComment_destroyTrue = createAsyncThunk(
     try {
       const response = await AxiosHelper()
         .post('comment/setComment_destroyTrue', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+export const setNoti_token = createAsyncThunk(
+  'user/setNoti_token',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/setNoti_token', data);
       //console.log(response)
       return response;
     } catch (error) {

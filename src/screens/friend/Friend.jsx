@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getAllLoiMoiKetBan,
   chapNhanLoiMoiKetBan,
-  huyLoiMoiKetBan,
+  setRelationNguoiLa,
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 
@@ -88,38 +88,38 @@ const Friend = props => {
   };
 
   //huyLoiMoiKetBan
-  const callHuyLoiMoiKetBan = async ID_relationship => {
+  const callSetRelationNguoiLa = async ID_relationship => {
     try {
       const paramsAPI = {
         ID_relationship: ID_relationship,
       };
-      await dispatch(huyLoiMoiKetBan(paramsAPI))
+      await dispatch(setRelationNguoiLa(paramsAPI))
         .unwrap()
         .then(response => {
           console.log(response?.message);
           callGetAllLoiMoiKetBan();
         })
         .catch(error => {
-          console.log('Error2 callHuyLoiMoiKetBan:', error);
+          console.log('Error2 callSetRelationNguoiLa:', error);
           setDialogreload(true);
         });
     } catch (error) {
       console.log(error);
     }
   };
-//chuyển trang profile
-  const onProfile =(item) => {
-if(item.ID_userA._id == me._id){
-  navigation.navigate('TabHome', {
-    screen: 'Profile',
-    params: {_id: item.ID_userB._id},
-  });
-}else{
-  navigation.navigate('TabHome', {
-    screen: 'Profile',
-    params: {_id: item.ID_userA._id},
-  });
-}
+  //chuyển trang profile
+  const onProfile = (item) => {
+    if (item.ID_userA._id == me._id) {
+      navigation.navigate('TabHome', {
+        screen: 'Profile',
+        params: { _id: item.ID_userB._id },
+      });
+    } else {
+      navigation.navigate('TabHome', {
+        screen: 'Profile',
+        params: { _id: item.ID_userA._id },
+      });
+    }
 
   };
   return (
@@ -150,12 +150,12 @@ if(item.ID_userA._id == me._id){
           {' '}
           Gợi ý
         </Text>
-        <TouchableOpacity onPress={()=>navigation.navigate('ListFriend',{_id:me._id})}>
-        <Text
-          style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
-          {' '}
-          Bạn bè
-        </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('ListFriend', { _id: me._id })}>
+          <Text
+            style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
+            {' '}
+            Bạn bè
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -169,13 +169,13 @@ if(item.ID_userA._id == me._id){
           data={relationships}
           keyExtractor={item => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={()=>{onProfile(item)}}>
-            <FriendRequestItem
-              data={item}
-              me={me._id}
-              onXacNhan={callChapNhanLoiMoiKetBan}
-              onXoa={callHuyLoiMoiKetBan}
-            />
+            <TouchableOpacity onPress={() => { onProfile(item) }}>
+              <FriendRequestItem
+                data={item}
+                me={me._id}
+                onXacNhan={callChapNhanLoiMoiKetBan}
+                onXoa={callSetRelationNguoiLa}
+              />
             </TouchableOpacity>
 
           )}

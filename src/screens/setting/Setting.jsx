@@ -13,6 +13,9 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../rtk/Reducer';
+import {
+  setNoti_token
+} from '../../rtk/API'
 const { width, height } = Dimensions.get('window');
 const Setting = (props) => {
 
@@ -23,9 +26,20 @@ const Setting = (props) => {
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
 
-  const onRegister = () => {
-    dispatch(logout())
+  const onLogout = () => {
+    dispatch(setNoti_token({ ID_user: me._id }))
+      .unwrap()
+      .then((response) => {
+        console.log(response);
+        // xóa user trong redux
+        dispatch(logout())
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
+
+
 
 
 
@@ -85,7 +99,7 @@ const Setting = (props) => {
                 subtitle="Remove account permanently"
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={onRegister}>
+            <TouchableOpacity onPress={onLogout}>
               <Option
                 icon="exit-outline"
                 title="Log out"

@@ -20,7 +20,7 @@ import {
     joinGroupPrivate,
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
-    huyLoiMoiKetBan,
+    setRelationNguoiLa,
     editAvatarOfUser,
     editBackgroundOfUser,
     allProfile, // allProfile
@@ -475,19 +475,19 @@ const Profile = props => {
     };
 
     //huyLoiMoiKetBan
-    const callHuyLoiMoiKetBan = async () => {
+    const callSetRelationNguoiLa = async () => {
         try {
             const paramsAPI = {
                 ID_relationship: relationship?._id,
             };
-            await dispatch(huyLoiMoiKetBan(paramsAPI))
+            await dispatch(setRelationNguoiLa(paramsAPI))
                 .unwrap()
                 .then(response => {
                     //console.log(response);
                     setRelationship(response.relationship);
                 })
                 .catch(error => {
-                    console.log('Error2 callHuyLoiMoiKetBan:', error);
+                    console.log('Error2 callSetRelationNguoiLa:', error);
                     setDialogreload(true);
                 });
         } catch (error) {
@@ -909,7 +909,7 @@ const Profile = props => {
                                 style={ProfileS.btnXoa}
                                 onPress={() => {
                                     setMenuVisible(false);
-                                    callHuyLoiMoiKetBan();
+                                    callSetRelationNguoiLa();
                                 }}>
                                 <Text style={ProfileS.text_button}>Xóa</Text>
                             </TouchableOpacity>
