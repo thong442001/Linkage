@@ -302,9 +302,7 @@ const Profile = props => {
             setloading(false);
         }
     };
- 
 
-    
     const sendPushNotification = async (token, title, body, data = {}) => {
         try {
             const response = await axios.post(
