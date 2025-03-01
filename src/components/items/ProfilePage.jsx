@@ -22,6 +22,7 @@ import {
     addPost_Reaction, // thả biểu cảm
     addPost, // api share
 } from '../../rtk/API';
+import { useNavigation } from '@react-navigation/native';
 const PostItem = ({
     post,
     ID_user,
@@ -29,6 +30,7 @@ const PostItem = ({
     onDeleteVinhVien = () => { },
     updatePostReaction = () => { },
 }) => {
+    const navigation = useNavigation();
     const me = useSelector(state => state.app.user)
     const reactions = useSelector(state => state.app.reactions)
     const dispatch = useDispatch();
@@ -386,7 +388,26 @@ const PostItem = ({
                         <View style={styles.userInfo}>
                             <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
                             <View style={{ marginLeft: 20 }}>
-                                <Text style={styles.name}>{post.ID_post_shared.ID_user.first_name + " " + post.ID_post_shared.ID_user.last_name}</Text>
+                                <Text style={styles.name}>
+                                    {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
+                                    {post.ID_post_shared.tags.length > 0 && (
+                                        <Text>
+                                            <Text style={{ color: 'gray' }}> cùng với </Text>
+                                            <Text onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.tags[0]._id })} style={[styles.name]}>
+                                                {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
+                                            </Text>
+                                            {post.ID_post_shared.tags.length > 1 && (
+                                                <>
+                                                    <Text style={{ color: 'gray' }}> và </Text>
+                                                    <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
+                                                        {post.ID_post_shared.tags.length - 1} người khác
+                                                    </Text>
+                                                </>
+                                            )}
+                                        </Text>
+                                    )}
+                                </Text>
+                                {/* <Text style={styles.name}>{post.ID_post_shared.ID_user.first_name + " " + post.ID_post_shared.ID_user.last_name}</Text> */}
                                 <View style={styles.boxName}>
                                     <Text style={styles.time}>{timeAgoShare}</Text>
                                     {/* <Icon name="earth" size={12} color="gray" /> */}
@@ -400,7 +421,26 @@ const PostItem = ({
                         <View style={styles.userInfo}>
                             <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                             <View style={{ marginLeft: 20 }}>
-                                <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                                <Text style={styles.name}>
+                                    {post.ID_user.first_name} {post.ID_user.last_name}
+                                    {post.tags.length > 0 && (
+                                        <Text>
+                                            <Text style={{ color: 'gray' }}> cùng với </Text>
+                                            <Text onPress={() => navigation.navigate('Profile', { _id: post.tags[0]._id })} style={[styles.name]}>
+                                                {post.tags[0]?.first_name} {post.tags[0]?.last_name}
+                                            </Text>
+                                            {post.tags.length > 1 && (
+                                                <>
+                                                    <Text style={{ color: 'gray' }}> và </Text>
+                                                    <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
+                                                        {post.tags.length - 1} người khác
+                                                    </Text>
+                                                </>
+                                            )}
+                                        </Text>
+                                    )}
+                                </Text>
+                                {/* <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text> */}
                                 <View style={styles.boxName}>
                                     <Text style={styles.time}>{timeAgo}</Text>
                                     {/* <Icon name="earth" size={12} color="gray" /> */}
@@ -706,6 +746,7 @@ const styles = StyleSheet.create({
         fontSize: width * 0.04, // 4% chiều rộng màn hình
         fontWeight: 'bold',
         color: 'black',
+        width: width * 0.6
     },
     caption: {
         marginBottom: height * 0.015,
