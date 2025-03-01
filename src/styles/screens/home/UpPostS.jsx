@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, Dimensions } from 'react-native'
 import React from 'react'
+const { width, height } = Dimensions.get('window');
 
 const UpPostS = StyleSheet.create({
     Container: {
@@ -69,7 +70,8 @@ const UpPostS = StyleSheet.create({
     txtName: {
         fontSize: 19,
         fontWeight: 'bold',
-        color: 'black'
+        color: 'black',
+        width: width * 0.7
     },
     btnStatus: {
         backgroundColor: '#B2D5F8',
@@ -227,7 +229,7 @@ const UpPostS = StyleSheet.create({
     },
     BoxInter1: {
         flexDirection: 'column'
-    }
+    },
     // interactions: {
     //     flexDirection: 'row',
     //     justifyContent: 'space-around',
@@ -244,6 +246,46 @@ const UpPostS = StyleSheet.create({
     //     marginLeft: 5,
     //     fontSize: 14,
     // },
+    //modal share
+    overlay1: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.6)", // Màu xám xung quanh
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContainer: {
+        width: "80%",
+        backgroundColor: "white", // Modal giữ nguyên màu trắng
+        borderRadius: 10,
+        padding: 20,
+    },
+    modalContent: {
+        alignItems: "center",
+    },
+    avatar: {
+        width: width * 0.11, // 11% chiều rộng màn hình
+        height: width * 0.11,
+        borderRadius: width * 0.25, // Bo tròn ảnh đại diện
+    },
+    name: {
+        color: 'black'
+    },
+    tag: {
+        // color: '#0064E0'
+        color: 'white',
+        fontSize: 15
+    },
+    btnTag: {
+        backgroundColor: "#0064E0",
+        borderRadius: 10,
+        paddingHorizontal: 20,
+        paddingVertical: 10
+    },
+    boxTag: {
+        // backgroundColor: '#0064E0',
+        alignSelf: 'flex-end',
+        marginBottom: 20
+    }
 })
 
 export default UpPostS

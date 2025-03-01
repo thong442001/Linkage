@@ -6,8 +6,10 @@ import {
     Image,
     TextInput,
     Modal,
+    TouchableWithoutFeedback,
+    FlatList,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UpPostS from '../../styles/screens/home/UpPostS';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -15,15 +17,50 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     addPost,
+    getAllFriendOfID_user,
 } from '../../rtk/API';
+import FriendAdd from '../../components/chat/FriendAdd';
 import Video from 'react-native-video';
+
 const UpPost = (props) => {
     const { navigation } = props;
 
     const dispatch = useDispatch();
+    const token = useSelector(state => state.app.token)
     const me = useSelector(state => state.app.user);
 
     const [modalVisible, setModalVisible] = useState(false);
+    //tag
+    const [tagVisible, setTagVisible] = useState(false);
+    //friend
+    const [friends, setFriends] = useState(null);
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [membersGroup, setMembersGroup] = useState([]);
+
+
+    //call api getAllFriendOfID_user (lấy danh sách bạn bè)
+    const callGetAllFriendOfID_user = async () => {
+        try {
+            await dispatch(getAllFriendOfID_user({ me: me._id, token: token }))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response.groups)
+                    setFriends(response.relationships);
+                })
+                .catch((error) => {
+                    console.log('Error1 getAllFriendOfID_user:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        callGetAllFriendOfID_user()
+    }, [tagVisible == true])
+
+
     const [selectedOption, setSelectedOption] = useState({
         status: 1,
         name: "Công khai"
@@ -32,8 +69,28 @@ const UpPost = (props) => {
     const [medias, setMedias] = useState([]);
     const [typePost, setTypePost] = useState('Normal');
     const [tags, setTags] = useState([]);
+    //de luu tam user duoc chon
+    const [tempSelectedUsers, setTempSelectedUsers] = useState([]);
 
     const [Flag, setFlag] = useState(false)
+
+    const toggleSelectUser = (id) => {
+        setSelectedUsers((prev) =>
+            prev.includes(id)
+                ? prev.filter((userId) => userId !== id)
+                : [...prev, id]
+        );
+        setTags((prev) =>
+            prev.includes(id)
+                ? prev.filter((tagId) => tagId !== id) // Nếu đã có id, thì xóa nó khỏi mảng
+                : [...prev, id]// Nếu chưa có, thì thêm vào mảng
+        );
+        setTempSelectedUsers((prev) =>
+            prev.includes(id)
+                ? prev.filter((userId) => userId !== id) // cũng giống cái setTags nhưng chỉ dùng để lưu trữ tạm rồi set lại vào cái setSelecterUsser 
+                : [...prev, id]
+        );
+    };
 
     // Các tùy chọn trạng thái
     const status = [
@@ -181,7 +238,7 @@ const UpPost = (props) => {
                 ID_post_shared: null,
                 tags: tags,
             }
-            console.log("push",paramsAPI);
+            console.log("push", paramsAPI);
             await dispatch(addPost(paramsAPI))
                 .unwrap()
                 .then((response) => {
@@ -201,6 +258,28 @@ const UpPost = (props) => {
         setSelectedOption(option);
         setModalVisible(false);
     };
+
+    //handle tag
+    const handleModelTag = () => {
+        setTagVisible(true);
+        console.log(">>>>>>>", friends)
+    }
+
+    // Chuyển danh sách friends thành mảng chứa ID và thông tin
+    const formattedFriends = friends?.map(friend => ({
+        _id: friend.ID_userA._id === me._id ? friend.ID_userB._id : friend.ID_userA._id,
+        first_name: friend.ID_userA._id === me._id ? friend.ID_userB.first_name : friend.ID_userA.first_name,
+        last_name: friend.ID_userA._id === me._id ? friend.ID_userB.last_name : friend.ID_userA.last_name,
+    })) || [];
+
+
+    //add tag
+    const handleAddTag = () => {
+        setTypePost('Tag')
+        setSelectedUsers(tempSelectedUsers); // Cập nhật danh sách user chính thức
+        setTags(tempSelectedUsers); // Cập nhật danh sách tags
+        setTagVisible(false); // Đóng modal
+    }
 
     return (
         <View style={UpPostS.Container}>
@@ -230,8 +309,19 @@ const UpPost = (props) => {
                     />
                     <View style={{ marginLeft: 15 }}>
                         <Text style={UpPostS.txtName}>
-                            {me.first_name + " " + me.last_name}
+                            {(() => {
+                                if (tags.length === 0) {
+                                    return `${me.first_name} ${me.last_name}`;
+                                } else if (tags.length === 1) {
+                                    const taggedUser = formattedFriends.find(friend => friend._id === tags[0]);
+                                    return `${me.first_name} ${me.last_name} cùng với ${taggedUser?.first_name || ''} ${taggedUser?.last_name || ''}`;
+                                } else {
+                                    const firstTaggedUser = formattedFriends.find(friend => friend._id === tags[0]);
+                                    return `${me.first_name} ${me.last_name} cùng với ${firstTaggedUser?.first_name || ''} ${firstTaggedUser?.last_name || ''} và ${tags.length - 1} người khác`;
+                                }
+                            })()}
                         </Text>
+
                         <View style={UpPostS.boxStatus}>
                             <TouchableOpacity
                                 style={UpPostS.btnStatus}
@@ -285,7 +375,7 @@ const UpPost = (props) => {
                     </TouchableOpacity>
                     <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
 
-                    <TouchableOpacity style={UpPostS.btnIcon}>
+                    <TouchableOpacity style={UpPostS.btnIcon} onPress={() => handleModelTag()}>
                         <View style={UpPostS.boxItems}>
                             <Icon name="pricetag" size={30} color="#48a1ff" />
                             {
@@ -337,6 +427,49 @@ const UpPost = (props) => {
                     </View>
                 </TouchableOpacity>
             </Modal >
+
+            {/* Tag */}
+            <Modal
+                visible={tagVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setTagVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setTagVisible(false)}>
+                    <View style={UpPostS.overlay1}>
+                        <View style={UpPostS.modalContainer}>
+                            <View >
+                                <View style={{ flexDirection: 'column' }}>
+                                    {/* <Image source={{ uri: me?.avatar }} style={UpPostS.avatar} /> */}
+                                    {/* <View style={{ marginLeft: 10 }}> */}
+                                    {/* <Text style={UpPostS.name}>{me?.first_name + " " + me?.last_name}</Text> */}
+                                    <View style={UpPostS.boxTag}>
+                                        <TouchableOpacity style={UpPostS.btnTag} onPress={() => handleAddTag()}>
+                                            <Text style={UpPostS.tag}>
+                                                Gắn thẻ
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <FlatList
+                                        data={friends}
+                                        keyExtractor={(item) => item._id}
+                                        extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
+                                        renderItem={({ item }) => (
+                                            <FriendAdd
+                                                item={item}
+                                                onToggle={toggleSelectUser}
+                                                selectedUsers={selectedUsers}
+                                                membersGroup={membersGroup}
+                                            />
+                                        )}
+                                    />
+                                    {/* </View> */}
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </View>
     )
 }

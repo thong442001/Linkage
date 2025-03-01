@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Icon2 from 'react-native-vector-icons/EvilIcons';
 import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import Icon4 from 'react-native-vector-icons/FontAwesome5';
+import Icon2 from 'react-native-vector-icons/AntDesign';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 import { useSelector, useDispatch } from 'react-redux';
 const { width, height } = Dimensions.get('window');
@@ -60,7 +60,7 @@ const PostItem = ({
         ).values()
     );
 
-
+    console.log(post.tags)
     // Tìm reaction của chính người dùng hiện tại
     const userReaction = post.post_reactions.find(
         (reaction) => reaction.ID_user._id === ID_user
@@ -91,6 +91,7 @@ const PostItem = ({
                 setShareVisible(true);
             });
         }
+        console.log("Profile page>>>>>>>>>>", post.tags)
     }
 
     // Các tùy chọn trạng thái
@@ -244,16 +245,26 @@ const PostItem = ({
         }
     };
 
-
-
-
     return (
         <View style={styles.postContainer}>
             <View style={styles.header}>
                 <View style={styles.userInfo}>
                     <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                     <View style={{ marginLeft: 20 }}>
-                        <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                        {/* <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text> */}
+                        <Text style={styles.name}>
+                            {(() => {
+                                if (!post.tags || post.tags.length === 0) {
+                                    return `${post.ID_user.first_name} ${post.ID_user.last_name}`;
+                                } else if (post.tags.length === 1) {
+                                    const taggedUser = post.tags[0];
+                                    return `${post.ID_user.first_name} ${post.ID_user.last_name} cùng với ${taggedUser?.first_name || ''} ${taggedUser?.last_name || ''}`;
+                                } else {
+                                    const firstTaggedUser = post.tags[0];
+                                    return `${post.ID_user.first_name} ${post.ID_user.last_name} cùng với ${firstTaggedUser?.first_name || ''} ${firstTaggedUser?.last_name || ''} và ${post.tags.length - 1} người khác`;
+                                }
+                            })()}
+                        </Text>
                         <View style={styles.boxName}>
                             <Text style={styles.time}>{timeAgo}</Text>
                             {/* <Icon name="earth" size={12} color="gray" /> */}
@@ -268,7 +279,7 @@ const PostItem = ({
                     disabled={ID_user != post.ID_user._id}
                     onPress={() =>
                         openBottomSheet(
-                            25,
+                            15,
                             <View>
                                 <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
                                     style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
@@ -317,6 +328,7 @@ const PostItem = ({
                             uniqueReactions.map((reaction, index) => (
                                 <Text
                                     key={index}
+                                    style={{ color: 'black' }}
                                 //style={styles.reactionText}
                                 >{reaction.ID_reaction.icon}</Text>
                             ))
@@ -343,7 +355,7 @@ const PostItem = ({
                     <Text
                         style={styles.actionText}
                     >
-                        {userReaction ? userReaction.ID_reaction.icon : "👍"} {/* Nếu đã react, hiển thị icon đó */}
+                        {userReaction ? userReaction.ID_reaction.icon : <Icon2 name="like2" size={20} color="black" />} {/* Nếu đã react, hiển thị icon đó */}
                     </Text>
                     <Text
                         style={[
@@ -522,6 +534,7 @@ const styles = StyleSheet.create({
         fontSize: width * 0.04, // 4% chiều rộng màn hình
         fontWeight: 'bold',
         color: 'black',
+        width: width * 0.6
     },
     caption: {
         marginBottom: height * 0.015,
