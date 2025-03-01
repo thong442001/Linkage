@@ -21,6 +21,7 @@ const { width, height } = Dimensions.get('window');
 import {
     addPost_Reaction, // thả biểu cảm
 } from '../../rtk/API';
+import { useNavigation } from '@react-navigation/native';
 const PostItem = ({
     post,
     ID_user,
@@ -28,6 +29,7 @@ const PostItem = ({
     onDeleteVinhVien = () => { },
     updatePostReaction = () => { },
 }) => {
+    const navigation = useNavigation();
     const me = useSelector(state => state.app.user)
     const reactions = useSelector(state => state.app.reactions)
     const dispatch = useDispatch();
@@ -253,18 +255,26 @@ const PostItem = ({
                     <View style={{ marginLeft: 20 }}>
                         {/* <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text> */}
                         <Text style={styles.name}>
-                            {(() => {
-                                if (!post.tags || post.tags.length === 0) {
-                                    return `${post.ID_user.first_name} ${post.ID_user.last_name}`;
-                                } else if (post.tags.length === 1) {
-                                    const taggedUser = post.tags[0];
-                                    return `${post.ID_user.first_name} ${post.ID_user.last_name} cùng với ${taggedUser?.first_name || ''} ${taggedUser?.last_name || ''}`;
-                                } else {
-                                    const firstTaggedUser = post.tags[0];
-                                    return `${post.ID_user.first_name} ${post.ID_user.last_name} cùng với ${firstTaggedUser?.first_name || ''} ${firstTaggedUser?.last_name || ''} và ${post.tags.length - 1} người khác`;
-                                }
-                            })()}
+                            {post.ID_user.first_name} {post.ID_user.last_name}
+                            {post.tags.length > 0 && (
+                                <Text>
+                                    <Text style={{ color: 'gray' }}> cùng với </Text>
+                                    <Text onPress={() => navigation.navigate('Profile', { _id: post.tags[0]._id })} style={[styles.name]}>
+                                        {post.tags[0]?.first_name} {post.tags[0]?.last_name}
+                                    </Text>
+                                    {post.tags.length > 1 && (
+                                        <>
+                                            <Text style={{ color: 'gray' }}> và </Text>
+                                            <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
+                                                {post.tags.length - 1} người khác
+                                            </Text>
+                                        </>
+                                    )}
+                                </Text>
+                            )}
                         </Text>
+
+
                         <View style={styles.boxName}>
                             <Text style={styles.time}>{timeAgo}</Text>
                             {/* <Icon name="earth" size={12} color="gray" /> */}

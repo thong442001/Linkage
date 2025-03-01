@@ -309,18 +309,26 @@ const UpPost = (props) => {
                     />
                     <View style={{ marginLeft: 15 }}>
                         <Text style={UpPostS.txtName}>
-                            {(() => {
-                                if (tags.length === 0) {
-                                    return `${me.first_name} ${me.last_name}`;
-                                } else if (tags.length === 1) {
-                                    const taggedUser = formattedFriends.find(friend => friend._id === tags[0]);
-                                    return `${me.first_name} ${me.last_name} cùng với ${taggedUser?.first_name || ''} ${taggedUser?.last_name || ''}`;
-                                } else {
-                                    const firstTaggedUser = formattedFriends.find(friend => friend._id === tags[0]);
-                                    return `${me.first_name} ${me.last_name} cùng với ${firstTaggedUser?.first_name || ''} ${firstTaggedUser?.last_name || ''} và ${tags.length - 1} người khác`;
-                                }
-                            })()}
+                            {me.first_name} {me.last_name}
+                            {tags.length > 0 && (
+                                <>
+                                    <Text style={{ color: 'gray' }}> cùng với </Text>
+                                    <Text style={{ fontWeight: 'bold' }}>
+                                        {(() => {
+                                            const taggedUser = formattedFriends.find(friend => friend._id === tags[0]);
+                                            return `${taggedUser?.first_name || ''} ${taggedUser?.last_name || ''}`;
+                                        })()}
+                                    </Text>
+                                    {tags.length > 1 && (
+                                        <>
+                                            <Text style={{ color: 'gray' }}> và </Text>
+                                            <Text style={{ fontWeight: 'bold' }}>{tags.length - 1} người khác</Text>
+                                        </>
+                                    )}
+                                </>
+                            )}
                         </Text>
+
 
                         <View style={UpPostS.boxStatus}>
                             <TouchableOpacity
