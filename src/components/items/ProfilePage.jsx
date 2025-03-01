@@ -602,8 +602,7 @@ const PostItem = ({
                     ? (
                         hasCaption && <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
                     )
-                    :
-                    (
+                    : (
                         hasCaption && <Text style={styles.caption}>{post?.caption}</Text>
                     )
             }
@@ -612,8 +611,7 @@ const PostItem = ({
                     ? (
                         hasMedia && renderMediaGrid(post.ID_post_shared.medias)
                     )
-                    :
-                    (
+                    : (
                         hasMedia && renderMediaGrid(post.medias)
                     )
             }

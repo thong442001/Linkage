@@ -119,7 +119,6 @@ import AddFriendGroup from '../screens/chat/AddFriendGroup';
 import AvtNameGroup from '../screens/chat/AvtNameGroup';
 import UpPost from '../screens/home/UpPost';
 import PostDetail from '../screens/home/PostDetail';
-import Comment from '../components/comment/Comment';
 import StoryViewer from '../screens/story/StoryViewer';
 import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
 import Trash from '../screens/setting/Trash';
@@ -144,7 +143,6 @@ const oStackHome = {
   AvtNameGroup: { name: 'AvtNameGroup', component: AvtNameGroup },
   UpPost: { name: 'UpPost', component: UpPost },
   PostDetail: { name: 'PostDetail', component: PostDetail },
-  Comment: { name: 'Comment', component: Comment },
   Home: { name: 'Home', component: Home },
   ChangeDisplayName: { name: 'ChangeDisplayName', component: ChangeDisplayName },
   Trash: { name: 'Trash', component: Trash },
