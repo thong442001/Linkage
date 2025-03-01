@@ -648,7 +648,7 @@ const PostItem = ({
                         style={[
                             styles.action,
                             userReaction &&
-                            { backgroundColor: 'blue' }
+                            { backgroundColor: 'white' }
                         ]}
                         onLongPress={() => {
                             handleLongPress();
@@ -664,7 +664,7 @@ const PostItem = ({
                             style={[
                                 styles.actionText,
                                 userReaction &&
-                                { color: 'white' }
+                                { color: '#FF9D00' }
                             ]}
                         >
                             {userReaction ? userReaction.ID_reaction.name : "Thích"} {/* Nếu đã react, hiển thị icon đó */}
