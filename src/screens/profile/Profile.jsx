@@ -60,15 +60,32 @@ const Profile = props => {
     const [dialogReLoad, setDialogreload] = useState(false);
     const [loading, setloading] = useState(true)
 
+
     const openImageModal = imageUrl => {
+
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
+
     };
+
 
     const closeImageModal = () => {
         setImageModalVisible(false);
         setSelectedImage(null);
+        closeBottomSheet();
     };
+
+
+    const openBottomSheetAvatar = () => {
+        if (stories?.stories.length > 0) {
+            // Nếu có story, mở Bottom Sheet với thêm tùy chọn xem story
+            openBottomSheet(30, detail_selection_image());
+        } else {
+            // Nếu không có story, chỉ mở Bottom Sheet với các tùy chọn hình ảnh
+            openBottomSheet(22, detail_selection_image());
+        }
+    };
+
 
 
 
@@ -112,7 +129,7 @@ const Profile = props => {
         }
     };
 
-    //đổi ảnh bìa
+    //đổi avatar
     const onOpenGalleryChangeAvatar = async () => {
         try {
             const options = { mediaType: 'image', quality: 1 };
@@ -248,6 +265,44 @@ const Profile = props => {
                     <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
                 </TouchableOpacity>
 
+
+
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={() => openImageModal(user?.avatar)}>
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="images" size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
+                </TouchableOpacity>
+
+
+                {stories?.stories.length > 0 &&
+                    (
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={() => {
+                                closeBottomSheet();
+                                navigation.navigate('StoryViewer', { StoryView: stories });
+                            }}>
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="images" size={25} />
+                            </View>
+                            <Text style={ProfileS.optionText}>Xem story</Text>
+                        </TouchableOpacity>
+                    )
+                }
+            </View>
+        );
+    };
+    const detail_selection_background = () => {
+        return (
+            <View style={ProfileS.containerBottomSheet}>
+                <View style={ProfileS.rectangle}>
+                    <View style={ProfileS.lineBottomSheet}></View>
+                </View>
+
                 <TouchableOpacity
                     style={ProfileS.option}
                     onPress={onOpenGalleryChangeBackground}>
@@ -255,6 +310,18 @@ const Profile = props => {
                         <Icon name="images" size={25} />
                     </View>
                     <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+                </TouchableOpacity>
+
+
+
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={() => openImageModal(user?.background)}>
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="images" size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Xem ảnh bìa</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -463,7 +530,7 @@ const Profile = props => {
                     </Snackbar>
                     <View>
                         <View>
-                            <Pressable onPress={() => openImageModal(user?.background)}>
+                            <Pressable onPress={() => openBottomSheet(25, detail_selection_background)}>
                                 {user?.background != null ? (
                                     <Image
                                         style={ProfileS.backGroundImage}
@@ -479,16 +546,8 @@ const Profile = props => {
                             </Pressable>
 
                             <Pressable
-                                onPress={() => {
-                                    if (stories?.stories.length > 0) {
-                                        // navigation.navigate('StoryViewer', {
-                                        //   StoryView: hasMeStories[0],
-                                        // });
-                                        navigation.navigate('StoryViewer', { StoryView: stories })
-                                    } else {
-                                        openImageModal(user?.avatar);
-                                    }
-                                }}>
+                                onPress={openBottomSheetAvatar}
+                            >
                                 {user && (
                                     <Image
                                         style={[
@@ -504,7 +563,7 @@ const Profile = props => {
                                 visible={isImageModalVisible}
                                 transparent={true}
                                 animationType="fade"
-                                onRequestClose={closeImageModal}>
+                                onRequestClose={{ closeImageModal }}>
                                 <View style={ProfileS.modalContainer}>
                                     <TouchableWithoutFeedback onPress={closeImageModal}>
                                         <View style={ProfileS.modalBackground} />
@@ -611,10 +670,7 @@ const Profile = props => {
                                         </TouchableOpacity>
                                         <View style={ProfileS.boxEdit}>
                                             <TouchableOpacity
-                                                style={ProfileS.btnEdit}
-                                                onPress={() => {
-                                                    openBottomSheet(25, detail_selection_image);
-                                                }}>
+                                                style={ProfileS.btnEdit}>
                                                 <Text style={ProfileS.textEdit}>
                                                     Chỉnh sửa trang cá nhân
                                                 </Text>

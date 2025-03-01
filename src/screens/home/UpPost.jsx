@@ -71,6 +71,7 @@ const UpPost = (props) => {
                                 </View>
                             </View>
                         ) : (
+
                             <Image source={{ uri }} style={UpPostS.image} resizeMode="cover" />
                         )}
 
@@ -181,7 +182,7 @@ const UpPost = (props) => {
                 ID_post_shared: null,
                 tags: tags,
             }
-            console.log("push",paramsAPI);
+            console.log("push", paramsAPI);
             await dispatch(addPost(paramsAPI))
                 .unwrap()
                 .then((response) => {

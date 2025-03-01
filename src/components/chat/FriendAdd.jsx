@@ -34,8 +34,7 @@ export default function FriendAdd({ item, onToggle, selectedUsers, membersGroup 
     <TouchableOpacity
       style={[styles.chatItem, isJoined && { opacity: 0.5 }]}
       onPress={() => onToggle(ID_friend)}
-      disabled={isJoined}
-    >
+      disabled={isJoined}>
       <View style={styles.boxSelect}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {avatar && <Image source={{ uri: avatar }} style={styles.avatar} />}
