@@ -1,17 +1,18 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 
-const ItemNotification = props => {
-  const {data} = props;
+const ItemNotification = ({ data }) => {
   return (
     <View style={styles.container}>
-      <Image source={{uri: data.img}} style={styles.img} />
+      <Image source={{ uri: data.avatar }} style={styles.img} />
       <View style={styles.container_content}>
         <View style={styles.container_name}>
-          <Text style={styles.text_name}>{data.name}</Text>
-          <Text style={styles.text_content}>{data.content}</Text>
+          <Text style={styles.text_name}>{data.senderName}</Text>
+          <Text style={styles.text_content}>
+            {data.type === 'friend_request' ? ' đã gửi lời mời kết bạn' : data.content}
+          </Text>
         </View>
-        <Text>{data.time}</Text>
+        <Text style={styles.text_time}>{data.timestamp}</Text>
       </View>
     </View>
   );
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
   text_content: {
     marginLeft: 2,
     fontSize: 16,
-    fontWeight: 'medium',
+    fontWeight: '400', // "medium" không hợp lệ, dùng "400" tương đương
     color: 'black',
   },
   text_name: {
@@ -49,5 +50,10 @@ const styles = StyleSheet.create({
   },
   container_content: {
     marginLeft: 13,
+  },
+  text_time: {
+    fontSize: 14,
+    color: 'gray',
+    marginTop: 3,
   },
 });

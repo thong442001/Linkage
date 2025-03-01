@@ -1,21 +1,15 @@
-import React from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-} from 'react-native';
-
-
+import React, { useEffect } from 'react';
+import { Alert, SafeAreaView, StatusBar, StyleSheet, Platform } from 'react-native';
 import AppNavigation from './src/navigations/AppNavigation';
-
-import { Provider } from 'react-redux'
+import { Provider } from 'react-redux';
 import { store, persistor } from './src/rtk/Store';
-import { PersistGate } from 'redux-persist/integration/react'
+import { PersistGate } from 'redux-persist/integration/react';
 import { BottomSheetProvider } from './src/context/BottomSheetContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
 enableScreens();
-// import 'react-native-gesture-handler'
+
+
 function App(): React.JSX.Element {
 
   return (
@@ -36,11 +30,10 @@ function App(): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     width: '100%',
     height: '100%',
     backgroundColor: 'white',
-  }
+  },
 });
 
 export default App;

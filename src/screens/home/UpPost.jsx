@@ -17,6 +17,7 @@ import {
     addPost,
 } from '../../rtk/API';
 import Video from 'react-native-video';
+import firebase from '@react-native-firebase/app';
 const UpPost = (props) => {
     const { navigation } = props;
 

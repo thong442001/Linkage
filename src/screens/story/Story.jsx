@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  PanResponder,
 } from 'react-native';
 import { addPost } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
@@ -18,11 +19,27 @@ import { useSelector, useDispatch } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+import axios from "axios";
+import { TextInput } from 'react-native-gesture-handler';
+
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
+const UPLOAD_PRESET = 'ml_default';
+
 const { width, height } = Dimensions.get('window');
 
 const Story = ({ route }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const [previewImage, setPreviewImage] = useState(null); // Ảnh hiển thị trước khi upload
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null); // Link ảnh sau khi upload
+  const [loading, setLoading] = useState(false);
+
+  const [text, setText] = useState('Nhập text...');
+  const [showText, setShowText] = useState(false);
+  const [scale, setScale] = useState(new Animated.Value(1));
+
+  const pan = useRef(new Animated.ValueXY()).current;
+
 
   const [stories, setStories] = useState([]);
   const [medias, setMedias] = useState([]);
@@ -42,42 +59,117 @@ const Story = ({ route }) => {
     { status: 3, name: 'Chỉ mình tôi' },
   ];
 
-  useEffect(() => {
+    // Gesture xử lý kéo/thả
+    const panResponder = useRef(
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderMove: Animated.event(
+          [null, { dx: pan.x, dy: pan.y }],
+          { useNativeDriver: false }
+        ),
+        onPanResponderRelease: () => {
+          pan.flattenOffset();
+        },
+      })
+    ).current;  
+
+useEffect(() => {
     if (route.params?.newStory) {
-      const newMedia = route.params.newStory;
-      setStories([{ id: new Date().getTime(), image: newMedia, avatar: { uri: me?.avatar }, name: me ? `${me.first_name} ${me.last_name}` : '' }]);
-      setMedias([newMedia]);
+      setPreviewImage(route.params.newStory);
     }
-  }, [route.params?.newStory, me]);
+  }, [route.params?.newStory]);
 
   const callAddPost = async () => {
-    if (medias.length === 0) {
-      console.log('Chưa có dữ liệu');
+    if (!previewImage) {
+      console.log('Chưa có ảnh');
       return;
     }
-    const paramsAPI = {
-      ID_user: me._id,
-      caption: '',
-      medias,
-      status: selectedOption.name,
-      type: typePost,
-      ID_post_shared: null,
-      tags: [],
-    };
 
     try {
+      const uploadedUrl = await uploadToCloudinary(previewImage);
+      if (!uploadedUrl) {
+        console.log('Lỗi khi upload ảnh');
+        return;
+      }
+
+      const paramsAPI = {
+        ID_user: me._id,
+        caption: '',
+        medias: [uploadedUrl], 
+        status: selectedOption.name,
+        type: typePost,
+        ID_post_shared: null,
+        tags: [],
+      };
+
       await dispatch(addPost(paramsAPI)).unwrap();
       navigation.navigate(oStackHome.TabHome.name);
     } catch (error) {
       console.log('Lỗi đăng bài:', error);
     }
   };
+  
+  const uploadToCloudinary = async (imageUri) => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "upload.jpg",
+    });
+    formData.append("upload_preset", UPLOAD_PRESET);
+
+    try {
+      const response = await axios.post(CLOUDINARY_URL, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const imageUrl = response.data.secure_url;
+      setUploadedImageUrl(imageUrl);
+      console.log("Ảnh đã tải lên:", imageUrl);
+      return imageUrl;
+    } catch (error) {
+      console.error("Lỗi upload:", error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <TouchableWithoutFeedback>
       <View style={styles.container}>
-        <Image source={{ uri: route?.params?.newStory }} style={styles.image} />
+      {previewImage ? (
+          <Image source={{ uri: previewImage }} style={styles.image} />
+        ) : (
+          <Text style={{ color: 'white', fontSize: 16 }}>Chưa có ảnh</Text>
+        )}
 
+          {/* Nút thêm Text */}
+      <TouchableOpacity
+        style={styles.addTextButton}
+        onPress={() => setShowText(true)}
+      >
+        <Text style={{ color: 'white' }}>Thêm Text</Text>
+      </TouchableOpacity>
+
+      {/* Text có thể kéo thả và thu phóng */}
+      {showText && (
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={[
+            styles.draggableTextContainer,
+            { transform: [...pan.getTranslateTransform(), { scale }] },
+          ]}
+        >
+          <TextInput
+            style={styles.draggableText}
+            onChangeText={setText}
+            value={text}
+            placeholder="Nhập text..."
+            placeholderTextColor="white"
+          />
+        </Animated.View>
+      )}
         {/* Avatar & Nút Thoát */}
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
@@ -96,8 +188,8 @@ const Story = ({ route }) => {
         </TouchableOpacity>
 
         {/* Nút Đăng Story */}
-        <TouchableOpacity style={styles.postButton} onPress={callAddPost}>
-          <Text style={styles.postText}>Đăng</Text>
+        <TouchableOpacity style={styles.postButton} onPress={callAddPost} disabled={loading}>
+          <Text style={styles.postText}>{loading ? 'Đang đăng...' : 'Đăng'}</Text>
         </TouchableOpacity>
 
         {/* Modal Chọn Quyền Riêng Tư */}
@@ -146,6 +238,9 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   optionItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#ddd' },
   optionText: { fontSize: 16 },
+  addTextButton: { position: 'absolute', bottom: 30, left: 20, backgroundColor: '#007AFF', padding: 10, borderRadius: 10 },
+  draggableTextContainer: { position: 'absolute', top: height / 3, left: width / 4, backgroundColor: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 10 },
+  draggableText: { color: 'white', fontSize: 20 },
 });
 
 export default Story;

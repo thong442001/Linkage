@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "552554906307",
+    "firebase_url": "https://linkage-9deac-default-rtdb.firebaseio.com",
+    "project_id": "linkage-9deac",
+    "storage_bucket": "linkage-9deac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:552554906307:android:7b79a921ac22f6eaeb1876",
+        "android_client_info": {
+          "package_name": "com.linkage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmrkDc4sz-Lj0k7YjtweL0YxYz8D50Db4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,6 +7,7 @@ const initialState = {
   token: '',
   refreshToken: '',
   reactions: null,
+  fcmToken: null, 
   stories: {},
   history: [],
 };
@@ -38,6 +39,9 @@ const appSlice = createSlice({
 
     setReactions: (state, action) => {
       state.reactions = action.payload;
+    },
+    setFcmToken: (state, action) => { 
+      state.fcmToken = action.payload;
     },
 
     addStory: (state, action) => {
@@ -118,6 +122,7 @@ export const {
   resetToken,
   logout,
   setReactions,
+  setFcmToken,
   addStory,
   removeStory,
   changeName,

@@ -8,6 +8,7 @@ import {
     TouchableWithoutFeedback,
     Modal,
     Pressable,
+    Alert
 } from 'react-native';
 import React, { useEffect, useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -33,9 +34,12 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { editAvatarOfUser, editBackgroundOfUser } from '../../rtk/API';
 import { changeAvatar, changeBackground } from '../../rtk/Reducer';
 import axios from 'axios';
+import messaging from '@react-native-firebase/messaging';
 import ProfileLoading from '../../utils/skeleton_loading/ProfileLoading';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import { useFocusEffect } from '@react-navigation/native';
+import database from '@react-native-firebase/database';
+import { sendPushNotification } from '../services/NotificationService';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -48,6 +52,8 @@ const Profile = props => {
     const [avatar, setavatar] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [isImageModalVisible, setImageModalVisible] = useState(false);
+
+    const FCM_SERVER_KEY = "BOa0rmhBQ7uccvqyUyiwuj-U7e_ljHnHI_jyZhobPyBPNJmP6AadvOuZc8dVd8QKxdFKpBp_RD-vWwEdc0R5o54";
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -297,27 +303,87 @@ const Profile = props => {
         }
     };
 
-    //guiLoiMoiKetBan
+    const sendPushNotification = async (token, title, body, data = {}) => {
+        try {
+            const response = await axios.post(
+               "https://fcm.googleapis.com/v1/projects/linkage-9deac/messages:send",
+                {
+                    to: token,
+                    notification: {
+                        title,
+                        body,
+                        sound: "default",
+                    },
+                    data: data, 
+                },
+                {
+                    headers: {
+                        Authorization: `key=${FCM_SERVER_KEY}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+    
+            console.log("✅ Gửi thông báo thành công!", response.data);
+        } catch (error) {
+            console.error("❌ Lỗi khi gửi thông báo FCM:", error.response?.data || error.message);
+        }
+    };
+    
     const callGuiLoiMoiKetBan = async () => {
         try {
             const paramsAPI = {
                 ID_relationship: relationship?._id,
                 me: me._id,
             };
+    
             await dispatch(guiLoiMoiKetBan(paramsAPI))
                 .unwrap()
-                .then(response => {
-                    //console.log(response);
+                .then(async (response) => {
                     setRelationship(response.relationship);
+    
+                    // 📌 Lưu thông báo vào Firebase
+                    const notificationRef = database().ref(`notifications/${user._id}`);
+                    const newNotificationRef = notificationRef.push();
+    
+                    await newNotificationRef.set({
+                        senderId: me._id,
+                        senderName: `${me.first_name} ${me.last_name}`,
+                        type: 'friend_request',
+                        avatar: user.avatar,
+                        timestamp: new Date().toISOString(),
+                        status: 'pending',
+                    });
+    
+                    console.log("✅ Lời mời kết bạn đã được lưu vào Firebase");
+    
+                    // 📌 Lấy FCM Token của người nhận từ Firebase
+                    const tokenSnapshot = await database().ref(`users/${user._id}/fcmToken`).once('value');
+                    const fcmToken = tokenSnapshot.val();
+    
+                    if (fcmToken) {
+                        console.log(`📩 Đang gửi thông báo đến user ${user._id} với token: ${fcmToken}`);
+    
+                        // 🚀 Gửi Push Notification qua FCM
+                        sendPushNotification(
+                            fcmToken,
+                            "📩 Lời mời kết bạn mới!",
+                            `${me.first_name} đã gửi cho bạn một lời mời kết bạn.`
+                        );
+                    } else {
+                        console.log("❌ Không tìm thấy FCM Token của người nhận!");
+                    }
                 })
                 .catch(error => {
-                    console.log('Error2 callGuiLoiMoiKetBan:', error);
+                    console.log('❌ Lỗi khi gửi lời mời:', error);
                     setDialogreload(true);
                 });
         } catch (error) {
             console.log(error);
         }
     };
+    
+    
 
     //chapNhanLoiMoiKetBan
     const callChapNhanLoiMoiKetBan = async () => {

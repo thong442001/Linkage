@@ -9,7 +9,6 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from "axios";
 import { oStackHome } from "../../navigations/HomeNavigation";
-
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
 const UPLOAD_PRESET = 'ml_default';
 
@@ -21,14 +20,36 @@ const PostStory = ({ navigation }) => {
     onOpenGallery();
   }, []);
 
+  // const onOpenGallery = async () => {
+  //   const options = {
+  //     mediaType: 'photo',
+  //     quality: 1,
+  //     selectionLimit: 1,
+  //   };
+
+  //   launchImageLibrary(options, async (response) => {
+  //     if (response.didCancel) {
+  //       console.log("Đã hủy chọn ảnh");
+  //       navigation.goBack(); // Quay lại nếu không chọn ảnh
+  //     } else if (response.errorMessage) {
+  //       Alert.alert("Lỗi", "Không thể mở thư viện ảnh!");
+  //       navigation.goBack();
+  //     } else {
+  //       const selectedFile = response.assets[0];
+  //       setSelectedImage(selectedFile.uri);
+  //       await uploadToCloudinary(selectedFile.uri);
+  //     }
+  //   });
+  // };
+
   const onOpenGallery = async () => {
     const options = {
-      mediaType: 'photo',
+      mediaType: "photo",
       quality: 1,
       selectionLimit: 1,
     };
 
-    launchImageLibrary(options, async (response) => {
+    launchImageLibrary(options, (response) => {
       if (response.didCancel) {
         console.log("Đã hủy chọn ảnh");
         navigation.goBack(); // Quay lại nếu không chọn ảnh
@@ -38,10 +59,17 @@ const PostStory = ({ navigation }) => {
       } else {
         const selectedFile = response.assets[0];
         setSelectedImage(selectedFile.uri);
-        await uploadToCloudinary(selectedFile.uri);
+        postStory(selectedFile.uri); // Truyền ảnh sang Story mà không cần tải lên Cloudinary
       }
     });
   };
+
+     const postStory = (imageUrl) => {
+    navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
+     }
+
+
+
 
   const uploadToCloudinary = async (imageUri) => {
     setLoading(true);
@@ -68,9 +96,9 @@ const PostStory = ({ navigation }) => {
     }
   };
 
-  const postStory = (imageUrl) => {
-    navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
-  };
+  // const postStory = (imageUrl) => {
+  //   navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
+  // };
 
   return (
     <View style={styles.container}>
@@ -78,7 +106,7 @@ const PostStory = ({ navigation }) => {
       {selectedImage && !loading && <Image source={{ uri: selectedImage }} style={styles.image} />}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
