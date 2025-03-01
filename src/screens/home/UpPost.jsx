@@ -21,6 +21,7 @@ import {
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
 import Video from 'react-native-video';
+import CommentS from '../../styles/components/items/CommentS';
 
 const UpPost = (props) => {
     const { navigation } = props;
@@ -117,24 +118,24 @@ const UpPost = (props) => {
         if (mediaCount === 0) return null;
 
         return (
-            <View style={UpPostS.mediaContainer}>
+            <View style={CommentS.mediaContainer}>
                 {medias.slice(0, 5).map((uri, index) => (
                     <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
                         {isVideo(uri) ? (
-                            <View style={UpPostS.videoWrapper}>
-                                <Video source={{ uri }} style={UpPostS.video} resizeMode="cover" paused />
-                                <View style={UpPostS.playButton}>
+                            <View style={CommentS.videoWrapper}>
+                                <Video source={{ uri }} style={CommentS.video} resizeMode="cover" paused />
+                                <View style={CommentS.playButton}>
                                     <Icon name="play-circle" size={40} color="white" />
                                 </View>
                             </View>
                         ) : (
 
-                            <Image source={{ uri }} style={UpPostS.image} resizeMode="cover" />
+                            <Image source={{ uri }} style={CommentS.image} resizeMode="cover" />
                         )}
 
                         {index === 4 && mediaCount > 5 && (
-                            <View style={UpPostS.overlay}>
-                                <Text style={UpPostS.overlayText}>+{mediaCount - 5}</Text>
+                            <View style={CommentS.overlay}>
+                                <Text style={CommentS.overlayText}>+{mediaCount - 5}</Text>
                             </View>
                         )}
                     </TouchableOpacity>
@@ -145,18 +146,18 @@ const UpPost = (props) => {
 
     const getMediaStyle = (count, index) => {
         if (count === 1) {
-            return UpPostS.singleMedia;
+            return CommentS.singleMedia;
         } else if (count === 2) {
-            return UpPostS.doubleMedia;
+            return CommentS.doubleMedia;
         } else if (count === 3) {
-            return index === 0 ? UpPostS.tripleMediaFirst : UpPostS.tripleMediaSecond;
+            return index === 0 ? CommentS.tripleMediaFirst : CommentS.tripleMediaSecond;
         } else if (count === 4) {
-            return UpPostS.quadMedia;
+            return CommentS.quadMedia;
         } else { // 5+ media
-            if (index < 2) return UpPostS.fivePlusMediaFirstRow;
-            else if (index === 2) return UpPostS.fivePlusMediaSecondRowLeft;
-            else if (index === 3) return UpPostS.fivePlusMediaSecondRowMiddle;
-            else return UpPostS.fivePlusMediaSecondRowRight;
+            if (index < 2) return CommentS.fivePlusMediaFirstRow;
+            else if (index === 2) return CommentS.fivePlusMediaSecondRowLeft;
+            else if (index === 3) return CommentS.fivePlusMediaSecondRowMiddle;
+            else return CommentS.fivePlusMediaSecondRowRight;
         }
     };
 
