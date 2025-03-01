@@ -79,6 +79,7 @@ const AppNavigation = () => {
         console.log("🔥 FCM Token:", token);
         if (token) {
           dispatch(setFcmToken(token)); // Lưu vào Redux
+          //if(user )
         }
       } catch (error) {
         console.log("❌ Lỗi khi lấy FCM Token:", error);

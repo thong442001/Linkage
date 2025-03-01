@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import styles from '../../styles/screens/login/LoginS';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../rtk/API';
 import ButtonCreateNewAccount from '../../components/button/ButtonCreateNewAccount';
 import { CustomTextInputEmail, CustomTextInputPassword } from '../../components/textinputs/CustomTextInput';
@@ -17,6 +17,7 @@ import LoadingModal from '../../utils/animation/loading/LoadingModal';
 const Login = (props) => {
   const { navigation } = props;
   const dispatch = useDispatch();
+  const fcmToken = useSelector(state => state.app.fcmToken);
 
   const [emailVsPhone, setEmailVsPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -64,8 +65,8 @@ const Login = (props) => {
     if (!validateForm()) return;
 
     const data = isValidEmail(emailVsPhone)
-      ? { email: emailVsPhone, phone: '', password }
-      : { email: '', phone: emailVsPhone, password };
+      ? { email: emailVsPhone, phone: '', password: password, fcmToken: fcmToken }
+      : { email: '', phone: emailVsPhone, password: password, fcmToken: fcmToken };
 
     onLogin(data);
   };
@@ -86,7 +87,7 @@ const Login = (props) => {
 
   return (
     <View style={styles.container}>
-      <LoadingModal visible={loading} /> 
+      <LoadingModal visible={loading} />
 
       <View style={styles.viewLogo}>
         <Image

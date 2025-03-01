@@ -21,6 +21,8 @@ import {
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
     huyLoiMoiKetBan,
+    editAvatarOfUser,
+    editBackgroundOfUser,
     allProfile, // allProfile
     changeDestroyPost, // changeDestroy
 } from '../../rtk/API';
@@ -31,7 +33,6 @@ import SelectAvatarDialog from '../../components/dialog/SelectAvatarDialog';
 import styles from '../../styles/screens/friend/FriendNoti';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { editAvatarOfUser, editBackgroundOfUser } from '../../rtk/API';
 import { changeAvatar, changeBackground } from '../../rtk/Reducer';
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
