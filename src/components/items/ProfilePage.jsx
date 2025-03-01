@@ -8,6 +8,7 @@ import {
     Dimensions,
     Modal,
     TouchableWithoutFeedback,
+    TextInput,
 } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -37,16 +38,27 @@ const PostItem = ({
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
 
     const [reactionsVisible, setReactionsVisible] = useState(false);
+    const [shareVisible, setShareVisible] = useState(false);
+
+    // trang thai
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedOption, setSelectedOption] = useState({
+        status: 1,
+        name: "Công khai"
+    });
     const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
-    // const uniqueReactions = Array.from(
-    //     new Map(
-    //         post.post_reactions
-    //             .filter(reaction => reaction.ID_reaction !== null)
-    //             .map(reaction => [reaction.ID_reaction._id, reaction])
-    //     ).values()
-    // );
+    // Cảnh
+    // post_reactions: list của reaction của post
+    // lọc reactions 
+    const uniqueReactions = Array.from(
+        new Map(
+            post.post_reactions
+                .filter(reaction => reaction.ID_reaction !== null)
+                .map(reaction => [reaction.ID_reaction._id, reaction])
+        ).values()
+    );
 
 
     // Tìm reaction của chính người dùng hiện tại
@@ -65,6 +77,41 @@ const PostItem = ({
                 setReactionsVisible(true);
             });
         }
+    };
+
+    //share
+    const handleShare = () => {
+        if (reactionRef.current) {
+            reactionRef.current.measure((x, y, width, height, pageX, pageY) => {
+                setMenuPosition({
+                    top: pageY - 57,
+                    left: pageX,
+                    right: pageX,
+                });
+                setShareVisible(true);
+            });
+        }
+    }
+
+    // Các tùy chọn trạng thái
+    const status = [
+        {
+            status: 1,
+            name: "Công khai"
+        },
+        {
+            status: 2,
+            name: "Bạn bè"
+        },
+        {
+            status: 3,
+            name: "Chỉ mình tôi"
+        },
+    ];
+
+    const handleSelectOption = (option) => {
+        setSelectedOption(option);
+        setModalVisible(false);
     };
 
     useEffect(() => {
@@ -95,10 +142,10 @@ const PostItem = ({
         };
 
         updateDiff();
-        const interval = setInterval(updateDiff, 1000);
+        // const interval = setInterval(updateDiff, 1000);
 
-        return () => clearInterval(interval);
-    }, [post.createdAt]);
+        // return () => clearInterval(interval);
+    }, []);
 
     const callAddPost_Reaction = async (ID_reaction, name, icon) => {
         try {
@@ -260,7 +307,7 @@ const PostItem = ({
             {hasCaption && <Text style={styles.caption}>{post?.caption}</Text>}
             {hasMedia && renderMediaGrid(post?.medias)}
             {/* reactions of post */}
-            {/* {
+            {
                 post.post_reactions.length > 0 &&
                 (
                     <View
@@ -279,7 +326,7 @@ const PostItem = ({
                         >{post.post_reactions.length}</Text>
                     </View>
                 )
-            } */}
+            }
             <View style={styles.interactions}>
                 <TouchableOpacity
                     ref={reactionRef} // Gắn ref vào đây
@@ -288,9 +335,9 @@ const PostItem = ({
                         userReaction &&
                         { backgroundColor: 'blue' }
                     ]}
-                // onLongPress={() => {
-                //     handleLongPress();
-                // }}
+                    onLongPress={() => {
+                        handleLongPress();
+                    }}
                 >
                     {/* <Icon2 name="like" size={25} color="black" /> */}
                     <Text
@@ -312,7 +359,7 @@ const PostItem = ({
                     <Icon3 name="comment" size={20} color="black" />
                     <Text style={styles.actionText}>Bình luận</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.action}>
+                <TouchableOpacity style={styles.action} onPress={() => handleShare()}>
                     <Icon4 name="share-alt" size={20} color="black" />
                     <Text style={styles.actionText}>Chia sẻ</Text>
                 </TouchableOpacity>
@@ -360,6 +407,80 @@ const PostItem = ({
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
+            </Modal >
+
+
+            {/* Chia sẻ */}
+            <Modal
+                visible={shareVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShareVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setShareVisible(false)}>
+                    <View style={styles.overlay1}>
+                        <View style={styles.modalContainer}>
+                            <View >
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Image source={{ uri: me?.avatar }} style={styles.avatar} />
+                                    <View style={{ marginLeft: 10 }}>
+                                        <Text style={styles.name}>{me?.first_name + " " + me?.last_name}</Text>
+                                        <View style={styles.boxStatus}>
+                                            <TouchableOpacity
+                                                style={styles.btnStatus}
+                                                onPress={() => setModalVisible(true)}
+                                            >
+                                                <Text style={styles.txtPublic}>{selectedOption.name}</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{ marginHorizontal: 10 }}>
+                                    <TextInput
+                                        placeholder='Hãy nói gì đó về nội dung này'
+                                        placeholderTextColor={"gray"}
+                                        multiline={true}
+                                        style={styles.contentShare}
+                                    />
+                                    <View style={{ backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
+                                        <TouchableOpacity style={{ padding: 10 }}>
+                                            <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* Modal để hiển thị danh sách trạng thái */}
+            < Modal
+                transparent={true}  // Cho phép nền của modal trong suốt, giúp nhìn thấy nền bên dưới modal.
+                visible={modalVisible}  // Điều khiển việc modal có hiển thị hay không dựa trên trạng thái `modalVisible`.
+                animationType="fade"  // Hiệu ứng khi modal xuất hiện. Ở đây là kiểu "slide" từ dưới lên.
+                onRequestClose={() => setModalVisible(false)}  // Khi modal bị yêu cầu đóng (ví dụ trên Android khi bấm nút back), hàm này sẽ được gọi để đóng modal.
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}  // Overlay của modal, tạo hiệu ứng làm mờ nền dưới modal.
+                    onPress={() => setModalVisible(false)}  // Đóng modal khi người dùng chạm vào khu vực bên ngoài modal.
+                >
+                    {/* // Nội dung chính của modal, nơi hiển thị các tùy chọn. */}
+                    <View style={styles.modalContent1}>
+                        {
+                            status.map((option, index) => (
+                                <TouchableOpacity
+                                    key={index}  // Mỗi phần tử trong danh sách cần có một key duy nhất.
+                                    style={styles.optionButton}  // Styling cho mỗi nút tùy chọn trong danh sách.
+                                    onPress={() => handleSelectOption(option)}  // Khi người dùng chọn một tùy chọn, hàm này sẽ được gọi để cập nhật trạng thái và đóng modal.
+                                >
+                                    {/* // Hiển thị tên của tùy chọn. */}
+                                    <Text style={styles.optionText}>{option.name}</Text>
+                                </TouchableOpacity>
+                            ))
+                        }
+                    </View>
+                </TouchableOpacity>
             </Modal >
         </View>
     );
@@ -548,6 +669,70 @@ const styles = StyleSheet.create({
         color: 'black',
         marginHorizontal: 5,
     },
+    //modal share
+    overlay1: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.6)", // Màu xám xung quanh
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContainer: {
+        width: "80%",
+        backgroundColor: "white", // Modal giữ nguyên màu trắng
+        borderRadius: 10,
+        padding: 20,
+    },
+    modalContent: {
+        alignItems: "center",
+    },
+    // model status
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent1: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 16,
+    },
+    optionButton: {
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    optionText: {
+        fontSize: 16,
+        color: '#000',
+    },
+    btnStatus: {
+        backgroundColor: '#B2D5F8',
+        padding: 7,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    txtPublic: {
+        fontSize: 13,
+        color: '#0064E0'
+    },
+    boxStatus: {
+        marginTop: 5,
+        flexDirection: 'row',
+    },
+    //content Share
+    contentShare: {
+        width: "auto",  // Hoặc có thể dùng flex: 1
+        // minHeight: 40, // Đảm bảo đủ không gian nhập liệu
+        // flex: 1, // Giúp mở rộng khi nhập nhiều dòng
+        // textAlignVertical: "top", // Căn chữ lên trên
+        // borderWidth: 1, 
+        // borderColor: "gray", 
+        // borderRadius: 5, 
+        padding: 10,
+        marginVertical: 10
+    }
 });
 
 export default PostItem;
