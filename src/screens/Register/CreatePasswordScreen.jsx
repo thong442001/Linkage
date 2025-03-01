@@ -1,53 +1,53 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { register } from '../../rtk/API'; 
+import { register } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 const { width, height } = Dimensions.get('window');
 
 const CreateNewPassWord = ({ route, navigation }) => {
-    const { first_name, last_name, dateOfBirth, sex, email, phone } = route.params; 
+    const { first_name, last_name, dateOfBirth, sex, email, phone } = route.params;
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [validPassword, setValidPassword] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); 
-    const [successVisible, setSuccessVisible] = useState(false); 
+    const [showPassword, setShowPassword] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
     const [failed, setfailed] = useState(false);
 
     const dispatch = useDispatch();
 
-    
+
     const validatePassword = (text) => {
         // Yêu cầu: ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-    
+        
         if (!passwordRegex.test(text)) {
             setError('Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt.');
         } else {
             setError('');
         }
-    
+
         setPassword(text);
         setValidPassword(passwordRegex.test(text));
     };
-    
+
     // Hàm xử lý đăng ký
     const handleRegister = () => {
         if (!validPassword) {
             setError('Vui lòng nhập mật khẩu hợp lệ.');
             return;
         }
-    
-        const userData = { first_name, last_name, dateOfBirth, sex, email, phone, password }; 
-        dispatch(register(userData)) 
+
+        const userData = { first_name, last_name, dateOfBirth, sex, email, phone, password };
+        dispatch(register(userData))
             .unwrap()
             .then(() => {
                 setSuccessVisible(true)
                 setTimeout(() => {
                     setSuccessVisible(false);
-                }, 2000); 
+                }, 2000);
                 navigation.navigate('Login');
             })
             .catch((err) => {
@@ -55,10 +55,10 @@ const CreateNewPassWord = ({ route, navigation }) => {
                 setfailed(true)
                 setTimeout(() => {
                     setfailed(false);
-                }, 2000); 
+                }, 2000);
             });
     };
-    
+
 
     return (
         <View style={styles.container}>
@@ -90,15 +90,15 @@ const CreateNewPassWord = ({ route, navigation }) => {
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <Pressable
-                style={[styles.button, validPassword ? null : styles.buttonDisabled]} 
+                style={[styles.button, validPassword ? null : styles.buttonDisabled]}
                 onPress={handleRegister} // Gọi hàm handleRegister khi nhấn nút
                 disabled={!validPassword} // Chặn nếu mật khẩu không hợp lệ
             >
                 <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
 
-            <SuccessModal visible={successVisible} message="Tạo tài khoản thành công!"/>
-            <FailedModal visible={failed} message="Đã có lỗi xảy ra! Vui lòng thử lại"/>
+            <SuccessModal visible={successVisible} message="Tạo tài khoản thành công!" />
+            <FailedModal visible={failed} message="Đã có lỗi xảy ra! Vui lòng thử lại" />
         </View>
     );
 };
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
         paddingVertical: height * 0.015,
     },
     inputError: {
-        borderColor: 'red', 
+        borderColor: 'red',
     },
     errorText: {
         color: 'red',

@@ -23,6 +23,8 @@ import {
 import ChatHeader from '../../components/chat/ChatHeader';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
+import {useBottomSheet} from '../../context/BottomSheetContext';
+
 const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -48,6 +50,12 @@ const Chat = (props) => {// cần ID_group (param)
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [status, setstatus] = useState(false);
+
+    const {openBottomSheet, closeBottomSheet} = useBottomSheet();
+
+    
+
+
 
     // call video
     const onCallvieo = () => {
@@ -386,6 +394,7 @@ const Chat = (props) => {// cần ID_group (param)
 
     const goBack = () => {
         navigation.navigate("HomeChat");
+        closeBottomSheet();
         // navigation.goBack();
     };
 

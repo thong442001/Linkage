@@ -3,11 +3,13 @@ import {
   Text,
   View,
   Image,
+  Dimensions,
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
+const { width, height } = Dimensions.get('window');
 export default function FriendAdd({ item, onToggle, selectedUsers, membersGroup }) {
   const me = useSelector(state => state.app.user);
   const [ID_friend, setID_friend] = useState(null);
@@ -34,15 +36,17 @@ export default function FriendAdd({ item, onToggle, selectedUsers, membersGroup 
     <TouchableOpacity
       style={[styles.chatItem, isJoined && { opacity: 0.5 }]}
       onPress={() => onToggle(ID_friend)}
-      disabled={isJoined}
-    >
+      disabled={isJoined}>
       <View style={styles.boxSelect}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {avatar && <Image source={{ uri: avatar }} style={styles.avatar} />}
           <View style={styles.vTxt}>
             {name && (
               <View style={styles.chatInfo}>
-                <Text style={styles.name}>{name}</Text>
+                <Text style={styles.name}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >{name}</Text>
               </View>
             )}
           </View>
@@ -75,6 +79,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: "black",
+    width: width * 0.4
   },
   // vTxt: {
   //   flexDirection: 'column',

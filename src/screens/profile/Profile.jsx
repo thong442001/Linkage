@@ -66,15 +66,32 @@ const Profile = props => {
     const [dialogReLoad, setDialogreload] = useState(false);
     const [loading, setloading] = useState(true)
 
+
     const openImageModal = imageUrl => {
+
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
+
     };
+
 
     const closeImageModal = () => {
         setImageModalVisible(false);
         setSelectedImage(null);
+        closeBottomSheet();
     };
+
+
+    const openBottomSheetAvatar = () => {
+        if (stories?.stories.length > 0) {
+            // Nếu có story, mở Bottom Sheet với thêm tùy chọn xem story
+            openBottomSheet(30, detail_selection_image());
+        } else {
+            // Nếu không có story, chỉ mở Bottom Sheet với các tùy chọn hình ảnh
+            openBottomSheet(22, detail_selection_image());
+        }
+    };
+
 
 
 
@@ -118,7 +135,7 @@ const Profile = props => {
         }
     };
 
-    //đổi ảnh bìa
+    //đổi avatar
     const onOpenGalleryChangeAvatar = async () => {
         try {
             const options = { mediaType: 'image', quality: 1 };
@@ -254,6 +271,44 @@ const Profile = props => {
                     <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
                 </TouchableOpacity>
 
+
+
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={() => openImageModal(user?.avatar)}>
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="images" size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
+                </TouchableOpacity>
+
+
+                {stories?.stories.length > 0 &&
+                    (
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={() => {
+                                closeBottomSheet();
+                                navigation.navigate('StoryViewer', { StoryView: stories });
+                            }}>
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="images" size={25} />
+                            </View>
+                            <Text style={ProfileS.optionText}>Xem story</Text>
+                        </TouchableOpacity>
+                    )
+                }
+            </View>
+        );
+    };
+    const detail_selection_background = () => {
+        return (
+            <View style={ProfileS.containerBottomSheet}>
+                <View style={ProfileS.rectangle}>
+                    <View style={ProfileS.lineBottomSheet}></View>
+                </View>
+
                 <TouchableOpacity
                     style={ProfileS.option}
                     onPress={onOpenGalleryChangeBackground}>
@@ -261,6 +316,18 @@ const Profile = props => {
                         <Icon name="images" size={25} />
                     </View>
                     <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+                </TouchableOpacity>
+
+
+
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={() => openImageModal(user?.background)}>
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="images" size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Xem ảnh bìa</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -302,13 +369,11 @@ const Profile = props => {
             setloading(false);
         }
     };
- 
 
-    
     const sendPushNotification = async (token, title, body, data = {}) => {
         try {
             const response = await axios.post(
-               "https://fcm.googleapis.com/v1/projects/linkage-9deac/messages:send",
+                "https://fcm.googleapis.com/v1/projects/linkage-9deac/messages:send",
                 {
                     to: token,
                     notification: {
@@ -316,7 +381,7 @@ const Profile = props => {
                         body,
                         sound: "default",
                     },
-                    data: data, 
+                    data: data,
                 },
                 {
                     headers: {
@@ -325,29 +390,29 @@ const Profile = props => {
                     },
                 }
             );
-    
+
             console.log("✅ Gửi thông báo thành công!", response.data);
         } catch (error) {
             console.error("❌ Lỗi khi gửi thông báo FCM:", error.response?.data || error.message);
         }
     };
-    
+
     const callGuiLoiMoiKetBan = async () => {
         try {
             const paramsAPI = {
                 ID_relationship: relationship?._id,
                 me: me._id,
             };
-    
+
             await dispatch(guiLoiMoiKetBan(paramsAPI))
                 .unwrap()
                 .then(async (response) => {
                     setRelationship(response.relationship);
-    
+
                     // 📌 Lưu thông báo vào Firebase
                     const notificationRef = database().ref(`notifications/${user._id}`);
                     const newNotificationRef = notificationRef.push();
-    
+
                     await newNotificationRef.set({
                         senderId: me._id,
                         senderName: `${me.first_name} ${me.last_name}`,
@@ -356,16 +421,16 @@ const Profile = props => {
                         timestamp: new Date().toISOString(),
                         status: 'pending',
                     });
-    
+
                     console.log("✅ Lời mời kết bạn đã được lưu vào Firebase");
-    
+
                     // 📌 Lấy FCM Token của người nhận từ Firebase
                     const tokenSnapshot = await database().ref(`users/${user._id}/fcmToken`).once('value');
                     const fcmToken = tokenSnapshot.val();
-    
+
                     if (fcmToken) {
                         console.log(`📩 Đang gửi thông báo đến user ${user._id} với token: ${fcmToken}`);
-    
+
                         // 🚀 Gửi Push Notification qua FCM
                         sendPushNotification(
                             fcmToken,
@@ -384,8 +449,8 @@ const Profile = props => {
             console.log(error);
         }
     };
-    
-    
+
+
 
     //chapNhanLoiMoiKetBan
     const callChapNhanLoiMoiKetBan = async () => {
@@ -531,7 +596,7 @@ const Profile = props => {
                     </Snackbar>
                     <View>
                         <View>
-                            <Pressable onPress={() => openImageModal(user?.background)}>
+                            <Pressable onPress={() => openBottomSheet(25, detail_selection_background)}>
                                 {user?.background != null ? (
                                     <Image
                                         style={ProfileS.backGroundImage}
@@ -547,16 +612,8 @@ const Profile = props => {
                             </Pressable>
 
                             <Pressable
-                                onPress={() => {
-                                    if (stories?.stories.length > 0) {
-                                        // navigation.navigate('StoryViewer', {
-                                        //   StoryView: hasMeStories[0],
-                                        // });
-                                        navigation.navigate('StoryViewer', { StoryView: stories })
-                                    } else {
-                                        openImageModal(user?.avatar);
-                                    }
-                                }}>
+                                onPress={openBottomSheetAvatar}
+                            >
                                 {user && (
                                     <Image
                                         style={[
@@ -572,7 +629,7 @@ const Profile = props => {
                                 visible={isImageModalVisible}
                                 transparent={true}
                                 animationType="fade"
-                                onRequestClose={closeImageModal}>
+                                onRequestClose={{ closeImageModal }}>
                                 <View style={ProfileS.modalContainer}>
                                     <TouchableWithoutFeedback onPress={closeImageModal}>
                                         <View style={ProfileS.modalBackground} />
@@ -610,7 +667,7 @@ const Profile = props => {
                                 {user?.first_name} {user?.last_name}
                             </Text>
                             <View style={ProfileS.boxInformation}>
-                                <Text style={ProfileS.friendNumber}>500 </Text>
+                                <Text style={ProfileS.friendNumber}>{friendRelationships.length} </Text>
                                 <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
                                     {' '}
                                     Người bạn
@@ -679,10 +736,7 @@ const Profile = props => {
                                         </TouchableOpacity>
                                         <View style={ProfileS.boxEdit}>
                                             <TouchableOpacity
-                                                style={ProfileS.btnEdit}
-                                                onPress={() => {
-                                                    openBottomSheet(25, detail_selection_image);
-                                                }}>
+                                                style={ProfileS.btnEdit}>
                                                 <Text style={ProfileS.textEdit}>
                                                     Chỉnh sửa trang cá nhân
                                                 </Text>
@@ -706,9 +760,11 @@ const Profile = props => {
                         <View style={ProfileS.title}>
                             <View>
                                 <Text style={ProfileS.textFriend}>Bạn bè</Text>
-                                <Text style={ProfileS.textFriendNumber2}>500 Người bạn</Text>
+                                <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} Người bạn</Text>
                             </View>
-                            <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('ListFriend', { _id: params._id })}>
+                                <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
+                            </TouchableOpacity>
                         </View>
 
                         <View style={ProfileS.listFriends}>

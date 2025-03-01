@@ -6,8 +6,10 @@ import {
     Image,
     TextInput,
     Modal,
+    TouchableWithoutFeedback,
+    FlatList,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UpPostS from '../../styles/screens/home/UpPostS';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -15,16 +17,50 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     addPost,
+    getAllFriendOfID_user,
 } from '../../rtk/API';
+import FriendAdd from '../../components/chat/FriendAdd';
 import Video from 'react-native-video';
-import firebase from '@react-native-firebase/app';
+import CommentS from '../../styles/components/items/CommentS';
 const UpPost = (props) => {
     const { navigation } = props;
 
     const dispatch = useDispatch();
+    const token = useSelector(state => state.app.token)
     const me = useSelector(state => state.app.user);
 
     const [modalVisible, setModalVisible] = useState(false);
+    //tag
+    const [tagVisible, setTagVisible] = useState(false);
+    //friend
+    const [friends, setFriends] = useState(null);
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [membersGroup, setMembersGroup] = useState([]);
+
+
+    //call api getAllFriendOfID_user (lấy danh sách bạn bè)
+    const callGetAllFriendOfID_user = async () => {
+        try {
+            await dispatch(getAllFriendOfID_user({ me: me._id, token: token }))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response.groups)
+                    setFriends(response.relationships);
+                })
+                .catch((error) => {
+                    console.log('Error1 getAllFriendOfID_user:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        callGetAllFriendOfID_user()
+    }, [tagVisible == true])
+
+
     const [selectedOption, setSelectedOption] = useState({
         status: 1,
         name: "Công khai"
@@ -33,8 +69,28 @@ const UpPost = (props) => {
     const [medias, setMedias] = useState([]);
     const [typePost, setTypePost] = useState('Normal');
     const [tags, setTags] = useState([]);
+    //de luu tam user duoc chon
+    const [tempSelectedUsers, setTempSelectedUsers] = useState([]);
 
     const [Flag, setFlag] = useState(false)
+
+    const toggleSelectUser = (id) => {
+        setSelectedUsers((prev) =>
+            prev.includes(id)
+                ? prev.filter((userId) => userId !== id)
+                : [...prev, id]
+        );
+        setTags((prev) =>
+            prev.includes(id)
+                ? prev.filter((tagId) => tagId !== id) // Nếu đã có id, thì xóa nó khỏi mảng
+                : [...prev, id]// Nếu chưa có, thì thêm vào mảng
+        );
+        setTempSelectedUsers((prev) =>
+            prev.includes(id)
+                ? prev.filter((userId) => userId !== id) // cũng giống cái setTags nhưng chỉ dùng để lưu trữ tạm rồi set lại vào cái setSelecterUsser 
+                : [...prev, id]
+        );
+    };
 
     // Các tùy chọn trạng thái
     const status = [
@@ -61,23 +117,24 @@ const UpPost = (props) => {
         if (mediaCount === 0) return null;
 
         return (
-            <View style={UpPostS.mediaContainer}>
+            <View style={CommentS.mediaContainer}>
                 {medias.slice(0, 5).map((uri, index) => (
                     <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
                         {isVideo(uri) ? (
-                            <View style={UpPostS.videoWrapper}>
-                                <Video source={{ uri }} style={UpPostS.video} resizeMode="cover" paused />
-                                <View style={UpPostS.playButton}>
+                            <View style={CommentS.videoWrapper}>
+                                <Video source={{ uri }} style={CommentS.video} resizeMode="cover" paused />
+                                <View style={CommentS.playButton}>
                                     <Icon name="play-circle" size={40} color="white" />
                                 </View>
                             </View>
                         ) : (
-                            <Image source={{ uri }} style={UpPostS.image} resizeMode="cover" />
+
+                            <Image source={{ uri }} style={CommentS.image} resizeMode="cover" />
                         )}
 
                         {index === 4 && mediaCount > 5 && (
-                            <View style={UpPostS.overlay}>
-                                <Text style={UpPostS.overlayText}>+{mediaCount - 5}</Text>
+                            <View style={CommentS.overlay}>
+                                <Text style={CommentS.overlayText}>+{mediaCount - 5}</Text>
                             </View>
                         )}
                     </TouchableOpacity>
@@ -88,18 +145,18 @@ const UpPost = (props) => {
 
     const getMediaStyle = (count, index) => {
         if (count === 1) {
-            return UpPostS.singleMedia;
+            return CommentS.singleMedia;
         } else if (count === 2) {
-            return UpPostS.doubleMedia;
+            return CommentS.doubleMedia;
         } else if (count === 3) {
-            return index === 0 ? UpPostS.tripleMediaFirst : UpPostS.tripleMediaSecond;
+            return index === 0 ? CommentS.tripleMediaFirst : CommentS.tripleMediaSecond;
         } else if (count === 4) {
-            return UpPostS.quadMedia;
+            return CommentS.quadMedia;
         } else { // 5+ media
-            if (index < 2) return UpPostS.fivePlusMediaFirstRow;
-            else if (index === 2) return UpPostS.fivePlusMediaSecondRowLeft;
-            else if (index === 3) return UpPostS.fivePlusMediaSecondRowMiddle;
-            else return UpPostS.fivePlusMediaSecondRowRight;
+            if (index < 2) return CommentS.fivePlusMediaFirstRow;
+            else if (index === 2) return CommentS.fivePlusMediaSecondRowLeft;
+            else if (index === 3) return CommentS.fivePlusMediaSecondRowMiddle;
+            else return CommentS.fivePlusMediaSecondRowRight;
         }
     };
 
@@ -182,7 +239,7 @@ const UpPost = (props) => {
                 ID_post_shared: null,
                 tags: tags,
             }
-            console.log("push",paramsAPI);
+            console.log("push", paramsAPI);
             await dispatch(addPost(paramsAPI))
                 .unwrap()
                 .then((response) => {
@@ -202,6 +259,28 @@ const UpPost = (props) => {
         setSelectedOption(option);
         setModalVisible(false);
     };
+
+    //handle tag
+    const handleModelTag = () => {
+        setTagVisible(true);
+        console.log(">>>>>>>", friends)
+    }
+
+    // Chuyển danh sách friends thành mảng chứa ID và thông tin
+    const formattedFriends = friends?.map(friend => ({
+        _id: friend.ID_userA._id === me._id ? friend.ID_userB._id : friend.ID_userA._id,
+        first_name: friend.ID_userA._id === me._id ? friend.ID_userB.first_name : friend.ID_userA.first_name,
+        last_name: friend.ID_userA._id === me._id ? friend.ID_userB.last_name : friend.ID_userA.last_name,
+    })) || [];
+
+
+    //add tag
+    const handleAddTag = () => {
+        setTypePost('Tag')
+        setSelectedUsers(tempSelectedUsers); // Cập nhật danh sách user chính thức
+        setTags(tempSelectedUsers); // Cập nhật danh sách tags
+        setTagVisible(false); // Đóng modal
+    }
 
     return (
         <View style={UpPostS.Container}>
@@ -231,8 +310,27 @@ const UpPost = (props) => {
                     />
                     <View style={{ marginLeft: 15 }}>
                         <Text style={UpPostS.txtName}>
-                            {me.first_name + " " + me.last_name}
+                            {me.first_name} {me.last_name}
+                            {tags.length > 0 && (
+                                <>
+                                    <Text style={{ color: 'gray' }}> cùng với </Text>
+                                    <Text style={{ fontWeight: 'bold' }}>
+                                        {(() => {
+                                            const taggedUser = formattedFriends.find(friend => friend._id === tags[0]);
+                                            return `${taggedUser?.first_name || ''} ${taggedUser?.last_name || ''}`;
+                                        })()}
+                                    </Text>
+                                    {tags.length > 1 && (
+                                        <>
+                                            <Text style={{ color: 'gray' }}> và </Text>
+                                            <Text style={{ fontWeight: 'bold' }}>{tags.length - 1} người khác</Text>
+                                        </>
+                                    )}
+                                </>
+                            )}
                         </Text>
+
+
                         <View style={UpPostS.boxStatus}>
                             <TouchableOpacity
                                 style={UpPostS.btnStatus}
@@ -286,7 +384,7 @@ const UpPost = (props) => {
                     </TouchableOpacity>
                     <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
 
-                    <TouchableOpacity style={UpPostS.btnIcon}>
+                    <TouchableOpacity style={UpPostS.btnIcon} onPress={() => handleModelTag()}>
                         <View style={UpPostS.boxItems}>
                             <Icon name="pricetag" size={30} color="#48a1ff" />
                             {
@@ -338,6 +436,49 @@ const UpPost = (props) => {
                     </View>
                 </TouchableOpacity>
             </Modal >
+
+            {/* Tag */}
+            <Modal
+                visible={tagVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setTagVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setTagVisible(false)}>
+                    <View style={UpPostS.overlay1}>
+                        <View style={UpPostS.modalContainer}>
+                            <View >
+                                <View style={{ flexDirection: 'column' }}>
+                                    {/* <Image source={{ uri: me?.avatar }} style={UpPostS.avatar} /> */}
+                                    {/* <View style={{ marginLeft: 10 }}> */}
+                                    {/* <Text style={UpPostS.name}>{me?.first_name + " " + me?.last_name}</Text> */}
+                                    <View style={UpPostS.boxTag}>
+                                        <TouchableOpacity style={UpPostS.btnTag} onPress={() => handleAddTag()}>
+                                            <Text style={UpPostS.tag}>
+                                                Gắn thẻ
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <FlatList
+                                        data={friends}
+                                        keyExtractor={(item) => item._id}
+                                        extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
+                                        renderItem={({ item }) => (
+                                            <FriendAdd
+                                                item={item}
+                                                onToggle={toggleSelectUser}
+                                                selectedUsers={selectedUsers}
+                                                membersGroup={membersGroup}
+                                            />
+                                        )}
+                                    />
+                                    {/* </View> */}
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </View>
     )
 }

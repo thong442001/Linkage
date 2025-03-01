@@ -25,7 +25,7 @@ const AppNavigation = () => {
   //console.log("****: " + reactions)
   const fcmToken = useSelector(state => state.app.fcmToken);
   console.log("📲 FCM Token từ Redux:", fcmToken);
-  
+
 
   useEffect(() => {
     //reactions
@@ -71,24 +71,24 @@ const AppNavigation = () => {
       });
     }
   }
-// tạo token nè
-useEffect(() => {
-  const getFCMToken = async () => {
-    try {
-      const token = await messaging().getToken();
-      console.log("🔥 FCM Token:", token);
-      if (token) {
-        dispatch(setFcmToken(token)); // Lưu vào Redux
+  // tạo token nè
+  useEffect(() => {
+    const getFCMToken = async () => {
+      try {
+        const token = await messaging().getToken();
+        console.log("🔥 FCM Token:", token);
+        if (token) {
+          dispatch(setFcmToken(token)); // Lưu vào Redux
+        }
+      } catch (error) {
+        console.log("❌ Lỗi khi lấy FCM Token:", error);
       }
-    } catch (error) {
-      console.log("❌ Lỗi khi lấy FCM Token:", error);
-    }
-  };
+    };
 
-  getFCMToken();
-}, []);
-  
-  
+    getFCMToken();
+  }, []);
+
+
   useEffect(() => {
     // Khi app đang mở
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
@@ -99,12 +99,12 @@ useEffect(() => {
         remoteMessage.data ?? {}
       );
     });
-  
+
     // Khi app chạy nền và người dùng nhấn vào thông báo
     const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(remoteMessage => {
       console.log('🔔 Người dùng nhấn vào thông báo khi app chạy nền:', remoteMessage);
     });
-  
+
     // Khi app bị kill và mở từ thông báo
     const initialNotification = messaging().getInitialNotification()
       .then(remoteMessage => {
@@ -112,21 +112,21 @@ useEffect(() => {
           console.log('🔔 App được mở từ thông báo khi bị kill:', remoteMessage);
         }
       });
-  
+
     // Khi người dùng nhấn vào thông báo từ notifee
     const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
         console.log('🔔 Người dùng đã nhấn vào thông báo:', detail.notification);
       }
     });
-  
+
     return () => {
       unsubscribeForeground();
       unsubscribeOpenedApp();
       unsubscribeNotifee();
     };
   }, []);
-  
+
 
 
   return (

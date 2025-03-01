@@ -107,7 +107,21 @@ const Friend = props => {
       console.log(error);
     }
   };
+//chuyển trang profile
+  const onProfile =(item) => {
+if(item.ID_userA._id == me._id){
+  navigation.navigate('TabHome', {
+    screen: 'Profile',
+    params: {_id: item.ID_userB._id},
+  });
+}else{
+  navigation.navigate('TabHome', {
+    screen: 'Profile',
+    params: {_id: item.ID_userA._id},
+  });
+}
 
+  };
   return (
     <View style={styles.container}>
       {/* Hiển thị Snackbar dưới cùng màn hình */}
@@ -122,6 +136,7 @@ const Friend = props => {
       </Snackbar>
       <View style={styles.HeaderWrap}>
         <Text style={[styles.title, { color: 'black' }]}> Bạn bè</Text>
+
         <Icon
           style={styles.findButton}
           name="search"
@@ -135,11 +150,13 @@ const Friend = props => {
           {' '}
           Gợi ý
         </Text>
+        <TouchableOpacity onPress={()=>navigation.navigate('ListFriend',{_id:me._id})}>
         <Text
           style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
           {' '}
           Bạn bè
         </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.titleWrap}>
@@ -152,12 +169,15 @@ const Friend = props => {
           data={relationships}
           keyExtractor={item => item._id}
           renderItem={({ item }) => (
+            <TouchableOpacity onPress={()=>{onProfile(item)}}>
             <FriendRequestItem
               data={item}
               me={me._id}
               onXacNhan={callChapNhanLoiMoiKetBan}
               onXoa={callHuyLoiMoiKetBan}
             />
+            </TouchableOpacity>
+
           )}
           showsVerticalScrollIndicator={false}
         />

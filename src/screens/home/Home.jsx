@@ -64,7 +64,7 @@ const Home = props => {
 
   const callChangeDestroyPost = async (ID_post) => {
     try {
-      console.log('Xóa bài viết với ID:', ID_post);
+      //console.log('Xóa bài viết với ID:', ID_post);
 
       await dispatch(changeDestroyPost({ _id: ID_post }))
         .unwrap()
@@ -174,7 +174,7 @@ const Home = props => {
           {/* Input to post */}
           <View style={HomeS.header2}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('Profile', { ID_user: me._id })}>
+              onPress={() => navigation.navigate('Profile', { _id: me._id })}>
               <Image style={HomeS.image} source={{ uri: me?.avatar }} />
             </TouchableOpacity>
             <TextInput
@@ -209,23 +209,23 @@ const Home = props => {
     );
   };
 
- 
-    const sendTestNotification = async () => {
-      await notifee.createChannel({
-        id: 'default-channel',
-        name: 'Default Channel',
-      });
-  
-      await notifee.displayNotification({
-        title: '🔥 Test Thông Báo',
-        body: '🚀 Đây là thông báo test khi mở app!',
-        android: {
-          channelId: 'default-channel',
-          importance: notifee.AndroidImportance.HIGH,
-          smallIcon: 'ic_launcher',
-        },
-      });
-    };
+
+  const sendTestNotification = async () => {
+    await notifee.createChannel({
+      id: 'default-channel',
+      name: 'Default Channel',
+    });
+
+    await notifee.displayNotification({
+      title: '🔥 Test Thông Báo',
+      body: '🚀 Đây là thông báo test khi mở app!',
+      android: {
+        channelId: 'default-channel',
+        importance: notifee.AndroidImportance.HIGH,
+        smallIcon: 'ic_launcher',
+      },
+    });
+  };
 
   return (
     <View style={HomeS.container}>
