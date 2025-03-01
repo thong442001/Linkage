@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useRef, useState, useEffect } from 'react';
-import { View, Pressable, BackHandler } from 'react-native';
+import { View, Pressable, BackHandler, Text } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
 const BottomSheetContext = createContext();
@@ -23,21 +23,28 @@ export const BottomSheetProvider = ({ children }) => {
         setIsVisible(false); // Hide overlay
     };
 
-    
+    //canh
+    // Sử dụng useEffect để mở BottomSheet sau khi content thay đổi
+    useEffect(() => {
+        if (content) {
+            bottomSheetRef.current?.snapToIndex(0);
+        }
+    }, [content]);
+
     useEffect(() => {
         const handleBackPress = () => {
             if (isVisible) {
-                closeBottomSheet(); 
-                return true; 
+                closeBottomSheet();
+                return true;
             }
-            return false; 
+            return false;
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
 
-        
+
         return () => backHandler.remove();
-    }, [isVisible]); 
+    }, [isVisible]);
 
     return (
         <BottomSheetContext.Provider value={{ openBottomSheet, closeBottomSheet }}>
@@ -54,7 +61,7 @@ export const BottomSheetProvider = ({ children }) => {
                         backgroundColor: 'rgba(0, 0, 0, 0.5)',
                     }}
                     activeOpacity={1}
-                    onPress={closeBottomSheet} 
+                    onPress={closeBottomSheet}
                 />
             )}
             {/* Bottom Sheet */}

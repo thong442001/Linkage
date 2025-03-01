@@ -696,7 +696,9 @@ const Profile = props => {
                                 <Text style={ProfileS.textFriend}>Bạn bè</Text>
                                 <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} Người bạn</Text>
                             </View>
+                            <TouchableOpacity onPress={()=>navigation.navigate('ListFriend',{_id:params._id})}>
                             <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
+                            </TouchableOpacity>
                         </View>
 
                         <View style={ProfileS.listFriends}>

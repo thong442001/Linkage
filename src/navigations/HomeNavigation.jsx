@@ -127,6 +127,7 @@ import ChangePassWord from '../screens/changeProfile/ChangePassWord';
 import CallPage from '../screens/call/CallPage';
 import CallGroup from '../screens/call/CallGroup';
 import ChatBot from '../screens/chat/ChatBot';
+import ListFriend from '../screens/friend/ListFriend';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -151,6 +152,7 @@ const oStackHome = {
   CallPage: { name: 'CallPage', component: CallPage },
   CallGroup: { name: 'CallGroup', component: CallGroup },
   ChatBot: { name: 'ChatBot', component: ChatBot },
+  ListFriend: { name: 'ListFriend', component: ListFriend },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

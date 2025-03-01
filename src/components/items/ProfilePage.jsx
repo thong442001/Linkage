@@ -9,6 +9,7 @@ import {
     Modal,
     TouchableWithoutFeedback,
     TextInput,
+    FlatList,
 } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -44,6 +45,7 @@ const PostItem = ({
 
     const [reactionsVisible, setReactionsVisible] = useState(false);
     const [shareVisible, setShareVisible] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
 
     // trang thai
     const [modalVisible, setModalVisible] = useState(false);
@@ -59,6 +61,106 @@ const PostItem = ({
 
     // Cảnh
     // post_reactions: list của reaction của post
+    const [selectedTab, setSelectedTab] = useState('all');
+    const [isFirstRender, setIsFirstRender] = useState(true);
+
+    // Khi selectedTab thay đổi, cập nhật nội dung BottomSheet
+
+    useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false);
+            return; // Bỏ qua lần chạy đầu tiên
+        }
+
+        if (selectedTab !== null) {
+            openBottomSheet(50, renderBottomSheetContent());
+        }
+    }, [selectedTab]);
+
+
+    const renderBottomSheetContent = () => {
+        return (
+            <View style={styles.container}>
+                <View style={styles.headerReaction}>
+                    <TouchableOpacity style={styles.backButton} onPress={closeBottomSheet}>
+                        <Icon4 name="angle-left" size={20} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Người đã bày tỏ cảm xúc</Text>
+                </View>
+
+                {/* Tabs */}
+                <View style={styles.tabContainer}>
+                    <FlatList
+                        data={tabs}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                style={[styles.tab, selectedTab === item.id && styles.selectedTab]}
+                                onPress={() => setSelectedTab(item.id)}>
+                                <Text style={styles.tabIcon}>{item.icon}</Text>
+                            </TouchableOpacity>
+                        )}
+                        keyExtractor={(item) => item.id}
+                    />
+                </View>
+
+                {/* Danh sách người dùng */}
+                <FlatList
+                    data={filteredUsers}
+                    renderItem={({ item }) => (
+                        <View style={styles.userItem}>
+                            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                            <View style={styles.container_listReaction}>
+                                <Text style={styles.nameItemReaction}>{item.name}</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={styles.nameItemReaction}>{item.reactionIcon}</Text>
+                                    <Text style={{ marginLeft: 5, color: 'black' }}>{item.quantity}</Text>
+                                </View>
+                            </View>
+                        </View>
+                    )}
+                    keyExtractor={(item) => item.id}
+                />
+            </View>
+        );
+    };
+
+    //   Tạo danh sách tab từ uniqueReactions
+    const uniqueReactions_tab = Array.from(
+        new Map(
+            post.post_reactions.map(reaction => [
+                reaction.ID_reaction._id,
+                reaction.ID_reaction,
+            ]),
+        ).values(),
+    );
+
+    const tabs = [
+        { id: 'all', icon: 'Tất cả' },
+        ...uniqueReactions_tab.map(reaction => ({
+            id: reaction._id,
+            icon: reaction.icon,
+        })),
+    ];
+
+    // Lọc danh sách người dùng theo reaction được chọn
+    const filteredUsers = post.post_reactions
+        .filter(
+            reaction =>
+                selectedTab === 'all' || reaction.ID_reaction._id === selectedTab,
+        )
+        .map(reaction => ({
+            id: `${reaction.ID_user._id}-${reaction._id}`, // Tạo key duy nhất
+            userId: reaction.ID_user._id, // ID của người dùng
+            name: `${reaction.ID_user.first_name} ${reaction.ID_user.last_name}`,
+            avatar: reaction.ID_user.avatar,
+            reactionId: reaction.ID_reaction._id,
+            reactionIcon: reaction.ID_reaction.icon,
+            quantity: reaction.quantity,
+        }));
+
+
     // lọc reactions 
     const uniqueReactions = Array.from(
         new Map(
@@ -67,8 +169,6 @@ const PostItem = ({
                 .map(reaction => [reaction.ID_reaction._id, reaction])
         ).values()
     );
-
-
     // Tìm reaction của chính người dùng hiện tại
     const userReaction = post.post_reactions.find(
         (reaction) => reaction.ID_user._id === ID_user
@@ -520,25 +620,26 @@ const PostItem = ({
 
             {/* reactions of post */}
             {
-                post.post_reactions.length > 0 &&
-                (
-                    <View
-                        style={[styles.vReactionsOfPost]}
-                    >
-                        {
-                            uniqueReactions.map((reaction, index) => (
-                                <Text
-                                    key={index}
-                                //style={styles.reactionText}
-                                >{reaction.ID_reaction.icon}</Text>
-                            ))
-                        }
-                        <Text
-                            style={styles.slReactionsOfPost}
-                        >{post.post_reactions.length}</Text>
-                    </View>
+                post.post_reactions.length > 0
+                && (
+                    <TouchableOpacity
+                        onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}>
+
+                        <View style={[styles.vReactionsOfPost]}>
+                            {uniqueReactions.map((reaction, index) => (
+                                <Text key={index} style={{ color: 'black' }}>
+                                    {reaction.ID_reaction.icon}
+                                </Text>
+                            ))}
+                            <Text style={styles.slReactionsOfPost}>
+                                {post.post_reactions.length}
+                            </Text>
+                        </View>
+
+                    </TouchableOpacity>
                 )
             }
+
             {
                 !post._destroy &&
                 <View style={styles.interactions}>
@@ -958,6 +1059,75 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 10,
         color: "black",
+    },
+    //buttonsheet reaction
+    container: {
+        flex: 1,
+        backgroundColor: '#FFFF',
+    },
+    headerReaction: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E4E4E4',
+    },
+    backButton: {
+        marginRight: 16,
+    },
+    headerTitle: {
+        color: 'black',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    tabContainer: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#E4E4E4',
+    },
+    tab: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+    },
+    selectedTab: {
+        borderBottomWidth: 2,
+        borderBottomColor: '#1877F2',
+    },
+    tabIcon: {
+        marginRight: 4,
+        fontSize: 16,
+        color: 'black'
+    },
+    tabLabel: {
+        color: 'black',
+        fontSize: 14,
+    },
+    userItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+    },
+    avatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 12,
+    },
+    userName: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    icon: {
+        position: 'absolute',
+        marginLeft: 25,
+        marginTop: 25,
+    },
+    container_listReaction: {
+        flexDirection: 'column',
+    },
+    nameItemReaction: {
+        color: 'black',
     }
 });
 
