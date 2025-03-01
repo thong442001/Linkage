@@ -14,14 +14,13 @@ const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
   const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
-  const reactions = useSelector(state => state.app.reactions)
+  //const reactions = useSelector(state => state.app.reactions)
   //console.log("****: " + reactions)
 
   useEffect(() => {
     //reactions
-    if (reactions == null) {
-      callGetAllReaction()
-    }
+    callGetAllReaction()
+
     // Hiển thị màn hình chào trong 2 giây
     const timeout = setTimeout(() => {
       setSplashVisible(false);  // Ẩn màn hình chào sau 2 giây
@@ -56,7 +55,7 @@ const AppNavigation = () => {
           : (user ? <HomeNavigation /> : <UserNavigation />)
 
       }
-      
+
     </NavigationContainer>
   );
 }

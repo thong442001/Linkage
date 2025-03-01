@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
+import React, { createContext, useContext, useRef, useState,useEffect } from 'react';
 import { View, Text } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
@@ -13,7 +13,6 @@ export const BottomSheetProvider = ({ children }) => {
         setSnapPoints([`${height}%`]); // Cập nhật chiều cao
 
         setContent(content);
-        bottomSheetRef.current?.snapToIndex(0);
         // setTimeout(() => {
         //     setContent(content);
         //     bottomSheetRef.current?.snapToIndex(0);
@@ -24,6 +23,13 @@ export const BottomSheetProvider = ({ children }) => {
         bottomSheetRef.current?.close();
         setContent(null);
     };
+
+        // Sử dụng useEffect để mở BottomSheet sau khi content thay đổi
+        useEffect(() => {
+            if (content) {
+                bottomSheetRef.current?.snapToIndex(0);
+            }
+        }, [content]);
 
     return (
         <BottomSheetContext.Provider value={{ openBottomSheet, closeBottomSheet }}>
