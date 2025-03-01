@@ -13,7 +13,7 @@ const ProfileS = StyleSheet.create({
         height: height * 0.05,
     },
     containerBottomSheet: {
-        backgroundColor: "#D9D9D9",
+        backgroundColor: "#ffffff",
         borderTopLeftRadius: width * 0.2,
         borderTopRightRadius: width * 0.2,
         paddingVertical: width * 0.05,
@@ -25,8 +25,8 @@ const ProfileS = StyleSheet.create({
     },
     lineBottomSheet: {
         width: width * 0.15,
-        height: height * 0.006,
-        backgroundColor: "#fff",
+        height: height * 0.005,
+        backgroundColor: "gray",
         borderRadius: width * 0.1,
     },
     option: {
@@ -267,7 +267,6 @@ const ProfileS = StyleSheet.create({
         position: 'absolute',
         bottom: height * 0.05,
         paddingHorizontal: width * 0.05,
-        paddingVertical: height * 0.015,
         borderRadius: width * 0.02,
     },
     closeButtonText: {
