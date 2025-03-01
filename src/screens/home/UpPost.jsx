@@ -23,6 +23,7 @@ import FriendAdd from '../../components/chat/FriendAdd';
 import Video from 'react-native-video';
 import CommentS from '../../styles/components/items/CommentS';
 
+import firebase from '@react-native-firebase/app';
 const UpPost = (props) => {
     const { navigation } = props;
 
