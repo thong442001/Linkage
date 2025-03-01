@@ -20,6 +20,7 @@ import { useSelector, useDispatch } from 'react-redux';
 const { width, height } = Dimensions.get('window');
 import {
     addPost_Reaction, // thả biểu cảm
+    addPost, // api share
 } from '../../rtk/API';
 const PostItem = ({
     post,
@@ -33,9 +34,11 @@ const PostItem = ({
     const dispatch = useDispatch();
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
     //console.log(post.post_reactions)
+    //console.log("imgs: " + post?.ID_post_shared?.medias)
 
     // time 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
+    const [timeAgoShare, setTimeAgoShare] = useState(post?.ID_post_shared?.createdAt);
 
     const [reactionsVisible, setReactionsVisible] = useState(false);
     const [shareVisible, setShareVisible] = useState(false);
@@ -48,6 +51,9 @@ const PostItem = ({
     });
     const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
+
+    //share 
+    const [captionShare, setCaptionShare] = useState('');
 
     // Cảnh
     // post_reactions: list của reaction của post
@@ -119,26 +125,60 @@ const PostItem = ({
             const now = Date.now();
             const createdTime = new Date(post.createdAt).getTime(); // Chuyển từ ISO sang timestamp
 
+            let createdTimeShare = null;
+            if (post.ID_post_shared?.createdAt) {
+                createdTimeShare = new Date(post.ID_post_shared.createdAt).getTime();
+            }
+
             if (isNaN(createdTime)) {
                 setTimeAgo("Không xác định");
+                setTimeAgoShare("Không xác định");
                 return;
             }
 
+            // Tính thời gian cho bài viết chính
             const diffMs = now - createdTime;
             if (diffMs < 0) {
                 setTimeAgo("Vừa xong");
-                return;
+            } else {
+                const seconds = Math.floor(diffMs / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+
+                if (days > 0) {
+                    setTimeAgo(`${days} ngày trước`);
+                } else if (hours > 0) {
+                    setTimeAgo(`${hours} giờ trước`);
+                } else if (minutes > 0) {
+                    setTimeAgo(`${minutes} phút trước`);
+                } else {
+                    setTimeAgo(`${seconds} giây trước`);
+                }
             }
 
-            const seconds = Math.floor(diffMs / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-            const days = Math.floor(hours / 24);
+            // Nếu bài viết là chia sẻ, tính thời gian cho bài gốc
+            if (createdTimeShare !== null) {
+                const diffMsShare = now - createdTimeShare;
+                if (diffMsShare < 0) {
+                    setTimeAgoShare("Vừa xong");
+                } else {
+                    const seconds = Math.floor(diffMsShare / 1000);
+                    const minutes = Math.floor(seconds / 60);
+                    const hours = Math.floor(minutes / 60);
+                    const days = Math.floor(hours / 24);
 
-            if (days > 0) setTimeAgo(`${days} ngày trước`);
-            else if (hours > 0) setTimeAgo(`${hours} giờ trước`);
-            else if (minutes > 0) setTimeAgo(`${minutes} phút trước`);
-            else setTimeAgo(`${seconds} giây trước`);
+                    if (days > 0) {
+                        setTimeAgoShare(`${days} ngày trước`);
+                    } else if (hours > 0) {
+                        setTimeAgoShare(`${hours} giờ trước`);
+                    } else if (minutes > 0) {
+                        setTimeAgoShare(`${minutes} phút trước`);
+                    } else {
+                        setTimeAgoShare(`${seconds} giây trước`);
+                    }
+                }
+            }
         };
 
         updateDiff();
@@ -179,7 +219,8 @@ const PostItem = ({
     };
 
     const hasCaption = post?.caption?.trim() !== '';
-    const hasMedia = post?.medias?.length > 0;
+
+    const hasMedia = post?.medias?.length > 0 || post?.ID_post_shared?.medias?.length > 0;
 
     const getIcon = (status) => {
         switch (status) {
@@ -244,68 +285,199 @@ const PostItem = ({
         }
     };
 
+    //call api addPost
+    const callAddPostShare = async () => {
+        try {
+            const paramsAPI = {
+                ID_user: me._id,
+                caption: captionShare,
+                medias: [],
+                status: selectedOption.name,
+                type: 'Share',
+                ID_post_shared: post.ID_post_shared ? post.ID_post_shared._id : post._id,//nếu share bài post share thì share bài gốc 
+                tags: [],
+            }
+            //console.log("push", paramsAPI);
+            await dispatch(addPost(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    //console.log(response)
+                    setShareVisible(false)
+                })
+                .catch((error) => {
+                    console.log('Error1 callAddPostShare:', error);
+                });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 
 
 
     return (
         <View style={styles.postContainer}>
-            <View style={styles.header}>
-                <View style={styles.userInfo}>
-                    <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                    <View style={{ marginLeft: 20 }}>
-                        <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
-                        <View style={styles.boxName}>
-                            <Text style={styles.time}>{timeAgo}</Text>
-                            {/* <Icon name="earth" size={12} color="gray" /> */}
+            {/* Header share  */}
+            {
+                post.ID_post_shared &&
+                <View style={styles.header}>
+                    <View style={styles.userInfo}>
+                        <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                        <View style={{ marginLeft: 20 }}>
+                            <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                            <View style={styles.boxName}>
+                                <Text style={styles.time}>{timeAgo}</Text>
+                                {/* <Icon name="earth" size={12} color="gray" /> */}
+                                {
+                                    getIcon(post.status)
+                                }
+                            </View>
                             {
-                                getIcon(post.status)
+                                hasCaption && <Text style={styles.caption}>{post.caption}</Text>
                             }
                         </View>
                     </View>
+
+                    <TouchableOpacity
+                        disabled={ID_user != post.ID_user._id}
+                        onPress={() =>
+                            openBottomSheet(
+                                25,
+                                <View>
+                                    <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
+                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                        <Text style={[styles.deleteText,]}
+                                        >{
+                                                post._destroy ? (
+                                                    "Phục hồi"
+                                                ) : "Xóa bài viết"
+                                            }
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {
+                                        post._destroy && (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    onDeleteVinhVien()
+                                                    closeBottomSheet()
+                                                }}
+                                                style={styles.deleteButton}>
+                                                <Text style={styles.deleteText}
+                                                >Xóa vĩnh viễn
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )
+                                    }
+                                </View>,
+                            )
+                        }
+
+                    >
+                        <Icon name="ellipsis-horizontal" size={22} color="black" />
+                    </TouchableOpacity>
                 </View>
+            }
+            {/* Header goc  */}
+            <View style={styles.header}>
+                {
+                    post.ID_post_shared
+                        ?
+                        <View style={styles.userInfo}>
+                            <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
+                            <View style={{ marginLeft: 20 }}>
+                                <Text style={styles.name}>{post.ID_post_shared.ID_user.first_name + " " + post.ID_post_shared.ID_user.last_name}</Text>
+                                <View style={styles.boxName}>
+                                    <Text style={styles.time}>{timeAgoShare}</Text>
+                                    {/* <Icon name="earth" size={12} color="gray" /> */}
+                                    {
+                                        getIcon(post.ID_post_shared.status)
+                                    }
+                                </View>
+                            </View>
+                        </View>
+                        :
+                        <View style={styles.userInfo}>
+                            <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                            <View style={{ marginLeft: 20 }}>
+                                <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                                <View style={styles.boxName}>
+                                    <Text style={styles.time}>{timeAgo}</Text>
+                                    {/* <Icon name="earth" size={12} color="gray" /> */}
+                                    {
+                                        getIcon(post.status)
+                                    }
+                                </View>
+                            </View>
+                        </View>
 
-                <TouchableOpacity
-                    disabled={ID_user != post.ID_user._id}
-                    onPress={() =>
-                        openBottomSheet(
-                            25,
-                            <View>
-                                <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
-                                    style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                    <Text style={[styles.deleteText,]}
-                                    >{
-                                            post._destroy ? (
-                                                "Phục hồi"
-                                            ) : "Xóa bài viết"
-                                        }
-                                    </Text>
-                                </TouchableOpacity>
-                                {
-                                    post._destroy && (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                onDeleteVinhVien()
-                                                closeBottomSheet()
-                                            }}
-                                            style={styles.deleteButton}>
-                                            <Text style={styles.deleteText}
-                                            >Xóa vĩnh viễn
-                                            </Text>
-                                        </TouchableOpacity>
-                                    )
-                                }
-                            </View>,
-                        )
-                    }
+                }
 
-                >
-                    <Icon name="ellipsis-horizontal" size={22} color="black" />
-                </TouchableOpacity>
+
+                {
+                    !post.ID_post_shared &&
+                    <TouchableOpacity
+                        disabled={ID_user != post.ID_user._id}
+                        onPress={() =>
+                            openBottomSheet(
+                                25,
+                                <View>
+                                    <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
+                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                        <Text style={[styles.deleteText,]}
+                                        >{
+                                                post._destroy ? (
+                                                    "Phục hồi"
+                                                ) : "Xóa bài viết"
+                                            }
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {
+                                        post._destroy && (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    onDeleteVinhVien()
+                                                    closeBottomSheet()
+                                                }}
+                                                style={styles.deleteButton}>
+                                                <Text style={styles.deleteText}
+                                                >Xóa vĩnh viễn
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )
+                                    }
+                                </View>,
+                            )
+                        }
+
+                    >
+                        <Icon name="ellipsis-horizontal" size={22} color="black" />
+                    </TouchableOpacity>
+                }
+
 
             </View>
+            {
+                post.ID_post_shared
+                    ? (
+                        hasCaption && <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
+                    )
+                    :
+                    (
+                        hasCaption && <Text style={styles.caption}>{post?.caption}</Text>
+                    )
+            }
+            {
+                post.ID_post_shared
+                    ? (
+                        hasMedia && renderMediaGrid(post.ID_post_shared.medias)
+                    )
+                    :
+                    (
+                        hasMedia && renderMediaGrid(post.medias)
+                    )
+            }
 
-            {hasCaption && <Text style={styles.caption}>{post?.caption}</Text>}
-            {hasMedia && renderMediaGrid(post?.medias)}
             {/* reactions of post */}
             {
                 post.post_reactions.length > 0 &&
@@ -327,43 +499,47 @@ const PostItem = ({
                     </View>
                 )
             }
-            <View style={styles.interactions}>
-                <TouchableOpacity
-                    ref={reactionRef} // Gắn ref vào đây
-                    style={[
-                        styles.action,
-                        userReaction &&
-                        { backgroundColor: 'blue' }
-                    ]}
-                    onLongPress={() => {
-                        handleLongPress();
-                    }}
-                >
-                    {/* <Icon2 name="like" size={25} color="black" /> */}
-                    <Text
-                        style={styles.actionText}
-                    >
-                        {userReaction ? userReaction.ID_reaction.icon : "👍"} {/* Nếu đã react, hiển thị icon đó */}
-                    </Text>
-                    <Text
+            {
+                !post._destroy &&
+                <View style={styles.interactions}>
+                    <TouchableOpacity
+                        ref={reactionRef} // Gắn ref vào đây
                         style={[
-                            styles.actionText,
+                            styles.action,
                             userReaction &&
-                            { color: 'white' }
+                            { backgroundColor: 'blue' }
                         ]}
+                        onLongPress={() => {
+                            handleLongPress();
+                        }}
                     >
-                        {userReaction ? userReaction.ID_reaction.name : "Thích"} {/* Nếu đã react, hiển thị icon đó */}
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.action}>
-                    <Icon3 name="comment" size={20} color="black" />
-                    <Text style={styles.actionText}>Bình luận</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.action} onPress={() => handleShare()}>
-                    <Icon4 name="share-alt" size={20} color="black" />
-                    <Text style={styles.actionText}>Chia sẻ</Text>
-                </TouchableOpacity>
-            </View>
+                        {/* <Icon2 name="like" size={25} color="black" /> */}
+                        <Text
+                            style={styles.actionText}
+                        >
+                            {userReaction ? userReaction.ID_reaction.icon : "👍"} {/* Nếu đã react, hiển thị icon đó */}
+                        </Text>
+                        <Text
+                            style={[
+                                styles.actionText,
+                                userReaction &&
+                                { color: 'white' }
+                            ]}
+                        >
+                            {userReaction ? userReaction.ID_reaction.name : "Thích"} {/* Nếu đã react, hiển thị icon đó */}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.action}>
+                        <Icon3 name="comment" size={20} color="black" />
+                        <Text style={styles.actionText}>Bình luận</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.action} onPress={() => handleShare()}>
+                        <Icon4 name="share-alt" size={20} color="black" />
+                        <Text style={styles.actionText}>Chia sẻ</Text>
+                    </TouchableOpacity>
+                </View>
+            }
+
 
 
             {/* reactions biểu cảm */}
@@ -441,9 +617,14 @@ const PostItem = ({
                                         placeholderTextColor={"gray"}
                                         multiline={true}
                                         style={styles.contentShare}
+                                        value={captionShare}
+                                        onChangeText={setCaptionShare}
                                     />
                                     <View style={{ backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
-                                        <TouchableOpacity style={{ padding: 10 }}>
+                                        <TouchableOpacity
+                                            style={{ padding: 10 }}
+                                            onPress={callAddPostShare}
+                                        >
                                             <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
                                         </TouchableOpacity>
                                     </View>
@@ -472,7 +653,10 @@ const PostItem = ({
                                 <TouchableOpacity
                                     key={index}  // Mỗi phần tử trong danh sách cần có một key duy nhất.
                                     style={styles.optionButton}  // Styling cho mỗi nút tùy chọn trong danh sách.
-                                    onPress={() => handleSelectOption(option)}  // Khi người dùng chọn một tùy chọn, hàm này sẽ được gọi để cập nhật trạng thái và đóng modal.
+                                    onPress={() => {
+                                        //console.log(option.name)
+                                        handleSelectOption(option)
+                                    }}  // Khi người dùng chọn một tùy chọn, hàm này sẽ được gọi để cập nhật trạng thái và đóng modal.
                                 >
                                     {/* // Hiển thị tên của tùy chọn. */}
                                     <Text style={styles.optionText}>{option.name}</Text>
@@ -731,7 +915,8 @@ const styles = StyleSheet.create({
         // borderColor: "gray", 
         // borderRadius: 5, 
         padding: 10,
-        marginVertical: 10
+        marginVertical: 10,
+        color: "black",
     }
 });
 
