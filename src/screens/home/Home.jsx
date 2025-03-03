@@ -31,21 +31,6 @@ const Home = props => {
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
 
-  //console.log(token)
-
-  // useEffect(() => {
-  //   callGetAllPostsInHome(me._id);
-
-  //   const focusListener = navigation.addListener('focus', () => {
-  //     callGetAllPostsInHome(me._id);
-  //   });
-
-  //   return () => {
-  //     focusListener();
-  //   };
-  // }, [navigation]);
-
-
   const callGetAllPostsInHome = async (ID_user) => {
     try {
       setloading(true)
@@ -114,6 +99,20 @@ const Home = props => {
             ID_reaction: newReaction
           });
         }
+
+        return { ...post, post_reactions: updatedReactions };
+      })
+    );
+  };
+
+  // Hàm cập nhật bài post sau khi xóa biểu cảm
+  const deletPostReaction = (ID_post, ID_post_reaction) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => {
+        if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
+
+        // 🔥 Gán lại kết quả của filter vào biến
+        const updatedReactions = post.post_reactions.filter(reaction => reaction._id !== ID_post_reaction);
 
         return { ...post, post_reactions: updatedReactions };
       })
@@ -243,6 +242,7 @@ const Home = props => {
               ID_user={me._id}
               onDelete={() => callChangeDestroyPost(item._id)}
               updatePostReaction={updatePostReaction}
+              deletPostReaction={deletPostReaction}
             />}
           keyExtractor={item => item._id}
           showsHorizontalScrollIndicator={false}

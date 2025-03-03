@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getChiTietPost,
   addPost_Reaction, // thả biểu cảm
+  deletePost_reaction,// xóa biểu cảm
   addPost, // api share
   addComment, // api tạo comment
 } from '../../rtk/API';
@@ -204,7 +205,7 @@ const PostDetail = (props) => {
   };
 
   useEffect(() => {
-    console.log("ID_post nhận được:", ID_post); // Kiểm tra ID có đúng không
+    //console.log("ID_post nhận được:", ID_post); // Kiểm tra ID có đúng không
     if (ID_post) {
       callGetChiTietPost(ID_post);
     }
@@ -316,7 +317,7 @@ const PostDetail = (props) => {
   );
 
   // Tìm reaction của chính người dùng hiện tại
-  const userReaction = post?.post_reactions.find(
+  const userReaction = reactionsOfPost.find(
     (reaction) => reaction.ID_user._id === me._id
   );
 
@@ -445,14 +446,85 @@ const PostDetail = (props) => {
       await dispatch(addPost_Reaction(paramsAPI))
         .unwrap()
         .then(response => {
-          //console.log(response.message);
-          callGetChiTietPost(post._id);
+          //console.log(response.post_reaction._id);
+          const newReaction = {
+            _id: ID_reaction,
+            name: name,
+            icon: icon,
+          };
+          updatePostReaction(
+            newReaction,
+            response.post_reaction._id,
+          )
         })
         .catch(error => {
           console.log('Lỗi call api addPost_Reaction', error);
         });
     } catch (error) {
       console.log('Lỗi trong addPost_Reaction:', error);
+    }
+  };
+
+  // Hàm cập nhật bài post sau khi thả biểu cảm
+  const updatePostReaction = (newReaction, ID_post_reaction) => {
+    if (userReaction) {
+      //userReaction có thì sửa userReaction trong reactionsOfPost
+      const updatedReactions = reactionsOfPost.map(reaction =>
+        reaction.ID_user._id === me._id
+          ? {
+            _id: ID_post_reaction, // ID của reaction mới từ server
+            ID_user: {
+              _id: me._id,
+              first_name: me.first_name,
+              last_name: me.last_name,
+              avatar: me.avatar,
+            },
+            ID_reaction: newReaction
+          }
+          : reaction
+      );
+      setReactionsOfPost(updatedReactions)
+    } else {
+      // chưa thêm vào
+      setReactionsOfPost([...reactionsOfPost, {
+        _id: ID_post_reaction, // ID của reaction mới từ server
+        ID_user: {
+          _id: me._id,
+          first_name: me.first_name,
+          last_name: me.last_name,
+          avatar: me.avatar,
+        },
+        ID_reaction: newReaction
+      }])
+    }
+  };
+
+  // Hàm cập nhật bài post sau khi xóa biểu cảm
+  const deletPostReaction = (ID_post_reaction) => {
+    const updatedReactions = reactionsOfPost.filter(reaction =>
+      reaction._id !== ID_post_reaction
+    );
+    setReactionsOfPost(updatedReactions)
+  };
+
+  const callDeletePost_reaction = async (ID_post_reaction) => {
+    try {
+      const paramsAPI = {
+        _id: ID_post_reaction
+      };
+      await dispatch(deletePost_reaction(paramsAPI))
+        .unwrap()
+        .then(response => {
+          // params: ID_post_reaction
+          deletPostReaction(
+            ID_post_reaction
+          )
+        })
+        .catch(error => {
+          console.log('Lỗi call api callDeletePost_reaction', error);
+        });
+    } catch (error) {
+      console.log('Lỗi trong callDeletePost_reaction:', error);
     }
   };
 
@@ -772,12 +844,16 @@ const PostDetail = (props) => {
               onLongPress={() => {
                 handleLongPress();
               }}
+              onPress={() => userReaction
+                ? callDeletePost_reaction(userReaction._id)
+                : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+              }
             >
               {/* <Icon2 name="like" size={25} color="black" /> */}
               <Text
                 style={styles.actionText}
               >
-                {userReaction ? userReaction.ID_reaction.icon : "👍"} {/* Nếu đã react, hiển thị icon đó */}
+                {userReaction ? userReaction.ID_reaction.icon : reactions[0].icon} {/* Nếu đã react, hiển thị icon đó */}
               </Text>
               <Text
                 style={[
@@ -786,15 +862,11 @@ const PostDetail = (props) => {
                   { color: '#FF9D00' }
                 ]}
               >
-                {userReaction ? userReaction.ID_reaction.name : "Thích"} {/* Nếu đã react, hiển thị icon đó */}
+                {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.action}
-              onPress={() => {
-                console.log("ID_post gửi đi:", post._id); // Kiểm tra ID trước khi chuyển trang
-                navigation.navigate("PostDetail", { ID_post: post._id });
-              }}
             >
               <Icon3 name="comment" size={20} color="black" />
               <Text style={styles.actionText}>Bình luận</Text>

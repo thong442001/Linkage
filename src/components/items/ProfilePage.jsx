@@ -22,6 +22,7 @@ const { width, height } = Dimensions.get('window');
 import {
     addPost_Reaction, // thả biểu cảm
     addPost, // api share
+    deletePost_reaction,//xóa post_reaction
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
 const PostItem = ({
@@ -30,6 +31,7 @@ const PostItem = ({
     onDelete = () => { },
     onDeleteVinhVien = () => { },
     updatePostReaction = () => { },
+    deletPostReaction = () => { },
 }) => {
     const navigation = useNavigation();
     const me = useSelector(state => state.app.user)
@@ -298,7 +300,7 @@ const PostItem = ({
             await dispatch(addPost_Reaction(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    console.log(response.message);
+                    //console.log(response.message);
                     const newReaction = {
                         _id: ID_reaction,
                         name: name,
@@ -316,6 +318,28 @@ const PostItem = ({
                 });
         } catch (error) {
             console.log('Lỗi trong addPost_Reaction:', error);
+        }
+    };
+
+    const callDeletePost_reaction = async (ID_post, ID_post_reaction) => {
+        try {
+            const paramsAPI = {
+                _id: ID_post_reaction
+            };
+            await dispatch(deletePost_reaction(paramsAPI))
+                .unwrap()
+                .then(response => {
+                    // params: ID_post, ID_post_reaction
+                    deletPostReaction(
+                        ID_post,
+                        ID_post_reaction
+                    )
+                })
+                .catch(error => {
+                    console.log('Lỗi call api callDeletePost_reaction', error);
+                });
+        } catch (error) {
+            console.log('Lỗi trong callDeletePost_reaction:', error);
         }
     };
 
@@ -667,12 +691,16 @@ const PostItem = ({
                         onLongPress={() => {
                             handleLongPress();
                         }}
+                        onPress={() => userReaction
+                            ? callDeletePost_reaction(post._id, userReaction._id)
+                            : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+                        }
                     >
                         {/* <Icon2 name="like" size={25} color="black" /> */}
                         <Text
                             style={styles.actionText}
                         >
-                            {userReaction ? userReaction.ID_reaction.icon : "👍"} {/* Nếu đã react, hiển thị icon đó */}
+                            {userReaction ? userReaction.ID_reaction.icon : reactions[0].icon} {/* Nếu đã react, hiển thị icon đó */}
                         </Text>
                         <Text
                             style={[
@@ -681,7 +709,7 @@ const PostItem = ({
                                 { color: '#FF9D00' }
                             ]}
                         >
-                            {userReaction ? userReaction.ID_reaction.name : "Thích"} {/* Nếu đã react, hiển thị icon đó */}
+                            {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -827,7 +855,7 @@ const PostItem = ({
                     </View>
                 </TouchableOpacity>
             </Modal >
-        </View>
+        </View >
     );
 };
 

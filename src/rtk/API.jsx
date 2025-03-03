@@ -632,6 +632,22 @@ export const addPost_Reaction = createAsyncThunk(
   }
 );
 
+// xóa post_reaction
+// params: _id
+export const deletePost_reaction = createAsyncThunk(
+  'post_reaction/deletePost_reaction',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('post_reaction/deletePost_reaction', data);
+      //console.log(response?.message)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Độ 
 export const getChiTietPost = createAsyncThunk(
   'post/getChiTietPost',
