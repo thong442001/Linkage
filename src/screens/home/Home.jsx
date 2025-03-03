@@ -155,7 +155,7 @@ const Home = props => {
               <Text style={HomeS.title}>inkage</Text>
             </View>
             <View style={HomeS.icons}>
-              <TouchableOpacity style={HomeS.iconsPadding}>
+              <TouchableOpacity style={HomeS.iconsPadding} onPress={()=>navigation.navigate(oStackHome.HuggingFaceImageGenerator.name)}>
                 <Icon name="add" size={25} color="black" />
               </TouchableOpacity>
               <TouchableOpacity
