@@ -23,7 +23,10 @@ import {
   getChiTietPost,
   addPost_Reaction, // thả biểu cảm
   addPost, // api share
+  addComment, // api tạo comment
 } from '../../rtk/API';
+import { launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
 
 const PostDetail = (props) => {
   const { navigation } = props
@@ -37,7 +40,9 @@ const PostDetail = (props) => {
   const { openBottomSheet, closeBottomSheet } = useBottomSheet();
   const token = useSelector(state => state.app.token);
 
-  const [comment, setComment] = useState([])
+  const [comments, setComments] = useState([])
+  const [comment, setComment] = useState('')
+  const [reply, setReply] = useState(null);
   const [post, setPost] = useState(null)
 
   const [timeAgo, setTimeAgo] = useState();
@@ -61,6 +66,7 @@ const PostDetail = (props) => {
 
   // Cảnh
   // post_reactions: list của reaction của post
+  const [reactionsOfPost, setReactionsOfPost] = useState([]);
   const [selectedTab, setSelectedTab] = useState('all');
   const [isFirstRender, setIsFirstRender] = useState(true);
 
@@ -68,17 +74,132 @@ const PostDetail = (props) => {
   //call api chi tiet bai post
   const callGetChiTietPost = async (ID_post) => {
     try {
-      console.log("ID_post:", ID_post);
+      //console.log("ID_post:", ID_post);
       const response = await dispatch(getChiTietPost({ ID_post, token })).unwrap();
 
       if (response && response.post) {
-        console.log("API:", response.post);
+        //console.log("API:", response.post);
         setPost(response.post);
+        setComments(response.post?.comments)
+        setReactionsOfPost(response.post.post_reactions)
       } else {
         console.log('API không trả về bài viết.');
       }
     } catch (error) {
       console.log('Lỗi khi lấy chi tiết bài viết:', error);
+    }
+  };
+
+  const addReplyToComment = (commentsList, newReply) => {
+    return commentsList.map((comment) => {
+      if (comment._id === newReply.ID_comment_reply._id) {
+        return {
+          ...comment,
+          replys: [...(comment.replys ?? []), newReply], // ✅ Đảm bảo replys luôn là mảng
+        };
+      }
+      if (Array.isArray(comment.replys) && comment.replys.length > 0) {
+        return {
+          ...comment,
+          replys: addReplyToComment(comment.replys, newReply),
+        };
+      }
+      return comment;
+    });
+  };
+
+  //call api chi tiet bai post
+  const callAddComment = async (type, content) => {
+    try {
+      if ((comment == null && type === 'text') || post == null) {
+        console.log('thiếu ')
+        return null;
+      }
+      const paramsAPI = {
+        ID_user: me._id,
+        ID_post: post._id,
+        content: content,
+        type: type,
+        ID_comment_reply: reply || undefined,
+      };
+
+      await dispatch(addComment(paramsAPI))
+        .unwrap()
+        .then((response) => {
+          if (response.comment?.ID_comment_reply) {
+            setComments((prevComments) => [...addReplyToComment(prevComments, response.comment)]);
+          } else {
+            setComments((prevComments) => [...prevComments, response.comment]);
+          }
+          setComment('');
+          setReply(null);
+        })
+        .catch((error) => {
+          console.error('Error1 addComment:', error);
+        });
+    } catch (error) {
+      console.log('Lỗi khi callAddComment:', error);
+    }
+  };
+
+  //up lên cloudiary
+  const uploadFile = async (file) => {
+    try {
+      const data = new FormData();
+      data.append('file', {
+        uri: file.uri,
+        type: file.type,
+        name: file.fileName || (file.type.startsWith('video/') ? 'video.mp4' : 'image.png'),
+      });
+      data.append('upload_preset', 'ml_default');
+
+      const response = await axios.post('https://api.cloudinary.com/v1_1/ddbolgs7p/upload', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      //console.log(file.type.type);
+      const fileUrl = response.data.secure_url;
+      console.log('🌍 Link file Cloudinary:', fileUrl);
+
+      if (file.type.startsWith('image/')) {
+        console.log("image");
+        callAddComment('image', fileUrl)
+      }
+      if (file.type.startsWith('video/')) {
+        console.log("video");
+        callAddComment('video', fileUrl)
+      }
+
+    } catch (error) {
+      console.log('uploadFile -> ', error.response ? error.response.data : error.message);
+      console.log("lỗi khi tải file")
+    }
+  };
+
+  //mở thư viện
+  const onOpenGallery = async () => {
+    try {
+      const options = {
+        mediaType: 'mixed',
+        quality: 1,
+      };
+
+      launchImageLibrary(options, async (response) => {
+        //console.log(response);
+        if (response.didCancel) {
+          console.log("đã hủy")
+        } else if (response.errorMessage) {
+          console.log("lỗi khi mở thư viện")
+        } else {
+          const selectedFile = response.assets[0];
+          console.log('📂 File đã chọn:', selectedFile.uri);
+
+          await uploadFile(selectedFile);
+        }
+      });
+    } catch (error) {
+      console.log('onOpenGallery -> ', error);
     }
   };
 
@@ -153,7 +274,7 @@ const PostDetail = (props) => {
   //   Tạo danh sách tab từ uniqueReactions
   const uniqueReactions_tab = Array.from(
     new Map(
-      post?.post_reactions.map(reaction => [
+      reactionsOfPost.map(reaction => [
         reaction.ID_reaction._id,
         reaction.ID_reaction,
       ]),
@@ -169,7 +290,7 @@ const PostDetail = (props) => {
   ];
 
   // Lọc danh sách người dùng theo reaction được chọn
-  const filteredUsers = post?.post_reactions
+  const filteredUsers = reactionsOfPost
     .filter(
       reaction =>
         selectedTab === 'all' || reaction.ID_reaction._id === selectedTab,
@@ -188,11 +309,12 @@ const PostDetail = (props) => {
   // lọc reactions 
   const uniqueReactions = Array.from(
     new Map(
-      post?.post_reactions
+      reactionsOfPost
         .filter(reaction => reaction.ID_reaction !== null)
         .map(reaction => [reaction.ID_reaction._id, reaction])
     ).values()
   );
+
   // Tìm reaction của chính người dùng hiện tại
   const userReaction = post?.post_reactions.find(
     (reaction) => reaction.ID_user._id === me._id
@@ -323,18 +445,8 @@ const PostDetail = (props) => {
       await dispatch(addPost_Reaction(paramsAPI))
         .unwrap()
         .then(response => {
-          console.log(response.message);
-          const newReaction = {
-            _id: ID_reaction,
-            name: name,
-            icon: icon,
-          };
-          // params: ID_post, newReaction, ID_post_reaction
-          updatePostReaction(
-            post._id,
-            newReaction,
-            response.post_reaction._id,
-          )
+          //console.log(response.message);
+          callGetChiTietPost(post._id);
         })
         .catch(error => {
           console.log('Lỗi call api addPost_Reaction', error);
@@ -839,26 +951,47 @@ const PostDetail = (props) => {
               //openBottomSheet(50, detail_reactions);
             }}>
             {/* reactions of post */}
-            {
-              post.post_reactions.length > 0
-              && (
-                <TouchableOpacity
-                  onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}>
 
-                  <View style={[styles.vReactionsOfPost]}>
-                    {uniqueReactions.map((reaction, index) => (
-                      <Text key={index} style={{ color: 'black' }}>
-                        {reaction.ID_reaction.icon}
+            <View style={[styles.vReactionsOfPost]}>
+              <View>
+                {
+                  reactionsOfPost.length > 0
+                  && (
+                    <TouchableOpacity
+                      style={{ flexDirection: "row" }}
+                      onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                    >
+                      {uniqueReactions.map((reaction, index) => (
+                        <Text key={index} style={{ color: 'black' }}>
+                          {reaction.ID_reaction.icon}
+                        </Text>
+                      ))}
+                      <Text style={styles.slReactionsOfPost}>
+                        {reactionsOfPost.length}
                       </Text>
-                    ))}
-                    <Text style={styles.slReactionsOfPost}>
-                      {post.post_reactions.length}
-                    </Text>
-                  </View>
-
-                </TouchableOpacity>
-              )
-            }
+                    </TouchableOpacity>
+                  )
+                }
+              </View>
+              <View>
+                {
+                  comments.length > 0
+                  && (
+                    <View>
+                      {/*so luong  bình luận */}
+                      {
+                        comments.length > 0
+                        && (
+                          <Text style={[styles.slReactionsOfPost]}>
+                            {post?.comments.length} bình luận
+                          </Text>
+                        )
+                      }
+                    </View>
+                  )
+                }
+              </View>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -868,19 +1001,77 @@ const PostDetail = (props) => {
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <FlatList
-        data={comment}
-        renderItem={({ item }) => <ListComment comment={item} />}
-        keyExtractor={item => item.id}
+        data={comments}
+        renderItem={({ item }) => <ListComment
+          comment={item}
+          onReply={(e) => setReply(e)}
+        />}
+        keyExtractor={item => item._id}
+        extraData={comments}
         ListHeaderComponent={header}
         contentContainerStyle={{ paddingBottom: '17%' }}
       />
       <View style={styles.boxInputText}>
+        {/* Hiển thị reply */}
+        {
+          reply && (
+            <View style={styles.replyPreview}>
+              <View>
+                <Text style={styles.replyTitle}>Đang trả lời: </Text>
+                <Text style={styles.replyContent}>
+                  {
+                    me._id == reply.ID_user._id
+                      ? ` Bạn: `
+                      : ` ${reply.ID_user.first_name} ${reply.ID_user.last_name}: `
+                  }
+                  {
+                    reply.type === 'text'
+                      ? `${reply.content}`
+                      : reply.type === 'image'
+                        ? 'Ảnh'
+                        : 'Video'
+                  }
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.replyRight}
+                onPress={() => setReply(null)}
+              >
+                <Text style={styles.replyTitle}>✖</Text>
+              </TouchableOpacity>
+            </View>
+          )
+        }
         <View style={styles.line}></View>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Viết bình luận "
-          multiline={true}
-        />
+        <View
+          style={{ flexDirection: 'row' }}
+        >
+          {/* Thư Viện */}
+          <View style={styles.librarySelect}>
+            <TouchableOpacity
+              onPress={onOpenGallery}
+            >
+              <Icon name="image" size={25} color="#007bff" />
+            </TouchableOpacity>
+
+          </View>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Viết bình luận "
+            multiline={true}
+            value={comment}
+            onChangeText={setComment}
+          />
+          <TouchableOpacity
+            onPress={() => callAddComment('text', comment)}
+            style={styles.sendButton}
+          >
+            <View>
+              <Icon name="send" size={25} color='#007bff' />
+            </View>
+            {/* <Text style={styles.sendText}>Send</Text> */}
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

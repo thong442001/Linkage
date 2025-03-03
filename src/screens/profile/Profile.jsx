@@ -697,7 +697,7 @@ const Profile = props => {
                                                 relationship?.relation == 'B gửi lời kết bạn A')) && (
                                                 <TouchableOpacity
                                                     style={ProfileS.btnAddStory}
-                                                    onPress={callHuyLoiMoiKetBan}>
+                                                    onPress={callSetRelationNguoiLa}>
                                                     <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
                                                 </TouchableOpacity>
                                             )}

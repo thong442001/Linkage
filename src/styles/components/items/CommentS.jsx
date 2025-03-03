@@ -189,7 +189,7 @@ const CommentS = StyleSheet.create({
         width: '100%',
         height: 20,
         paddingHorizontal: 10,
-        alignItems: 'center',
+        justifyContent: 'space-between'
     },
     slReactionsOfPost: {
         color: 'black',
@@ -383,6 +383,7 @@ const CommentS = StyleSheet.create({
         marginHorizontal: width * 0.05,
         marginVertical: height * 0.015,
         padding: width * 0.025,
+        width: width * 0.75
     },
     line: {
         height: 0.5,
@@ -464,6 +465,28 @@ const CommentS = StyleSheet.create({
         left: '50%',
         transform: [{ translateX: -20 }, { translateY: -20 }],
     },
+    sendButton: {
+        marginLeft: 10,
+        // backgroundColor: '#007bff',
+        // padding: 10,
+        // borderRadius: 20,
+    },
+    //reply
+    replyPreview: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderTopWidth: 1,
+        borderColor: 'grey',
+    },
+    replyTitle: {
+        color: 'black',
+    },
+    replyContent: {
+        color: 'grey',
+    },
+    replyRight: {
+        alignItems: 'flex-end',
+    }
 });
 
 

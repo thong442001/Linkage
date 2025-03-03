@@ -40,9 +40,6 @@ const Setting = (props) => {
   };
 
 
-
-
-
   const Option = ({ icon, title, subtitle, color = 'black' }) => (
     <View style={styles.option}>
       <Icon name={icon} size={20} color={color} />

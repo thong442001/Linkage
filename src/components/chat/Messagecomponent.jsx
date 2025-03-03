@@ -317,6 +317,7 @@ export default function MessageComponent({
                   </TouchableOpacity>
                 ))}
               </View>
+
               <View
                 style={[
                   styles.messageWrapper,
@@ -342,7 +343,7 @@ export default function MessageComponent({
                     <Text style={[styles.messageTextThuHoi]}>
                       Tin nhắn đã được thu hồi
                     </Text>
-                  ) : (
+                  ) : message.type == 'text' ? (
                     <Text
                       style={[
                         styles.messageText,
@@ -350,6 +351,26 @@ export default function MessageComponent({
                       ]}>
                       {message.content}
                     </Text>
+                  ) : message.type == 'image' ? (
+                    <Image
+                      style={[
+                        styles.messageImage,
+                        isCurrentUser && styles.currentUserText,
+                      ]}
+                      source={{ uri: message.content }}
+                    />
+                  ) : (
+                    message.type == 'video' && (
+                      <Video
+                        source={{ uri: message.content }} // URL video
+                        style={[
+                          styles.messageVideo,
+                          isCurrentUser && styles.currentUserText,
+                        ]}
+                        controls={true} // Hiển thị điều khiển video
+                        resizeMode="contain" // Cách hiển thị video
+                      />
+                    )
                   )
                 }
                 {/* thời gian */}

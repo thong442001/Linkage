@@ -31,6 +31,8 @@ const Home = props => {
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
 
+  //console.log(token)
+
   // useEffect(() => {
   //   callGetAllPostsInHome(me._id);
 

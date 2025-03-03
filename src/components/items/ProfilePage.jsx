@@ -625,10 +625,11 @@ const PostItem = ({
             {
                 post.post_reactions.length > 0
                 && (
-                    <TouchableOpacity
-                        onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}>
-
-                        <View style={[styles.vReactionsOfPost]}>
+                    <View style={[styles.vReactionsOfPost]}>
+                        <TouchableOpacity
+                            style={{ flexDirection: "row" }}
+                            onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                        >
                             {uniqueReactions.map((reaction, index) => (
                                 <Text key={index} style={{ color: 'black' }}>
                                     {reaction.ID_reaction.icon}
@@ -637,9 +638,19 @@ const PostItem = ({
                             <Text style={styles.slReactionsOfPost}>
                                 {post.post_reactions.length}
                             </Text>
+                        </TouchableOpacity>
+                        <View>
+                            {/*so luong  bình luận */}
+                            {
+                                post?.comments.length > 0
+                                && (
+                                    <Text style={styles.slReactionsOfPost}>
+                                        {post?.comments.length} bình luận
+                                    </Text>
+                                )
+                            }
                         </View>
-
-                    </TouchableOpacity>
+                    </View>
                 )
             }
 
@@ -1008,7 +1019,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 20,
         paddingHorizontal: 10,
-        alignItems: 'center',
+        justifyContent: 'space-between'
     },
     slReactionsOfPost: {
         color: 'black',

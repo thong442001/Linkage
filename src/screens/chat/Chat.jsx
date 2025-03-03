@@ -23,7 +23,7 @@ import {
 import ChatHeader from '../../components/chat/ChatHeader';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
-import {useBottomSheet} from '../../context/BottomSheetContext';
+import { useBottomSheet } from '../../context/BottomSheetContext';
 
 const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
@@ -51,9 +51,9 @@ const Chat = (props) => {// cần ID_group (param)
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [status, setstatus] = useState(false);
 
-    const {openBottomSheet, closeBottomSheet} = useBottomSheet();
+    const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
-    
+
 
 
 
@@ -499,7 +499,20 @@ const Chat = (props) => {// cần ID_group (param)
                     <View style={styles.replyPreview}>
                         <View>
                             <Text style={styles.replyTitle}>Đang trả lời: </Text>
-                            <Text style={styles.replyContent}>{reply.content}</Text>
+                            <Text style={styles.replyContent}>
+                                {
+                                    me._id == reply.sender._id
+                                        ? ` Bạn: `
+                                        : ` ${reply.sender.first_name} ${reply.sender.last_name}: `
+                                }
+                                {
+                                    reply.type === 'text'
+                                        ? `${reply.content}`
+                                        : reply.type === 'image'
+                                            ? 'Ảnh'
+                                            : 'Video'
+                                }
+                            </Text>
                         </View>
                         <TouchableOpacity
                             style={styles.replyRight}
@@ -514,11 +527,11 @@ const Chat = (props) => {// cần ID_group (param)
             <View style={styles.inputContainer}>
                 {/* Thư Viện */}
                 <View style={styles.librarySelect}>
-                    <Pressable
+                    <TouchableOpacity
                         onPress={onOpenGallery}
                     >
                         <Icon name="image" size={25} color="#007bff" />
-                    </Pressable>
+                    </TouchableOpacity>
 
                 </View>
                 <TextInput

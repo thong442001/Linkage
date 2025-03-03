@@ -1,23 +1,12 @@
-import {
-    Image,
-    StyleSheet,
-    Text,
-    View,
-    Dimensions,
-    FlatList,
-    TouchableOpacity,
-} from 'react-native'
-import React, { useState, useEffect } from 'react';
-import ListCommentReply from './ListCommentReply';
+import { Image, StyleSheet, Text, View, Dimensions, FlatList, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect } from 'react'
 const { width, height } = Dimensions.get('window');
 import Video from 'react-native-video';
-const ListComment = (props) => {
+const ListCommentReply = (props) => {
     const { comment, onReply } = props
-
     const [replys, setrReplys] = useState(comment.replys || []);
     // time 
     const [timeAgo, setTimeAgo] = useState(comment.createdAt);
-
     useEffect(() => {
         const updateDiff = () => {
             const now = Date.now();
@@ -61,11 +50,12 @@ const ListComment = (props) => {
         setrReplys(comment.replys ? [...comment.replys] : []);
     }, [comment.replys]);
 
-
-
     return (
         <View style={[styles.container]}>
             <View style={{ flexDirection: 'row', marginHorizontal: 5, }}>
+                <Text style={{ color: 'black' }}>
+                    {"------->   "}
+                </Text>
                 <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
                 <View>
                     <View style={styles.boxContent}>
@@ -106,27 +96,27 @@ const ListComment = (props) => {
                         <Text style={{ color: "black" }}>Thích</Text>
                         <TouchableOpacity
                             onPress={() => onReply(comment)}
+
                         >
                             <Text style={{ color: "black" }}>Trả lời</Text>
                         </TouchableOpacity>
-
                     </View>
                 </View>
             </View>
             <FlatList
-                data={replys}
-                renderItem={({ item }) => <ListCommentReply
-                    comment={item}
-                    onReply={(e) => onReply(e)}
-                />}
+                data={comment.replys}
+                renderItem={({ item }) =>
+                    <ListCommentReply
+                        comment={item}
+                        onReply={(e) => onReply(e)}
+                    />}
                 keyExtractor={item => item._id}
-                extraData={replys} // 🔥 Ép FlatList render lại khi replys thay đổi
             />
         </View>
     )
 }
 
-export default ListComment
+export default ListCommentReply
 
 const styles = StyleSheet.create({
     avatar: {

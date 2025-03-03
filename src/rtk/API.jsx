@@ -658,8 +658,11 @@ export const addComment = createAsyncThunk(
     try {
       const response = await AxiosHelper()
         .post('comment/addComment', data);
-      //console.log(response)
-      return response;
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
     } catch (error) {
       return rejectWithValue(error.message);
     }
