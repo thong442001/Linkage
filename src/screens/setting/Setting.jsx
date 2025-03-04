@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  Modal,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../rtk/Reducer';
+import QRCode from 'react-native-qrcode-svg';
 import {
   setNoti_token
 } from '../../rtk/API'
@@ -25,6 +27,7 @@ const Setting = (props) => {
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
+  const [qrVisible, setQrVisible] = useState(false); // 🔥 State để hiển thị modal QR
 
   const onLogout = () => {
     dispatch(setNoti_token({ ID_user: me._id }))
@@ -70,7 +73,29 @@ const Setting = (props) => {
             <View style={styles.profileInfo}>
               <Text style={styles.name}>{me.first_name} {me.last_name}</Text>
             </View>
-            <Icon name="qr-code-outline" size={22} color="black" />
+            <TouchableOpacity onPress={() => setQrVisible(true)}>
+              <Icon name="qr-code-outline" size={22} color="black" />
+            </TouchableOpacity>
+            {/* 🔥 Modal hiển thị QR Code */}
+            <Modal
+              visible={qrVisible}
+              transparent
+              onRequestClose={() => setQrVisible(false)}>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Mã QR của bạn</Text>
+                  <QRCode
+                    value={`chatapp://chat/${me._id}`}
+                    size={200}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setQrVisible(false)}
+                    style={styles.closeButton}>
+                    <Text style={styles.closeButtonText}>Đóng</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
           </View>
           <ScrollView style={styles.list}>
             <TouchableOpacity
@@ -197,4 +222,24 @@ const styles = StyleSheet.create({
     color: 'gray',
     fontSize: width * 0.035,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  closeButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: 'blue',
+    borderRadius: 5,
+  },
+  closeButtonText: { color: 'white', fontSize: 16 },
 });

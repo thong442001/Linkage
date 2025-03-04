@@ -155,8 +155,11 @@ const Home = props => {
               />
               <Text style={HomeS.title}>inkage</Text>
             </View>
-            <View style={HomeS.icons}>
-              <TouchableOpacity style={HomeS.iconsPadding} onPress={()=>navigation.navigate(oStackHome.HuggingFaceImageGenerator.name)}>
+            <View style={HomeS.icons} >
+              <TouchableOpacity onPress={()=>navigation.navigate('QRScannerScreen')} style={HomeS.iconsPadding}>
+                <Icon name="scan-circle-outline" size={25} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity style={HomeS.iconsPadding}>
                 <Icon name="add" size={25} color="black" />
               </TouchableOpacity>
               <TouchableOpacity

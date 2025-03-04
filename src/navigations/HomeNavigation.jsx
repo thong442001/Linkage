@@ -128,6 +128,7 @@ import CallGroup from '../screens/call/CallGroup';
 import ChatBot from '../screens/chat/ChatBot';
 import ListFriend from '../screens/friend/ListFriend';
 import HuggingFaceImageGenerator from '../screens/Al/RunwayMLImageGenerator ';
+import QRScannerScreen from '../screens/qrCode/QRScannerScreen';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -153,6 +154,8 @@ const oStackHome = {
   ChatBot: { name: 'ChatBot', component: ChatBot },
   ListFriend: { name: 'ListFriend', component: ListFriend },
   HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },
+  QRScannerScreen: { name: 'QRScannerScreen', component: QRScannerScreen },
+
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
