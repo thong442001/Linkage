@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Image,
@@ -13,29 +13,29 @@ import {
   FlatList,
   PanResponder,
 } from 'react-native';
-import {addPost, searchYouTubeMusic} from '../../rtk/API';
-import {useNavigation} from '@react-navigation/native';
-import {useSelector, useDispatch} from 'react-redux';
-import {oStackHome} from '../../navigations/HomeNavigation';
+import { addPost, searchYouTubeMusic } from '../../rtk/API';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 
 import axios from 'axios';
-import {TextInput} from 'react-native-gesture-handler';
+import { TextInput } from 'react-native-gesture-handler';
 
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
 const UPLOAD_PRESET = 'ml_default';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const Story = ({route}) => {
+const Story = ({ route }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [previewImage, setPreviewImage] = useState(null); // Ảnh hiển thị trước khi upload
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null); // Link ảnh sau khi upload
   const [loading, setLoading] = useState(false);
 
-  const [text, setText] = useState('Nhập text...');
+  const [text, setText] = useState('');
   const [showText, setShowText] = useState(false);
   const [scale, setScale] = useState(new Animated.Value(1));
 
@@ -58,22 +58,30 @@ const Story = ({route}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const statusOptions = [
-    {status: 1, name: 'Công khai'},
-    {status: 2, name: 'Bạn bè'},
-    {status: 3, name: 'Chỉ mình tôi'},
+    { status: 1, name: 'Công khai' },
+    { status: 2, name: 'Bạn bè' },
+    { status: 3, name: 'Chỉ mình tôi' },
   ];
 
   // Gesture xử lý kéo/thả
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {
-        useNativeDriver: false,
-      }),
+      onPanResponderGrant: () => {
+        pan.setOffset({
+          x: pan.x._value,
+          y: pan.y._value,
+        });
+        pan.setValue({ x: 0, y: 0 });
+      },
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
       onPanResponderRelease: () => {
         pan.flattenOffset();
       },
-    }),
+    })
   ).current;
 
   useEffect(() => {
@@ -124,7 +132,7 @@ const Story = ({route}) => {
 
     try {
       const response = await axios.post(CLOUDINARY_URL, formData, {
-        headers: {'Content-Type': 'multipart/form-data'},
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       const imageUrl = response.data.secure_url;
       setUploadedImageUrl(imageUrl);
@@ -141,7 +149,7 @@ const Story = ({route}) => {
   // const MusicPlayer = ({ songUrl }) => {
   //   const [paused, setPaused] = useState(false);
   //   console.log("🎶 Đang phát nhạc:", songUrl);
-  
+
   //   return (
   //     <View>
   //       {songUrl && (
@@ -164,23 +172,23 @@ const Story = ({route}) => {
   //     </View>
   //   );
   // };
-  
-  
+
+
   // const searchYouTubeMusic = async (query) => {
   //   const API_KEY = "AIzaSyCFElZOCK_3MtbZzKOdT_oK0K0RgPKmcRc";
   //   try {
   //     console.log("🔎 Đang tìm kiếm:", query);
-  
+
   //     const response = await axios.get(
   //       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query} music&type=video&key=${API_KEY}`
   //     );
-  
+
   //     console.log("📃 Kết quả YouTube API:", response.data.items);
-  
+
   //     const videoId = response.data.items[0]?.id.videoId;
   //     if (videoId) {
   //       console.log("🎬 Video ID:", videoId);
-  
+
   //       // Gửi yêu cầu tới Y2Mate để lấy link chuyển đổi
   //       const y2mateResponse = await axios.post(
   //         "https://www.y2mate.com/mates/analyzeV2/ajax",
@@ -191,9 +199,9 @@ const Story = ({route}) => {
   //         }),
   //         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
   //       );
-  
+
   //       console.log("📃 Phản hồi từ Y2Mate:", y2mateResponse.data);
-  
+
   //       const audioUrl = `https://www.snappea.com/api/button/mp3/${videoId}`;
   //       if (audioUrl) {
   //         setSelectedSongUrl(audioUrl);
@@ -208,23 +216,23 @@ const Story = ({route}) => {
   //     console.error("❌ Lỗi lấy nhạc YouTube:", error);
   //   }
   // };
-  
-  
+
+
 
   return (
     <TouchableWithoutFeedback>
       <View style={styles.container}>
         {previewImage ? (
-          <Image source={{uri: previewImage}} style={styles.image} />
+          <Image source={{ uri: previewImage }} style={styles.image} />
         ) : (
-          <Text style={{color: 'white', fontSize: 16}}>Chưa có ảnh</Text>
+          <Text style={{ color: 'white', fontSize: 16 }}>Chưa có ảnh</Text>
         )}
 
         {/* Nút thêm Text */}
         <TouchableOpacity
           style={styles.addTextButton}
           onPress={() => setShowText(true)}>
-          <Text style={{color: 'white'}}>Thêm Text</Text>
+          <Text style={{ color: 'white' }}>Thêm Text</Text>
         </TouchableOpacity>
 
         {/* Text có thể kéo thả và thu phóng */}
@@ -233,13 +241,14 @@ const Story = ({route}) => {
             {...panResponder.panHandlers}
             style={[
               styles.draggableTextContainer,
-              {transform: [...pan.getTranslateTransform(), {scale}]},
-            ]}>
+              { transform: pan.getTranslateTransform() },
+            ]}
+          >
             <TextInput
               style={styles.draggableText}
               onChangeText={setText}
               value={text}
-              placeholder="Nhập text..."
+              placeholder="Nhập văn bản..."
               placeholderTextColor="white"
             />
           </Animated.View>
@@ -247,7 +256,7 @@ const Story = ({route}) => {
         {/* Avatar & Nút Thoát */}
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
-            <Image source={{uri: me?.avatar}} style={styles.avatar} />
+            <Image source={{ uri: me?.avatar }} style={styles.avatar} />
             <Text style={styles.username}>
               {me?.first_name} {me?.last_name}
             </Text>
@@ -289,7 +298,7 @@ const Story = ({route}) => {
               <FlatList
                 data={statusOptions}
                 keyExtractor={item => item.status.toString()}
-                renderItem={({item}) => (
+                renderItem={({ item }) => (
                   <TouchableOpacity
                     style={styles.optionItem}
                     onPress={() => {
@@ -359,7 +368,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: StatusBar.currentHeight || 0,
   },
-  image: {width, height, resizeMode: 'cover'},
+  image: { width, height, resizeMode: 'cover' },
   headerContainer: {
     position: 'absolute',
     top: 30,
@@ -369,11 +378,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  userInfoContainer: {flexDirection: 'row', alignItems: 'center'},
-  avatar: {width: 40, height: 40, borderRadius: 20, marginRight: 10},
-  username: {color: 'white', fontSize: 16, fontWeight: 'bold'},
-  exitButton: {padding: 8, borderRadius: 20},
-  exitText: {fontSize: 20, color: 'white'},
+  userInfoContainer: { flexDirection: 'row', alignItems: 'center' },
+  avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
+  username: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+  exitButton: { padding: 8, borderRadius: 20 },
+  exitText: { fontSize: 20, color: 'white' },
   privacyButton: {
     position: 'absolute',
     bottom: 90,
@@ -384,7 +393,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  privacyText: {color: 'white', marginLeft: 10, fontSize: 14},
+  privacyText: { color: 'white', marginLeft: 10, fontSize: 14 },
   postButton: {
     position: 'absolute',
     bottom: 30,
@@ -404,7 +413,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 20,
   },
-  postText: {color: 'white', fontSize: 16, fontWeight: 'bold'},
+  postText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -417,7 +426,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
   },
-  modalTitle: {fontSize: 18, fontWeight: 'bold', marginBottom: 10},
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   optionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -425,7 +434,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  optionText: {fontSize: 16},
+  optionText: { fontSize: 16 },
   addTextButton: {
     position: 'absolute',
     bottom: 30,
@@ -442,7 +451,17 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
   },
-  draggableText: {color: 'white', fontSize: 20},
+  draggableText: { color: 'white', fontSize: 20 },
+  draggableTextContainer: {
+    position: "absolute",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 10,
+    borderRadius: 5,
+  },
+  draggableText: {
+    color: "white",
+    fontSize: 18,
+  },
 });
 
 export default Story;

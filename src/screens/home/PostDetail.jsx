@@ -752,7 +752,11 @@ const PostDetail = (props) => {
                   :
                   <View style={styles.userInfo}>
                     <View style={{ marginRight: width * 0.03 }}>
-                      <TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.goBack();// back về
+                        }}
+                      >
                         <Icon name="arrow-back" size={25} color="black" />
                       </TouchableOpacity>
                     </View>
