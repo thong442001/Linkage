@@ -127,6 +127,7 @@ import CallPage from '../screens/call/CallPage';
 import CallGroup from '../screens/call/CallGroup';
 import ChatBot from '../screens/chat/ChatBot';
 import ListFriend from '../screens/friend/ListFriend';
+import HuggingFaceImageGenerator from '../screens/Al/RunwayMLImageGenerator ';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -151,6 +152,7 @@ const oStackHome = {
   CallGroup: { name: 'CallGroup', component: CallGroup },
   ChatBot: { name: 'ChatBot', component: ChatBot },
   ListFriend: { name: 'ListFriend', component: ListFriend },
+  HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
