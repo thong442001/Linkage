@@ -44,6 +44,8 @@ const PostDetail = (props) => {
 
   const [comments, setComments] = useState([])
   const [comment, setComment] = useState('')
+  const [countComments, setCountComments] = useState(0)
+
   const [reply, setReply] = useState(null);
   const [post, setPost] = useState(null)
 
@@ -84,6 +86,7 @@ const PostDetail = (props) => {
         setPost(response.post);
         setComments(response.post?.comments)
         setReactionsOfPost(response.post.post_reactions)
+        setCountComments(response.post.countComments);
       } else {
         console.log('API không trả về bài viết.');
       }
@@ -110,6 +113,7 @@ const PostDetail = (props) => {
     });
   };
 
+
   //call api chi tiet bai post
   const callAddComment = async (type, content) => {
     try {
@@ -133,6 +137,7 @@ const PostDetail = (props) => {
           } else {
             setComments((prevComments) => [...prevComments, response.comment]);
           }
+          setCountComments(countComments + 1);
           setComment('');
           setReply(null);
         })
@@ -638,7 +643,9 @@ const PostDetail = (props) => {
               <View style={styles.userInfo}>
                 <View style={{ marginRight: width * 0.04 }}>
                   <TouchableOpacity
-
+                    onPress={() => {
+                      navigation.goBack();// back về
+                    }}
                   >
                     <Icon name="arrow-back" size={25} color="black" />
                   </TouchableOpacity>
@@ -1068,10 +1075,10 @@ const PostDetail = (props) => {
                     <View>
                       {/*so luong  bình luận */}
                       {
-                        comments.length > 0
+                        countComments > 0
                         && (
                           <Text style={[styles.slReactionsOfPost]}>
-                            {post?.comments.length} bình luận
+                            {countComments} bình luận
                           </Text>
                         )
                       }
