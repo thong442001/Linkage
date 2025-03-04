@@ -1,5 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import AxiosHelper from '../helpers/AxiosHelper'
+import axios from "axios";
+// của spotify
+const CLIENT_ID = "1517c266c3f940ad9c9826a65577eaa9";
+const CLIENT_SECRET = "f24bc1b5e1bf4eca8e5b772b81de1c79";
 
 export const login = createAsyncThunk(
   'user/login',
