@@ -438,69 +438,72 @@ const PostItem = ({
         }
     }
 
-
-
-
     return (
         <View style={styles.postContainer}>
             {/* Header share  */}
             {
                 post.ID_post_shared &&
-                <View style={styles.header}>
-                    <View style={styles.userInfo}>
-                        <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                        <View style={{ marginLeft: 20 }}>
-                            <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
-                            <View style={styles.boxName}>
-                                <Text style={styles.time}>{timeAgo}</Text>
-                                {/* <Icon name="earth" size={12} color="gray" /> */}
-                                {
-                                    getIcon(post.status)
-                                }
-                            </View>
-                            {
-                                hasCaption && <Text style={styles.caption}>{post.caption}</Text>
-                            }
-                        </View>
-                    </View>
-
-                    <TouchableOpacity
-                        disabled={ID_user != post.ID_user._id}
-                        onPress={() =>
-                            openBottomSheet(
-                                25,
-                                <View>
-                                    <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
-                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                        <Text style={[styles.deleteText,]}
-                                        >{
-                                                post._destroy ? (
-                                                    "Phục hồi"
-                                                ) : "Xóa bài viết"
-                                            }
-                                        </Text>
-                                    </TouchableOpacity>
+                <View>
+                    <View style={styles.header}>
+                        <View style={styles.userInfo}>
+                            <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                            <View style={{ marginLeft: width * 0.01 }}>
+                                <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                                <View style={styles.boxName}>
+                                    <Text style={styles.time}>{timeAgo}</Text>
+                                    {/* <Icon name="earth" size={12} color="gray" /> */}
                                     {
-                                        post._destroy && (
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    onDeleteVinhVien()
-                                                    closeBottomSheet()
-                                                }}
-                                                style={styles.deleteButton}>
-                                                <Text style={styles.deleteText}
-                                                >Xóa vĩnh viễn
-                                                </Text>
-                                            </TouchableOpacity>
-                                        )
+                                        getIcon(post.status)
                                     }
-                                </View>,
-                            )
-                        }
+                                </View>
 
-                    >
-                        <Icon name="ellipsis-horizontal" size={22} color="black" />
-                    </TouchableOpacity>
+                            </View>
+
+                        </View>
+
+                        <TouchableOpacity
+                            disabled={ID_user != post.ID_user._id}
+                            onPress={() =>
+                                openBottomSheet(
+                                    25,
+                                    <View>
+                                        <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
+                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                            <Text style={[styles.deleteText,]}
+                                            >{
+                                                    post._destroy ? (
+                                                        "Phục hồi"
+                                                    ) : "Xóa bài viết"
+                                                }
+                                            </Text>
+                                        </TouchableOpacity>
+                                        {
+                                            post._destroy && (
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        onDeleteVinhVien()
+                                                        closeBottomSheet()
+                                                    }}
+                                                    style={styles.deleteButton}>
+                                                    <Text style={styles.deleteText}
+                                                    >Xóa vĩnh viễn
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )
+                                        }
+                                    </View>,
+                                )
+                            }
+
+                        >
+                            <Icon name="ellipsis-horizontal" size={22} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                    <View>
+                        {
+                            hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>
+                        }
+                    </View>
                 </View>
             }
             {/* Header goc  */}
@@ -512,7 +515,7 @@ const PostItem = ({
                                 ?
                                 <View style={styles.userInfo}>
                                     <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
-                                    <View style={{ marginLeft: 20 }}>
+                                    <View style={{ marginLeft: width * 0.01 }}>
                                         <Text style={styles.name}>
                                             {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
                                             {post.ID_post_shared.tags.length > 0 && (
@@ -545,7 +548,7 @@ const PostItem = ({
                                 :
                                 <View style={styles.userInfo}>
                                     <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                                    <View style={{ marginLeft: 20 }}>
+                                    <View style={{ marginLeft: width * 0.01 }}>
                                         <Text style={styles.name}>
                                             {post.ID_user.first_name} {post.ID_user.last_name}
                                             {post.tags.length > 0 && (
@@ -633,17 +636,18 @@ const PostItem = ({
                             hasCaption && <Text style={styles.caption}>{post?.caption}</Text>
                         )
                 }
+                {
+                    post.ID_post_shared
+                        ? (
+                            hasMedia && renderMediaGrid(post.ID_post_shared.medias)
+                        )
+                        :
+                        (
+                            hasMedia && renderMediaGrid(post.medias)
+                        )
+                }
             </View>
-            {
-                post.ID_post_shared
-                    ? (
-                        hasMedia && renderMediaGrid(post.ID_post_shared.medias)
-                    )
-                    :
-                    (
-                        hasMedia && renderMediaGrid(post.medias)
-                    )
-            }
+
 
             {/* reactions of post */}
             {
@@ -866,12 +870,15 @@ const styles = StyleSheet.create({
         marginBottom: height * 0.015, // 1.5% chiều cao màn hình
     },
     header1: {
-        borderWidth: 0.3,
-        borderRadius: 3,
-        borderTopColor: 'black',
-        borderLeftColor: 'black',
-        borderRightColor: 'black',
-        borderBottomColor: 'white'
+        backgroundColor: 'white',
+        borderColor: 'black',
+        borderWidth: 0.2,
+        borderRadius: 7,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5, // Dành cho Android
     },
     header2: {
     },
@@ -911,10 +918,12 @@ const styles = StyleSheet.create({
         marginBottom: height * 0.015,
         fontSize: width * 0.035, // 3.5% chiều rộng màn hình
         color: 'black',
+        marginLeft: width * 0.04
     },
     mediaContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        justifyContent: 'center'
     },
     singleMedia: {
         width: '100%',
@@ -1039,7 +1048,7 @@ const styles = StyleSheet.create({
     reactionText: {
         fontSize: 15,
         color: "#000",
-        alignSelf: 'flex-end'
+        alignSelf: 'flex-end',
     },
     // reaction of post
     vReactionsOfPost: {
@@ -1047,7 +1056,8 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 20,
         paddingHorizontal: 10,
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        marginTop: height * 0.02
     },
     slReactionsOfPost: {
         color: 'black',

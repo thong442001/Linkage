@@ -7,6 +7,7 @@ import {
   TextInput,
   Modal,
   TouchableWithoutFeedback,
+  Dimensions
 } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import Video from 'react-native-video';
@@ -28,7 +29,7 @@ import {
 } from '../../rtk/API';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
-
+const { width, height } = Dimensions.get('window');
 const PostDetail = (props) => {
   const { navigation } = props
   const route = useRoute();
@@ -628,66 +629,79 @@ const PostDetail = (props) => {
       return <Text>Đang tải dữ liệu...</Text>;
     }
     return (
-      <View>
+      <View style={styles.postContainer}>
         {/* Header share  */}
         {
           post.ID_post_shared &&
-          <View style={styles.header}>
-            <View style={styles.userInfo}>
-              <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-              <View style={{ marginLeft: 20 }}>
-                <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
-                <View style={styles.boxName}>
-                  <Text style={styles.time}>{timeAgo}</Text>
-                  {/* <Icon name="earth" size={12} color="gray" /> */}
-                  {
-                    getIcon(post.status)
-                  }
+          <View>
+            <View style={styles.header}>
+              <View style={styles.userInfo}>
+                <View style={{ marginRight: width * 0.04 }}>
+                  <TouchableOpacity
+
+                  >
+                    <Icon name="arrow-back" size={25} color="black" />
+                  </TouchableOpacity>
                 </View>
-                {
-                  hasCaption && <Text style={styles.caption}>{post.caption}</Text>
-                }
-              </View>
-            </View>
-
-            <TouchableOpacity
-              disabled={me._id != post.ID_user._id}
-              onPress={() =>
-                openBottomSheet(
-                  25,
-                  <View>
-                    <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
-                      style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                      <Text style={[styles.deleteText,]}
-                      >{
-                          post._destroy ? (
-                            "Phục hồi"
-                          ) : "Xóa bài viết"
-                        }
-                      </Text>
-                    </TouchableOpacity>
+                <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                <View style={{ marginLeft: width * 0.05 }}>
+                  <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                  <View style={styles.boxName}>
+                    <Text style={styles.time}>{timeAgo}</Text>
+                    {/* <Icon name="earth" size={12} color="gray" /> */}
                     {
-                      post._destroy && (
-                        <TouchableOpacity
-                          onPress={() => {
-                            onDeleteVinhVien()
-                            closeBottomSheet()
-                          }}
-                          style={styles.deleteButton}>
-                          <Text style={styles.deleteText}
-                          >Xóa vĩnh viễn
-                          </Text>
-                        </TouchableOpacity>
-                      )
+                      getIcon(post.status)
                     }
-                  </View>,
-                )
-              }
+                  </View>
 
-            >
-              <Icon name="ellipsis-horizontal" size={22} color="black" />
-            </TouchableOpacity>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                disabled={me._id != post.ID_user._id}
+                onPress={() =>
+                  openBottomSheet(
+                    25,
+                    <View>
+                      <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
+                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                        <Text style={[styles.deleteText,]}
+                        >{
+                            post._destroy ? (
+                              "Phục hồi"
+                            ) : "Xóa bài viết"
+                          }
+                        </Text>
+                      </TouchableOpacity>
+                      {
+                        post._destroy && (
+                          <TouchableOpacity
+                            onPress={() => {
+                              onDeleteVinhVien()
+                              closeBottomSheet()
+                            }}
+                            style={styles.deleteButton}>
+                            <Text style={styles.deleteText}
+                            >Xóa vĩnh viễn
+                            </Text>
+                          </TouchableOpacity>
+                        )
+                      }
+                    </View>,
+                  )
+                }
+
+              >
+                <Icon name="ellipsis-horizontal" size={22} color="black" />
+              </TouchableOpacity>
+            </View>
+            <View>
+              {
+                hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>
+              }
+            </View>
           </View>
+
         }
         {/* Header goc  */}
         <View style={post.ID_post_shared ? styles.header1 : styles.header2} >
@@ -730,6 +744,11 @@ const PostDetail = (props) => {
                   </View>
                   :
                   <View style={styles.userInfo}>
+                    <View style={{ marginRight: width * 0.03 }}>
+                      <TouchableOpacity>
+                        <Icon name="arrow-back" size={25} color="black" />
+                      </TouchableOpacity>
+                    </View>
                     <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                     <View style={{ marginLeft: 20 }}>
                       <Text style={styles.name}>
@@ -764,10 +783,6 @@ const PostDetail = (props) => {
               }
             </View>
 
-
-            <View>
-
-            </View>
             {
               !post.ID_post_shared &&
               <TouchableOpacity
@@ -819,17 +834,18 @@ const PostDetail = (props) => {
                 hasCaption && <Text style={styles.caption}>{post?.caption}</Text>
               )
           }
+          {
+            post.ID_post_shared
+              ? (
+                hasMedia && renderMediaGrid(post.ID_post_shared.medias)
+              )
+              :
+              (
+                hasMedia && renderMediaGrid(post.medias)
+              )
+          }
         </View>
-        {
-          post.ID_post_shared
-            ? (
-              hasMedia && renderMediaGrid(post.ID_post_shared.medias)
-            )
-            :
-            (
-              hasMedia && renderMediaGrid(post.medias)
-            )
-        }
+
 
         {
           !post._destroy &&
@@ -1114,35 +1130,36 @@ const PostDetail = (props) => {
             </View>
           )
         }
-        <View style={styles.line}></View>
-        <View
-          style={{ flexDirection: 'row' }}
-        >
-          {/* Thư Viện */}
-          <View style={styles.librarySelect}>
-            <TouchableOpacity
-              onPress={onOpenGallery}
-            >
-              <Icon name="image" size={25} color="#007bff" />
-            </TouchableOpacity>
-
-          </View>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Viết bình luận "
-            multiline={true}
-            value={comment}
-            onChangeText={setComment}
-          />
-          <TouchableOpacity
-            onPress={() => callAddComment('text', comment)}
-            style={styles.sendButton}
+        <View style={styles.boxCommentAll}>
+          <View
+            style={styles.boxComment}
           >
-            <View>
-              <Icon name="send" size={25} color='#007bff' />
+            {/* Thư Viện */}
+            <View style={styles.librarySelect}>
+              <TouchableOpacity
+                onPress={onOpenGallery}
+              >
+                <Icon name="image" size={25} color="#007bff" />
+              </TouchableOpacity>
+
             </View>
-            {/* <Text style={styles.sendText}>Send</Text> */}
-          </TouchableOpacity>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Viết bình luận "
+              multiline={true}
+              value={comment}
+              onChangeText={setComment}
+            />
+            <View>
+              <TouchableOpacity
+                onPress={() => callAddComment('text', comment)}
+                style={styles.sendButton}
+              >
+                <Icon name="send" size={25} color='#007bff' />
+                {/* <Text style={styles.sendText}>Send</Text> */}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </View>
     </View>

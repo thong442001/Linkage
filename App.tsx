@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Alert, SafeAreaView, StatusBar, StyleSheet, Platform } from 'react-native';
+
 import AppNavigation from './src/navigations/AppNavigation';
 import { Provider } from 'react-redux';
 import { store, persistor } from './src/rtk/Store';

@@ -8,13 +8,16 @@ const CommentS = StyleSheet.create({
         marginBottom: height * 0.015, // 1.5% chiều cao màn hình
     },
     header1: {
-        borderWidth: 0.3,
-        borderRadius: 3,
-        borderTopColor: 'black',
-        borderLeftColor: 'black',
-        borderRightColor: 'black',
-        borderBottomColor: 'white'
-    },
+        backgroundColor: 'white',
+        borderColor: 'black',
+        borderWidth: 0.2,
+        borderRadius: 7,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5, // Dành cho Android
+    },    
     header2: {
     },
     header: {
@@ -30,7 +33,7 @@ const CommentS = StyleSheet.create({
     },
     userInfo: {
         flex: 1,
-        marginLeft: width * 0.01,
+        // marginLeft: width * 0.01,
         alignItems: 'center',
         flexDirection: 'row'
     },
@@ -53,6 +56,7 @@ const CommentS = StyleSheet.create({
         marginBottom: height * 0.015,
         fontSize: width * 0.035, // 3.5% chiều rộng màn hình
         color: 'black',
+        marginLeft: width * 0.04
     },
     mediaContainer: {
         flexDirection: 'row',
@@ -312,7 +316,7 @@ const CommentS = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        marginRight: 12,
+        // marginRight: 12,
     },
     userName: {
         fontSize: 14,
@@ -328,6 +332,7 @@ const CommentS = StyleSheet.create({
     },
     nameItemReaction: {
         color: 'black',
+        marginLeft : width * 0.03
     },
     box: {
         backgroundColor: "#D9d9d9",
@@ -381,12 +386,13 @@ const CommentS = StyleSheet.create({
         backgroundColor: "#d9d9d9",
         borderRadius: width * 0.05,
         marginHorizontal: width * 0.05,
-        marginVertical: height * 0.015,
+        marginVertical: height * 0.012,
         padding: width * 0.025,
-        width: width * 0.75
+        // width: width * 0.75,
+        flex: 1
     },
     line: {
-        height: 0.5,
+        height: 0.2,
         width: '100%',
         backgroundColor: 'gray',
     },
@@ -466,7 +472,7 @@ const CommentS = StyleSheet.create({
         transform: [{ translateX: -20 }, { translateY: -20 }],
     },
     sendButton: {
-        marginLeft: 10,
+        // marginRight: 20,
         // backgroundColor: '#007bff',
         // padding: 10,
         // borderRadius: 20,
@@ -482,10 +488,25 @@ const CommentS = StyleSheet.create({
         color: 'black',
     },
     replyContent: {
-        color: 'grey',
+        color: 'black',
     },
     replyRight: {
         alignItems: 'flex-end',
+    },
+    //input comment 
+    boxComment: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: width * 0.04,
+    },
+    boxCommentAll: {
+        backgroundColor: 'white', // Đảm bảo có màu nền để bóng hiển thị rõ
+        borderRadius: 6, // Nếu muốn bo góc
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3.84,
+        elevation: 20, // Dành cho Android
     }
 });
 
