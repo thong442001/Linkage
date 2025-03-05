@@ -334,12 +334,12 @@ export const getAllFriendOfID_user = createAsyncThunk(
 );
 
 // nhóm chat
-export const addtMembers = createAsyncThunk(
-  'group/addtMembers',
+export const addMembers = createAsyncThunk(
+  'group/addMembers',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
-        .post('group/addtMembers', data);
+        .post('group/addMembers', data);
       //console.log(response)
       if (response.status == true) {
         console.log(response?.message)

@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     getAllFriendOfID_user,
     getGroupID,
-    addtMembers
+    addMembers
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -91,20 +91,22 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
     }
 
     //call api addtMembers
-    const callAddtMembers = async (ID_group, new_members) => {
+    const callAddMembers = async (ID_group, new_members) => {
         try {
             const paramsAPI = {
                 ID_group: ID_group,
                 new_members: new_members,
             }
-            await dispatch(addtMembers(paramsAPI))
+            await dispatch(addMembers(paramsAPI))
                 .unwrap()
                 .then((response) => {
                     console.log(response.message)
-                    navigation.navigate("Chat", { ID_group: ID_group })
+                    if (response.status) {
+                        navigation.navigate("Chat", { ID_group: ID_group })
+                    }
                 })
                 .catch((error) => {
-                    console.log('Error1 addtMembers:', error);
+                    console.log('Error1 callAddMembers:', error);
                 });
 
         } catch (error) {
@@ -115,7 +117,7 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
     // Xử lý add ng
     const handleAddMembers = () => {
         if (selectedUsers.length > 0) {
-            callAddtMembers(params.ID_group, selectedUsers)
+            callAddMembers(params.ID_group, selectedUsers)
         } else {
             return;
         }
@@ -149,7 +151,7 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
                 </View>
                 {/* search friend */}
                 <View style={styles.boxSearch}>
-                    <View style={{paddingLeft: 10}}>
+                    <View style={{ paddingLeft: 10 }}>
                         <Icon name="search-outline" size={25} color='black' />
                     </View>
                     <TextInput
@@ -187,41 +189,41 @@ const styles = StyleSheet.create({
     containerAll: {
         flex: 1,
         backgroundColor: '#fff',
-      },
-      container: {
+    },
+    container: {
         marginHorizontal: width * 0.05, // 5% chiều rộng màn hình
-      },
-      header: {
+    },
+    header: {
         fontSize: width * 0.06, // 6% chiều rộng màn hình
         fontWeight: 'bold',
         color: "black",
         width: width * 0.5, // 50% chiều rộng màn hình
         textAlign: 'center',
-      },
-      headerBlue: {
+    },
+    headerBlue: {
         fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "blue",
         textAlign: 'center',
-      },
-      searchBox: {
+    },
+    searchBox: {
         padding: height * 0.02, // 2% chiều cao màn hình
         flex: 1,
-      },
-      vHeader: {
+    },
+    vHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginVertical: height * 0.02, // 2% chiều cao màn hình
         alignItems: 'center',
-      },
-      txtGrey: {
+    },
+    txtGrey: {
         fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "#797979",
-      },
-      boxSearch: {
+    },
+    boxSearch: {
         flexDirection: 'row',
         alignItems: 'center',
         marginVertical: height * 0.02, // 2% chiều cao màn hình
         backgroundColor: '#eee',
         borderRadius: width * 0.05, // 5% chiều rộng màn hình
-      },
+    },
 });
