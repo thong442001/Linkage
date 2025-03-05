@@ -144,7 +144,6 @@ const Chat = (props) => {// cần ID_group (param)
         getMessagesOld(params?.ID_group);
 
         // Kết nối tới server
-
         const newSocket = io('https://linkage.id.vn', {
             transports: ['websocket', 'polling'],
             reconnection: true,   // Cho phép tự động kết nối lại

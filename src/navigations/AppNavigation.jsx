@@ -8,18 +8,20 @@ import {
   getAllReaction,
 } from '../rtk/API';
 import { requestPermissions } from '../screens/service/MyFirebaseMessagingService';
-
-
 import { setReactions, setFcmToken } from '../rtk/Reducer';
 import database from '@react-native-firebase/database';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
+import { io } from "socket.io-client";  // Thêm socket.io-client
 
 const AppNavigation = () => {
 
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
+  const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]); // Lưu danh sách user online
+
   const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
   //console.log("****: " + reactions)
@@ -30,13 +32,39 @@ const AppNavigation = () => {
   useEffect(() => {
     //reactions
     callGetAllReaction()
-
     // Hiển thị màn hình chào trong 2 giây
     const timeout = setTimeout(() => {
       setSplashVisible(false);  // Ẩn màn hình chào sau 2 giây
     }, 2000);
-    return () => clearTimeout(timeout);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
+
+  useEffect(() => {
+    // Kết nối tới server
+    const newSocket = io('https://linkage.id.vn', {
+      transports: ['websocket', 'polling'],
+      reconnection: true,   // Cho phép tự động kết nối lại
+      reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
+      timeout: 5000, // Chờ tối đa 5 giây trước khi báo lỗi
+    });
+    setSocket(newSocket);
+    if (user && socket) {
+      newSocket.emit("user_online", user._id); // Gửi ID user lên server khi đăng nhập
+    }
+
+    newSocket.on("online_users", (userList) => {
+      setOnlineUsers(userList);
+      console.log("🟢 Danh sách user online:", userList);
+    });
+    console.log("OnlineUsers: " + onlineUsers);
+
+    return () => {
+      newSocket.off("online_users");
+    };
+  }, [user]);
 
 
   //call api getAllReaction

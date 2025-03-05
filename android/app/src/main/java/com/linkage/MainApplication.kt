@@ -1,4 +1,4 @@
-package com.linkage
+package com.linkage.app
 
 import android.app.Application
 import com.facebook.react.PackageList

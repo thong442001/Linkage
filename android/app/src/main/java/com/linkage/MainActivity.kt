@@ -1,4 +1,4 @@
-package com.linkage
+package com.linkage.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

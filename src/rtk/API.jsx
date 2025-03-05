@@ -24,6 +24,21 @@ export const login = createAsyncThunk(
   }
 );
 
+export const loginGG = createAsyncThunk(
+  'gg/loginGG',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response =
+        await AxiosHelper()
+          .post('gg/loginGG', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const register = createAsyncThunk(
   'user/register',
   async (data, { rejectWithValue }) => {
