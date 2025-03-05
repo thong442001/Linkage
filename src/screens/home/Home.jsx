@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Stories from '../../components/items/Stories';
 import ProfilePage from '../../components/items/ProfilePage';
@@ -26,6 +26,7 @@ const Home = props => {
   const { params } = route;
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
+
   const token = useSelector(state => state.app.token);
   const [loading, setloading] = useState(true); // Quản lý trạng thái loading
   const [posts, setPosts] = useState(null);
@@ -125,6 +126,19 @@ const Home = props => {
       callGetAllPostsInHome(me._id); // Gọi API load dữ liệu
     }, [])
   );
+  const renderPosts = useCallback(({ item }) => (
+    <ProfilePage
+      post={item}
+      ID_user={me._id}
+      onDelete={() => callChangeDestroyPost(item._id)}
+      updatePostReaction={updatePostReaction}
+      deletPostReaction={deletPostReaction}
+    />
+  ), [posts]);
+
+  const renderStories = useCallback(({ item }) => (
+    <Stories StoryPost={item} />
+  ), [stories]);
 
   const headerComponentStory = () => {
     return (
@@ -156,10 +170,13 @@ const Home = props => {
               <Text style={HomeS.title}>inkage</Text>
             </View>
             <View style={HomeS.icons} >
-              <TouchableOpacity onPress={()=>navigation.navigate('QRScannerScreen')} style={HomeS.iconsPadding}>
+              <TouchableOpacity onPress={() => navigation.navigate('QRScannerScreen')} style={HomeS.iconsPadding}>
                 <Icon name="scan-circle-outline" size={25} color="black" />
               </TouchableOpacity>
-              <TouchableOpacity style={HomeS.iconsPadding}>
+              <TouchableOpacity s
+                tyle={HomeS.iconsPadding}
+                onPress={() => navigation.navigate('HuggingFaceImageGenerator')}
+              >
                 <Icon name="add" size={25} color="black" />
               </TouchableOpacity>
               <TouchableOpacity
@@ -200,7 +217,7 @@ const Home = props => {
           <View style={HomeS.story}>
             <FlatList
               data={stories}
-              renderItem={({ item }) => <Stories StoryPost={item} />}
+              renderItem={renderStories}
               keyExtractor={(item, index) => item?._id ? item._id.toString() : `story-${index}`}
               horizontal={true}
               showsHorizontalScrollIndicator={false}
@@ -239,14 +256,7 @@ const Home = props => {
       ) : (
         <FlatList
           data={posts}
-          renderItem={({ item }) =>
-            <ProfilePage
-              post={item}
-              ID_user={me._id}
-              onDelete={() => callChangeDestroyPost(item._id)}
-              updatePostReaction={updatePostReaction}
-              deletPostReaction={deletPostReaction}
-            />}
+          renderItem={renderPosts}
           keyExtractor={item => item._id}
           showsHorizontalScrollIndicator={false}
           ListHeaderComponent={headerComponentPost}

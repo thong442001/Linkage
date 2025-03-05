@@ -104,9 +104,19 @@ const appSlice = createSlice({
 
         builder.addCase(login.fulfilled, (state, action) => {
             console.log('...Fulfilled login', action.payload);
-            state.user = action.payload?.user || null;
             state.token = action.payload?.token || '';
             state.refreshToken = action.payload?.refreshToken || '';
+            state.user = action.payload?.user
+                ? {
+                    ...action.payload.user,
+                    createdAt: action.payload.user.createdAt
+                        ? new Date(action.payload.user.createdAt).toISOString()
+                        : null,
+                    updatedAt: action.payload.user.updatedAt
+                        ? new Date(action.payload.user.updatedAt).toISOString()
+                        : null,
+                }
+                : null;
         });
 
         builder.addCase(login.rejected, (state, action) => {

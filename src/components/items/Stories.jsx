@@ -1,11 +1,11 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
-import React from 'react';
+import React, { memo } from 'react';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
-const Stories = ({ StoryPost }) => {
+const Stories = memo(({ StoryPost }) => {
 
   // console.log('Props received in Stories:', StoryPost.user._id); // Kiểm tra props nhận được
 
@@ -34,7 +34,7 @@ const Stories = ({ StoryPost }) => {
       </Text>
     </TouchableOpacity>
   );
-};
+});
 export default Stories;
 
 const styles = StyleSheet.create({

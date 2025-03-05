@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
     minHeight: 100,
+    color: 'black'
   },
   imageContainer: {
     marginTop: 20,

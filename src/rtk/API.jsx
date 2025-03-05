@@ -718,3 +718,33 @@ export const setNoti_token = createAsyncThunk(
     }
   }
 );
+
+// params: ID_comment, ID_user, ID_reaction
+export const addComment_Reaction = createAsyncThunk(
+  'comment_reaction/addComment_Reaction',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('comment_reaction/addComment_Reaction', data);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// // xóa deleteComment_reaction
+// // params: _id
+export const deleteComment_reaction = createAsyncThunk(
+  'comment_reaction/deleteComment_reaction',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('comment_reaction/deleteComment_reaction', data);
+      //console.log(response?.message)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);

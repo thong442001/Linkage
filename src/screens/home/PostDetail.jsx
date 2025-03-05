@@ -9,12 +9,11 @@ import {
   TouchableWithoutFeedback,
   Dimensions
 } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import Icon4 from 'react-native-vector-icons/FontAwesome5';
-import Icon5 from 'react-native-vector-icons/AntDesign';
 import styles from '../../styles/components/items/CommentS';
 import ListComment from '../../components/items/ListComment';
 import { useRoute } from '@react-navigation/native';
@@ -79,17 +78,17 @@ const PostDetail = (props) => {
   const callGetChiTietPost = async (ID_post) => {
     try {
       //console.log("ID_post:", ID_post);
-      const response = await dispatch(getChiTietPost({ ID_post, token })).unwrap();
-
-      if (response && response.post) {
-        //console.log("API:", response.post);
-        setPost(response.post);
-        setComments(response.post?.comments)
-        setReactionsOfPost(response.post.post_reactions)
-        setCountComments(response.post.countComments);
-      } else {
-        console.log('API không trả về bài viết.');
-      }
+      await dispatch(getChiTietPost({ ID_post, token }))
+        .unwrap()
+        .then((response) => {
+          setPost(response.post);
+          setComments(response.post.comments)
+          setReactionsOfPost(response.post.post_reactions)
+          setCountComments(response.post.countComments);
+        })
+        .catch((error) => {
+          console.log('API không trả về bài viết: ' + error.message);
+        });
     } catch (error) {
       console.log('Lỗi khi lấy chi tiết bài viết:', error);
     }
@@ -629,6 +628,13 @@ const PostDetail = (props) => {
     }
   }
 
+  const renderComment = useCallback(({ item }) => (
+    <ListComment
+      comment={item}
+      onReply={(e) => setReply(e)}
+    />
+  ), [setReply]);
+
   const header = () => {
     if (!post) {
       return <Text>Đang tải dữ liệu...</Text>;
@@ -1101,11 +1107,9 @@ const PostDetail = (props) => {
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <FlatList
         data={comments}
-        renderItem={({ item }) => <ListComment
-          comment={item}
-          onReply={(e) => setReply(e)}
-        />}
-        keyExtractor={item => item._id}
+        renderItem={renderComment}
+        keyExtractor={(item) => item._id.toString()}
+        getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
         extraData={comments}
         ListHeaderComponent={header}
         contentContainerStyle={{ paddingBottom: '17%' }}

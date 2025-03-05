@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import {
     View,
     Text,
@@ -25,7 +25,7 @@ import {
     deletePost_reaction,//xóa post_reaction
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
-const PostItem = ({
+const PostItem = memo(({
     post,
     ID_user,
     onDelete = () => { },
@@ -861,7 +861,7 @@ const PostItem = ({
             </Modal >
         </View >
     );
-};
+});
 
 const styles = StyleSheet.create({
     postContainer: {
@@ -989,6 +989,7 @@ const styles = StyleSheet.create({
         left: '50%',
         transform: [{ translateX: -20 }, { translateY: -20 }],
     },
+    // list reactions 
     overlay: {
         position: 'absolute',
         //backgroundColor: 'rgba(0,0,0,0.5)',
