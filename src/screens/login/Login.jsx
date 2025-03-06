@@ -132,7 +132,7 @@ const Login = (props) => {
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      onLoginGG({ email: user.email, name: user.displayName, picture: user.photoURL });
+      onLoginGG({ email: user.email, name: user.displayName, picture: user.photoURL, fcmToken: fcmToken });
 
     } catch (error) {
       console.error("Lỗi đăng nhập:", error.message);
