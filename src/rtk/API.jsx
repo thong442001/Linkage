@@ -57,6 +57,21 @@ export const register = createAsyncThunk(
     }
   }
 )
+export const check_email = createAsyncThunk(
+  'gg/check-email',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response =
+        await AxiosHelper()
+          //.get('post/getMyPosts', data);
+          .get(`gg/check-email?uid=${data.uid}`);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const checkPhone = createAsyncThunk(
   'user/checkPhone',

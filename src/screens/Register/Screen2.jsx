@@ -3,7 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, Alert } from 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { checkPhone } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
-
+import auth from "@react-native-firebase/auth";
 const { width } = Dimensions.get('window');
 
 const Screen2 = (props) => {
@@ -12,6 +12,9 @@ const Screen2 = (props) => {
 
     const dispatch = useDispatch();
     const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState("");
+    const [confirmation, setConfirmation] = useState(null);
+
     const [error, setError] = useState('');
 
     function isValidPhone(phone) {
@@ -30,25 +33,27 @@ const Screen2 = (props) => {
         }
 
         setError('');
+        //handleSendOTP();
         callAPICheckPhone();
     };
 
 
     const callAPICheckPhone = () => {
         dispatch(checkPhone({ phone }))
-    .unwrap()
-    .then((response) => {
-        console.log("Response từ API:", response); 
-        if (response.status) {
-            handleTiep();
-        } else {
-            Alert.alert('Lỗi', response.message);
-        }
-    })
-    .catch((error) => {
-        Alert.alert('Lỗi', 'Đã xảy ra lỗi khi kiểm tra số điện thoại.');
-        console.log('Error:', error);
-    });
+            .unwrap()
+            .then((response) => {
+                console.log("Response từ API:", response);
+                if (response.status) {
+                    handleTiep();
+                    //handleSendOTP();
+                } else {
+                    Alert.alert('Lỗi', response.message);
+                }
+            })
+            .catch((error) => {
+                Alert.alert('Lỗi', 'Đã xảy ra lỗi khi kiểm tra số điện thoại.');
+                console.log('Error:', error);
+            });
 
     };
 
@@ -62,6 +67,33 @@ const Screen2 = (props) => {
             phone: phone,
             email: null,
         });
+    };
+    const formatPhoneNumber = (phone) => {
+        if (!phone.startsWith("+")) {
+            return "+84" + phone.replace(/^0/, ""); // Thêm +84 nếu thiếu và bỏ số 0 đầu
+        }
+        return phone;
+    };
+
+    // Gửi OTP
+    const handleSendOTP = async () => {
+        let formattedPhone = formatPhoneNumber(phone); // Định dạng lại số điện thoại
+        try {
+            const confirm = await auth().signInWithPhoneNumber(formattedPhone);
+            setConfirmation(confirm);
+        } catch (error) {
+            console.error("Lỗi gửi OTP: " + error.message);
+        }
+    };
+    // Xác thực OTP
+    const handleVerifyOTP = async () => {
+        try {
+            const userCredential = await confirmation.confirm(otp);
+            console.log("Đăng nhập thành công!");
+            console.log("User:", userCredential.user);
+        } catch (error) {
+            console.error("OTP không hợp lệ!");
+        }
     };
 
     return (
@@ -84,13 +116,36 @@ const Screen2 = (props) => {
                 style={[styles.inputDate, error && { borderColor: 'red' }]}
                 keyboardType="phone-pad"
             />
+            {/* <TextInput
+                value={otp}
+                onChangeText={(text) => {
+                    setOtp(text);
+                    setError('');
+                }}
+                placeholderTextColor={'#8C96A2'}
+                placeholder="OTP"
+                style={[styles.inputDate, error && { borderColor: 'red' }]}
+                keyboardType="phone-pad"
+            /> */}
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
-
             <Pressable style={styles.button} onPress={check}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
+            {/* <Pressable style={styles.button} onPress={check}>
+                <Text style={styles.buttonText}>Gửi OTP</Text>
+            </Pressable>
+            <Pressable style={styles.button} onPress={check}>
+                <Text style={styles.buttonText}>Xác thực</Text>
+            </Pressable>
+            {
+                confirmation && (
+                    <Pressable style={styles.button} onPress={handleTiep}>
+                        <Text style={styles.buttonText}>Tiếp</Text>
+                    </Pressable>
+                )
+            } */}
 
             <View style={styles.containerButton}>
                 <Pressable
@@ -136,6 +191,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         fontSize: 16,
         marginBottom: 5,
+        color: 'black'
     },
     errorText: {
         color: 'red',
