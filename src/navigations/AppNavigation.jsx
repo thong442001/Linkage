@@ -121,11 +121,16 @@ const AppNavigation = () => {
     // Khi app đang mở
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
       console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
-      displayNotification(
-        remoteMessage.notification?.title ?? 'Thông báo',
-        remoteMessage.notification?.body ?? 'Bạn có một tin nhắn mới.',
-        remoteMessage.data ?? {}
-      );
+
+      // Hiển thị thông báo bằng Notifee
+      await notifee.displayNotification({
+        title: remoteMessage.notification?.title ?? 'Thông báo',
+        body: remoteMessage.notification?.body ?? 'Bạn có một tin nhắn mới.',
+        android: {
+          channelId: 'default-channel', // Đảm bảo channelId tồn tại
+          smallIcon: 'ic_launcher', // Đổi icon nếu cần
+        },
+      });
     });
 
     // Khi app chạy nền và người dùng nhấn vào thông báo

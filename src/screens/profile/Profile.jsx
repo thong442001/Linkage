@@ -69,7 +69,6 @@ const Profile = props => {
 
 
     const openImageModal = imageUrl => {
-
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
 
@@ -92,8 +91,6 @@ const Profile = props => {
             openBottomSheet(22, detail_selection_image());
         }
     };
-
-
 
 
     //up lên cloudiary
@@ -272,9 +269,6 @@ const Profile = props => {
                     <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
                 </TouchableOpacity>
 
-
-
-
                 <TouchableOpacity
                     style={ProfileS.option}
                     onPress={() => openImageModal(user?.avatar)}>
@@ -318,9 +312,6 @@ const Profile = props => {
                     </View>
                     <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
                 </TouchableOpacity>
-
-
-
 
                 <TouchableOpacity
                     style={ProfileS.option}
@@ -371,33 +362,6 @@ const Profile = props => {
         }
     };
 
-    const sendPushNotification = async (token, title, body, data = {}) => {
-        try {
-            const response = await axios.post(
-                "https://fcm.googleapis.com/v1/projects/linkage-9deac/messages:send",
-                {
-                    to: token,
-                    notification: {
-                        title,
-                        body,
-                        sound: "default",
-                    },
-                    data: data,
-                },
-                {
-                    headers: {
-                        Authorization: `key=${FCM_SERVER_KEY}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            console.log("✅ Gửi thông báo thành công!", response.data);
-        } catch (error) {
-            console.error("❌ Lỗi khi gửi thông báo FCM:", error.response?.data || error.message);
-        }
-    };
-
     const callGuiLoiMoiKetBan = async () => {
         try {
             const paramsAPI = {
@@ -408,39 +372,8 @@ const Profile = props => {
             await dispatch(guiLoiMoiKetBan(paramsAPI))
                 .unwrap()
                 .then(async (response) => {
+                    console.log(response);
                     setRelationship(response.relationship);
-
-                    // 📌 Lưu thông báo vào Firebase
-                    const notificationRef = database().ref(`notifications/${user._id}`);
-                    const newNotificationRef = notificationRef.push();
-
-                    await newNotificationRef.set({
-                        senderId: me._id,
-                        senderName: `${me.first_name} ${me.last_name}`,
-                        type: 'friend_request',
-                        avatar: user.avatar,
-                        timestamp: new Date().toISOString(),
-                        status: 'pending',
-                    });
-
-                    console.log("✅ Lời mời kết bạn đã được lưu vào Firebase");
-
-                    // 📌 Lấy FCM Token của người nhận từ Firebase
-                    const tokenSnapshot = await database().ref(`users/${user._id}/fcmToken`).once('value');
-                    const fcmToken = tokenSnapshot.val();
-
-                    if (fcmToken) {
-                        console.log(`📩 Đang gửi thông báo đến user ${user._id} với token: ${fcmToken}`);
-
-                        // 🚀 Gửi Push Notification qua FCM
-                        sendPushNotification(
-                            fcmToken,
-                            "📩 Lời mời kết bạn mới!",
-                            `${me.first_name} đã gửi cho bạn một lời mời kết bạn.`
-                        );
-                    } else {
-                        console.log("❌ Không tìm thấy FCM Token của người nhận!");
-                    }
                 })
                 .catch(error => {
                     console.log('❌ Lỗi khi gửi lời mời:', error);

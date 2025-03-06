@@ -17,20 +17,20 @@ const FriendRequestItem = props => {
     <View style={[styles.container, { backgroundColor: 'white' }]}>
       <View style={styles.imgWrap}>
         {data.ID_userA == me ? (
-          <Image style={styles.image} source={{ uri: data.ID_userA.avatar }} />
-        ) : (
           <Image style={styles.image} source={{ uri: data.ID_userB.avatar }} />
+        ) : (
+          <Image style={styles.image} source={{ uri: data.ID_userA.avatar }} />
         )}
       </View>
       <View style={styles.wrapper}>
         <View style={styles.info}>
           {data.ID_userA == me ? (
             <Text style={styles.name}>
-              {data.ID_userA.first_name} {data.ID_userA.last_name}
+              {data.ID_userA.first_name} {data.ID_userB.last_name}
             </Text>
           ) : (
             <Text style={styles.name}>
-              {data.ID_userB.first_name} {data.ID_userB.last_name}
+              {data.ID_userB.first_name} {data.ID_userA.last_name}
             </Text>
           )}
           <Text style={styles.sentTime}>30 giây</Text>
