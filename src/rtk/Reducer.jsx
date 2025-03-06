@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { login } from './API';
+import { login, loginGG } from './API';
 
 const initialState = {
     user: null,
@@ -95,22 +95,63 @@ const appSlice = createSlice({
     },
 
     extraReducers: builder => {
+        // login app
         builder.addCase(login.pending, state => {
             console.log('...Pending login');
             state.messageLogin = null;
             state.token = '';
             state.refreshToken = '';
         });
-
         builder.addCase(login.fulfilled, (state, action) => {
             console.log('...Fulfilled login', action.payload);
-            state.user = action.payload?.user || null;
             state.token = action.payload?.token || '';
             state.refreshToken = action.payload?.refreshToken || '';
+            state.user = action.payload?.user
+                ? {
+                    ...action.payload.user,
+                    createdAt: action.payload.user.createdAt
+                        ? new Date(action.payload.user.createdAt).toISOString()
+                        : null,
+                    updatedAt: action.payload.user.updatedAt
+                        ? new Date(action.payload.user.updatedAt).toISOString()
+                        : null,
+                }
+                : null;
         });
-
         builder.addCase(login.rejected, (state, action) => {
             console.log('...Rejected login', action?.payload);
+            state.user = null;
+            state.messageLogin = action?.payload || 'Login failed';
+            state.token = '';
+            state.refreshToken = '';
+        });
+
+        // loginGG
+        builder.addCase(loginGG.pending, state => {
+            console.log('...Pending loginGG');
+            state.messageLogin = null;
+            state.token = '';
+            state.refreshToken = '';
+        });
+        builder.addCase(loginGG.fulfilled, (state, action) => {
+            console.log('...Fulfilled loginGG', action.payload);
+            state.token = action.payload?.token || '';
+            state.refreshToken = action.payload?.refreshToken || '';
+            state.user = action.payload?.user
+                ? {
+                    ...action.payload.user,
+                    createdAt: action.payload.user.createdAt
+                        ? new Date(action.payload.user.createdAt).toISOString()
+                        : null,
+                    updatedAt: action.payload.user.updatedAt
+                        ? new Date(action.payload.user.updatedAt).toISOString()
+                        : null,
+                }
+                : null;
+        });
+
+        builder.addCase(loginGG.rejected, (state, action) => {
+            console.log('...Rejected loginGG', action?.payload);
             state.user = null;
             state.messageLogin = action?.payload || 'Login failed';
             state.token = '';
@@ -129,7 +170,8 @@ export const {
     changeName,
     changeAvatar,
     changeBackground,
-    addSearch, removeSearch, clearHistory
-
+    addSearch,
+    removeSearch,
+    clearHistory
 } = appSlice.actions;
 export default appSlice.reducer;

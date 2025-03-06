@@ -1,13 +1,13 @@
 // components/SearchItem.js
 import React from 'react';
-import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const SearchItem = ({user, onDelete}) => {
+const SearchItem = ({ user, onDelete }) => {
   return (
     <View style={styles.container}>
       <View style={styles.container_img_name}>
-        <Image source={{uri: user.avatar}} style={styles.avatar} />
+        <Image source={{ uri: user.avatar }} style={styles.avatar} />
         <Text style={styles.name}>
           {user.first_name} {user.last_name}
         </Text>

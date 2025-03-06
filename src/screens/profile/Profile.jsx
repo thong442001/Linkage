@@ -10,7 +10,7 @@ import {
     Pressable,
     Alert
 } from 'react-native';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
@@ -591,6 +591,17 @@ const Profile = props => {
         await getID_groupPrivate(params?._id, me?._id);
     };
 
+    const renderPosts = useCallback(({ item }) => (
+        <ProfilePage
+            post={item}
+            ID_user={me._id}
+            onDelete={() => callChangeDestroyPost(item._id)}
+            updatePostReaction={updatePostReaction}
+            deletPostReaction={deletPostReaction}
+        />
+    ), [posts]);
+
+
     const headerFriends = () => {
         if (loading) {
             return <ProfileLoading />
@@ -882,15 +893,7 @@ const Profile = props => {
                     <View style={ProfileS.post}>
                         <FlatList
                             data={posts}
-                            renderItem={({ item }) =>
-                                <ProfilePage
-                                    post={item}
-                                    ID_user={me._id}
-                                    onDelete={() => callChangeDestroyPost(item._id)}
-                                    updatePostReaction={updatePostReaction}
-                                    deletPostReaction={deletPostReaction}
-                                />
-                            }
+                            renderItem={renderPosts}
                             keyExtractor={item => item._id}
                             showsHorizontalScrollIndicator={false}
                             ListHeaderComponent={headerFriends}

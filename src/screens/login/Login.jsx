@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   View,
@@ -6,13 +6,19 @@ import {
   Image,
   Pressable,
   ActivityIndicator,
+  Button,
 } from 'react-native';
 import styles from '../../styles/screens/login/LoginS';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../rtk/API';
+import {
+  login,
+  loginGG
+} from '../../rtk/API';
+import auth from "@react-native-firebase/auth";
 import ButtonCreateNewAccount from '../../components/button/ButtonCreateNewAccount';
 import { CustomTextInputEmail, CustomTextInputPassword } from '../../components/textinputs/CustomTextInput';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const Login = (props) => {
   const { navigation } = props;
@@ -24,6 +30,12 @@ const Login = (props) => {
   const [errorEmailPhone, setErrorEmailPhone] = useState('');
   const [errorPassword, setErrorPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: "94150586774-ju0vq4e5o8k1uce1vs9oqk944i00ultn.apps.googleusercontent.com",
+    });
+  }, []);
 
   function isValidEmail(email) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
@@ -85,6 +97,48 @@ const Login = (props) => {
       });
   };
 
+  const onLoginGG = (data) => {
+    setLoading(true);
+    dispatch(loginGG(data))
+      .unwrap()
+      .then((response) => {
+        console.log(response);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setErrorPassword(error);
+        setLoading(false);
+      });
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      // Đăng xuất trước để chọn lại tài khoản
+      await GoogleSignin.signOut();
+      await GoogleSignin.hasPlayServices();
+
+      // Đăng nhập Google
+      const userInfo = await GoogleSignin.signIn();
+      const { idToken } = await GoogleSignin.getTokens(); // Lấy ID Token
+      console.log(idToken)
+
+      if (!idToken) {
+        console.log("Không lấy được ID Token!");
+        return;
+      }
+
+      // Xác thực với Firebase
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const userCredential = await auth().signInWithCredential(googleCredential);
+      const user = userCredential.user;
+
+      onLoginGG({ email: user.email, name: user.displayName, picture: user.photoURL });
+
+    } catch (error) {
+      console.error("Lỗi đăng nhập:", error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <LoadingModal visible={loading} />
@@ -126,6 +180,11 @@ const Login = (props) => {
         <Pressable onPress={() => navigation.navigate('FindWithEmail')}>
           <Text style={styles.forgotPasswordText}>Bạn quên mật khẩu ư?</Text>
         </Pressable>
+        {/* loginGG */}
+        <Button
+          title="Đăng nhập Google"
+          onPress={handleGoogleLogin}
+        />
       </View>
 
       <ButtonCreateNewAccount onPress={() => navigation.navigate('Screen1')} />

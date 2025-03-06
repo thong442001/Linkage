@@ -127,8 +127,8 @@ import CallPage from '../screens/call/CallPage';
 import CallGroup from '../screens/call/CallGroup';
 import ChatBot from '../screens/chat/ChatBot';
 import ListFriend from '../screens/friend/ListFriend';
-import MiniGameScreen from '../screens/miniGame/miniGame';
-
+import HuggingFaceImageGenerator from '../screens/Al/RunwayMLImageGenerator ';
+import QRScannerScreen from '../screens/qrCode/QRScannerScreen';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -153,8 +153,9 @@ const oStackHome = {
   CallGroup: { name: 'CallGroup', component: CallGroup },
   ChatBot: { name: 'ChatBot', component: ChatBot },
   ListFriend: { name: 'ListFriend', component: ListFriend },
-  MiniGameScreen: { name: 'MiniGameScreen', component: MiniGameScreen },
-   
+  HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },
+  QRScannerScreen: { name: 'QRScannerScreen', component: QRScannerScreen },
+
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

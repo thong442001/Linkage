@@ -1,5 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import AxiosHelper from '../helpers/AxiosHelper'
+import axios from "axios";
+// của spotify
+const CLIENT_ID = "1517c266c3f940ad9c9826a65577eaa9";
+const CLIENT_SECRET = "f24bc1b5e1bf4eca8e5b772b81de1c79";
 
 export const login = createAsyncThunk(
   'user/login',
@@ -14,6 +18,21 @@ export const login = createAsyncThunk(
       } else {
         return rejectWithValue(response.data.message);
       }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const loginGG = createAsyncThunk(
+  'gg/loginGG',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response =
+        await AxiosHelper()
+          .post('gg/loginGG', data);
+      //console.log(response)
+      return response;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -330,12 +349,12 @@ export const getAllFriendOfID_user = createAsyncThunk(
 );
 
 // nhóm chat
-export const addtMembers = createAsyncThunk(
-  'group/addtMembers',
+export const addMembers = createAsyncThunk(
+  'group/addMembers',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
-        .post('group/addtMembers', data);
+        .post('group/addMembers', data);
       //console.log(response)
       if (response.status == true) {
         console.log(response?.message)
@@ -708,6 +727,36 @@ export const setNoti_token = createAsyncThunk(
       const response = await AxiosHelper()
         .post('user/setNoti_token', data);
       //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// params: ID_comment, ID_user, ID_reaction
+export const addComment_Reaction = createAsyncThunk(
+  'comment_reaction/addComment_Reaction',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('comment_reaction/addComment_Reaction', data);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// // xóa deleteComment_reaction
+// // params: _id
+export const deleteComment_reaction = createAsyncThunk(
+  'comment_reaction/deleteComment_reaction',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('comment_reaction/deleteComment_reaction', data);
+      //console.log(response?.message)
       return response;
     } catch (error) {
       return rejectWithValue(error.message);

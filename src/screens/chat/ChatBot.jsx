@@ -1,205 +1,259 @@
 import {
-  ActivityIndicator,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  Image,
+    ActivityIndicator,
+    FlatList,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    Image,
 } from 'react-native';
-import React, {useEffect, useState, useRef} from 'react';
-import {GoogleGenerativeAI} from '@google/generative-ai';
+import React, { useEffect, useState, useRef } from 'react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { launchImageLibrary } from 'react-native-image-picker';
 
-import {useNavigation} from '@react-navigation/native';
-import {IconButton} from 'react-native-paper'; // 👉 Dùng IconButton thay vì Icon
+import { useNavigation } from '@react-navigation/native';
+import { IconButton } from 'react-native-paper';
+
 
 const API_GEMINI_KEY = 'AIzaSyDI3FtFcFDJ56pt4i7qsufmJdOklo6F1OQ'; // Thay bằng API Key hợp lệ
 
 const Gemini = () => {
-  const navigation = useNavigation(); // 👉 Hook điều hướng
-  const [messagesAI, setMessagesAI] = useState([]);
-  const [messagesUser, setMessagesUser] = useState('');
-  const [loading, setLoading] = useState(false);
-  const flatListRef = useRef(null); // Quản lý danh sách tin nhắn
+    const navigation = useNavigation();
+    const [messages, setMessages] = useState([]);
+    const [messageText, setMessageText] = useState('');
+    const [loading, setLoading] = useState(false);
+    const flatListRef = useRef(null);
+    const [selectedImage, setSelectedImage] = useState(null);
+    // 🛠 Gửi tin nhắn văn bản
+    const sendMessage = async () => {
+        if (!messageText.trim() && !selectedImage) return;
 
-  const sendMessage = async () => {
-    if (!messagesUser.trim()) return;
+        setLoading(true);
+        const newMessages = [];
 
-    setLoading(true);
-    const newUserMessage = {text: messagesUser, user: true};
-    setMessagesAI(prev => [...prev, newUserMessage]);
-    const currentMessage = messagesUser;
-    setMessagesUser('');
+        if (selectedImage) {
+            newMessages.push({
+                type: 'image',
+                content: `data:image/jpeg;base64,${selectedImage}`,
+                user: true,
+            });
+        }
 
-    try {
-      const genAI = new GoogleGenerativeAI(API_GEMINI_KEY);
-      const model = genAI.getGenerativeModel({model: 'gemini-1.5-flash'});
+        if (messageText.trim()) {
+            newMessages.push({ type: 'text', content: messageText, user: true });
+        }
 
-      const history = messagesAI
-        .filter(msg => msg.user)
-        .map(msg => ({role: 'user', parts: [{text: msg.text}]}));
+        setMessages(prev => [...prev, ...newMessages]);
+        setSelectedImage(null);
+        setMessageText('');
 
-      history.push({role: 'user', parts: [{text: currentMessage}]});
+        try {
+            const genAI = new GoogleGenerativeAI(API_GEMINI_KEY);
+            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
-      const chat = model.startChat({
-        history: history,
-        generationConfig: {maxOutputTokens: 200},
-      });
+            // Tạo lịch sử hội thoại đầy đủ để gửi
+            const conversationHistory = messages.map(msg => ({
+                role: msg.user ? 'user' : 'model',
+                parts:
+                    msg.type === 'image'
+                        ? [
+                            {
+                                inlineData: {
+                                    data: msg.content.split(',')[1],
+                                    mimeType: 'image/jpeg',
+                                },
+                            },
+                        ]
+                        : [{ text: msg.content }],
+            }));
 
-      const result = await chat.sendMessage(currentMessage);
-      const text = result.response.candidates[0].content.parts[0].text;
+            // Thêm tin nhắn mới
+            const parts = [];
+            if (selectedImage) {
+                parts.push({
+                    inlineData: {
+                        data: selectedImage,
+                        mimeType: 'image/jpeg',
+                    },
+                });
+            }
+            if (messageText.trim()) {
+                parts.push({ text: messageText });
+            }
+            conversationHistory.push({ role: 'user', parts });
 
-      setMessagesAI(prev => [...prev, {text, user: false}]);
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({animated: true});
-      }, 300);
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+            // Gửi tin nhắn đến Gemini AI
+            const generatedContent = await model.generateContent({
+                contents: conversationHistory, // Gửi toàn bộ lịch sử
+            });
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* 🟢 Thanh tiêu đề với nút quay về */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}>
-          <IconButton icon="arrow-left" size={24} color="white" />
-        </TouchableOpacity>
+            const aiResponse = generatedContent.response.text();
 
-        <Text style={styles.headerTitle}>Gemini AI Chat</Text>
-      </View>
+            setMessages(prev => [
+                ...prev,
+                { type: 'text', content: aiResponse, user: false },
+            ]);
+            scrollToEnd();
+        } catch (error) {
+            console.error('Lỗi gửi tin nhắn:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}>
-        <FlatList
-          ref={flatListRef}
-          data={messagesAI}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => (
-            <View
-              style={[
-                styles.messageBubble,
-                item.user ? styles.userMessage : styles.aiMessage,
-              ]}>
-              <Text style={styles.messageText}>{item.text}</Text>
+    // 📸 Chọn ảnh từ thư viện
+    const pickImage = () => {
+        launchImageLibrary({ mediaType: 'photo', includeBase64: true }, response => {
+            if (response.assets && response.assets.length > 0) {
+                const base64 = response.assets[0].base64;
+                setSelectedImage(base64); // Lưu ảnh nhưng chưa gửi ngay
+            }
+        });
+    };
+
+    const scrollToEnd = () => {
+        setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+        }, 300);
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={styles.backButton}>
+                    <IconButton icon="arrow-left" size={24} color="white" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Gemini AI Chat</Text>
             </View>
-          )}
-          contentContainerStyle={styles.chatContainer}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({animated: true})
-          }
-        />
 
-        {/* 🟢 Hộp nhập tin nhắn */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Nhập tin nhắn..."
-            onChangeText={setMessagesUser}
-            value={messagesUser}
-            onSubmitEditing={sendMessage}
-            style={styles.input}
-          />
-          <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-            <IconButton
-              icon="send"
-              size={24}
-              color="white"
-              onPress={sendMessage}
-            />
-          </TouchableOpacity>
-          {loading && <ActivityIndicator size="small" color="black" />}
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.container}>
+                <FlatList
+                    ref={flatListRef}
+                    data={messages}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                        <View
+                            style={[
+                                styles.messageBubble,
+                                item.user ? styles.userMessage : styles.aiMessage,
+                            ]}>
+                            {item.type === 'image' ? (
+                                <Image source={{ uri: item.content }} style={styles.chatImage} />
+                            ) : (
+                                <Text style={styles.messageText}>{item.content}</Text>
+                            )}
+                        </View>
+                    )}
+                    contentContainerStyle={styles.chatContainer}
+                />
+
+                <View style={styles.inputContainer}>
+                    {selectedImage && (
+                        <Image
+                            source={{ uri: `data:image/jpeg;base64,${selectedImage}` }}
+                            style={styles.previewImage}
+                        />
+                    )}
+
+                    <TextInput
+                        placeholder="Nhập tin nhắn..."
+                        onChangeText={setMessageText}
+                        value={messageText}
+                        onSubmitEditing={sendMessage}
+                        style={styles.input}
+                    />
+                    <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
+                        <IconButton icon="image" size={24} color="white" />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+                        <IconButton icon="send" size={24} color="white" />
+                    </TouchableOpacity>
+                    {loading && <ActivityIndicator size="small" color="black" />}
+                </View>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
+    );
 };
 
 export default Gemini;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f4f8',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0084ff',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-  },
-  backButton: {
-    marginRight: 10,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  chatContainer: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-  },
-  messageBubble: {
-    maxWidth: '80%',
-    padding: 12,
-    marginVertical: 5,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  userMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#0084ff',
-    borderBottomRightRadius: 0,
-  },
-  aiMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#e0e0e0',
-    borderBottomLeftRadius: 0,
-  },
-  messageText: {
-    color: 'black',
-    fontSize: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderTopWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
-  },
-  input: {
-    flex: 1,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    backgroundColor: 'white',
-  },
-  sendButton: {
-    marginLeft: 10,
-    // backgroundColor: '#0084ff',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width:40,
-    height:40
-  },
+    container: { flex: 1, backgroundColor: '#f0f4f8' },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#0084ff',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+    },
+    backButton: { marginRight: 10 },
+    headerTitle: { fontSize: 20, fontWeight: 'bold', color: 'white' },
+    chatContainer: {
+        flexGrow: 1,
+        justifyContent: 'flex-start',
+        paddingHorizontal: 15,
+        paddingBottom: 10,
+    },
+    messageBubble: {
+        maxWidth: '80%',
+        padding: 12,
+        marginVertical: 5,
+        borderRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    userMessage: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#0084ff',
+        borderBottomRightRadius: 0,
+    },
+    aiMessage: {
+        alignSelf: 'flex-start',
+        backgroundColor: '#e0e0e0',
+        borderBottomLeftRadius: 0,
+    },
+    messageText: { color: 'black', fontSize: 16 },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        borderTopWidth: 1,
+        borderColor: '#ccc',
+        backgroundColor: '#fff',
+    },
+    input: {
+        flex: 1,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        backgroundColor: 'white',
+        color: 'black',
+    },
+    chatImage: { width: 200, height: 200, borderRadius: 10, marginTop: 5 },
+    previewImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        margin: 10,
+        alignSelf: 'flex-start',
+    },
+    audioButton: {
+        backgroundColor: "#ff3b30",
+        padding: 12,
+        borderRadius: 50,
+        marginLeft: 10,
+    },
+
 });
