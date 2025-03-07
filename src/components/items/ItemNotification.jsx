@@ -10,12 +10,10 @@ const ItemNotification = ({ data }) => {
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
-        setID_friend(data.ID_relationship.ID_userB._id)
         setName(data.ID_relationship.ID_userB.first_name
           + " " + data.ID_relationship.ID_userB.last_name);
         setAvatar(data.ID_relationship.ID_userB.avatar);
       } else {
-        setID_friend(data.ID_relationship.ID_userA._id)
         setName(data.ID_relationship.ID_userA.first_name
           + " " + data.ID_relationship.ID_userA.last_name);
         setAvatar(data.ID_relationship.ID_userA.avatar);

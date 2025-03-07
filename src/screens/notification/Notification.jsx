@@ -14,12 +14,14 @@ const Notification = () => {
 
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user); // Lấy thông tin user từ Redux
+  const token = useSelector(state => state.app.token); // Lấy thông tin user từ Redux
 
   const callGetAllNotificationOfUser = async () => {
     try {
       await dispatch(getAllNotificationOfUser({ me: me._id, token: token }))
         .unwrap()
         .then(response => {
+          console.log(response);
           setNotifications(response.notifications);
         })
         .catch(error => {
@@ -42,8 +44,11 @@ const Notification = () => {
       {/* Danh sách thông báo */}
       <Text style={styles.title}>Thông báo</Text>
       <FlatList
-        data={showAll ? notifications : notifications.slice(0, 7)}
-        renderItem={({ item }) => <ItemNotification data={item} />}
+        // data={showAll ? notifications : notifications.slice(0, 7)}
+        data={notifications}
+        renderItem={({ item }) =>
+          <ItemNotification data={item} />
+        }
         keyExtractor={(item, index) => index.toString()}
       />
 
