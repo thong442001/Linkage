@@ -778,3 +778,39 @@ export const deleteComment_reaction = createAsyncThunk(
     }
   }
 );
+
+// ****************** notification ****************
+
+// params : me(ID_user)
+export const getAllNotificationOfUser = createAsyncThunk(
+  'notification/getAllNotificationOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`notification/getAllNotificationOfUser?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// params : _id(ID_notification)
+export const setStatusSeen = createAsyncThunk(
+  'notification/setStatusSeen',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('notification/setStatusSeen', data);
+      //console.log(response?.message)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
