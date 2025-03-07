@@ -1,7 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import ItemNotification from '../../components/items/ItemNotification';
 import {
   getAllNotificationOfUser
@@ -12,6 +12,7 @@ const Notification = () => {
   const [newNotification, setNewNotification] = useState(null); // State chứa thông báo mới nhất
   const [visible, setVisible] = useState(false); // State điều khiển Snackbar
 
+  const dispatch = useDispatch();
   const me = useSelector(state => state.app.user); // Lấy thông tin user từ Redux
 
   const callGetAllNotificationOfUser = async () => {

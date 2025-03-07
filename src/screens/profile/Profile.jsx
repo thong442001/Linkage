@@ -767,7 +767,7 @@ const Profile = props => {
                             <View style={ProfileS.boxThink}>
                                 <Image
                                     style={ProfileS.avataStatus}
-                                    source={require('./../../../assets/images/person.jpg')}
+                                    source={{ uri: user?.avatar }}
                                 />
                                 <Text style={{ fontSize: 13, marginLeft: 10 }}>
                                     Bạn đang nghĩ gì?
