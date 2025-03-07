@@ -21,6 +21,7 @@ const AppNavigation = () => {
   const user = useSelector(state => state.app.user);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]); // Lưu danh sách user online
+  
 
   const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
@@ -95,7 +96,7 @@ const AppNavigation = () => {
       await notifee.createChannel({
         id: 'default-channel',
         name: 'Default Channel',
-        importance: AndroidImportance.HIGH,
+        importance: AndroidImportance.MAX,
       });
     }
   }
@@ -122,11 +123,16 @@ const AppNavigation = () => {
     // Khi app đang mở
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
       console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
-      displayNotification(
-        remoteMessage.notification?.title ?? 'Thông báo',
-        remoteMessage.notification?.body ?? 'Bạn có một tin nhắn mới.',
-        remoteMessage.data ?? {}
-      );
+  
+      // Hiển thị thông báo bằng Notifee
+      await notifee.displayNotification({
+        title: remoteMessage.notification?.title ?? 'Thông báo',
+        body: remoteMessage.notification?.body ?? 'Bạn có một tin nhắn mới.',
+        android: {
+          channelId: 'default-channel', // Đảm bảo channelId tồn tại
+          smallIcon: 'logo_linkage', // Đổi icon nếu cần
+        },
+      });
     });
 
     // Khi app chạy nền và người dùng nhấn vào thông báo
@@ -153,6 +159,7 @@ const AppNavigation = () => {
       unsubscribeForeground();
       unsubscribeOpenedApp();
       unsubscribeNotifee();
+      // initialNotification();
     };
   }, []);
 
