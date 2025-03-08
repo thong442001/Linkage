@@ -157,8 +157,6 @@ const oStackHome = {
   HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },
   QRScannerScreen: { name: 'QRScannerScreen', component: QRScannerScreen },
   QRSannerAddGroup: { name: 'QRSannerAddGroup', component: QRSannerAddGroup },
-
-
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

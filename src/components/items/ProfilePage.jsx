@@ -648,39 +648,39 @@ const PostItem = memo(({
                 }
             </View>
 
-
-            {/* reactions of post */}
-            {
-                post.post_reactions.length > 0
-                && (
-                    <View style={[styles.vReactionsOfPost]}>
-                        <TouchableOpacity
-                            style={{ flexDirection: "row" }}
-                            onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
-                        >
-                            {uniqueReactions.map((reaction, index) => (
-                                <Text key={index} style={{ color: 'black' }}>
-                                    {reaction.ID_reaction.icon}
-                                </Text>
-                            ))}
-                            <Text style={styles.slReactionsOfPost}>
-                                {post.post_reactions.length}
-                            </Text>
-                        </TouchableOpacity>
-                        <View>
-                            {/*so luong  bình luận */}
-                            {
-                                post?.comments.length > 0
-                                && (
-                                    <Text style={styles.slReactionsOfPost}>
-                                        {post?.comments.length} bình luận
+            <View style={{flexDirection:'row',justifyContent:'space-between',width:width*0.7,alignItems:'center'}}>
+                {/* reactions of post */}
+                {
+                    post.post_reactions.length > 0
+                    && (
+                        <View style={[styles.vReactionsOfPost]}>
+                            <TouchableOpacity
+                                style={{ flexDirection: "row" }}
+                                onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                            >
+                                {uniqueReactions.map((reaction, index) => (
+                                    <Text key={index} style={{ color: 'black' }}>
+                                        {reaction.ID_reaction.icon}
                                     </Text>
-                                )
-                            }
+                                ))}
+                                <Text style={styles.slReactionsOfPost}>
+                                    {post.post_reactions.length}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
-                    </View>
-                )
-            }
+                    )
+                }
+                {/*so luong  bình luận */}
+                {
+                        post?.comments.length > 0
+                            && (
+                                <Text style={styles.slReactionsOfPost}>
+                                    {post?.comments.length} bình luận
+                                </Text>
+                            )
+                }
+            </View>
+
 
             {
                 !post._destroy &&
