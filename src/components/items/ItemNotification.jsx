@@ -37,6 +37,22 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_relationship.ID_userA.avatar);
       }
+    } else if (data.type == 'Đã thành bạn bè của bạn') {
+      if (data.ID_relationship.ID_userA._id == me._id) {
+        setName(
+          data.ID_relationship.ID_userB.first_name +
+            ' ' +
+            data.ID_relationship.ID_userB.last_name
+        );
+        setAvatar(data.ID_relationship.ID_userB.avatar);
+      } else {
+        setName(
+          data.ID_relationship.ID_userA.first_name +
+            ' ' +
+            data.ID_relationship.ID_userA.last_name
+        );
+        setAvatar(data.ID_relationship.ID_userA.avatar);
+      }
     }
   }, []);
 
@@ -44,9 +60,9 @@ const ItemNotification = ({data}) => {
   // Xác định màn hình cần chuyển đến dựa vào loại thông báo
   const navigateToScreen = () => {
     if (data.type === 'Lời mời kết bạn') {
-      navigation.navigate('friend', { userId: me._id });
-    } else if (data.type === 'Tin nhắn mới') {
-      navigation.navigate('ChatScreen', { conversationId: data.conversationId });
+      navigation.navigate('Friend', { userId: me._id });
+    } else if (data.type === 'Đã thành bạn bè của bạn') {
+      navigation.navigate('Profile', { _id: data.ID_relationship.ID_userB});
     } else if (data.type === 'Bài viết mới') {
       navigation.navigate('PostDetailScreen', { postId: data.postId });
     }
@@ -59,7 +75,7 @@ const ItemNotification = ({data}) => {
       <View style={styles.container_content}>
         <View style={styles.container_name}>
           <Text style={styles.text_name}>{name}</Text>
-          <Text style={styles.text_content}>{data.content ?? "Bạn có thông báo mới"}</Text>
+          <Text style={styles.text_content}>{data.type ?? "Bạn có thông báo mới"}</Text>
         </View>
         <Text style={styles.text_time}>{formattedDate}</Text>
       </View>
