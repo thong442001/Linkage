@@ -309,12 +309,30 @@ export const chapNhanLoiMoiKetBan = createAsyncThunk(
   }
 );
 
-export const setRelationNguoiLa = createAsyncThunk(
-  'relationship/setRelationNguoiLa',
+export const huyLoiMoiKetBan = createAsyncThunk(
+  'relationship/huyLoiMoiKetBan',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
-        .post(`relationship/setRelationNguoiLa`, data);
+        .post(`relationship/huyLoiMoiKetBan`, data);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const huyBanBe = createAsyncThunk(
+  'relationship/huyBanBe',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post(`relationship/huyBanBe`, data);
       //console.log(response.status)
       if (response.status == true) {
         return response;
