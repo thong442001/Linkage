@@ -58,7 +58,7 @@ const Setting = (props) => {
     <View style={styles.container}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.textSetting}>Setting</Text>
+          <Text style={styles.textSetting}>Cài đặt</Text>
         </View>
         <View style={styles.body}>
           <View style={styles.profile}>
@@ -99,33 +99,34 @@ const Setting = (props) => {
           </View>
           <ScrollView style={styles.list}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('ChangePassWord')}>
-              <Option
-                icon="person"
-                title="Change user name"
-                subtitle="Privacy, security, change number"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
               onPress={() => navigation.navigate('ChangeDisplayName')}>
               <Option
-                icon="lock-closed"
-                title="Change password"
-                subtitle="Update your password"
+                icon="person"
+                title="Thay đổi tên"
+                subtitle="Bạn có thể thay đổi tên của bạn"
               />
             </TouchableOpacity>
-            <TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ChangePassWord')}>
+              <Option
+                icon="lock-closed"
+                title="Thay đổi mật khẩu"
+                subtitle="Bạn có thể thay đổi mật khẩu của bạn"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity  onPress={() => navigation.navigate('Trash')}>
               <Option
                 icon="trash"
-                title="Delete account"
-                subtitle="Remove account permanently"
+                title="Thùng rác"
+                subtitle="Chứa các bài viết đã xóa"
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={onLogout}>
               <Option
                 icon="exit-outline"
-                title="Log out"
-                subtitle="Sign out from your account"
+                title="Đăng xuất"
+                subtitle="Đăng xuất khỏi tài khoản của bạn"
                 color="red"
               />
             </TouchableOpacity>

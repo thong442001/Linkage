@@ -77,6 +77,10 @@ const HomeChat = (props) => {// cần param
                     <MaterialIcons name="arrow-back-ios-new" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.header}>Đoạn chat</Text>
+                  {/* Nút quét QR group */}
+                <TouchableOpacity onPress={() => navigation.navigate("QRSannerAddGroup")} >
+                <Icon name="scan-circle-outline" size={25} color="black" />
+              </TouchableOpacity>
                 {/* Nút tạo group */}
                 <TouchableOpacity onPress={() => navigation.navigate("CreateGroup")}>
                     <MaterialIcons name="group-add" size={24} color="black" />
