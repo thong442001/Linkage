@@ -4,8 +4,8 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 const { width, height } = Dimensions.get('window');
 
 const ProfileLoading = () => {
-    return (
-        <SkeletonPlaceholder>
+    return ( 
+        <SkeletonPlaceholder >
             {/* Skeleton cho ảnh bìa */}
 
             <View style={styles.container}>
@@ -32,6 +32,8 @@ const ProfileLoading = () => {
                     <View style={styles.btnMore} />
                 </View>
             </View>
+
+
             </View>
         </SkeletonPlaceholder>
     );

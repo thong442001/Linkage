@@ -41,6 +41,7 @@ import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import { useFocusEffect } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import { sendPushNotification } from '../services/NotificationService';
+import FriendLoading from '../../utils/skeleton_loading/FriendLoading';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -805,7 +806,8 @@ const Profile = props => {
     };
 
 
-
+    
+    
     return (
         <View style={ProfileS.container}>
             <View style={ProfileS.boxHeader}>
@@ -827,17 +829,25 @@ const Profile = props => {
             <View>
                 <View>
 
-                    <View style={ProfileS.post}>
-                        <FlatList
-                            data={posts}
-                            renderItem={renderPosts}
-                            keyExtractor={item => item._id}
-                            showsHorizontalScrollIndicator={false}
-                            ListHeaderComponent={headerFriends}
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={{ paddingBottom: 50 }}
-                        />
-                    </View>
+                <View style={ProfileS.post}>
+    {loading ? (
+        <>
+            <ProfileLoading />
+            <FriendLoading/>
+        </>
+    ) : (
+        <FlatList
+            data={posts}    
+            renderItem={renderPosts}
+            keyExtractor={item => item._id}
+            showsHorizontalScrollIndicator={false}
+            ListHeaderComponent={headerFriends}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 50 }}
+        />
+    )}
+</View>
+
                 </View>
             </View>
 

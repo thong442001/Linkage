@@ -8,6 +8,7 @@ import {
     Modal,
     TouchableWithoutFeedback,
     FlatList,
+    ActivityIndicator,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import UpPostS from '../../styles/screens/home/UpPostS';
@@ -36,7 +37,7 @@ const UpPost = (props) => {
     const [friends, setFriends] = useState(null);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [membersGroup, setMembersGroup] = useState([]);
-
+    const [isLoading, setisLoading] = useState(false)
 
     //call api getAllFriendOfID_user (lấy danh sách bạn bè)
     const callGetAllFriendOfID_user = async () => {
@@ -162,6 +163,7 @@ const UpPost = (props) => {
 
     // Hàm tải lên một file lên Cloudinary
     const uploadFile = async (file) => {
+        setisLoading(true); 
         try {
             const data = new FormData();
             data.append('file', {
@@ -185,16 +187,23 @@ const UpPost = (props) => {
             console.log("Lỗi khi tải file");
             return null; // Trả về null nếu có lỗi
         }
+        finally{
+            setisLoading(false)
+        }
     };
 
     // Hàm tải lên nhiều file cùng lúc
     const uploadMultipleFiles = async (files) => {
+        setisLoading(true)
         try {
             const uploadedUrls = await Promise.all(files.map(file => uploadFile(file)));
             const validUrls = uploadedUrls.filter(url => url !== null); // Loại bỏ file lỗi
             setMedias(prev => [...prev, ...validUrls]); // Cập nhật danh sách medias
         } catch (error) {
             console.log('uploadMultipleFiles -> ', error);
+        }
+        finally{
+            setisLoading(false)
         }
     };
 
@@ -359,6 +368,15 @@ const UpPost = (props) => {
                 </View>
 
             </View>
+
+                                
+            {/* hiệu ứng loading khi tải ảnh */}
+                    {isLoading && (
+            <View style={UpPostS.loadingContainer}>
+                <ActivityIndicator size="large" color="#33a850" />
+                <Text style={UpPostS.loadingText}>Đang tải lên...</Text>
+            </View>
+        )}
 
 
 
