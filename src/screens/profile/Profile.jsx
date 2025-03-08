@@ -10,7 +10,7 @@ import {
     Pressable,
     Alert
 } from 'react-native';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
@@ -53,7 +53,7 @@ const Profile = props => {
     const [avatar, setavatar] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [isImageModalVisible, setImageModalVisible] = useState(false);
-
+    const [liveID, setliveID] = useState('')
     const FCM_SERVER_KEY = "BOa0rmhBQ7uccvqyUyiwuj-U7e_ljHnHI_jyZhobPyBPNJmP6AadvOuZc8dVd8QKxdFKpBp_RD-vWwEdc0R5o54";
 
     const [user, setUser] = useState(null);
@@ -68,6 +68,10 @@ const Profile = props => {
     const [loading, setloading] = useState(true)
 
 
+    useEffect(() => {
+        setliveID(String(Math.floor(Math.random() * 1000000)))
+    }, [])
+    
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
@@ -777,11 +781,11 @@ const Profile = props => {
                         </View>
                     </View>
                     <View style={ProfileS.boxLivestream}>
-                        <TouchableOpacity style={ProfileS.btnLivestream}>
+                        <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive',  { userID: me._id , avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
                             <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                                 <Icon name="videocam" size={20} color="red" />
                                 <Text style={{ marginLeft: 5, color: 'black' }}>
-                                    Phát trực tiếp
+                                    Phát trực tiếp {liveID}
                                 </Text>
                             </View>
                         </TouchableOpacity>
