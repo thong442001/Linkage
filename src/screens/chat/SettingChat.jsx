@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, ScrollView, Modal } from "react-native";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,17 +8,20 @@ import {
     deleteMember,
     deleteGroup,
 } from '../../rtk/API';
+import QRCode from 'react-native-qrcode-svg';
 const { width, height } = Dimensions.get('window');
 const SettingChat = (props) => { // cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
 
-    //console.log('Setting: ', params.group);
+    // console.log('Setting: ', params.ID_group);
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
 
     const [group, setGroup] = useState(null);
+    const [qrVisible, setQrVisible] = useState(false); // 🔥 State để hiển thị modal QR
+    
 
     useEffect(() => {
         // Call API khi lần đầu vào trang
@@ -182,6 +185,7 @@ const SettingChat = (props) => { // cần ID_group (param)
                     && (
                         group.members[0]._id == me._id
                         && (
+                            <View style={{alignItems: 'center'}}>
                             <TouchableOpacity
                                 style={styles.addMemberButton}
                                 onPress={toAddFriendGroup}
@@ -191,6 +195,11 @@ const SettingChat = (props) => { // cần ID_group (param)
                                 </View>
                                 <Text style={styles.addMemberText}>Thêm</Text>
                             </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setQrVisible(true)}>
+                                <Icon name="qr-code-outline" size={22} color="black" />
+                            </TouchableOpacity>
+                            </View>
+
                         )
                     )
                 }
@@ -229,7 +238,38 @@ const SettingChat = (props) => { // cần ID_group (param)
                         </View>
                     )
                 }
-
+                {
+                    group != null && (
+                        <Modal
+                        visible={qrVisible}
+                        transparent
+                        onRequestClose={() => setQrVisible(false)}>
+                        <View style={styles.modalContainer}>
+                          <View style={styles.modalContent}>
+                                              {/* Name group */}
+                                              {
+                                          group.name == null
+                                              ? (
+                                                  <Text style={styles.modalTitle}>Nhóm chưa có tên</Text>
+                                              ) : (
+                                                  <Text style={styles.modalTitle}>Nhóm: {group.name}</Text>
+                                              )
+                                      }
+                            <QRCode
+                              value={`linkage://addgroup/${params.ID_group}`}
+                              size={200}
+                            />
+                            <TouchableOpacity
+                              onPress={() => setQrVisible(false)}
+                              style={styles.closeButton}>
+                              <Text style={styles.closeButtonText}>Đóng</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </Modal>
+                    )
+                }
+           
             </View>
     );
 };
@@ -267,7 +307,7 @@ const styles = StyleSheet.create({
     },
     addMemberButton: {
         alignItems: "center",
-        marginTop: height * 0.025, // 2.5% chiều cao màn hình
+        marginVertical: height * 0.025, // 2.5% chiều cao màn hình
     },
     addMemberText: {
         fontSize: width * 0.035, // 3.5% chiều rộng màn hình
@@ -307,7 +347,29 @@ const styles = StyleSheet.create({
         backgroundColor: '#d9d9d960',
         padding: width * 0.03, // 3% chiều rộng màn hình
         borderRadius: width * 0.2, // 20% chiều rộng màn hình
-    }
+    },
+    //modal qr
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+      },
+      modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+      },
+      modalTitle: {fontSize: 18, fontWeight: 'medium', marginBottom: 10, color:'black'},
+      closeButton: {
+        marginTop: 10,
+        paddingHorizontal: 80,
+        paddingVertical:5,
+        backgroundColor: 'blue',
+        borderRadius: 5,
+      },
+      closeButtonText: {color: 'white', fontSize: 16},
 });
 
 export default SettingChat
