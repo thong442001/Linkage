@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Image,
@@ -26,9 +26,9 @@ import { TextInput } from 'react-native-gesture-handler';
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
 const UPLOAD_PRESET = 'ml_default';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-const Story = ({ route }) => {
+const Story = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [previewImage, setPreviewImage] = useState(null); // Ảnh hiển thị trước khi upload
@@ -58,9 +58,9 @@ const Story = ({ route }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const statusOptions = [
-    { status: 1, name: 'Công khai' },
-    { status: 2, name: 'Bạn bè' },
-    { status: 3, name: 'Chỉ mình tôi' },
+    {status: 1, name: 'Công khai'},
+    {status: 2, name: 'Bạn bè'},
+    {status: 3, name: 'Chỉ mình tôi'},
   ];
 
   // Gesture xử lý kéo/thả
@@ -225,7 +225,7 @@ const Story = ({ route }) => {
         {previewImage ? (
           <Image source={{ uri: previewImage }} style={styles.image} />
         ) : (
-          <Text style={{ color: 'white', fontSize: 16 }}>Chưa có ảnh</Text>
+          <Text style={{color: 'white', fontSize: 16}}>Chưa có ảnh</Text>
         )}
 
         {/* Nút thêm Text */}
@@ -276,6 +276,12 @@ const Story = ({ route }) => {
           <Text style={styles.privacyText}>{selectedOption.name}</Text>
         </TouchableOpacity>
 
+        {/* Nút mở Camera */}
+        <TouchableOpacity style={styles.cameraButton} onPress={openCamera}>
+          <Icon name="camera" size={24} color="white" />
+          <Text style={{color: 'white', marginLeft: 5}}>Chụp ảnh</Text>
+        </TouchableOpacity>
+
         {/* Nút Đăng Story */}
         <TouchableOpacity
           style={styles.postButton}
@@ -298,7 +304,7 @@ const Story = ({ route }) => {
               <FlatList
                 data={statusOptions}
                 keyExtractor={item => item.status.toString()}
-                renderItem={({ item }) => (
+                renderItem={({item}) => (
                   <TouchableOpacity
                     style={styles.optionItem}
                     onPress={() => {

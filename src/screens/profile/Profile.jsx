@@ -1,14 +1,14 @@
 import {
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    TouchableOpacity,
-    FlatList,
-    TouchableWithoutFeedback,
-    Modal,
-    Pressable,
-    Alert
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  TouchableWithoutFeedback,
+  Modal,
+  Pressable,
+  Alert
 } from 'react-native';
 import React, { useState, useCallback, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -17,14 +17,14 @@ import ProfilePage from '../../components/items/ProfilePage';
 import Friends from '../../components/items/Friends';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    joinGroupPrivate,
-    guiLoiMoiKetBan,
-    chapNhanLoiMoiKetBan,
-    setRelationNguoiLa,
-    editAvatarOfUser,
-    editBackgroundOfUser,
-    allProfile, // allProfile
-    changeDestroyPost, // changeDestroy
+  joinGroupPrivate,
+  guiLoiMoiKetBan,
+  chapNhanLoiMoiKetBan,
+  setRelationNguoiLa,
+  editAvatarOfUser,
+  editBackgroundOfUser,
+  allProfile, // allProfile
+  changeDestroyPost, // changeDestroy
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS';

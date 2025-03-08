@@ -5,9 +5,7 @@ import {
   changeDestroyPost,
   deletePost,
 } from '../../rtk/API';
-import HomeS from '../../styles/screens/home/HomeS';
 import ProfilePage from '../../components/items/ProfilePage';
-import { oStackHome } from '../../navigations/HomeNavigation';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
@@ -91,49 +89,49 @@ const Trash = props => {
     }
   };
 
-  // Hàm cập nhật bài post sau khi thả biểu cảm
-  const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
-    setPosts(prevPosts =>
-      prevPosts.map(post => {
-        if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
+  // // Hàm cập nhật bài post sau khi thả biểu cảm
+  // const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
+  //   setPosts(prevPosts =>
+  //     prevPosts.map(post => {
+  //       if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
 
-        // Tìm reaction của user hiện tại
-        const existingReactionIndex = post.post_reactions.findIndex(
-          reaction => reaction.ID_user._id === me._id
-        );
+  //       // Tìm reaction của user hiện tại
+  //       const existingReactionIndex = post.post_reactions.findIndex(
+  //         reaction => reaction.ID_user._id === me._id
+  //       );
 
-        let updatedReactions = [...post.post_reactions];
+  //       let updatedReactions = [...post.post_reactions];
 
-        if (existingReactionIndex !== -1) {
-          // Nếu user đã thả reaction, cập nhật reaction mới
-          updatedReactions[existingReactionIndex] = {
-            ...updatedReactions[existingReactionIndex],
-            ID_reaction: newReaction
-          };
-        } else {
-          // Nếu user chưa thả reaction, thêm mới
-          updatedReactions.push({
-            _id: ID_post_reaction, // ID của reaction mới từ server
-            ID_user: {
-              _id: me._id,
-              first_name: me.first_name, // Sửa lại đúng key
-              last_name: me.last_name,
-              avatar: me.avatar,
-            },
-            ID_reaction: newReaction
-          });
-        }
+  //       if (existingReactionIndex !== -1) {
+  //         // Nếu user đã thả reaction, cập nhật reaction mới
+  //         updatedReactions[existingReactionIndex] = {
+  //           ...updatedReactions[existingReactionIndex],
+  //           ID_reaction: newReaction
+  //         };
+  //       } else {
+  //         // Nếu user chưa thả reaction, thêm mới
+  //         updatedReactions.push({
+  //           _id: ID_post_reaction, // ID của reaction mới từ server
+  //           ID_user: {
+  //             _id: me._id,
+  //             first_name: me.first_name, // Sửa lại đúng key
+  //             last_name: me.last_name,
+  //             avatar: me.avatar,
+  //           },
+  //           ID_reaction: newReaction
+  //         });
+  //       }
 
-        return { ...post, post_reactions: updatedReactions };
-      })
-    );
-  };
+  //       return { ...post, post_reactions: updatedReactions };
+  //     })
+  //   );
+  // };
 
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-      <Ionicons name="arrow-back" size={30} color="#000" />
+        <Ionicons name="arrow-back" size={30} color="#000" />
       </TouchableOpacity>
       <View>
         <View style={styles.post}>
@@ -147,7 +145,6 @@ const Trash = props => {
                   ID_user={me._id}
                   onDelete={() => callChangeDestroyPost(item._id)}
                   onDeleteVinhVien={() => callDeletePost(item._id)}
-                  updatePostReaction={updatePostReaction}
                 />
               }
               keyExtractor={item => item._id}
