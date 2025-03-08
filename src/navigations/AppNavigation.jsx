@@ -120,18 +120,51 @@ const AppNavigation = () => {
 
   useEffect(() => {
     // Khi app đang mở
-    const unsubscribeForeground = messaging().onMessage(async message => {
-      console.log('📩 Nhận thông báo khi app đang mở:', message);
-      // Hiển thị thông báo bằng Notifee
-      await notifee.displayNotification({
-        title: message.notification?.title ?? 'Thông báo',
-        body: message.notification?.body ?? 'Bạn có một tin nhắn mới.',
-        android: {
-          channelId: 'default-channel', // Đảm bảo channelId tồn tại
-          smallIcon: 'ic_launcher', // Đổi icon nếu cần
-        },
-      });
+    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+      try {
+        console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
+
+        if (!remoteMessage?.data?.notification) {
+          console.warn("⚠ Không có dữ liệu notification");
+          return;
+        }
+
+        // Kiểm tra JSON hợp lệ trước khi parse
+        let notification;
+        try {
+          notification = JSON.parse(remoteMessage.data.notification);
+        } catch (error) {
+          console.error("❌ Lỗi khi parse JSON notification:", error);
+          return;
+        }
+
+        console.log("✅ Đã parse notification:", notification);
+
+        let content = "Bạn có một thông báo mới";
+        if (notification?.type === 'Lời mời kết bạn' && notification?.ID_relationship) {
+          const { ID_userA, ID_userB } = notification.ID_relationship;
+
+          if (user?._id?.toString() === ID_userA?._id?.toString()) {
+            content = `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
+          } else {
+            content = `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
+          }
+        }
+
+        // Hiển thị thông báo bằng Notifee
+        await notifee.displayNotification({
+          title: remoteMessage.notification?.title ?? 'Thông báo',
+          body: content,
+          android: {
+            channelId: 'default-channel', // Đảm bảo channelId tồn tại
+            smallIcon: 'ic_launcher', // Đổi icon nếu cần
+          },
+        });
+      } catch (error) {
+        console.error("❌ Lỗi khi xử lý thông báo:", error);
+      }
     });
+
 
     // Khi app chạy nền và người dùng nhấn vào thông báo
     const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(remoteMessage => {
@@ -171,7 +204,6 @@ const AppNavigation = () => {
           : (user ? <HomeNavigation /> : <UserNavigation />)
 
       }
-
     </NavigationContainer>
   );
 }
