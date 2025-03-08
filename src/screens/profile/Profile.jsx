@@ -20,7 +20,8 @@ import {
     joinGroupPrivate,
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
-    setRelationNguoiLa,
+    huyLoiMoiKetBan,
+    huyBanBe,
     editAvatarOfUser,
     editBackgroundOfUser,
     allProfile, // allProfile
@@ -411,19 +412,40 @@ const Profile = props => {
     };
 
     //huyLoiMoiKetBan
-    const callSetRelationNguoiLa = async () => {
+    const callHuyLoiMoiKetBan = async () => {
         try {
             const paramsAPI = {
                 ID_relationship: relationship?._id,
             };
-            await dispatch(setRelationNguoiLa(paramsAPI))
+            await dispatch(huyLoiMoiKetBan(paramsAPI))
                 .unwrap()
                 .then(response => {
                     //console.log(response);
                     setRelationship(response.relationship);
                 })
                 .catch(error => {
-                    console.log('Error2 callSetRelationNguoiLa:', error);
+                    console.log('Error2 callHuyLoiMoiKetBan:', error);
+                    setDialogreload(true);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    //huyBanBe
+    const callHuyBanBe = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+            };
+            await dispatch(huyBanBe(paramsAPI))
+                .unwrap()
+                .then(response => {
+                    //console.log(response);
+                    setRelationship(response.relationship);
+                })
+                .catch(error => {
+                    console.log('Error2 callHuyBanBe:', error);
                     setDialogreload(true);
                 });
         } catch (error) {
@@ -551,6 +573,7 @@ const Profile = props => {
                     <Snackbar
                         visible={dialogReLoad}
                         onDismiss={() => {
+                            callAllProfile();
                             setDialogreload(false);
                         }}
                         duration={1000}>
@@ -662,7 +685,7 @@ const Profile = props => {
                                                 relationship?.relation == 'B gửi lời kết bạn A')) && (
                                                 <TouchableOpacity
                                                     style={ProfileS.btnAddStory}
-                                                    onPress={callSetRelationNguoiLa}>
+                                                    onPress={callHuyLoiMoiKetBan}>
                                                     <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
                                                 </TouchableOpacity>
                                             )}
@@ -872,7 +895,7 @@ const Profile = props => {
                                             style={ProfileS.btnXoa}
                                             onPress={() => {
                                                 setMenuVisible(false);
-                                                callSetRelationNguoiLa();
+                                                callHuyBanBe();
                                             }}>
                                             <Text style={ProfileS.text_button}>Hủy bạn bè</Text>
                                         </TouchableOpacity>
@@ -892,7 +915,7 @@ const Profile = props => {
                                             style={ProfileS.btnXoa}
                                             onPress={() => {
                                                 setMenuVisible(false);
-                                                callSetRelationNguoiLa();
+                                                callHuyLoiMoiKetBan();
                                             }}>
                                             <Text style={ProfileS.text_button}>Xóa</Text>
                                         </TouchableOpacity>
