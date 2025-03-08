@@ -675,7 +675,7 @@ const PostItem = memo(({
                                     style={{ flexDirection: "row" }}
                                     onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
                                 >
-                                    {uniqueReactions.map((reaction, index) => (
+                                    {topReactions.map((reaction, index) => (
                                         <Text key={index} style={{ color: 'black' }}>
                                             {reaction.ID_reaction.icon}
                                         </Text>
