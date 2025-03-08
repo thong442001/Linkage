@@ -1,14 +1,14 @@
 import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  FlatList,
-  TouchableWithoutFeedback,
-  Modal,
-  Pressable,
-  Alert
+    StyleSheet,
+    Text,
+    View,
+    Image,
+    TouchableOpacity,
+    FlatList,
+    TouchableWithoutFeedback,
+    Modal,
+    Pressable,
+    Alert
 } from 'react-native';
 import React, { useState, useCallback, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -17,14 +17,14 @@ import ProfilePage from '../../components/items/ProfilePage';
 import Friends from '../../components/items/Friends';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  joinGroupPrivate,
-  guiLoiMoiKetBan,
-  chapNhanLoiMoiKetBan,
-  setRelationNguoiLa,
-  editAvatarOfUser,
-  editBackgroundOfUser,
-  allProfile, // allProfile
-  changeDestroyPost, // changeDestroy
+    joinGroupPrivate,
+    guiLoiMoiKetBan,
+    chapNhanLoiMoiKetBan,
+    setRelationNguoiLa,
+    editAvatarOfUser,
+    editBackgroundOfUser,
+    allProfile, // allProfile
+    changeDestroyPost, // changeDestroy
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS';
@@ -72,7 +72,7 @@ const Profile = props => {
     useEffect(() => {
         setliveID(String(Math.floor(Math.random() * 1000000)))
     }, [])
-    
+
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
@@ -648,7 +648,11 @@ const Profile = props => {
                                             </TouchableOpacity>
                                         )}
                                         {relationship?.relation == 'Bạn bè' && (
-                                            <TouchableOpacity style={ProfileS.btnAddStory}>
+                                            <TouchableOpacity
+                                                style={ProfileS.btnAddStory}
+                                                onPress={() => {
+                                                    setMenuVisible(true);
+                                                }}>
                                                 <Text style={ProfileS.textAddStory}>Bạn bè</Text>
                                             </TouchableOpacity>
                                         )}
@@ -782,7 +786,7 @@ const Profile = props => {
                         </View>
                     </View>
                     <View style={ProfileS.boxLivestream}>
-                        <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive',  { userID: me._id , avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
+                        <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
                             <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                                 <Icon name="videocam" size={20} color="red" />
                                 <Text style={{ marginLeft: 5, color: 'black' }}>
@@ -806,8 +810,8 @@ const Profile = props => {
     };
 
 
-    
-    
+
+
     return (
         <View style={ProfileS.container}>
             <View style={ProfileS.boxHeader}>
@@ -829,24 +833,24 @@ const Profile = props => {
             <View>
                 <View>
 
-                <View style={ProfileS.post}>
-    {loading ? (
-        <>
-            <ProfileLoading />
-            <FriendLoading/>
-        </>
-    ) : (
-        <FlatList
-            data={posts}    
-            renderItem={renderPosts}
-            keyExtractor={item => item._id}
-            showsHorizontalScrollIndicator={false}
-            ListHeaderComponent={headerFriends}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 50 }}
-        />
-    )}
-</View>
+                    <View style={ProfileS.post}>
+                        {loading ? (
+                            <>
+                                <ProfileLoading />
+                                <FriendLoading />
+                            </>
+                        ) : (
+                            <FlatList
+                                data={posts}
+                                renderItem={renderPosts}
+                                keyExtractor={item => item._id}
+                                showsHorizontalScrollIndicator={false}
+                                ListHeaderComponent={headerFriends}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingBottom: 50 }}
+                            />
+                        )}
+                    </View>
 
                 </View>
             </View>
@@ -859,24 +863,42 @@ const Profile = props => {
                 onRequestClose={() => setMenuVisible(false)}>
                 <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
                     <View style={ProfileS.overlay}>
-                        <View style={ProfileS.dialog}>
-                            <TouchableOpacity
-                                style={ProfileS.btnXacNhan}
-                                onPress={() => {
-                                    setMenuVisible(false);
-                                    callChapNhanLoiMoiKetBan();
-                                }}>
-                                <Text style={ProfileS.text_button}>Xác Nhận</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={ProfileS.btnXoa}
-                                onPress={() => {
-                                    setMenuVisible(false);
-                                    callSetRelationNguoiLa();
-                                }}>
-                                <Text style={ProfileS.text_button}>Xóa</Text>
-                            </TouchableOpacity>
-                        </View>
+
+                        {
+                            relationship?.relation == 'Bạn bè'
+                                ? (
+                                    <View style={ProfileS.dialog}>
+                                        <TouchableOpacity
+                                            style={ProfileS.btnXoa}
+                                            onPress={() => {
+                                                setMenuVisible(false);
+                                                callSetRelationNguoiLa();
+                                            }}>
+                                            <Text style={ProfileS.text_button}>Hủy bạn bè</Text>
+                                        </TouchableOpacity>
+                                    </View>
+
+                                ) : (
+                                    <View style={ProfileS.dialog}>
+                                        <TouchableOpacity
+                                            style={ProfileS.btnXacNhan}
+                                            onPress={() => {
+                                                setMenuVisible(false);
+                                                callChapNhanLoiMoiKetBan();
+                                            }}>
+                                            <Text style={ProfileS.text_button}>Xác Nhận</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={ProfileS.btnXoa}
+                                            onPress={() => {
+                                                setMenuVisible(false);
+                                                callSetRelationNguoiLa();
+                                            }}>
+                                            <Text style={ProfileS.text_button}>Xóa</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )
+                        }
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
