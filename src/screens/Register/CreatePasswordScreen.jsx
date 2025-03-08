@@ -22,7 +22,7 @@ const CreateNewPassWord = ({ route, navigation }) => {
     const validatePassword = (text) => {
         // Yêu cầu: ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-        
+
         if (!passwordRegex.test(text)) {
             setError('Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt.');
         } else {
@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
     inputDate: {
         flex: 1,
         paddingVertical: height * 0.015,
+        color: 'black'
     },
     inputError: {
         borderColor: 'red',

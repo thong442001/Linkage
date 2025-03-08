@@ -12,7 +12,6 @@ import { setReactions, setFcmToken } from '../rtk/Reducer';
 import database from '@react-native-firebase/database';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-
 import { io } from "socket.io-client";  // Thêm socket.io-client
 
 const AppNavigation = () => {
@@ -121,16 +120,15 @@ const AppNavigation = () => {
 
   useEffect(() => {
     // Khi app đang mở
-    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-      console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
-  
+    const unsubscribeForeground = messaging().onMessage(async message => {
+      console.log('📩 Nhận thông báo khi app đang mở:', message);
       // Hiển thị thông báo bằng Notifee
       await notifee.displayNotification({
-        title: remoteMessage.notification?.title ?? 'Thông báo',
-        body: remoteMessage.notification?.body ?? 'Bạn có một tin nhắn mới.',
+        title: message.notification?.title ?? 'Thông báo',
+        body: message.notification?.body ?? 'Bạn có một tin nhắn mới.',
         android: {
           channelId: 'default-channel', // Đảm bảo channelId tồn tại
-          smallIcon: 'logo_linkage', // Đổi icon nếu cần
+          smallIcon: 'ic_launcher', // Đổi icon nếu cần
         },
       });
     });

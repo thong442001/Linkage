@@ -126,6 +126,7 @@ const Home = props => {
       callGetAllPostsInHome(me._id); // Gọi API load dữ liệu
     }, [])
   );
+  
   const renderPosts = useCallback(({ item }) => (
     <ProfilePage
       post={item}

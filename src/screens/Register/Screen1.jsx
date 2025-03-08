@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
         borderRadius: width * 0.02,
         padding: width * 0.03,
         backgroundColor: '#fff',
+        color: 'black'
     },
     inputNameUserError: {
         flex: 1,
@@ -227,6 +228,7 @@ const styles = StyleSheet.create({
         padding: width * 0.03,
         backgroundColor: '#fff',
         marginVertical: height * 0.02,
+        color: 'black'
     },
     inputDateError: {
         borderWidth: 1,

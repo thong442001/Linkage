@@ -1,18 +1,44 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 const ItemNotification = ({ data }) => {
+  const me = useSelector(state => state.app.user);
+
+  const [name, setName] = useState(null);
+  const [avatar, setAvatar] = useState(null);
+
+  useEffect(() => {
+    if (data.type == 'Lời mời kết bạn') {
+      if (data.ID_relationship.ID_userA._id == me._id) {
+        setID_friend(data.ID_relationship.ID_userB._id)
+        setName(data.ID_relationship.ID_userB.first_name
+          + " " + data.ID_relationship.ID_userB.last_name);
+        setAvatar(data.ID_relationship.ID_userB.avatar);
+      } else {
+        setID_friend(data.ID_relationship.ID_userA._id)
+        setName(data.ID_relationship.ID_userA.first_name
+          + " " + data.ID_relationship.ID_userA.last_name);
+        setAvatar(data.ID_relationship.ID_userA.avatar);
+      }
+    }
+
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Image source={{ uri: data.avatar }} style={styles.img} />
+      {
+        avatar && (
+          <Image source={{ uri: avatar }} style={styles.img} />
+        )
+      }
       <View style={styles.container_content}>
         <View style={styles.container_name}>
-          <Text style={styles.text_name}>{data.senderName}</Text>
+          {/* <Text style={styles.text_name}>{data.senderName}</Text> */}
           <Text style={styles.text_content}>
-            {data.type === 'friend_request' ? ' đã gửi lời mời kết bạn' : data.content}
+            {data.content}
           </Text>
         </View>
-        <Text style={styles.text_time}>{data.timestamp}</Text>
+        <Text style={styles.text_time}>{data.createdAt}</Text>
       </View>
     </View>
   );

@@ -57,6 +57,21 @@ export const register = createAsyncThunk(
     }
   }
 )
+export const check_email = createAsyncThunk(
+  'gg/check-email',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response =
+        await AxiosHelper()
+          //.get('post/getMyPosts', data);
+          .get(`gg/check-email?uid=${data.uid}`);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const checkPhone = createAsyncThunk(
   'user/checkPhone',
@@ -756,6 +771,42 @@ export const deleteComment_reaction = createAsyncThunk(
     try {
       const response = await AxiosHelper()
         .post('comment_reaction/deleteComment_reaction', data);
+      //console.log(response?.message)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// ****************** notification ****************
+
+// params : me(ID_user)
+export const getAllNotificationOfUser = createAsyncThunk(
+  'notification/getAllNotificationOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`notification/getAllNotificationOfUser?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// params : _id(ID_notification)
+export const setStatusSeen = createAsyncThunk(
+  'notification/setStatusSeen',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('notification/setStatusSeen', data);
       //console.log(response?.message)
       return response;
     } catch (error) {

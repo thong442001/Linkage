@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { checkEmail } from '../../rtk/API';
+import {
+    checkEmail,
+    check_email
+} from '../../rtk/API';
 import { useDispatch } from 'react-redux';
-
+import auth from '@react-native-firebase/auth';
 const { width, height } = Dimensions.get('window');
+//import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Screen3 = (props) => {
     const { route, navigation } = props;
@@ -12,7 +16,56 @@ const Screen3 = (props) => {
 
     const dispatch = useDispatch();
     const [email, setEmail] = useState('');
+    const [emailVerified, setEmailVerified] = useState(false);
     const [error, setError] = useState('');
+
+    // useEffect(() => {
+    //     auth().signOut();
+
+    //     const fetchUserStatus = async () => {
+    //         const user = auth().currentUser;
+    //         if (user) {
+    //             await user.reload(); // Buộc cập nhật trạng thái từ Firebase
+    //             setEmailVerified(!user.emailVerified); // Cập nhật trạng thái email
+    //         }
+    //     };
+
+    //     fetchUserStatus();
+
+    //     const unsubscribe = auth().onAuthStateChanged((user) => {
+    //         if (user) {
+    //             setEmailVerified(!user.emailVerified);
+    //         }
+    //     });
+
+    //     return () => unsubscribe(); // Hủy lắng nghe khi unmount
+    // }, []);
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const user = auth().currentUser;
+            if (user) {
+                await user.reload(); // Cập nhật trạng thái từ Firebase
+                //setEmailVerified(user.emailVerified);
+                //const uid = user.uid;
+                callcheck_email(user.uid)
+            }
+        }, 1000); // Kiểm tra mỗi 1 giây
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const callcheck_email = (uid) => {
+        dispatch(check_email({ uid: uid }))
+            .unwrap()
+            .then((response) => {
+                setEmailVerified(response.emailVerified)
+            })
+            .catch((error) => {
+                console.log('Error callcheck_email:', error);
+            });
+    };
+
     const check = () => {
         if (validateEmail(email)) {
             callAPICheckEamil();
@@ -31,7 +84,9 @@ const Screen3 = (props) => {
             .unwrap()
             .then((response) => {
                 if (response.status) {
-                    handleTiep();
+                    //handleTiep();
+                    //auth().isSignInWithEmailLink(email);
+                    sendEmailVerification()
                 } else {
                     console.log("Lỗi: " + response.message);
                     setError(response.message)
@@ -40,6 +95,35 @@ const Screen3 = (props) => {
             .catch((error) => {
                 console.log('Error:', error);
             });
+    };
+
+    const checkEmailVerified = async () => {
+        const user = auth().currentUser;
+        if (user) {
+            await user.reload(); // Cập nhật thông tin user từ Firebase
+            if (user.emailVerified) {
+                setEmailVerified(true); // Cho phép nhấn nút "Tiếp"
+            }
+        }
+    };
+
+    const sendEmailVerification = async () => {
+        const actionCodeSettings = {
+            url: 'https://linkage.id.vn/gg/verify-email', // Link app của bạn
+            handleCodeInApp: true,
+        };
+
+        auth()
+            .sendSignInLinkToEmail(email, actionCodeSettings)
+            .then(() => {
+                console.log("Đã gửi link đăng nhập đến:", email);
+            })
+            .catch(error => {
+                console.error("Lỗi gửi link đăng nhập:", error.message);
+            });
+
+        // checkEmailVerified()
+
     };
 
     const handleTiep = () => {
@@ -74,8 +158,16 @@ const Screen3 = (props) => {
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua email</Text>
 
             <Pressable style={styles.button} onPress={check}>
-                <Text style={styles.buttonText}>Tiếp</Text>
+                <Text style={styles.buttonText}>Xác thực</Text>
             </Pressable>
+            {
+                emailVerified && (
+                    <Pressable style={styles.button} onPress={handleTiep}>
+                        <Text style={styles.buttonText}>Tiếp</Text>
+                    </Pressable>
+                )
+            }
+
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
@@ -121,6 +213,7 @@ const styles = StyleSheet.create({
         padding: height * 0.015,
         backgroundColor: '#fff',
         marginVertical: height * 0.02,
+        color: 'black'
     },
     errorText: {
         color: 'red',
