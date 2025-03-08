@@ -66,6 +66,11 @@ const PostItem = memo(({
     const [selectedTab, setSelectedTab] = useState('all');
     const [isFirstRender, setIsFirstRender] = useState(true);
 
+
+    //hien len anh
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isImageModalVisible, setImageModalVisible] = useState(false);
+
     // Khi selectedTab thay đổi, cập nhật nội dung BottomSheet
     useEffect(() => {
         if (isFirstRender) {
@@ -384,7 +389,14 @@ const PostItem = memo(({
         return (
             <View style={styles.mediaContainer}>
                 {medias.slice(0, 5).map((uri, index) => (
-                    <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
+                    <TouchableOpacity
+                        key={index}
+                        style={getMediaStyle(mediaCount, index)}
+                        onPress={() => {
+                            setSelectedImage(uri);
+                            setImageModalVisible(true);
+                        }}
+                    >
                         {isVideo(uri) ? (
                             <View style={styles.videoWrapper}>
                                 <Video source={{ uri }} style={styles.video} resizeMode="cover" paused />
@@ -406,6 +418,7 @@ const PostItem = memo(({
             </View>
         );
     };
+
 
     const getMediaStyle = (count, index) => {
         if (count === 1) {
@@ -751,9 +764,6 @@ const PostItem = memo(({
                     </TouchableOpacity>
                 </View>
             }
-
-
-
             {/* reactions biểu cảm */}
             < Modal
                 visible={reactionsVisible}
@@ -878,6 +888,20 @@ const PostItem = memo(({
                     </View>
                 </TouchableOpacity>
             </Modal >
+
+            <Modal
+                visible={isImageModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setImageModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
         </View >
     );
 });
@@ -1216,7 +1240,18 @@ const styles = StyleSheet.create({
     },
     nameItemReaction: {
         color: 'black',
-    }
+    },
+    //anh
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.8)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    fullImage: {
+        width: "90%",
+        height: "80%",
+    },
 });
 
 export default PostItem;
