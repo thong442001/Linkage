@@ -163,13 +163,27 @@ const PostItem = memo(({
 
 
     // lọc reactions 
-    const uniqueReactions = Array.from(
-        new Map(
-            post.post_reactions
-                .filter(reaction => reaction.ID_reaction !== null)
-                .map(reaction => [reaction.ID_reaction._id, reaction])
-        ).values()
-    );
+    // const uniqueReactions = Array.from(
+    //     new Map(
+    //         post.post_reactions
+    //             .filter(reaction => reaction.ID_reaction !== null)
+    //             .map(reaction => [reaction.ID_reaction._id, reaction])
+    //     ).values()
+    // );
+
+    // Nhóm reaction theo ID và đếm số lượng
+    const reactionCount = post.post_reactions.reduce((acc, reaction) => {
+        if (!reaction.ID_reaction) return acc; // Bỏ qua reaction null
+        const id = reaction.ID_reaction._id;
+        acc[id] = acc[id] ? { ...acc[id], count: acc[id].count + 1 } : { ...reaction, count: 1 };
+        return acc;
+    }, {});
+
+    // Chuyển object thành mảng và lấy 2 reaction có số lượng nhiều nhất
+    const topReactions = Object.values(reactionCount)
+        .sort((a, b) => b.count - a.count) // Sắp xếp giảm dần theo count
+        .slice(0, 2); // Lấy 2 reaction có số lượng nhiều nhất
+
     // Tìm reaction của chính người dùng hiện tại
     const userReaction = post.post_reactions.find(
         (reaction) => reaction.ID_user._id === ID_user
@@ -658,7 +672,7 @@ const PostItem = memo(({
                             style={{ flexDirection: "row" }}
                             onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
                         >
-                            {uniqueReactions.map((reaction, index) => (
+                            {topReactions.map((reaction, index) => (
                                 <Text key={index} style={{ color: 'black' }}>
                                     {reaction.ID_reaction.icon}
                                 </Text>

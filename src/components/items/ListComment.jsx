@@ -57,13 +57,13 @@ const ListComment = memo(({ comment, onReply }) => {
                 const days = Math.floor(hours / 24);
 
                 if (days > 0) {
-                    setTimeAgo(`${days} ngày trước`);
+                    setTimeAgo(`${days} ngày`);
                 } else if (hours > 0) {
-                    setTimeAgo(`${hours} giờ trước`);
+                    setTimeAgo(`${hours} giờ`);
                 } else if (minutes > 0) {
-                    setTimeAgo(`${minutes} phút trước`);
+                    setTimeAgo(`${minutes} phút`);
                 } else {
-                    setTimeAgo(`${seconds} giây trước`);
+                    setTimeAgo(`${seconds} giây`);
                 }
             }
         };
@@ -93,6 +93,28 @@ const ListComment = memo(({ comment, onReply }) => {
             });
         }
     };
+
+    // lọc reactions 
+    // const uniqueReactions = Array.from(
+    //     new Map(
+    //         comment_reactions
+    //             .filter(reaction => reaction.ID_reaction !== null)
+    //             .map(reaction => [reaction.ID_reaction._id, reaction])
+    //     ).values()
+    // );
+
+    // Nhóm reaction theo ID và đếm số lượng
+    const reactionCount = comment_reactions.reduce((acc, reaction) => {
+        if (!reaction.ID_reaction) return acc; // Bỏ qua reaction null
+        const id = reaction.ID_reaction._id;
+        acc[id] = acc[id] ? { ...acc[id], count: acc[id].count + 1 } : { ...reaction, count: 1 };
+        return acc;
+    }, {});
+
+    // Chuyển object thành mảng và lấy 2 reaction có số lượng nhiều nhất
+    const topReactions = Object.values(reactionCount)
+        .sort((a, b) => b.count - a.count) // Sắp xếp giảm dần theo count
+        .slice(0, 2); // Lấy 2 reaction có số lượng nhiều nhất
 
     // reaction comment
     const callAddComment_Reaction = async (ID_reaction, name, icon) => {
@@ -201,73 +223,82 @@ const ListComment = memo(({ comment, onReply }) => {
         <View style={styles.container}>
             <View style={{ flexDirection: 'row', marginHorizontal: 5 }}>
                 <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
-                <View>
-                    <View style={styles.boxContent}>
-                        <Text style={styles.name}>{comment.ID_user.first_name} {comment.ID_user.last_name}</Text>
-                        {
-                            comment.type == 'text' ? (
-                                <Text style={styles.commentText}>{comment.content}</Text>
-                            ) : comment.type == 'image' ? (
-                                <Image style={styles.messageImage} source={{ uri: comment.content }} />
-                            ) : comment.type == 'video' && (
-                                <Video
-                                    source={{ uri: comment.content }}
-                                    style={styles.messageVideo}
-                                    controls={true}
-                                    resizeMode="contain"
-                                />
-                            )
-                        }
-                        {/* butonsheet reaction biểu cảm */}
-                        <TouchableOpacity
-                        //</View>onPress={() => openBottomSheet(50, renderBottomSheetContent())}
-                        >
-                            <View style={{ flexDirection: 'row' }}>
-                                {
-                                    comment_reactions.length > 0
-                                    && (
-                                        <Text style={styles.reactionText}>
-                                            {comment_reactions.length}
-                                        </Text>
-                                    )
-                                }
-                                {
-                                    comment_reactions.map((reaction, index) => (
-                                        <View key={index} style={styles.reactionButton}>
-                                            <Text style={styles.reactionText}>
-                                                {reaction.ID_reaction.icon}
-                                            </Text>
-                                        </View>
-                                    ))}
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.boxInteract}>
-                        <Text style={{ color: "black" }}>{timeAgo}</Text>
-                        <TouchableOpacity
-                            ref={reactionRef} // Gắn ref vào đây
-                            onLongPress={() => {
-                                handleLongPress();
-                            }}
-                            onPress={() => userReaction
-                                ? callDeleteComment_reaction(userReaction._id)
-                                : callAddComment_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+                <View style={{ maxWidth: "90%" }}>
+                    <View>
+                        <View style={styles.boxContent}>
+                            <Text style={styles.name}>{comment.ID_user.first_name} {comment.ID_user.last_name}</Text>
+                            {
+                                comment.type == 'text' ? (
+                                    <Text style={styles.commentText}>{comment.content}</Text>
+                                ) : comment.type == 'image' ? (
+                                    <Image style={styles.messageImage} source={{ uri: comment.content }} />
+                                ) : comment.type == 'video' && (
+                                    <Video
+                                        source={{ uri: comment.content }}
+                                        style={styles.messageVideo}
+                                        controls={true}
+                                        resizeMode="contain"
+                                    />
+                                )
                             }
-                        >
-                            <Text
-                                style={[
-                                    userReaction
-                                        ? { color: '#FF9D00' }
-                                        : { color: 'black' }
-                                ]}
-                            >
-                                {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
-                            </Text>
-                        </TouchableOpacity>
+                        </View>
+                    </View>
 
-                        <TouchableOpacity onPress={() => onReply(comment)}>
-                            <Text style={{ color: "black" }}>Trả lời</Text>
-                        </TouchableOpacity>
+                    <View style={styles.boxInteract2}>
+                        <View style={styles.boxInteract}>
+                            <Text style={{ color: "black" }}>{timeAgo}</Text>
+                            <TouchableOpacity
+                                ref={reactionRef} // Gắn ref vào đây
+                                onLongPress={() => {
+                                    handleLongPress();
+                                }}
+                                onPress={() => userReaction
+                                    ? callDeleteComment_reaction(userReaction._id)
+                                    : callAddComment_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+                                }
+                            >
+                                <Text
+                                    style={[
+                                        userReaction
+                                            ? { color: '#FF9D00' }
+                                            : { color: 'black' }
+                                    ]}
+                                >
+                                    {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => onReply(comment)}>
+                                <Text style={{ color: "black" }}>Trả lời</Text>
+                            </TouchableOpacity>
+                        </View>
+
+
+                        {/* butonsheet reaction biểu cảm */}
+                        <View>
+                            <TouchableOpacity
+                            //</View>onPress={() => openBottomSheet(50, renderBottomSheetContent())}
+                            >
+                                <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                                    {
+                                        comment_reactions.length > 0
+                                        && (
+                                            <Text style={styles.reactionText}>
+                                                {comment_reactions.length}
+                                            </Text>
+                                        )
+                                    }
+                                    {
+                                        topReactions.map((reaction, index) => (
+                                            <View key={index} >
+                                                <Text style={styles.reactionText2}>
+                                                    {reaction.ID_reaction.icon}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                </View>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </View >
@@ -331,7 +362,8 @@ const ListComment = memo(({ comment, onReply }) => {
                 data={replys}
                 renderItem={renderReply}
                 keyExtractor={(item) => item._id.toString()}
-                getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
+                // getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
+                contentContainerStyle={{ paddingBottom: 70 }}
             />
         </View >
     );
@@ -341,71 +373,72 @@ export default ListComment;
 
 const styles = StyleSheet.create({
     avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 50,
+        width: width * 0.12, // Tự động scale theo màn hình (~12% chiều rộng)
+        height: width * 0.12,
+        borderRadius: width * 0.06, // Giữ hình tròn
     },
     container: {
-        marginVertical: 10,
+        marginVertical: height * 0.01,
         flex: 1,
-        marginTop: 10,
-        marginHorizontal: 20
+        marginTop: height * 0.02,
+        marginHorizontal: width * 0.05,
     },
     boxInteract: {
-        marginLeft: width * 0.05,
-        marginTop: 10,
+        flexDirection: 'row',
+        gap: width * 0.02, // Khoảng cách giữa các phần tử
+        marginTop: height * 0.005,
+    },
+    boxInteract2: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: 170,
-        gap: 10
+        width: '100%',
+        flexWrap: 'wrap',
     },
     boxContent: {
-        marginLeft: 15,
-        padding: 10,
+        marginLeft: width * 0.04,
+        padding: width * 0.03,
         backgroundColor: '#d9d9d990',
-        borderRadius: 20,
-        paddingLeft: 15,
-        // maxWidth: '85%',
-        // flexShrink: 1,
+        borderRadius: width * 0.05,
+        paddingLeft: width * 0.04,
+        maxWidth: '80%',
+        alignSelf: 'flex-start',
     },
     name: {
-        fontSize: 15,
+        fontSize: width * 0.04,
         fontWeight: "bold",
-        marginBottom: 5,
-        color: 'black'
+        marginBottom: height * 0.005,
+        color: 'black',
     },
     commentText: {
-        lineHeight: 22,
-        color: 'black'
+        lineHeight: height * 0.03,
+        color: 'black',
     },
     messageImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 5,
+        width: width * 0.5,
+        height: width * 0.5,
+        borderRadius: width * 0.02,
     },
     messageVideo: {
-        width: 250,
-        height: 250,
-        borderRadius: 5,
+        width: width * 0.5,
+        height: width * 0.6,
+        borderRadius: width * 0.02,
     },
     replyContainer: {
         flexDirection: 'row',
-        paddingLeft: 20, // Chỉ thụt vào 1 lần cho reply
+        paddingLeft: width * 0.05,
         position: 'relative',
     },
     threadLine: {
         position: 'absolute',
-        left: 10,
-        top: 10,
-        bottom: 10,
+        left: width * 0.025,
+        top: height * 0.01,
+        bottom: height * 0.01,
         width: 2,
         backgroundColor: 'gray',
     },
-    // list reactions 
     overlay: {
         position: 'absolute',
-        //backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         top: 0,
@@ -413,19 +446,23 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
     },
-    //reaction
     reactionBar: {
         position: 'absolute',
         flexDirection: "row",
         backgroundColor: "#FFFF",
-        padding: 10,
-        borderRadius: 20,
+        padding: width * 0.03,
+        borderRadius: width * 0.05,
     },
     reactionButton: {
-        marginHorizontal: 5,
+        marginHorizontal: width * 0.015,
     },
     reactionText: {
-        fontSize: 15,
+        fontSize: width * 0.04,
+        color: "#000",
+        alignSelf: 'flex-end',
+    },
+    reactionText2: {
+        fontSize: width * 0.04,
         color: "#000",
         alignSelf: 'flex-end',
     },

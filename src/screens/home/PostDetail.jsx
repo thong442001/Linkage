@@ -313,13 +313,26 @@ const PostDetail = (props) => {
 
 
   // lọc reactions 
-  const uniqueReactions = Array.from(
-    new Map(
-      reactionsOfPost
-        .filter(reaction => reaction.ID_reaction !== null)
-        .map(reaction => [reaction.ID_reaction._id, reaction])
-    ).values()
-  );
+  // const uniqueReactions = Array.from(
+  //   new Map(
+  //     reactionsOfPost
+  //       .filter(reaction => reaction.ID_reaction !== null)
+  //       .map(reaction => [reaction.ID_reaction._id, reaction])
+  //   ).values()
+  // );
+
+  // Nhóm reaction theo ID và đếm số lượng
+  const reactionCount = reactionsOfPost.reduce((acc, reaction) => {
+    if (!reaction.ID_reaction) return acc; // Bỏ qua reaction null
+    const id = reaction.ID_reaction._id;
+    acc[id] = acc[id] ? { ...acc[id], count: acc[id].count + 1 } : { ...reaction, count: 1 };
+    return acc;
+  }, {});
+
+  // Chuyển object thành mảng và lấy 2 reaction có số lượng nhiều nhất
+  const topReactions = Object.values(reactionCount)
+    .sort((a, b) => b.count - a.count) // Sắp xếp giảm dần theo count
+    .slice(0, 2); // Lấy 2 reaction có số lượng nhiều nhất
 
   // Tìm reaction của chính người dùng hiện tại
   const userReaction = reactionsOfPost.find(
@@ -1046,7 +1059,6 @@ const PostDetail = (props) => {
             styles.boxHeader,
             {
               justifyContent: 'space-between',
-              marginBottom: 20,
               marginHorizontal: 20,
             },
           ]}>
@@ -1066,7 +1078,7 @@ const PostDetail = (props) => {
                       style={{ flexDirection: "row" }}
                       onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
                     >
-                      {uniqueReactions.map((reaction, index) => (
+                      {topReactions.map((reaction, index) => (
                         <Text key={index} style={{ color: 'black' }}>
                           {reaction.ID_reaction.icon}
                         </Text>
@@ -1109,7 +1121,7 @@ const PostDetail = (props) => {
         data={comments}
         renderItem={renderComment}
         keyExtractor={(item) => item._id.toString()}
-        getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
+        // getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
         extraData={comments}
         ListHeaderComponent={header}
         contentContainerStyle={{ paddingBottom: '17%' }}

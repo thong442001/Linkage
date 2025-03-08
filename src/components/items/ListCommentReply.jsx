@@ -11,12 +11,13 @@ import {
 } from 'react-native';
 import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
 import Video from 'react-native-video';
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 import { useSelector, useDispatch } from 'react-redux';
 import {
     addComment_Reaction, // api tạo comment_reaction
     deleteComment_reaction, // api delete reaction
 } from '../../rtk/API';
+import Svg, { Path } from 'react-native-svg';
 const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
 
     const dispatch = useDispatch()
@@ -52,13 +53,13 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
             const days = Math.floor(hours / 24);
 
             if (days > 0) {
-                setTimeAgo(`${days} ngày trước`);
+                setTimeAgo(`${days} ngày`);
             } else if (hours > 0) {
-                setTimeAgo(`${hours} giờ trước`);
+                setTimeAgo(`${hours} giờ`);
             } else if (minutes > 0) {
-                setTimeAgo(`${minutes} phút trước`);
+                setTimeAgo(`${minutes} phút`);
             } else {
-                setTimeAgo(`${seconds} giây trước`);
+                setTimeAgo(`${seconds} giây`);
             }
         };
 
@@ -86,6 +87,28 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
             });
         }
     };
+
+    // lọc reactions 
+    // const uniqueReactions = Array.from(
+    //     new Map(
+    //         comment_reactions
+    //             .filter(reaction => reaction.ID_reaction !== null)
+    //             .map(reaction => [reaction.ID_reaction._id, reaction])
+    //     ).values()
+    // );
+
+    // Nhóm reaction theo ID và đếm số lượng
+    const reactionCount = comment_reactions.reduce((acc, reaction) => {
+        if (!reaction.ID_reaction) return acc; // Bỏ qua reaction null
+        const id = reaction.ID_reaction._id;
+        acc[id] = acc[id] ? { ...acc[id], count: acc[id].count + 1 } : { ...reaction, count: 1 };
+        return acc;
+    }, {});
+
+    // Chuyển object thành mảng và lấy 2 reaction có số lượng nhiều nhất
+    const topReactions = Object.values(reactionCount)
+        .sort((a, b) => b.count - a.count) // Sắp xếp giảm dần theo count
+        .slice(0, 2); // Lấy 2 reaction có số lượng nhiều nhất
 
     // reaction comment
     const callAddComment_Reaction = async (ID_reaction, name, icon) => {
@@ -188,9 +211,40 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
 
     return (
         <View style={[styles.container, level > 0 && styles.replyContainer]}>
-            <View style={{ flexDirection: 'row', paddingLeft: level === 1 ? 20 : 0 }}>
-                <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
-                <View>
+            <View style={{ flexDirection: 'row', marginTop: 10, maxWidth: "78%", paddingLeft: level === 1 ? 20 : 0 }}>
+                <View style={{ flexDirection: 'row' }}>
+                    {/* Đường kẻ vuông góc dưới bên trái */}
+                    <Svg height="50" width="50">
+                        {/* Đoạn thẳng đi xuống */}
+                        <Path
+                            d="M 2 0 V 20"
+                            stroke="gray"
+                            strokeWidth="1"
+                            fill="transparent"
+                        />
+                        {/* Đoạn cong bo góc */}
+                        <Path
+                            d="M 2 17 Q 2 30 20 30"
+                            stroke="gray"
+                            strokeWidth="1"
+                            fill="transparent"
+                        />
+                        {/* Đoạn thẳng đi ngang */}
+                        <Path
+                            d="M 20 30 H 45"
+                            stroke="gray"
+                            strokeWidth="1"
+                            fill="transparent"
+                        />
+                    </Svg>
+
+                    {/* Avatar */}
+                    <View>
+                        <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
+                    </View>
+                </View>
+
+                <View >
                     <View style={styles.boxContent}>
                         <Text style={styles.name}>{comment.ID_user.first_name} {comment.ID_user.last_name}</Text>
                         {comment.type === 'text' ? (
@@ -205,60 +259,65 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
                                 resizeMode="contain"
                             />
                         )}
-                        {/* butonsheet reaction biểu cảm */}
-                        <TouchableOpacity
-                        //</View>onPress={() => openBottomSheet(50, renderBottomSheetContent())}
-                        >
-                            <View style={{ flexDirection: 'row' }}>
-                                {
-                                    comment_reactions.length > 0
-                                    && (
-                                        <Text style={styles.reactionText}>
-                                            {comment_reactions.length}
-                                        </Text>
-                                    )
-                                }
-                                {
-                                    comment_reactions.map((reaction, index) => (
-                                        <View key={index} style={styles.reactionButton}>
-                                            <Text style={styles.reactionText}>
-                                                {reaction.ID_reaction.icon}
-                                            </Text>
-                                        </View>
-                                    ))}
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.boxInteract}>
-                        <Text style={{ color: "black" }}>{timeAgo}</Text>
-                        <TouchableOpacity
-                            ref={reactionRef} // Gắn ref vào đây
-                            onLongPress={() => {
-                                handleLongPress();
-                            }}
-                            onPress={() => userReaction
-                                ? callDeleteComment_reaction(userReaction._id)
-                                : callAddComment_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
-                            }
-                        >
-                            <Text
-                                style={[
-                                    userReaction
-                                        ? { color: '#FF9D00' }
-                                        : { color: 'black' }
-                                ]}
-                            >
-                                {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
-                            </Text>
-                        </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => onReply(comment)}>
-                            <Text style={{ color: "black" }}>Trả lời</Text>
-                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.boxInteract2}>
+                        <View style={styles.boxInteract}>
+                            <Text style={{ color: "black" }}>{timeAgo}</Text>
+                            <TouchableOpacity
+                                ref={reactionRef} // Gắn ref vào đây
+                                onLongPress={() => {
+                                    handleLongPress();
+                                }}
+                                onPress={() => userReaction
+                                    ? callDeleteComment_reaction(userReaction._id)
+                                    : callAddComment_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+                                }
+                            >
+                                <Text
+                                    style={[
+                                        userReaction
+                                            ? { color: '#FF9D00' }
+                                            : { color: 'black' }
+                                    ]}
+                                >
+                                    {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => onReply(comment)}>
+                                <Text style={{ color: "black" }}>Trả lời</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View>
+                            {/* butonsheet reaction biểu cảm */}
+                            <TouchableOpacity
+                            //</View>onPress={() => openBottomSheet(50, renderBottomSheetContent())}
+                            >
+                                <View style={{ flexDirection: 'row' }}>
+                                    {
+                                        comment_reactions.length > 0
+                                        && (
+                                            <Text style={styles.reactionText}>
+                                                {comment_reactions.length}
+                                            </Text>
+                                        )
+                                    }
+                                    {
+                                        topReactions.map((reaction, index) => (
+                                            <View key={index}>
+                                                <Text style={styles.reactionText}>
+                                                    {reaction.ID_reaction.icon}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                </View>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </View>
-
             {/* reactions biểu cảm */}
             < Modal
                 visible={reactionsVisible}
@@ -307,9 +366,9 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
                 data={replys}
                 renderItem={renderReply}
                 keyExtractor={(item) => item._id.toString()}
-                getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
+            // getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
             />
-        </View>
+        </View >
     );
 });
 
@@ -317,54 +376,60 @@ export default ListCommentReply;
 
 const styles = StyleSheet.create({
     avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 50,
+        width: width * 0.1, // ~10% chiều rộng màn hình
+        height: width * 0.1,
+        borderRadius: width * 0.05, // Giữ hình tròn
     },
     container: {
-        marginVertical: 10,
+        marginVertical: height * 0.005,
         flex: 1,
-        marginHorizontal: 20
     },
     replyContainer: {
         position: 'relative',
     },
     boxInteract: {
-        marginTop: 5,
+        flexDirection: 'row',
+        gap: width * 0.025,
+        marginTop: height * 0.005,
+    },
+    boxInteract2: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        justifyContent: 'space-between',
+        width: '100%',
+        flexWrap: 'wrap',
     },
     boxContent: {
-        marginLeft: 10,
-        padding: 10,
+        marginLeft: width * 0.04,
+        padding: width * 0.03,
         backgroundColor: '#d9d9d990',
-        borderRadius: 20,
+        borderRadius: width * 0.05,
+        paddingLeft: width * 0.04,
+        maxWidth: '80%',
+        alignSelf: 'flex-start',
     },
     name: {
-        fontSize: 14,
+        fontSize: width * 0.035,
         fontWeight: "bold",
-        marginBottom: 5,
+        marginBottom: height * 0.005,
         color: 'black',
     },
     commentText: {
-        lineHeight: 22,
-        color: 'black'
+        lineHeight: height * 0.03,
+        color: 'black',
     },
     messageImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 5,
+        width: width * 0.4,
+        height: width * 0.5,
+        borderRadius: width * 0.02,
     },
     messageVideo: {
-        width: 250,
-        height: 250,
-        borderRadius: 5,
+        width: width * 0.4,
+        height: width * 0.6,
+        borderRadius: width * 0.02,
     },
-    // list reactions 
     overlay: {
         position: 'absolute',
-        //backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         top: 0,
@@ -372,20 +437,34 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
     },
-    //reaction
     reactionBar: {
         position: 'absolute',
         flexDirection: "row",
         backgroundColor: "#FFFF",
-        padding: 10,
-        borderRadius: 20,
+        padding: width * 0.03,
+        borderRadius: width * 0.05,
     },
     reactionButton: {
-        marginHorizontal: 5,
+        marginHorizontal: width * 0.015,
     },
     reactionText: {
-        fontSize: 15,
+        fontSize: width * 0.04,
         color: "#000",
         alignSelf: 'flex-end',
     },
+    lineContainer: {
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        marginRight: width * 0.04,
+    },
+    line2: {
+        width: width * 0.002,
+        height: height * 0.03,
+        backgroundColor: 'gray',
+    },
+    line: {
+        width: width * 0.08,
+        height: width * 0.002,
+        backgroundColor: 'gray',
+    }
 });
