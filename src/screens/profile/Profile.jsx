@@ -760,47 +760,50 @@ const Profile = props => {
                     </View>
                 </View>
 
-                <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
-                    <View style={ProfileS.boxLive}>
-                        <View style={ProfileS.title2}>
-                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
-                                Bài viết
-                            </Text>
-                            <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
-                        </View>
-                        <View style={ProfileS.boxAllThink}>
-                            <View style={ProfileS.boxThink}>
-                                <Image
-                                    style={ProfileS.avataStatus}
-                                    source={{ uri: user?.avatar }}
-                                />
-                                <Text style={{ fontSize: 13, marginLeft: 10 }}>
-                                    Bạn đang nghĩ gì?
-                                </Text>
-                            </View>
-                            <Icon name="image" size={30} color="#3FF251" />
-                        </View>
-                    </View>
-                    <View style={ProfileS.boxLivestream}>
-                        <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive',  { userID: me._id , avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
-                            <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                <Icon name="videocam" size={20} color="red" />
-                                <Text style={{ marginLeft: 5, color: 'black' }}>
-                                    Phát trực tiếp {liveID}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <TouchableOpacity style={ProfileS.btnManage}>
-                        <View style={ProfileS.boxManange}>
-                            <Icon2 name="comment-text" size={17} color="black" />
-                            <Text style={{ fontSize: 13, color: 'black' }}>
-                                {' '}
-                                Quản lí bài viết
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
+                {user?._id === me?._id && (
+    <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
+        <View style={ProfileS.boxLive}>
+            <View style={ProfileS.title2}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
+                    Bài viết
+                </Text>
+                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
+            </View>
+            <View style={ProfileS.boxAllThink}>
+                <View style={ProfileS.boxThink}>
+                    <Image
+                        style={ProfileS.avataStatus}
+                        source={{ uri: user?.avatar }}
+                    />
+                    <Text style={{ fontSize: 13, marginLeft: 10 }}>
+                        Bạn đang nghĩ gì?
+                    </Text>
                 </View>
+                <Icon name="image" size={30} color="#3FF251" />
+            </View>
+        </View>
+        <View style={ProfileS.boxLivestream}>
+            <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive',  { userID: me._id , avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
+                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                    <Icon name="videocam" size={20} color="red" />
+                    <Text style={{ marginLeft: 5, color: 'black' }}>
+                        Phát trực tiếp {liveID}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={ProfileS.btnManage}>
+            <View style={ProfileS.boxManange}>
+                <Icon2 name="comment-text" size={17} color="black" />
+                <Text style={{ fontSize: 13, color: 'black' }}>
+                    Quản lí bài viết
+                </Text>
+            </View>
+        </TouchableOpacity>
+    </View>
+)}
+
+                
             </View>
         );
     };
