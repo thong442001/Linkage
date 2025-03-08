@@ -3,6 +3,20 @@ import React from 'react'
 const { width, height } = Dimensions.get('window');
 
 const UpPostS = StyleSheet.create({
+    loadingContainer: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: [{ translateX: -50 }, { translateY: -50 }],
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: 'white',
+        marginTop: 10,
+    },
     Container: {
         flex: 1,
         backgroundColor: 'white'
