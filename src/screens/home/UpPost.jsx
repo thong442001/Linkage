@@ -163,7 +163,7 @@ const UpPost = (props) => {
 
     // Hàm tải lên một file lên Cloudinary
     const uploadFile = async (file) => {
-        setisLoading(true); 
+        setisLoading(true);
         try {
             const data = new FormData();
             data.append('file', {
@@ -187,7 +187,7 @@ const UpPost = (props) => {
             console.log("Lỗi khi tải file");
             return null; // Trả về null nếu có lỗi
         }
-        finally{
+        finally {
             setisLoading(false)
         }
     };
@@ -202,7 +202,7 @@ const UpPost = (props) => {
         } catch (error) {
             console.log('uploadMultipleFiles -> ', error);
         }
-        finally{
+        finally {
             setisLoading(false)
         }
     };
@@ -369,14 +369,14 @@ const UpPost = (props) => {
 
             </View>
 
-                                
+
             {/* hiệu ứng loading khi tải ảnh */}
-                    {isLoading && (
-            <View style={UpPostS.loadingContainer}>
-                <ActivityIndicator size="large" color="#33a850" />
-                <Text style={UpPostS.loadingText}>Đang tải lên...</Text>
-            </View>
-        )}
+            {isLoading && (
+                <View style={UpPostS.loadingContainer}>
+                    <ActivityIndicator size="large" color="#33a850" />
+                    <Text style={UpPostS.loadingText}>Đang tải lên...</Text>
+                </View>
+            )}
 
 
 

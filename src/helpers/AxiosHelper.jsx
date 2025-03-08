@@ -6,8 +6,7 @@ import { resetToken } from '../rtk/Reducer';
 const AxiosHelper = (token = '', contentType = 'application/json') => {
     const axiosInstance = axios.create({
         baseURL: 'https://linkage.id.vn' // IP: mạng
-        //'http://192.168.2.17:3001/'// IP: mạng
-        //baseURL: 'https://be-linkage.vercel.app/'// deploy
+        //baseURL: 'http://192.168.111.56:3001/'// IP: mạng
     });
     // cmd -----> ipconfig -----> IPv4 Address (192.168.1.1)
     axiosInstance.interceptors.request.use(

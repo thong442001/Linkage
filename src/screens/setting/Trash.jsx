@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import {
   getPostsUserIdDestroyTrue,
   changeDestroyPost,
@@ -9,7 +9,7 @@ import ProfilePage from '../../components/items/ProfilePage';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
-
+import { useFocusEffect } from '@react-navigation/native';
 
 const Trash = props => {
   const { route, navigation } = props;
@@ -17,27 +17,16 @@ const Trash = props => {
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-
   const [posts, setPosts] = useState([]);
-  useEffect(() => {
-    //console.log('1');
-    // Call API khi lần đầu vào trang
-    callGetPostsUserIdDestroyTrue(me._id);
 
-    // Thêm listener để gọi lại API khi quay lại trang
-    const focusListener = navigation.addListener('focus', () => {
-      callGetPostsUserIdDestroyTrue(me._id);
-      //console.log('2');
-    });
-
-    // Cleanup listener khi component bị unmount
-    return () => {
-      focusListener();
-    };
-  }, [navigation]);
+  useFocusEffect(
+    useCallback(() => {
+      callGetPostsUserIdDestroyTrue(me._id); // Gọi API load dữ liệu
+    }, [])
+  );
 
   //call api callGetPostsUserIdDestroyTrue
-  const callGetPostsUserIdDestroyTrue = async ID_user => {
+  const callGetPostsUserIdDestroyTrue = async (ID_user) => {
     try {
       await dispatch(getPostsUserIdDestroyTrue({ me: ID_user, token: token }))
         .unwrap()
@@ -88,44 +77,6 @@ const Trash = props => {
       console.log('Lỗi trong callChangeDestroyPost:', error);
     }
   };
-
-  // // Hàm cập nhật bài post sau khi thả biểu cảm
-  // const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
-  //   setPosts(prevPosts =>
-  //     prevPosts.map(post => {
-  //       if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
-
-  //       // Tìm reaction của user hiện tại
-  //       const existingReactionIndex = post.post_reactions.findIndex(
-  //         reaction => reaction.ID_user._id === me._id
-  //       );
-
-  //       let updatedReactions = [...post.post_reactions];
-
-  //       if (existingReactionIndex !== -1) {
-  //         // Nếu user đã thả reaction, cập nhật reaction mới
-  //         updatedReactions[existingReactionIndex] = {
-  //           ...updatedReactions[existingReactionIndex],
-  //           ID_reaction: newReaction
-  //         };
-  //       } else {
-  //         // Nếu user chưa thả reaction, thêm mới
-  //         updatedReactions.push({
-  //           _id: ID_post_reaction, // ID của reaction mới từ server
-  //           ID_user: {
-  //             _id: me._id,
-  //             first_name: me.first_name, // Sửa lại đúng key
-  //             last_name: me.last_name,
-  //             avatar: me.avatar,
-  //           },
-  //           ID_reaction: newReaction
-  //         });
-  //       }
-
-  //       return { ...post, post_reactions: updatedReactions };
-  //     })
-  //   );
-  // };
 
 
   return (
