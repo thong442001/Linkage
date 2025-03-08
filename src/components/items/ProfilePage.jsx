@@ -648,38 +648,37 @@ const PostItem = memo(({
                 }
             </View>
 
-            <View style={{flexDirection:'row',justifyContent:'space-between',width:width*0.7,alignItems:'center'}}>
-                {/* reactions of post */}
-                {
-                    post.post_reactions.length > 0
-                    && (
-                        <View style={[styles.vReactionsOfPost]}>
-                            <TouchableOpacity
-                                style={{ flexDirection: "row" }}
-                                onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
-                            >
-                                {uniqueReactions.map((reaction, index) => (
-                                    <Text key={index} style={{ color: 'black' }}>
-                                        {reaction.ID_reaction.icon}
-                                    </Text>
-                                ))}
-                                <Text style={styles.slReactionsOfPost}>
-                                    {post.post_reactions.length}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    )
-                }
-                {/*so luong  bình luận */}
-                {
-                        post?.comments.length > 0
-                            && (
-                                <Text style={styles.slReactionsOfPost}>
-                                    {post?.comments.length} bình luận
-                                </Text>
-                            )
-                }
+            <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
+            {/* reactions of post */}
+            {post.post_reactions.length > 0 && (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <TouchableOpacity
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                        onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                    >
+                        {uniqueReactions.map((reaction, index) => (
+                            <Text key={index} style={{ color: 'black' }}>
+                                {reaction.ID_reaction.icon}
+                            </Text>
+                        ))}
+                        <Text style={styles.slReactionsOfPost}>
+                            {post.post_reactions.length}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* số lượng bình luận luôn sát bên phải */}
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                {post?.comments.length > 0 && (
+                    <Text style={styles.slReactionsOfPost}>
+                        {post?.comments.length} bình luận
+                    </Text>
+                )}
             </View>
+        </View>
+
+
 
 
             {

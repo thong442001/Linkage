@@ -8,6 +8,7 @@ import {
     Modal,
     TouchableWithoutFeedback,
     FlatList,
+    ActivityIndicator
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import UpPostS from '../../styles/screens/home/UpPostS';
@@ -36,6 +37,72 @@ const UpPost = (props) => {
     const [friends, setFriends] = useState(null);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [membersGroup, setMembersGroup] = useState([]);
+    //AI
+      const [prompt, setPrompt] = useState('');
+      const [image, setImage] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [modalVisibleAI, setModalVisibleAI] = useState(false);
+
+        // Mô hình tạo ảnh
+  const MODEL_URL = 'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5';
+  const API_KEY = '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'; // Thay bằng API key của bạn
+
+  // AI tạo ảnh
+  const generateImage = async () => {
+    if (!prompt) return;
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(MODEL_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inputs: prompt }),
+      });
+
+      // Chuyển đổi response thành base64
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = arrayBufferToBase64(arrayBuffer);
+      const imageUri = `data:image/jpeg;base64,${base64}`;
+      setImage(imageUri);
+      
+      // Chuyển Base64 thành file tạm thời để tải lên Cloudinary
+      const file = {
+          uri: imageUri, 
+          type: 'image/jpeg', 
+          fileName: 'ai-generated-image.jpg'
+      };
+      
+      // Gọi hàm uploadFile để tải ảnh lên Cloudinary
+      const uploadedUrl = await uploadFile(file);
+      
+      if (uploadedUrl) {
+          setMedias(prev => [...prev, uploadedUrl]); // Thêm URL thật vào danh sách ảnh để đăng bài
+      }
+      
+      
+     
+    } catch (error) {
+      console.error('Error generating image:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // Hàm chuyển đổi ArrayBuffer thành base64
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  };
 
 
     //call api getAllFriendOfID_user (lấy danh sách bạn bè)
@@ -356,6 +423,7 @@ const UpPost = (props) => {
                     />
                     {/* medias */}
                     {hasMedia && renderMediaGrid(medias)}
+                    {loading && <ActivityIndicator size="large" color="#0000ff" />}
                 </View>
 
             </View>
@@ -395,11 +463,14 @@ const UpPost = (props) => {
 
                     <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
 
-                    <TouchableOpacity style={UpPostS.btnIcon}>
+                    <TouchableOpacity style={UpPostS.btnIcon} onPress={() => setModalVisibleAI(true)}>
                         <View style={UpPostS.boxItems}>
-                            <Icon name="videocam-outline" size={30} color="#fcb13c" />
-                            {
-                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Video trực tiếp</Text>
+                        <Image
+                                style={{ width: 25, height: 25}}
+                                source={require('../../../assets/images/ai.png')}
+                            /> 
+                           {
+                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Tạo ảnh bằng AI</Text>
                             }
                         </View>
                     </TouchableOpacity>
@@ -479,8 +550,93 @@ const UpPost = (props) => {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+            {/* Modal AI */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisibleAI}
+        onRequestClose={() => setModalVisibleAI(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalBackground} 
+          activeOpacity={1} 
+          onPress={() => setModalVisibleAI(false)} 
+        >
+          <View style={styles.modalContainer}>
+            <Text style={styles.title}>Nhập mô tả</Text>
+            
+            {/* Ô nhập liệu */}
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập nội dung..."
+              placeholderTextColor={'black'}
+              value={prompt}
+              onChangeText={setPrompt}
+            />
+
+            {/* Nút gửi */}
+            {/* <TouchableOpacity title="Gửi" onPress={() => {
+              console.log("Nội dung nhập:", inputValue);
+              setModalVisible(false);
+            }} /> */}
+            <TouchableOpacity style={{backgroundColor:'blue',padding:10,borderRadius:10}}  onPress={()=>{generateImage(),setModalVisibleAI(false)}}>
+                <Text style={{color:'white'}}>Tạo ảnh</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
         </View>
     )
 }
 
 export default UpPost
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalBackground: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContainer: {
+      width: "80%",
+      backgroundColor: "white",
+      padding: 20,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 10,
+      color:'black',
+    },
+    input: {
+      width: "100%",
+      height: 40,
+      borderColor: "gray",
+      borderWidth: 1,
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      marginBottom: 10,
+      color: "black",
+    },
+      container: {
+    flex: 1,
+    padding: 20,
+  },
+  imageContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  image: {
+    width: 300,
+    height: 300,
+    resizeMode: 'contain',
+  },
+  });
