@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Stories from '../../components/items/Stories';
 import ProfilePage from '../../components/items/ProfilePage';
@@ -20,6 +20,8 @@ import {
 } from '../../rtk/API';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';  // Đảm bảo đã import component này
 import NothingHome from '../../utils/animation/homeanimation/NothingHome';
+import ItemLive from '../../components/items/ItemLive';
+import database from '@react-native-firebase/database';
 
 const Home = props => {
   const { route, navigation } = props;
@@ -31,7 +33,21 @@ const Home = props => {
   const [loading, setloading] = useState(true); // Quản lý trạng thái loading
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
+  const [liveSessions, setLiveSessions] = useState([]); // Danh sách phiên livestream từ Realtime Database
 
+  useEffect(() => {
+    const liveSessionsRef = database().ref('/liveSessions');
+  
+    const onValueChange = liveSessionsRef.on('value', snapshot => {
+      const liveSessions = snapshot.val() ? Object.values(snapshot.val()) : [];
+      setLiveSessions(liveSessions);
+      console.log('phien live tu realtime:', liveSessions);
+
+
+    });
+  
+    return () => liveSessionsRef.off('value', onValueChange); // Hủy lắng nghe khi component bị unmount
+  }, []);
   const callGetAllPostsInHome = async (ID_user) => {
     try {
       setloading(true)
@@ -215,18 +231,27 @@ const Home = props => {
 
         {/* Story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
-          <View style={HomeS.story}>
-            <FlatList
-              data={stories}
-              renderItem={renderStories}
-              keyExtractor={(item, index) => item?._id ? item._id.toString() : `story-${index}`}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              ListHeaderComponent={headerComponentStory}
-              contentContainerStyle={{ paddingHorizontal: 20 }}
-            />
-          </View>
-        </View>
+    <View style={HomeS.story}>
+        <FlatList
+            data={stories.concat(liveSessions)}  // Kết hợp stories và liveSessions
+            renderItem={({ item }) => {
+                if (item.liveID) {
+                    return <ItemLive user={item} />;  // Nếu có liveID, render live session
+                } else {
+                    return <Stories StoryPost={item} />;  // Nếu không có, render story
+                }
+            }}
+            keyExtractor={(item, index) =>
+              item.liveID ? item.liveID : item._id ? item._id.toString() : `story-${index}`
+            }
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            ListHeaderComponent={headerComponentStory}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+            ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+        />
+    </View>
+</View>
       </View>
     );
   };
