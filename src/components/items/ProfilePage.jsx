@@ -627,17 +627,17 @@ const PostItem = memo(({
                     }
                 </View>
                 {
-                    post.ID_post_shared
+                    post?.ID_post_shared
                         ? (
-                            hasCaption && <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
+                            <Text style={styles.caption}>{post.ID_post_shared.caption}</Text>
                         )
                         :
                         (
-                            hasCaption && <Text style={styles.caption}>{post?.caption}</Text>
+                            hasCaption && <Text style={styles.caption}>{post.caption}</Text>
                         )
                 }
                 {
-                    post.ID_post_shared
+                    post?.ID_post_shared
                         ? (
                             hasMedia && renderMediaGrid(post.ID_post_shared.medias)
                         )
@@ -651,22 +651,27 @@ const PostItem = memo(({
 
             {/* reactions of post */}
             {
-                post.post_reactions.length > 0
+                (post?.post_reactions.length > 0 || post?.comments.length > 0)
                 && (
                     <View style={[styles.vReactionsOfPost]}>
-                        <TouchableOpacity
-                            style={{ flexDirection: "row" }}
-                            onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
-                        >
-                            {uniqueReactions.map((reaction, index) => (
-                                <Text key={index} style={{ color: 'black' }}>
-                                    {reaction.ID_reaction.icon}
-                                </Text>
-                            ))}
-                            <Text style={styles.slReactionsOfPost}>
-                                {post.post_reactions.length}
-                            </Text>
-                        </TouchableOpacity>
+                        {
+                            post?.post_reactions.length > 0
+                            && (
+                                <TouchableOpacity
+                                    style={{ flexDirection: "row" }}
+                                    onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                                >
+                                    {uniqueReactions.map((reaction, index) => (
+                                        <Text key={index} style={{ color: 'black' }}>
+                                            {reaction.ID_reaction.icon}
+                                        </Text>
+                                    ))}
+                                    <Text style={styles.slReactionsOfPost}>
+                                        {post.post_reactions.length}
+                                    </Text>
+                                </TouchableOpacity>
+                            )
+                        }
                         <View>
                             {/*so luong  bình luận */}
                             {

@@ -14,12 +14,14 @@ import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import { io } from "socket.io-client";  // Thêm socket.io-client
 
+
 const AppNavigation = () => {
 
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]); // Lưu danh sách user online
+  
 
   const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
@@ -94,7 +96,7 @@ const AppNavigation = () => {
       await notifee.createChannel({
         id: 'default-channel',
         name: 'Default Channel',
-        importance: AndroidImportance.HIGH,
+        importance: AndroidImportance.MAX,
       });
     }
   }
@@ -189,6 +191,7 @@ const AppNavigation = () => {
       unsubscribeForeground();
       unsubscribeOpenedApp();
       unsubscribeNotifee();
+      // initialNotification();
     };
   }, []);
 

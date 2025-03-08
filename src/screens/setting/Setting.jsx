@@ -130,6 +130,15 @@ const Setting = (props) => {
                 color="red"
               />
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate("MiniGameScreen")}>
+              <Option
+                icon="exit-outline"
+                title="Game"
+                subtitle="Sign out from your account"
+                color="red"
+              />
+            </TouchableOpacity>
           </ScrollView>
         </View>
 
