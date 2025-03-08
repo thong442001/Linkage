@@ -651,7 +651,7 @@ const PostItem = memo(({
 
             {/* reactions of post */}
             {
-                (post?.post_reactions.length > 0 || post?.comments.length > 0)
+                (post?.post_reactions?.length > 0 || post?.comments?.length > 0)
                 && (
                     <View style={[styles.vReactionsOfPost]}>
                         {
@@ -675,7 +675,7 @@ const PostItem = memo(({
                         <View>
                             {/*so luong  bình luận */}
                             {
-                                post?.comments.length > 0
+                                post?.comments?.length > 0
                                 && (
                                     <Text style={styles.slReactionsOfPost}>
                                         {post?.comments.length} bình luận
