@@ -1,44 +1,70 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-const ItemNotification = ({ data }) => {
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {useSelector} from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
+const ItemNotification = ({data}) => {
   const me = useSelector(state => state.app.user);
+  const navigation = useNavigation();
 
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
 
+  const date = new Date(data.createdAt);
+  const formattedDate = new Intl.DateTimeFormat('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(date);
+
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
-        setName(data.ID_relationship.ID_userB.first_name
-          + " " + data.ID_relationship.ID_userB.last_name);
+        setName(
+          data.ID_relationship.ID_userB.first_name +
+            ' ' +
+            data.ID_relationship.ID_userB.last_name
+        );
         setAvatar(data.ID_relationship.ID_userB.avatar);
       } else {
-        setName(data.ID_relationship.ID_userA.first_name
-          + " " + data.ID_relationship.ID_userA.last_name);
+        setName(
+          data.ID_relationship.ID_userA.first_name +
+            ' ' +
+            data.ID_relationship.ID_userA.last_name
+        );
         setAvatar(data.ID_relationship.ID_userA.avatar);
       }
     }
-
   }, []);
 
+
+  // Xác định màn hình cần chuyển đến dựa vào loại thông báo
+  const navigateToScreen = () => {
+    if (data.type === 'Lời mời kết bạn') {
+      navigation.navigate('friend', { userId: me._id });
+    } else if (data.type === 'Tin nhắn mới') {
+      navigation.navigate('ChatScreen', { conversationId: data.conversationId });
+    } else if (data.type === 'Bài viết mới') {
+      navigation.navigate('PostDetailScreen', { postId: data.postId });
+    }
+  };
+
   return (
+    <TouchableOpacity onPress={navigateToScreen} >
     <View style={styles.container}>
-      {
-        avatar && (
-          <Image source={{ uri: avatar }} style={styles.img} />
-        )
-      }
+      {avatar && <Image source={{uri: avatar}} style={styles.img} />}
       <View style={styles.container_content}>
         <View style={styles.container_name}>
-          {/* <Text style={styles.text_name}>{data.senderName}</Text> */}
-          <Text style={styles.text_content}>
-            {data.content}
-          </Text>
+          <Text style={styles.text_name}>{name}</Text>
+          <Text style={styles.text_content}>{data.content ?? "Bạn có thông báo mới"}</Text>
         </View>
-        <Text style={styles.text_time}>{data.createdAt}</Text>
+        <Text style={styles.text_time}>{formattedDate}</Text>
       </View>
     </View>
+    </TouchableOpacity>
   );
 };
 
@@ -59,7 +85,7 @@ const styles = StyleSheet.create({
     borderColor: 'white',
   },
   container_name: {
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
   text_content: {
     marginLeft: 2,

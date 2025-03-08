@@ -14,6 +14,7 @@ import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import { io } from "socket.io-client";  // Thêm socket.io-client
 
+
 const AppNavigation = () => {
 
   const dispatch = useDispatch();
