@@ -141,21 +141,49 @@ const AppNavigation = () => {
 
         console.log("✅ Đã parse notification:", notification);
 
-        let content = "Bạn có một thông báo mới";
-        if (notification?.type === 'Lời mời kết bạn' && notification?.ID_relationship) {
-          const { ID_userA, ID_userB } = notification.ID_relationship;
-
-          if (user?._id?.toString() === ID_userA?._id?.toString()) {
-            content = `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
-          } else {
-            content = `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
+        const contentne = () => {
+          if (notification?.type === 'Lời mời kết bạn' && notification?.ID_relationship) {
+            const { ID_userA, ID_userB } = notification.ID_relationship;
+        
+            if (user?._id?.toString() === ID_userA?._id?.toString()) {
+              return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
+            } else {
+              return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
+            }
           }
-        }
+        
+          if (notification?.type === "Đã thành bạn bè của bạn" && notification?.ID_relationship) {
+            const { ID_userA, ID_userB } = notification.ID_relationship;
+        
+            if (user?._id?.toString() === ID_userA?._id?.toString()) {
+              return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''} với bạn đã thành bạn bè`;
+            } else {
+              return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''} với bạn đã thành bạn bè`;
+            }
+          }
+        
+          if (notification?.type === 'Tin nhắn mới' && notification?.ID_message) {
+            const { sender, content } = notification.ID_message;
+        
+            if (sender) {
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã gửi một tin nhắn'}`;
+            } 
+          }
+
+          if (notification?.type === 'Bạn đã được mời vào nhóm mới' && notification?.ID_group) {
+            return `Bạn đã được mời vào nhóm mới`;
+          }
+        
+      
+
+          return "Bạn có một thông báo mới"; // Nội dung mặc định
+        };
+        
 
         // Hiển thị thông báo bằng Notifee
         await notifee.displayNotification({
           title: remoteMessage.notification?.title ?? 'Thông báo',
-          body: content,
+          body: contentne(),
           android: {
             channelId: 'default-channel', // Đảm bảo channelId tồn tại
             smallIcon: 'ic_launcher', // Đổi icon nếu cần
