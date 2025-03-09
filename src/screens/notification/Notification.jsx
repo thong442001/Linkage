@@ -1,24 +1,21 @@
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useState, useCallback} from 'react';
+import {View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, LayoutAnimation} from 'react-native';
+import {useSelector, useDispatch} from 'react-redux';
 import ItemNotification from '../../components/items/ItemNotification';
-import {
-  getAllNotificationOfUser
-} from '../../rtk/API';
+import {getAllNotificationOfUser} from '../../rtk/API';
+
 const Notification = () => {
-  const [showAll, setShowAll] = useState(false);
   const [notifications, setNotifications] = useState([]); // State chứa danh sách thông báo
-  const [newNotification, setNewNotification] = useState(null); // State chứa thông báo mới nhất
-  const [visible, setVisible] = useState(false); // State điều khiển Snackbar
+  const [expandedGroups, setExpandedGroups] = useState({}); // Trạng thái mở rộng từng nhóm
 
   const dispatch = useDispatch();
-  const me = useSelector(state => state.app.user); // Lấy thông tin user từ Redux
-  const token = useSelector(state => state.app.token); // Lấy thông tin user từ Redux
+  const me = useSelector(state => state.app.user);
+  const token = useSelector(state => state.app.token);
 
   const callGetAllNotificationOfUser = async () => {
     try {
-      await dispatch(getAllNotificationOfUser({ me: me._id, token: token }))
+      await dispatch(getAllNotificationOfUser({me: me._id, token: token}))
         .unwrap()
         .then(response => {
           console.log(response);
@@ -34,32 +31,55 @@ const Notification = () => {
 
   useFocusEffect(
     useCallback(() => {
-      callGetAllNotificationOfUser(); // Gọi API load dữ liệu
-    }, [])
+      callGetAllNotificationOfUser();
+    }, []),
   );
 
+  // Nhóm thông báo theo loại
+  const groupedNotifications = notifications.reduce((acc, item) => {
+    const type = item.type || 'Khác';
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(item);
+    return acc;
+  }, {});
+
+  // Hàm mở rộng nhóm thông báo
+
+  const toggleExpand = (type) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedGroups(prevState => ({
+      ...prevState,
+      [type]: !prevState[type]
+    }));
+  };
   return (
-    <View style={styles.container}>
-
-      {/* Danh sách thông báo */}
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Thông báo</Text>
-      <FlatList
-        // data={showAll ? notifications : notifications.slice(0, 7)}
-        data={notifications}
-        renderItem={({ item }) =>
-          <ItemNotification data={item} />
-        }
-        keyExtractor={(item, index) => index.toString()}
-      />
-
-      {notifications.length > 7 && !showAll && (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setShowAll(true)}>
-          <Text style={styles.text_button}>Xem thêm thông báo</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+      {Object.keys(groupedNotifications).map((type, index) => (
+        <View key={index} style={styles.categoryContainer}>
+          <Text style={styles.categoryTitle}>{type}</Text>
+          <FlatList
+            data={
+              expandedGroups[type]
+                ? groupedNotifications[type]
+                : groupedNotifications[type].slice(0, 4)
+            }
+            renderItem={({item}) => <ItemNotification data={item} />}
+            keyExtractor={(item, index) => index.toString()}
+            scrollEnabled={false} // ⚡ Ngăn FlatList cuộn, chỉ ScrollView cuộn
+          />
+          {groupedNotifications[type].length > 4 && (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => toggleExpand(type)}>
+              <Text style={styles.text_button}>
+                {expandedGroups[type] ? 'Ẩn bớt' : 'Xem thêm thông báo'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 
@@ -77,6 +97,16 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'center',
     marginBottom: 10,
+  },
+  categoryContainer: {
+    marginBottom: 50,
+    paddingHorizontal: 10,
+  },
+  categoryTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+    marginBottom: 5,
   },
   button: {
     height: 39,
