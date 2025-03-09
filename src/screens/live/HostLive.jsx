@@ -1,9 +1,10 @@
-import { SafeAreaView, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { SafeAreaView, StyleSheet, BackHandler, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ZegoUIKitPrebuiltLiveStreaming, { HOST_DEFAULT_CONFIG } from '@zegocloud/zego-uikit-prebuilt-live-streaming-rn';
 import Keycenter from './Keycenter';
 import database from '@react-native-firebase/database';
+import { useFocusEffect } from '@react-navigation/native';
 
 const HostLive = (props) => {
   const { route, navigation } = props;
@@ -47,6 +48,30 @@ const HostLive = (props) => {
         console.error('Lỗi xóa live:', error);
       });
   };
+
+
+  //xử lí sự kiện user dùng nút back trên thiết bị của họ
+    useFocusEffect(
+      React.useCallback(() => {
+
+    const backAction = () => {
+      Alert.alert(
+        'Thoát livestream',
+        'Bạn có chắc chắn muốn rời khỏi phiên live?',
+        [
+          {text: 'Hủy' , style: 'cancel'},
+          {text: 'OK' , onPress: () => handleLeaveLive()}
+        ]
+      )
+      return true; // Ngăn không cho thoát app ngay lập tức
+    }
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+  
+    return () => {
+        backHandler.remove();
+    }
+  }, [])
+);
 
   return (
     <SafeAreaView style={styles.container}>

@@ -66,12 +66,17 @@ const Profile = props => {
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
     const [dialogReLoad, setDialogreload] = useState(false);
+    //loading skeleton
     const [loading, setloading] = useState(true)
 
+    //loading khi doi anh
+    const [isLoading, setisLoading] = useState(false)
 
-    useEffect(() => {
-        setliveID(String(Math.floor(Math.random() * 1000000)))
-    }, [])
+    useFocusEffect(
+        React.useCallback(() => {
+          setliveID(String(Math.floor(Math.random() * 100000000)));
+        }, [])
+      );
     
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
@@ -141,21 +146,26 @@ const Profile = props => {
     //đổi avatar
     const onOpenGalleryChangeAvatar = async () => {
         try {
+            setisLoading(true)
+            closeBottomSheet()
             const options = { mediaType: 'image', quality: 1 };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
+                    setisLoading(false)
                     console.log('Đã hủy chọn ảnh');
                     return;
                 }
 
                 if (response.errorMessage) {
+                    setisLoading(false)
                     console.log('Lỗi khi mở thư viện:', response.errorMessage);
                     return;
                 }
 
                 const selectedFile = response.assets?.[0];
                 if (!selectedFile) {
+                    setisLoading(false)
                     console.log('Không có ảnh nào được chọn!');
                     return;
                 }
@@ -164,6 +174,7 @@ const Profile = props => {
 
                 const fileUrl = await uploadFile(selectedFile);
                 if (!fileUrl) {
+                    setisLoading(false)
                     console.log('❌ Upload ảnh thất bại!');
                     return;
                 }
@@ -176,12 +187,14 @@ const Profile = props => {
                         if (res.status) {
                             dispatch(changeAvatar(fileUrl));
                             console.log('✅ Đổi avatar thành công');
-                            closeBottomSheet();
                         } else {
+                            setisLoading(false);  
                             console.log('❌ Đổi avatar thất bại');
                         }
+                        setisLoading(false); 
                     })
                     .catch(err => {
+                        setisLoading(false);  
                         console.log('❌ Lỗi khi gửi API đổi avatar:', err);
                     });
             });
@@ -730,7 +743,6 @@ const Profile = props => {
                         </View>
 
                         <View style={ProfileS.listFriends}>
-                            <LoadingModal visible={loading} />
                             <FlatList
                                 data={(friendRelationships || []).slice(0, 6)}
                                 renderItem={({ item }) => (
@@ -787,7 +799,7 @@ const Profile = props => {
                 <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                     <Icon name="videocam" size={20} color="red" />
                     <Text style={{ marginLeft: 5, color: 'black' }}>
-                        Phát trực tiếp {liveID}
+                        Phát trực tiếp 
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -813,6 +825,7 @@ const Profile = props => {
     
     return (
         <View style={ProfileS.container}>
+            <LoadingModal visible={isLoading}/>
             <View style={ProfileS.boxHeader}>
                 <View style={ProfileS.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
