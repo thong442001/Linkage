@@ -10,10 +10,13 @@ import {
 } from '../../rtk/API';
 import QRCode from 'react-native-qrcode-svg';
 const { width, height } = Dimensions.get('window');
+import { useSocket } from '../../context/socketContext';
+
 const SettingChat = (props) => { // cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
 
+    const { socket } = useSocket();
     // console.log('Setting: ', params.ID_group);
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
@@ -21,7 +24,7 @@ const SettingChat = (props) => { // cần ID_group (param)
 
     const [group, setGroup] = useState(null);
     const [qrVisible, setQrVisible] = useState(false); // 🔥 State để hiển thị modal QR
-    
+
 
     useEffect(() => {
         // Call API khi lần đầu vào trang
@@ -66,6 +69,7 @@ const SettingChat = (props) => { // cần ID_group (param)
             await dispatch(deleteMember(paramsAPI))
                 .unwrap()
                 .then((response) => {
+
                     // bakc HomeChat
                     navigation.navigate("HomeChat");
                 })
@@ -87,6 +91,8 @@ const SettingChat = (props) => { // cần ID_group (param)
             await dispatch(deleteGroup(paramsAPI))
                 .unwrap()
                 .then((response) => {
+                    // Emit sự kiện "delete_group" để cập nhật danh sách nhóm
+                    socket.emit("delete_group", { ID_group: params.ID_group });
                     // bakc HomeChat
                     navigation.navigate("HomeChat");
                 })
@@ -126,66 +132,66 @@ const SettingChat = (props) => { // cần ID_group (param)
     };
 
     return (
-            <View style={styles.container}>
+        <View style={styles.container}>
 
-                {/* Nút Back */}
-                {
-                    group != null
-                    && (
-                        <TouchableOpacity
-                            style={styles.backButton}
-                            onPress={goBack}
-                        >
-                            <Icon name="arrow-back" size={24} color="black" />
-                        </TouchableOpacity>
-                    )
-                }
-                {/* Ảnh đại diện nhóm */}
-                {
-                    group != null
-                    && (
-                        <View style={styles.groupAvatarContainer}>
-                            <Image source={{ uri: group.avatar }} style={styles.avatar} />
-                            {/* Name group */}
-                            {
-                                group.name == null
-                                    ? (
-                                        <Text
-                                            style={styles.groupName}
-                                        >
-                                            Nhóm chưa có tên
-                                        </Text>
-                                    ) : (
-                                        <Text
-                                            style={styles.groupName}
-                                        >
-                                            {group.name}
-                                        </Text>
-                                    )
-                            }
-                            {/* đổi name vs avt group */}
-                            {
-                                group.members[0]._id == me._id
-                                && (
-                                    <TouchableOpacity
-                                        onPress={toAvtNameGroup}
+            {/* Nút Back */}
+            {
+                group != null
+                && (
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={goBack}
+                    >
+                        <Icon name="arrow-back" size={24} color="black" />
+                    </TouchableOpacity>
+                )
+            }
+            {/* Ảnh đại diện nhóm */}
+            {
+                group != null
+                && (
+                    <View style={styles.groupAvatarContainer}>
+                        <Image source={{ uri: group.avatar }} style={styles.avatar} />
+                        {/* Name group */}
+                        {
+                            group.name == null
+                                ? (
+                                    <Text
+                                        style={styles.groupName}
                                     >
-                                        <Text style={styles.changeGroupInfo}>Đổi tên hoặc ảnh</Text>
-                                    </TouchableOpacity>
+                                        Nhóm chưa có tên
+                                    </Text>
+                                ) : (
+                                    <Text
+                                        style={styles.groupName}
+                                    >
+                                        {group.name}
+                                    </Text>
                                 )
-                            }
-                        </View>
-                    )
-                }
+                        }
+                        {/* đổi name vs avt group */}
+                        {
+                            group.members[0]._id == me._id
+                            && (
+                                <TouchableOpacity
+                                    onPress={toAvtNameGroup}
+                                >
+                                    <Text style={styles.changeGroupInfo}>Đổi tên hoặc ảnh</Text>
+                                </TouchableOpacity>
+                            )
+                        }
+                    </View>
+                )
+            }
 
 
-                {/* Nút Thêm thành viên */}
-                {
-                    group != null
+            {/* Nút Thêm thành viên */}
+            {
+                group != null
+                && (
+                    group.members[0]._id == me._id
                     && (
-                        group.members[0]._id == me._id
-                        && (
-                            <View style={{alignItems: 'center'}}>
+                        <View style={{ alignItems: 'center' }}>
                             <TouchableOpacity
                                 style={styles.addMemberButton}
                                 onPress={toAddFriendGroup}
@@ -198,79 +204,79 @@ const SettingChat = (props) => { // cần ID_group (param)
                             <TouchableOpacity onPress={() => setQrVisible(true)}>
                                 <Icon name="qr-code-outline" size={22} color="black" />
                             </TouchableOpacity>
-                            </View>
-
-                        )
-                    )
-                }
-
-                {/* Thông tin về đoạn chat */}
-                {
-                    group != null
-                    && (
-                        <View style={styles.chatInfoContainer}>
-
-                            <TouchableOpacity
-                                style={styles.infoItem}
-                                onPress={toMembersGroup}
-                            >
-                                <Text style={styles.infoText}>Xem thành viên trong nhóm chat</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.leaveChatButton}
-                                onPress={handleRoiNhom}
-                            >
-                                <Text style={styles.leaveChatText}>Rời khỏi nhóm chat</Text>
-                            </TouchableOpacity>
-
-                            {
-                                group.members[0]._id == me._id
-                                && (
-                                    <TouchableOpacity
-                                        style={styles.leaveChatButton}
-                                        onPress={handleGiaiTan}
-                                    >
-                                        <Text style={styles.leaveChatText}>Giải tán nhóm chat</Text>
-                                    </TouchableOpacity>
-                                )
-                            }
                         </View>
+
                     )
-                }
-                {
-                    group != null && (
-                        <Modal
+                )
+            }
+
+            {/* Thông tin về đoạn chat */}
+            {
+                group != null
+                && (
+                    <View style={styles.chatInfoContainer}>
+
+                        <TouchableOpacity
+                            style={styles.infoItem}
+                            onPress={toMembersGroup}
+                        >
+                            <Text style={styles.infoText}>Xem thành viên trong nhóm chat</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.leaveChatButton}
+                            onPress={handleRoiNhom}
+                        >
+                            <Text style={styles.leaveChatText}>Rời khỏi nhóm chat</Text>
+                        </TouchableOpacity>
+
+                        {
+                            group.members[0]._id == me._id
+                            && (
+                                <TouchableOpacity
+                                    style={styles.leaveChatButton}
+                                    onPress={handleGiaiTan}
+                                >
+                                    <Text style={styles.leaveChatText}>Giải tán nhóm chat</Text>
+                                </TouchableOpacity>
+                            )
+                        }
+                    </View>
+                )
+            }
+            {
+                group != null && (
+                    <Modal
                         visible={qrVisible}
                         transparent
                         onRequestClose={() => setQrVisible(false)}>
                         <View style={styles.modalContainer}>
-                          <View style={styles.modalContent}>
-                                              {/* Name group */}
-                                              {
-                                          group.name == null
-                                              ? (
-                                                  <Text style={styles.modalTitle}>Nhóm chưa có tên</Text>
-                                              ) : (
-                                                  <Text style={styles.modalTitle}>Nhóm: {group.name}</Text>
-                                              )
-                                      }
-                            <QRCode
-                              value={`linkage://addgroup/${params.ID_group}`}
-                              size={200}
-                            />
-                            <TouchableOpacity
-                              onPress={() => setQrVisible(false)}
-                              style={styles.closeButton}>
-                              <Text style={styles.closeButtonText}>Đóng</Text>
-                            </TouchableOpacity>
-                          </View>
+                            <View style={styles.modalContent}>
+                                {/* Name group */}
+                                {
+                                    group.name == null
+                                        ? (
+                                            <Text style={styles.modalTitle}>Nhóm chưa có tên</Text>
+                                        ) : (
+                                            <Text style={styles.modalTitle}>Nhóm: {group.name}</Text>
+                                        )
+                                }
+                                <QRCode
+                                    value={`linkage://addgroup/${params.ID_group}`}
+                                    size={200}
+                                />
+                                <TouchableOpacity
+                                    onPress={() => setQrVisible(false)}
+                                    style={styles.closeButton}>
+                                    <Text style={styles.closeButtonText}>Đóng</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                      </Modal>
-                    )
-                }
-           
-            </View>
+                    </Modal>
+                )
+            }
+
+        </View>
     );
 };
 
@@ -354,22 +360,22 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0,0,0,0.5)',
-      },
-      modalContent: {
+    },
+    modalContent: {
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 5,
         alignItems: 'center',
-      },
-      modalTitle: {fontSize: 18, fontWeight: 'medium', marginBottom: 10, color:'black'},
-      closeButton: {
+    },
+    modalTitle: { fontSize: 18, fontWeight: 'medium', marginBottom: 10, color: 'black' },
+    closeButton: {
         marginTop: 10,
         paddingHorizontal: 80,
-        paddingVertical:5,
+        paddingVertical: 5,
         backgroundColor: 'blue',
         borderRadius: 5,
-      },
-      closeButtonText: {color: 'white', fontSize: 16},
+    },
+    closeButtonText: { color: 'white', fontSize: 16 },
 });
 
 export default SettingChat

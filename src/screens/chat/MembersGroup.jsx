@@ -17,11 +17,12 @@ import {
     passKey,
 } from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useSocket } from '../../context/socketContext';
 const { width, height } = Dimensions.get('window');
 const MembersGroup = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
-
+    const { socket } = useSocket();
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
@@ -72,6 +73,8 @@ const MembersGroup = (props) => {// cần ID_group (param)
                 .unwrap()
                 .then((response) => {
                     //console.log(ID_user)
+                    // Emit sự kiện "kick_user" để cập nhật danh sách nhóm
+                    socket.emit("kick_user", { ID_group: params.ID_group, ID_user: ID_user });
                     // load lại 
                     callGetGroupID();
                 })
@@ -192,26 +195,26 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         // padding: width * 0.05, // Nếu cần padding
-      },
-      header: {
+    },
+    header: {
         fontSize: width * 0.06, // 6% chiều rộng màn hình
         fontWeight: 'bold',
         color: "black",
         width: width * 0.5, // 50% chiều rộng màn hình
         textAlign: 'center',
-      },
-      headerBlue: {
+    },
+    headerBlue: {
         fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "blue",
         textAlign: 'center',
-      },
-      searchBox: {
+    },
+    searchBox: {
         backgroundColor: '#eee',
         borderRadius: width * 0.05, // 5% chiều rộng màn hình
         padding: width * 0.025, // 2.5% chiều rộng màn hình
         marginBottom: height * 0.02, // 2% chiều cao màn hình
-      },
-      vHeader: {
+    },
+    vHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: height * 0.025, // 2.5% chiều cao màn hình
@@ -223,10 +226,10 @@ const styles = StyleSheet.create({
         elevation: 5, // Tác dụng trên Android
         paddingVertical: height * 0.02, // 2% chiều cao màn hình
         paddingHorizontal: width * 0.04, // 4% chiều rộng màn hình
-      },
-      txtGrey: {
+    },
+    txtGrey: {
         fontSize: width * 0.04, // 4% chiều rộng màn hình
         color: "#797979",
         marginBottom: height * 0.015, // 1.5% chiều cao màn hình
-      }
+    }
 });

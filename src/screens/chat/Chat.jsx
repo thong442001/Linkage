@@ -11,7 +11,7 @@ import {
     Keyboard,
     Pressable, // bàn phím
 } from 'react-native';
-import io from 'socket.io-client';
+import { useSocket } from '../../context/socketContext';
 import { useDispatch, useSelector } from 'react-redux';
 //import { socket } from "../../utils/index";
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -40,7 +40,7 @@ const Chat = (props) => {// cần ID_group (param)
     const [myUsername, setmyUsername] = useState(null);
     const [myAvatar, setmyAvatar] = useState(null);
 
-    const [socket, setSocket] = useState(null);
+    const { socket } = useSocket();
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [reply, setReply] = useState(null);
@@ -53,17 +53,13 @@ const Chat = (props) => {// cần ID_group (param)
 
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
-
-
-
-
     // call video
     const onCallvieo = () => {
         if (!group) return;
         if (group.isPrivate == true) {
-            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true });
+            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar  });
         } else {
-            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true });
+            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar  });
         }
     };
     // call audio
@@ -138,34 +134,24 @@ const Chat = (props) => {// cần ID_group (param)
     };
 
     useEffect(() => {
+
         // lấy name vs avt
         getInforGroup(params?.ID_group);
         // lấy messages old
         getMessagesOld(params?.ID_group);
 
-        // Kết nối tới server
-        const newSocket = io('https://linkage.id.vn', {
-            transports: ['websocket', 'polling'],
-            reconnection: true,   // Cho phép tự động kết nối lại
-            reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
-            timeout: 5000, // Chờ tối đa 5 giây trước khi báo lỗi
-        });
-        setSocket(newSocket);
+        const focusListener = navigation.addListener('focus', () => {
+            // lấy name vs avt
+            getInforGroup(params?.ID_group);
+            // lấy messages old
+            getMessagesOld(params?.ID_group);
 
-        newSocket.on('connect', () => {
-            console.log('Kết nối thành công:', newSocket.id);
-            newSocket.emit("joinGroup", params?.ID_group);
         });
 
-        newSocket.on('connect_error', (err) => {
-            console.error('Lỗi kết nối:', err.message);
-        });
-        newSocket.on('disconnect', () => {
-            console.log('Mất kết nối với server');
-        });
+        socket.emit("joinGroup", params?.ID_group);
 
         // Lắng nghe tin nhắn từ server
-        newSocket.on('receive_message', (data) => {
+        socket.on('receive_message', (data) => {
             console.log(data);
             setMessages((prevMessages) => [
                 ...prevMessages,
@@ -196,7 +182,7 @@ const Chat = (props) => {// cần ID_group (param)
         });
 
         // Lắng nghe tin nhắn từ server bị thu hồi
-        newSocket.on('message_revoked', (data) => {
+        socket.on('message_revoked', (data) => {
             //console.log("🔥 Đã nhận được message_revoked:");
             setMessages(prevMessages => {
                 const updatedMessages = prevMessages?.map(msg =>
@@ -208,7 +194,7 @@ const Chat = (props) => {// cần ID_group (param)
         });
 
         // Lắng nghe tin nhắn từ server biểu cảm
-        newSocket.on('receive_message_reation', (data) => {
+        socket.on('receive_message_reation', (data) => {
             //console.log("🔥 Đã nhận được receive_message_reation:" + data);
             setMessages(prevMessages => {
                 return prevMessages?.map((msg) => {
@@ -261,6 +247,16 @@ const Chat = (props) => {// cần ID_group (param)
             });
         });
 
+        socket.on("group_deleted", ({ ID_group }) => {
+            console.log(`🗑️ Nhóm ${ID_group} đã bị xóa`);
+            goBack();
+        });
+
+        socket.on("kicked_from_group", ({ ID_group }) => {
+            console.log(`🚪 Bạn đã bị kick khỏi nhóm ${ID_group}`);
+            goBack();
+        });
+
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardHeight(e.endCoordinates.height);
@@ -272,13 +268,17 @@ const Chat = (props) => {// cần ID_group (param)
         });
 
         return () => {
-            console.log('Ngắt kết nối socket');
-            newSocket.disconnect();
+            socket.off("receive_message_reation");
+            socket.off("message_revoked");
+            socket.off("receive_message");
+            socket.off("group_deleted");
+            socket.off("kicked_from_group");
             // bàn phím
             keyboardDidShowListener.remove();
             keyboardDidHideListener.remove();
+            focusListener;
         };
-    }, [params?.ID_group]);
+    }, [navigation]);
 
     //infor group
     const getInforGroup = async (ID_group) => {
@@ -291,7 +291,7 @@ const Chat = (props) => {// cần ID_group (param)
                     if (response.group.isPrivate == true) {
                         // lấy tên của mình
                         const myUser = response.group.members.find(user => user._id === me._id);
-                        console.log(response.group.members);
+                        //console.log(response.group.members);
                         if (myUser) {
                             setID_user(myUser._id);
                             setmyUsername((myUser.first_name + " " + myUser.last_name));
@@ -356,7 +356,7 @@ const Chat = (props) => {// cần ID_group (param)
             await dispatch(getMessagesGroup({ ID_group: ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
-                    console.log(response.messages)
+                    //console.log(response.messages)
                     setMessages(response.messages);
                 })
                 .catch((error) => {

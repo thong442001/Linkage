@@ -190,8 +190,8 @@ const Home = props => {
               <TouchableOpacity onPress={() => navigation.navigate('QRScannerScreen')} style={HomeS.iconsPadding}>
                 <Icon name="scan-circle-outline" size={25} color="black" />
               </TouchableOpacity>
-              <TouchableOpacity s
-                tyle={HomeS.iconsPadding}
+              <TouchableOpacity 
+              style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate('HuggingFaceImageGenerator')}
               >
                 <Icon name="add" size={25} color="black" />

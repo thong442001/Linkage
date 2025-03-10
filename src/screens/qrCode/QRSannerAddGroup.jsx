@@ -3,6 +3,8 @@ import { View, Text, Alert, TouchableOpacity, Platform, PermissionsAndroid } fro
 import { Camera, useCameraDevices, useCodeScanner } from "react-native-vision-camera";
 import { useDispatch, useSelector } from 'react-redux';
 import { addMembers } from "../../rtk/API";
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 const QRSannerAddGroup = (props) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [selectedDevice, setSelectedDevice] = useState(null);
@@ -129,14 +131,51 @@ const QRSannerAddGroup = (props) => {
     return <Text>Đang khởi tạo camera...</Text>;
   }
 
-  return (
-    <Camera
-      style={{ flex: 1 }}
-      device={selectedDevice}
-      isActive={true}
-      codeScanner={codeScanner}
-    />
-  );
+   return (
+     <View style={{ flex: 1 }}>
+       {/* Nút quay lại đặt trên cùng */}
+       <TouchableOpacity 
+         onPress={() => navigation.goBack()}
+         style={{
+           position: "absolute",
+           top: 20,
+           left: 20,
+           backgroundColor: "rgba(0, 0, 0, 0.5)", 
+           padding: 15,
+           borderRadius: 30,
+           zIndex: 10, 
+         }}
+       >
+         <MaterialIcons name="arrow-back-ios-new" size={15} color="white" />
+       </TouchableOpacity>
+       {/* ✅ Ô vuông ở giữa màn hình */}
+       <View 
+         style={{
+           position: "absolute",
+           width: "70%",
+           aspectRatio: 1,
+           alignSelf: "center",
+           top: "40%", 
+           transform: [{ translateY: -50 }], // 🔹 Dịch lên để căn giữa 
+           borderRadius: 20,
+           borderWidth: 5,
+           borderColor: "rgba(255, 255, 255, 0.3)", // 🔹 Viền đỏ để dễ thấy
+           zIndex: 10, // 🔹 Đặt lên trên Camera
+         }}
+       />
+ 
+   
+       {/* Camera */}
+       <Camera
+         style={{ flex: 1 }}
+         device={selectedDevice}
+         isActive={true}
+         codeScanner={codeScanner}
+       />
+     </View>
+   );
+  
+  
 };
 
 export default QRSannerAddGroup;
