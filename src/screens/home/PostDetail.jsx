@@ -32,7 +32,7 @@ const { width, height } = Dimensions.get('window');
 const PostDetail = (props) => {
   const { navigation } = props
   const route = useRoute();
-  const { ID_post } = route.params || {}
+  const { ID_post, typeClick } = route.params || {}
 
   const dispatch = useDispatch()
   const me = useSelector(state => state.app.user)
@@ -73,6 +73,9 @@ const PostDetail = (props) => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [isFirstRender, setIsFirstRender] = useState(true);
 
+  //hien len anh
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isImageModalVisible, setImageModalVisible] = useState(false);
 
   //call api chi tiet bai post
   const callGetChiTietPost = async (ID_post) => {
@@ -93,6 +96,8 @@ const PostDetail = (props) => {
       console.log('Lỗi khi lấy chi tiết bài viết:', error);
     }
   };
+
+
 
   const addReplyToComment = (commentsList, newReply) => {
     return commentsList.map((comment) => {
@@ -313,13 +318,26 @@ const PostDetail = (props) => {
 
 
   // lọc reactions 
-  const uniqueReactions = Array.from(
-    new Map(
-      reactionsOfPost
-        .filter(reaction => reaction.ID_reaction !== null)
-        .map(reaction => [reaction.ID_reaction._id, reaction])
-    ).values()
-  );
+  // const uniqueReactions = Array.from(
+  //   new Map(
+  //     reactionsOfPost
+  //       .filter(reaction => reaction.ID_reaction !== null)
+  //       .map(reaction => [reaction.ID_reaction._id, reaction])
+  //   ).values()
+  // );
+
+  // Nhóm reaction theo ID và đếm số lượng
+  const reactionCount = reactionsOfPost.reduce((acc, reaction) => {
+    if (!reaction.ID_reaction) return acc; // Bỏ qua reaction null
+    const id = reaction.ID_reaction._id;
+    acc[id] = acc[id] ? { ...acc[id], count: acc[id].count + 1 } : { ...reaction, count: 1 };
+    return acc;
+  }, {});
+
+  // Chuyển object thành mảng và lấy 2 reaction có số lượng nhiều nhất
+  const topReactions = Object.values(reactionCount)
+    .sort((a, b) => b.count - a.count) // Sắp xếp giảm dần theo count
+    .slice(0, 2); // Lấy 2 reaction có số lượng nhiều nhất
 
   // Tìm reaction của chính người dùng hiện tại
   const userReaction = reactionsOfPost.find(
@@ -551,15 +569,24 @@ const PostDetail = (props) => {
   }
   const isVideo = (uri) => uri?.endsWith('.mp4') || uri?.endsWith('.mov');
 
+
+  //render anh
   const renderMediaGrid = (medias) => {
     const mediaCount = medias.length;
-
     if (mediaCount === 0) return null;
-
     return (
       <View style={styles.mediaContainer}>
         {medias.slice(0, 5).map((uri, index) => (
-          <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
+          <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}
+            onPress={() => {
+              setSelectedImage(uri);
+              if (mediaCount > 5) {
+                navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+              } else {
+                setImageModalVisible(true);
+              }
+            }}
+          >
             {isVideo(uri) ? (
               <View style={styles.videoWrapper}>
                 <Video source={{ uri }} style={styles.video} resizeMode="cover" paused />
@@ -579,6 +606,44 @@ const PostDetail = (props) => {
           </TouchableOpacity>
         ))}
       </View>
+    );
+  };
+
+  const renderMediaSDetail = (medias) => {
+    const mediaCount = medias.length;
+    if (mediaCount === 0) return null;
+
+    return (
+      <FlatList
+        data={medias}
+        keyExtractor={(uri, index) => `${uri}-${index}`}
+        renderItem={({ item: uri, index }) => (
+          <TouchableOpacity
+            style={styles.mediaItemDetail}
+            onPress={() => {
+              setSelectedImage(uri);
+              setImageModalVisible(true);
+            }}
+          >
+            {isVideo(uri) ? (
+              <View style={styles.videoWrapperDetail}>
+                <Video source={{ uri }} style={styles.videoDetail} resizeMode="cover" paused />
+                <View style={styles.playButtonDetail}>
+                  <Icon name="play-circle" size={40} color="white" />
+                </View>
+              </View>
+            ) : (
+              <Image source={{ uri }} style={styles.imageDetail} resizeMode="cover" />
+            )}
+
+            {/* {index === 4 && mediaCount > 5 && (
+              <View style={styles.overlay}>
+                <Text style={styles.overlayText}>+{mediaCount - 5}</Text>
+              </View>
+            )} */}
+          </TouchableOpacity>
+        )}
+      />
     );
   };
 
@@ -700,7 +765,7 @@ const PostDetail = (props) => {
                           </TouchableOpacity>
                         )
                       }
-                    </View>,
+                    </View>
                   )
                 }
 
@@ -724,6 +789,18 @@ const PostDetail = (props) => {
                 post.ID_post_shared
                   ?
                   <View style={styles.userInfo}>
+                    {/* {
+                      typeClick === "image" && ( // Nếu là chi tiết ảnh thì hiển thị nút Back
+                        <TouchableOpacity
+                          style={{ marginRight: width * 0.04 }}
+                          onPress={() => {
+                            navigation.goBack(); // Quay lại màn trước
+                          }}
+                        >
+                          <Icon name="arrow-back" size={25} color="black" />
+                        </TouchableOpacity>
+                      )
+                    } */}
                     <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
                     <View style={{ marginLeft: 20 }}>
                       <Text style={styles.name}>
@@ -844,26 +921,19 @@ const PostDetail = (props) => {
           {
             post.ID_post_shared
               ? (
-                hasCaption && <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
+                <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
               )
               :
               (
-                hasCaption && <Text style={styles.caption}>{post?.caption}</Text>
+                <Text style={styles.caption}>{post?.caption}</Text>
               )
           }
           {
-            post.ID_post_shared
-              ? (
-                hasMedia && renderMediaGrid(post.ID_post_shared.medias)
-              )
-              :
-              (
-                hasMedia && renderMediaGrid(post.medias)
-              )
+            typeClick === "image"
+              ? (hasMedia && renderMediaSDetail(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
+              : (hasMedia && renderMediaGrid(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
           }
         </View>
-
-
         {
           !post._destroy &&
           <View style={styles.interactions}>
@@ -1038,6 +1108,21 @@ const PostDetail = (props) => {
           </TouchableOpacity>
         </Modal >
 
+
+        {/* Modal hiển thị ảnh */}
+        <Modal
+          visible={isImageModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setImageModalVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
+            <View style={styles.modalOverlay}>
+              <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
         <View style={[styles.line, { marginBottom: 20 }]}></View>
 
         {/* reaction of post */}
@@ -1046,7 +1131,6 @@ const PostDetail = (props) => {
             styles.boxHeader,
             {
               justifyContent: 'space-between',
-              marginBottom: 20,
               marginHorizontal: 20,
             },
           ]}>
@@ -1066,7 +1150,7 @@ const PostDetail = (props) => {
                       style={{ flexDirection: "row" }}
                       onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
                     >
-                      {uniqueReactions.map((reaction, index) => (
+                      {topReactions.map((reaction, index) => (
                         <Text key={index} style={{ color: 'black' }}>
                           {reaction.ID_reaction.icon}
                         </Text>
@@ -1109,7 +1193,7 @@ const PostDetail = (props) => {
         data={comments}
         renderItem={renderComment}
         keyExtractor={(item) => item._id.toString()}
-        getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
+        // getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
         extraData={comments}
         ListHeaderComponent={header}
         contentContainerStyle={{ paddingBottom: '17%' }}
@@ -1145,37 +1229,42 @@ const PostDetail = (props) => {
             </View>
           )
         }
-        <View style={styles.boxCommentAll}>
-          <View
-            style={styles.boxComment}
-          >
-            {/* Thư Viện */}
-            <View style={styles.librarySelect}>
-              <TouchableOpacity
-                onPress={onOpenGallery}
+        {
+          typeClick == "comment" ?
+            <View style={styles.boxCommentAll}>
+              <View
+                style={styles.boxComment}
               >
-                <Icon name="image" size={25} color="#007bff" />
-              </TouchableOpacity>
+                {/* Thư Viện */}
+                <View style={styles.librarySelect}>
+                  <TouchableOpacity
+                    onPress={onOpenGallery}
+                  >
+                    <Icon name="image" size={25} color="#007bff" />
+                  </TouchableOpacity>
 
+                </View>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Viết bình luận "
+                  multiline={true}
+                  value={comment}
+                  onChangeText={setComment}
+                />
+                <View>
+                  <TouchableOpacity
+                    onPress={() => callAddComment('text', comment)}
+                    style={styles.sendButton}
+                  >
+                    <Icon name="send" size={25} color='#007bff' />
+                    {/* <Text style={styles.sendText}>Send</Text> */}
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Viết bình luận "
-              multiline={true}
-              value={comment}
-              onChangeText={setComment}
-            />
-            <View>
-              <TouchableOpacity
-                onPress={() => callAddComment('text', comment)}
-                style={styles.sendButton}
-              >
-                <Icon name="send" size={25} color='#007bff' />
-                {/* <Text style={styles.sendText}>Send</Text> */}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+            :
+            <View></View>
+        }
       </View>
     </View>
   );

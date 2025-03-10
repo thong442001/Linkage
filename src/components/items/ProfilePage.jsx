@@ -66,6 +66,11 @@ const PostItem = memo(({
     const [selectedTab, setSelectedTab] = useState('all');
     const [isFirstRender, setIsFirstRender] = useState(true);
 
+
+    //hien len anh
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isImageModalVisible, setImageModalVisible] = useState(false);
+
     // Khi selectedTab thay đổi, cập nhật nội dung BottomSheet
     useEffect(() => {
         if (isFirstRender) {
@@ -163,13 +168,27 @@ const PostItem = memo(({
 
 
     // lọc reactions 
-    const uniqueReactions = Array.from(
-        new Map(
-            post.post_reactions
-                .filter(reaction => reaction.ID_reaction !== null)
-                .map(reaction => [reaction.ID_reaction._id, reaction])
-        ).values()
-    );
+    // const uniqueReactions = Array.from(
+    //     new Map(
+    //         post.post_reactions
+    //             .filter(reaction => reaction.ID_reaction !== null)
+    //             .map(reaction => [reaction.ID_reaction._id, reaction])
+    //     ).values()
+    // );
+
+    // Nhóm reaction theo ID và đếm số lượng
+    const reactionCount = post.post_reactions.reduce((acc, reaction) => {
+        if (!reaction.ID_reaction) return acc; // Bỏ qua reaction null
+        const id = reaction.ID_reaction._id;
+        acc[id] = acc[id] ? { ...acc[id], count: acc[id].count + 1 } : { ...reaction, count: 1 };
+        return acc;
+    }, {});
+
+    // Chuyển object thành mảng và lấy 2 reaction có số lượng nhiều nhất
+    const topReactions = Object.values(reactionCount)
+        .sort((a, b) => b.count - a.count) // Sắp xếp giảm dần theo count
+        .slice(0, 2); // Lấy 2 reaction có số lượng nhiều nhất
+
     // Tìm reaction của chính người dùng hiện tại
     const userReaction = post.post_reactions.find(
         (reaction) => reaction.ID_user._id === ID_user
@@ -362,6 +381,8 @@ const PostItem = memo(({
 
     const isVideo = (uri) => uri?.endsWith('.mp4') || uri?.endsWith('.mov');
 
+
+    //render anh
     const renderMediaGrid = (medias) => {
         const mediaCount = medias.length;
 
@@ -370,7 +391,18 @@ const PostItem = memo(({
         return (
             <View style={styles.mediaContainer}>
                 {medias.slice(0, 5).map((uri, index) => (
-                    <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
+                    <TouchableOpacity
+                        key={index}
+                        style={getMediaStyle(mediaCount, index)}
+                        onPress={() => {
+                            setSelectedImage(uri);
+                            if (mediaCount > 5) {
+                                navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+                            } else {
+                                setImageModalVisible(true);
+                            }
+                        }}
+                    >
                         {isVideo(uri) ? (
                             <View style={styles.videoWrapper}>
                                 <Video source={{ uri }} style={styles.video} resizeMode="cover" paused />
@@ -392,6 +424,7 @@ const PostItem = memo(({
             </View>
         );
     };
+
 
     const getMediaStyle = (count, index) => {
         if (count === 1) {
@@ -702,23 +735,22 @@ const PostItem = memo(({
 
             <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
                 {/* reactions of post */}
-                {post.post_reactions.length > 0 && (
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <TouchableOpacity
-                            style={{ flexDirection: "row", alignItems: "center" }}
-                            onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
-                        >
-                            {uniqueReactions.map((reaction, index) => (
-                                <Text key={index} style={{ color: 'black' }}>
-                                    {reaction.ID_reaction.icon}
-                                </Text>
-                            ))}
-                            <Text style={styles.slReactionsOfPost}>
-                                {post.post_reactions.length}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
+                {
+                    post.post_reactions.length > 0 && (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <TouchableOpacity
+                                style={{ flexDirection: "row", alignItems: "center" }}
+                                onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                            >
+                                {
+                                    topReactions.map((reaction, index) => (
+                                        <Text key={index} style={{ color: 'black' }}>
+                                            {reaction.ID_reaction.icon}
+                                        </Text>
+                                    ))}
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
                 {/* số lượng bình luận luôn sát bên phải */}
                 <View style={{ flex: 1, alignItems: 'flex-end' }}>
@@ -771,7 +803,7 @@ const PostItem = memo(({
                         style={styles.action}
                         onPress={() => {
                             console.log("ID_post gửi đi:", post._id); // Kiểm tra ID trước khi chuyển trang
-                            navigation.navigate("PostDetail", { ID_post: post._id });
+                            navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "comment" });
                         }}
                     >
                         <Icon3 name="comment" size={20} color="black" />
@@ -783,9 +815,6 @@ const PostItem = memo(({
                     </TouchableOpacity>
                 </View>
             }
-
-
-
             {/* reactions biểu cảm */}
             < Modal
                 visible={reactionsVisible}
@@ -910,6 +939,22 @@ const PostItem = memo(({
                     </View>
                 </TouchableOpacity>
             </Modal >
+
+
+            {/* Modal hiển thị ảnh */}
+            <Modal
+                visible={isImageModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setImageModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
         </View >
     );
 });
@@ -1248,7 +1293,18 @@ const styles = StyleSheet.create({
     },
     nameItemReaction: {
         color: 'black',
-    }
+    },
+    //anh
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.8)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    fullImage: {
+        width: "90%",
+        height: "80%",
+    },
 });
 
 export default PostItem;

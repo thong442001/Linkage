@@ -17,7 +17,7 @@ const CommentS = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5, // Dành cho Android
-    },    
+    },
     header2: {
     },
     header: {
@@ -332,7 +332,7 @@ const CommentS = StyleSheet.create({
     },
     nameItemReaction: {
         color: 'black',
-        marginLeft : width * 0.03
+        marginLeft: width * 0.03
     },
     box: {
         backgroundColor: "#D9d9d9",
@@ -507,7 +507,61 @@ const CommentS = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 3.84,
         elevation: 20, // Dành cho Android
-    }
+    },
+    //anh
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.8)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    fullImage: {
+        width: "90%",
+        height: "80%",
+    },
+    // chi tiet anh
+    mediaItemDetail: {
+        width: "100%", 
+        height: 300, // Đặt chiều cao cố định hoặc dùng "auto" nếu muốn theo tỷ lệ
+        marginBottom: 10, // Khoảng cách giữa các ảnh
+      },
+      imageDetail: {
+        width: "100%",
+        height: "100%",
+        // borderRadius: 10, // Bo góc nhẹ
+      },
+      videoWrapperDetail: {
+        width: "100%",
+        height: "100%",
+        position: "relative",
+      },
+      videoDetail: {
+        width: "100%",
+        height: "100%",
+        // borderRadius: 10,
+      },
+      playButtonDetail: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: [{ translateX: -20 }, { translateY: -20 }],
+      },
+      overlayDetail: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
+      },
+      overlayTextDetail: {
+        color: "white",
+        fontSize: 24,
+        fontWeight: "bold",
+      },
 });
 
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState, useEffect } from 'react';
+import React, { createContext, useContext, useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Pressable, BackHandler, Text } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
@@ -17,11 +17,12 @@ export const BottomSheetProvider = ({ children }) => {
         bottomSheetRef.current?.snapToIndex(0);
     };
 
-    const closeBottomSheet = () => {
+    const closeBottomSheet = useCallback(() => {
         bottomSheetRef.current?.close();
+        setIsVisible(false); // Cập nhật ngay lập tức
         setContent(null);
-        setIsVisible(false); // Hide overlay
-    };
+    }, []);
+
 
     //canh
     // Sử dụng useEffect để mở BottomSheet sau khi content thay đổi
@@ -70,7 +71,10 @@ export const BottomSheetProvider = ({ children }) => {
                 index={-1}
                 snapPoints={snapPoints}
                 enablePanDownToClose={true}
-                onClose={closeBottomSheet} // Ensure overlay hides when sheet closes
+                onClose={() => setIsVisible(false)}
+                onChange={(index) => {
+                    if (index === -1) setIsVisible(false);
+                }}
                 handleComponent={null}
             >
                 <BottomSheetView style={{ backgroundColor: '#fff', height: '100%', borderTopEndRadius: 20, borderTopStartRadius: 20 }}>
