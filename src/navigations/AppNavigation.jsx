@@ -1,41 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState, useEffect} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
 import HomeNavigation from './HomeNavigation';
 import UserNavigation from './UserNavigation';
 import Welcome from '../screens/welcome/Welcome';
-import {
-  getAllReaction,
-} from '../rtk/API';
-import { requestPermissions } from '../screens/service/MyFirebaseMessagingService';
-import { setReactions, setFcmToken } from '../rtk/Reducer';
+import {getAllReaction} from '../rtk/API';
+import {requestPermissions} from '../screens/service/MyFirebaseMessagingService';
+import {setReactions, setFcmToken} from '../rtk/Reducer';
 import database from '@react-native-firebase/database';
 import messaging from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-import { io } from "socket.io-client";  // Thêm socket.io-client
-
+import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
+import {io} from 'socket.io-client'; // Thêm socket.io-client
 
 const AppNavigation = () => {
-
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]); // Lưu danh sách user online
-  
 
-  const [isSplashVisible, setSplashVisible] = useState(true);  // Trạng thái để kiểm soát màn hình chào
+  const [isSplashVisible, setSplashVisible] = useState(true); // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
   //console.log("****: " + reactions)
   const fcmToken = useSelector(state => state.app.fcmToken);
-  console.log("📲 FCM Token từ Redux:", fcmToken);
-
+  console.log('📲 FCM Token từ Redux:', fcmToken);
 
   useEffect(() => {
     //reactions
-    callGetAllReaction()
+    callGetAllReaction();
     // Hiển thị màn hình chào trong 2 giây
     const timeout = setTimeout(() => {
-      setSplashVisible(false);  // Ẩn màn hình chào sau 2 giây
+      setSplashVisible(false); // Ẩn màn hình chào sau 2 giây
     }, 2000);
 
     return () => {
@@ -47,44 +41,42 @@ const AppNavigation = () => {
     // Kết nối tới server
     const newSocket = io('https://linkage.id.vn', {
       transports: ['websocket', 'polling'],
-      reconnection: true,   // Cho phép tự động kết nối lại
+      reconnection: true, // Cho phép tự động kết nối lại
       reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
       timeout: 5000, // Chờ tối đa 5 giây trước khi báo lỗi
     });
     setSocket(newSocket);
     if (user && socket) {
-      newSocket.emit("user_online", user._id); // Gửi ID user lên server khi đăng nhập
+      newSocket.emit('user_online', user._id); // Gửi ID user lên server khi đăng nhập
     }
 
-    newSocket.on("online_users", (userList) => {
+    newSocket.on('online_users', userList => {
       setOnlineUsers(userList);
-      console.log("🟢 Danh sách user online:", userList);
+      console.log('🟢 Danh sách user online:', userList);
     });
-    console.log("OnlineUsers: " + onlineUsers);
+    console.log('OnlineUsers: ' + onlineUsers);
 
     return () => {
-      newSocket.off("online_users");
+      newSocket.off('online_users');
     };
   }, [user]);
-
 
   //call api getAllReaction
   const callGetAllReaction = async () => {
     try {
       await dispatch(getAllReaction())
         .unwrap()
-        .then((response) => {
+        .then(response => {
           //console.log("****: " + response)
           dispatch(setReactions(response.reactions));
         })
-        .catch((error) => {
+        .catch(error => {
           console.log('Error:', error);
         });
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     requestPermissions();
@@ -105,19 +97,18 @@ const AppNavigation = () => {
     const getFCMToken = async () => {
       try {
         const token = await messaging().getToken();
-        console.log("🔥 FCM Token:", token);
+        console.log('🔥 FCM Token:', token);
         if (token) {
           dispatch(setFcmToken(token)); // Lưu vào Redux
           //if(user )
         }
       } catch (error) {
-        console.log("❌ Lỗi khi lấy FCM Token:", error);
+        console.log('❌ Lỗi khi lấy FCM Token:', error);
       }
     };
 
     getFCMToken();
   }, []);
-
 
   useEffect(() => {
     // Khi app đang mở
@@ -126,7 +117,7 @@ const AppNavigation = () => {
         console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
 
         if (!remoteMessage?.data?.notification) {
-          console.warn("⚠ Không có dữ liệu notification");
+          console.warn('⚠ Không có dữ liệu notification');
           return;
         }
 
@@ -135,50 +126,109 @@ const AppNavigation = () => {
         try {
           notification = JSON.parse(remoteMessage.data.notification);
         } catch (error) {
-          console.error("❌ Lỗi khi parse JSON notification:", error);
+          console.error('❌ Lỗi khi parse JSON notification:', error);
           return;
         }
 
-        console.log("✅ Đã parse notification:", notification);
+        console.log('✅ Đã parse notification:', notification);
 
         const contentne = () => {
-          if (notification?.type === 'Lời mời kết bạn' && notification?.ID_relationship) {
-            const { ID_userA, ID_userB } = notification.ID_relationship;
-        
+          if (
+            notification?.type === 'Lời mời kết bạn' &&
+            notification?.ID_relationship
+          ) {
+            const {ID_userA, ID_userB} = notification.ID_relationship;
+
             if (user?._id?.toString() === ID_userA?._id?.toString()) {
-              return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
+              return `${ID_userB?.first_name || ''} ${
+                ID_userB?.last_name || ''
+              } đã gửi lời mời kết bạn với bạn`;
             } else {
-              return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''} đã gửi lời mời kết bạn với bạn`;
+              return `${ID_userA?.first_name || ''} ${
+                ID_userA?.last_name || ''
+              } đã gửi lời mời kết bạn với bạn`;
             }
-          }
-        
-          if (notification?.type === "Đã thành bạn bè của bạn" && notification?.ID_relationship) {
-            const { ID_userA, ID_userB } = notification.ID_relationship;
-        
-            if (user?._id?.toString() === ID_userA?._id?.toString()) {
-              return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''} với bạn đã thành bạn bè`;
-            } else {
-              return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''} với bạn đã thành bạn bè`;
-            }
-          }
-        
-          if (notification?.type === 'Tin nhắn mới' && notification?.ID_message) {
-            const { sender, content } = notification.ID_message;
-        
-            if (sender) {
-              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã gửi một tin nhắn'}`;
-            } 
           }
 
-          if (notification?.type === 'Bạn đã được mời vào nhóm mới' && notification?.ID_group) {
+          if (
+            notification?.type === 'Đã thành bạn bè của bạn' &&
+            notification?.ID_relationship
+          ) {
+            const {ID_userA, ID_userB} = notification.ID_relationship;
+
+            if (user?._id?.toString() === ID_userA?._id?.toString()) {
+              return `${ID_userB?.first_name || ''} ${
+                ID_userB?.last_name || ''
+              } với bạn đã thành bạn bè`;
+            } else {
+              return `${ID_userA?.first_name || ''} ${
+                ID_userA?.last_name || ''
+              } với bạn đã thành bạn bè`;
+            }
+          }
+
+          if (
+            notification?.type === 'Tin nhắn mới' &&
+            notification?.ID_message
+          ) {
+            const {sender, content} = notification.ID_message;
+
+            if (notification.ID_message.type === "text") {
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+                content || 'Đã gửi một tin nhắn'
+              }`;
+            } else{
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+               'Đã gửi một ảnh mới'
+              }`;
+            }
+          }
+
+          if (
+            notification?.type === 'Bạn đã được mời vào nhóm mới' &&
+            notification?.ID_group
+          ) {
             return `Bạn đã được mời vào nhóm mới`;
           }
-        
-      
 
-          return "Bạn có một thông báo mới"; // Nội dung mặc định
+          
+          if (
+            notification?.type === "Đã đăng story mới" &&
+            notification?.ID_post
+          ) { 
+            const {sender, content} = notification.ID_post;
+
+            if (sender) {
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+                content || 'Đã đăng story mới'
+              }`;
+            }
+          }
+
+          if (
+            notification?.type === 'Bạn đã được mời vào nhóm mới' &&
+            notification?.ID_group
+          ) {
+            return `Bạn đã được mời vào nhóm mới`;
+          }
+
+          if (
+            notification?.type === "Đã đăng bài mới" &&
+            notification?.ID_post
+          ){ 
+            const {sender, content} = notification.ID_post;
+
+            if (sender) {
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+                content || 'Đã đăng bài post mới'
+              }`;
+            }
+          }
+
+
+
+          return 'Bạn có một thông báo mới'; // Nội dung mặc định
         };
-        
 
         // Hiển thị thông báo bằng Notifee
         await notifee.displayNotification({
@@ -190,28 +240,39 @@ const AppNavigation = () => {
           },
         });
       } catch (error) {
-        console.error("❌ Lỗi khi xử lý thông báo:", error);
+        console.error('❌ Lỗi khi xử lý thông báo:', error);
       }
     });
 
-
     // Khi app chạy nền và người dùng nhấn vào thông báo
-    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log('🔔 Người dùng nhấn vào thông báo khi app chạy nền:', remoteMessage);
-    });
+    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
+      remoteMessage => {
+        console.log(
+          '🔔 Người dùng nhấn vào thông báo khi app chạy nền:',
+          remoteMessage,
+        );
+      },
+    );
 
     // Khi app bị kill và mở từ thông báo
-    const initialNotification = messaging().getInitialNotification()
+    const initialNotification = messaging()
+      .getInitialNotification()
       .then(remoteMessage => {
         if (remoteMessage) {
-          console.log('🔔 App được mở từ thông báo khi bị kill:', remoteMessage);
+          console.log(
+            '🔔 App được mở từ thông báo khi bị kill:',
+            remoteMessage,
+          );
         }
       });
 
     // Khi người dùng nhấn vào thông báo từ notifee
-    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+    const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS) {
-        console.log('🔔 Người dùng đã nhấn vào thông báo:', detail.notification);
+        console.log(
+          '🔔 Người dùng đã nhấn vào thông báo:',
+          detail.notification,
+        );
       }
     });
 
@@ -223,18 +284,17 @@ const AppNavigation = () => {
     };
   }, []);
 
-
-
   return (
     <NavigationContainer>
-      {
-        isSplashVisible
-          ? <Welcome />  // Hiển thị màn hình chào trước
-          : (user ? <HomeNavigation /> : <UserNavigation />)
-
-      }
+      {isSplashVisible ? (
+        <Welcome /> // Hiển thị màn hình chào trước
+      ) : user ? (
+        <HomeNavigation />
+      ) : (
+        <UserNavigation />
+      )}
     </NavigationContainer>
   );
-}
+};
 
 export default AppNavigation;
