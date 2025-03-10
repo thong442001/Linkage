@@ -12,7 +12,7 @@ const ItemListFriend = (props) => {
       setID_friend(item.ID_userB._id);
       setName(`${item.ID_userB.first_name} ${item.ID_userB.last_name}`);
       setAvatar(item.ID_userB.avatar);
-    } else {
+    } else {  
       setID_friend(item.ID_userA._id);
       setName(`${item.ID_userA.first_name} ${item.ID_userA.last_name}`);
       setAvatar(item.ID_userA.avatar);
