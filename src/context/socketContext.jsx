@@ -11,6 +11,9 @@ export const SocketProvider = ({ children }) => {
     const user = useSelector(state => state.app.user);
 
     useEffect(() => {
+        if (!user || !user._id) return; // Chỉ khởi tạo khi có user
+
+        console.log("🔄 Khởi tạo socket...");
         const newSocket = io('https://linkage.id.vn', {
             transports: ['websocket'],
             reconnection: true,
@@ -26,39 +29,52 @@ export const SocketProvider = ({ children }) => {
 
         setSocket(newSocket);
 
+        newSocket.on("online_users", (userList) => {
+            console.log("🟢 Danh sách user online:", userList);
+            setOnlineUsers([...userList]); // Tạo mảng mới để re-render
+        });
+
         return () => {
+            newSocket.off("online_users");
             newSocket.disconnect();
         };
-    }, []);
+    }, [user]); // Chạy lại khi user thay đổi
+
 
     useEffect(() => {
-        if (!socket) return;
+        if (!socket || !user || !user._id) return;
 
-        const handleOnlineUsers = (userList) => {
-            console.log("🟢 Danh sách user online:", userList);
-            setOnlineUsers(userList);
-        };
-
-        socket.on("online_users", handleOnlineUsers);
-
-        return () => {
-            socket.off("online_users", handleOnlineUsers);
-        };
-    }, [socket]);
-
-    useEffect(() => {
-        if (!socket) return;
-
-        if (user && user._id) {
+        if (socket.connected) {
             console.log("📡 Gửi sự kiện user_online:", user._id);
             socket.emit("user_online", user._id);
         } else {
-            console.log("📴 User logout, ngắt kết nối socket...");
+            socket.on("connect", () => {
+                console.log("✅ Socket connected, gửi lại user_online:", user._id);
+                socket.emit("user_online", user._id);
+            });
+        }
+
+        return () => {
+            socket.off("connect");
+        };
+    }, [socket, user]);
+
+
+    useEffect(() => {
+        if (!socket) return;
+
+        if (!user || !user._id) {
+            console.log("📴 User logout, gửi sự kiện user_offline...");
             socket.emit("user_offline");
-            socket.disconnect();
-            setSocket(null);
+
+            setTimeout(() => {
+                console.log("📴 Disconnecting socket...");
+                socket.disconnect();
+                setSocket(null);
+            }, 500); // Đợi 1 giây để đảm bảo server nhận được
         }
     }, [user, socket]);
+
 
 
     return (
