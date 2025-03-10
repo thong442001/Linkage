@@ -67,13 +67,18 @@ const Profile = props => {
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
     const [dialogReLoad, setDialogreload] = useState(false);
+    //loading skeleton
     const [loading, setloading] = useState(true)
 
+    //loading khi doi anh
+    const [isLoading, setisLoading] = useState(false)
 
-    useEffect(() => {
-        setliveID(String(Math.floor(Math.random() * 1000000)))
-    }, [])
-
+    useFocusEffect(
+        React.useCallback(() => {
+          setliveID(String(Math.floor(Math.random() * 100000000)));
+        }, [])
+      );
+    
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
@@ -142,21 +147,26 @@ const Profile = props => {
     //đổi avatar
     const onOpenGalleryChangeAvatar = async () => {
         try {
+            setisLoading(true)
+            closeBottomSheet()
             const options = { mediaType: 'image', quality: 1 };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
+                    setisLoading(false)
                     console.log('Đã hủy chọn ảnh');
                     return;
                 }
 
                 if (response.errorMessage) {
+                    setisLoading(false)
                     console.log('Lỗi khi mở thư viện:', response.errorMessage);
                     return;
                 }
 
                 const selectedFile = response.assets?.[0];
                 if (!selectedFile) {
+                    setisLoading(false)
                     console.log('Không có ảnh nào được chọn!');
                     return;
                 }
@@ -165,6 +175,7 @@ const Profile = props => {
 
                 const fileUrl = await uploadFile(selectedFile);
                 if (!fileUrl) {
+                    setisLoading(false)
                     console.log('❌ Upload ảnh thất bại!');
                     return;
                 }
@@ -177,12 +188,14 @@ const Profile = props => {
                         if (res.status) {
                             dispatch(changeAvatar(fileUrl));
                             console.log('✅ Đổi avatar thành công');
-                            closeBottomSheet();
                         } else {
+                            setisLoading(false);  
                             console.log('❌ Đổi avatar thất bại');
                         }
+                        setisLoading(false); 
                     })
                     .catch(err => {
+                        setisLoading(false);  
                         console.log('❌ Lỗi khi gửi API đổi avatar:', err);
                     });
             });
@@ -757,7 +770,6 @@ const Profile = props => {
                         </View>
 
                         <View style={ProfileS.listFriends}>
-                            <LoadingModal visible={loading} />
                             <FlatList
                                 data={(friendRelationships || []).slice(0, 6)}
                                 renderItem={({ item }) => (
@@ -787,47 +799,50 @@ const Profile = props => {
                     </View>
                 </View>
 
-                <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
-                    <View style={ProfileS.boxLive}>
-                        <View style={ProfileS.title2}>
-                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
-                                Bài viết
-                            </Text>
-                            <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
-                        </View>
-                        <View style={ProfileS.boxAllThink}>
-                            <View style={ProfileS.boxThink}>
-                                <Image
-                                    style={ProfileS.avataStatus}
-                                    source={{ uri: user?.avatar }}
-                                />
-                                <Text style={{ fontSize: 13, marginLeft: 10 }}>
-                                    Bạn đang nghĩ gì?
-                                </Text>
-                            </View>
-                            <Icon name="image" size={30} color="#3FF251" />
-                        </View>
-                    </View>
-                    <View style={ProfileS.boxLivestream}>
-                        <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
-                            <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                <Icon name="videocam" size={20} color="red" />
-                                <Text style={{ marginLeft: 5, color: 'black' }}>
-                                    Phát trực tiếp {liveID}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <TouchableOpacity style={ProfileS.btnManage}>
-                        <View style={ProfileS.boxManange}>
-                            <Icon2 name="comment-text" size={17} color="black" />
-                            <Text style={{ fontSize: 13, color: 'black' }}>
-                                {' '}
-                                Quản lí bài viết
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
+                {user?._id === me?._id && (
+    <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
+        <View style={ProfileS.boxLive}>
+            <View style={ProfileS.title2}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
+                    Bài viết
+                </Text>
+                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
+            </View>
+            <View style={ProfileS.boxAllThink}>
+                <View style={ProfileS.boxThink}>
+                    <Image
+                        style={ProfileS.avataStatus}
+                        source={{ uri: user?.avatar }}
+                    />
+                    <Text style={{ fontSize: 13, marginLeft: 10 }}>
+                        Bạn đang nghĩ gì?
+                    </Text>
                 </View>
+                <Icon name="image" size={30} color="#3FF251" />
+            </View>
+        </View>
+        <View style={ProfileS.boxLivestream}>
+            <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive',  { userID: me._id , avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
+                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                    <Icon name="videocam" size={20} color="red" />
+                    <Text style={{ marginLeft: 5, color: 'black' }}>
+                        Phát trực tiếp 
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={ProfileS.btnManage}>
+            <View style={ProfileS.boxManange}>
+                <Icon2 name="comment-text" size={17} color="black" />
+                <Text style={{ fontSize: 13, color: 'black' }}>
+                    Quản lí bài viết
+                </Text>
+            </View>
+        </TouchableOpacity>
+    </View>
+)}
+
+                
             </View>
         );
     };
@@ -837,6 +852,7 @@ const Profile = props => {
 
     return (
         <View style={ProfileS.container}>
+            <LoadingModal visible={isLoading}/>
             <View style={ProfileS.boxHeader}>
                 <View style={ProfileS.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>

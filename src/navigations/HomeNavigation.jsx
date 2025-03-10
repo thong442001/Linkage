@@ -130,6 +130,9 @@ import ListFriend from '../screens/friend/ListFriend';
 import HuggingFaceImageGenerator from '../screens/Al/RunwayMLImageGenerator ';
 import QRScannerScreen from '../screens/qrCode/QRScannerScreen';
 import QRSannerAddGroup from '../screens/qrCode/QRSannerAddGroup';
+import HomeLive from '../screens/live/HomeLive';
+import HostLive from '../screens/live/HostLive';
+import AudienceScreen from '../screens/live/AudienceScreen';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -157,6 +160,9 @@ const oStackHome = {
   HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },
   QRScannerScreen: { name: 'QRScannerScreen', component: QRScannerScreen },
   QRSannerAddGroup: { name: 'QRSannerAddGroup', component: QRSannerAddGroup },
+  HostLive: { name: 'HostLive', component: HostLive },
+  HomeLive: { name: 'HomeLive', component: HomeLive },
+  AudienceScreen: { name: 'AudienceScreen', component: AudienceScreen },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

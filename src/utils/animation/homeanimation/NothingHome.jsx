@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     container: {
-        marginVertical: 25,
+        marginVertical: 20,
         justifyContent: 'center',  // Căn giữa theo chiều dọc
         alignItems: 'center',      // Căn giữa theo chiều ngang
     },

@@ -1,65 +1,66 @@
 import React from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const { width, height } = Dimensions.get('window'); // Lấy kích thước màn hình
 
 const HomeLoading = () => {
   return (
-    <SkeletonPlaceholder>
-      <View style={HomeS.container}>
-        <View style={HomeS.header2}>
-          <View style={HomeS.image} />
-          <View style={{
-            width: width * 0.78, 
-            height: 42,
-            borderRadius: 28,
-            marginHorizontal: 5,
-            backgroundColor: '#E0E0E0'
-          }} />
+      <SkeletonPlaceholder>
+        <View style={HomeS.container}>
+          <View style={HomeS.header2}>
+            <View style={HomeS.image} />
+            <View style={{
+              width: width * 0.78, 
+              height: 42,
+              borderRadius: 28,
+              marginHorizontal: 5,
+              backgroundColor: '#E0E0E0'
+            }} />
+          </View>
+
+          <View style={HomeS.story}>
+            <View style={HomeS.boxStory}>
+              <View style={HomeS.imageStory} />
+              <View style={HomeS.backGround}>
+                <View style={{ width: width * 0.15, height: 15, borderRadius: 4 }} />
+              </View>
+            </View>
+            <View style={[HomeS.boxStory, { marginHorizontal: 10 }]}>
+              <View style={HomeS.imageStory} />
+              <View style={HomeS.backGround}>
+                <View style={{ width: width * 0.15, height: 15, borderRadius: 4 }} />
+              </View>
+            </View>
+          </View>
+
+          <View style={HomeS.postBox}>
+            <View style={HomeS.postHeader}>
+              <View style={HomeS.postAvatar} />
+              <View style={HomeS.postInfo}>
+                <View style={HomeS.namePlaceholder} />
+                <View style={HomeS.timePlaceholder} />
+              </View>
+            </View>
+
+            <View style={HomeS.imageGrid}>
+              <View style={HomeS.postImage} />
+            </View>
+
+            <View style={HomeS.postHeader}>
+              <View style={HomeS.postAvatar} />
+              <View style={HomeS.postInfo}>
+                <View style={HomeS.namePlaceholder} />
+                <View style={HomeS.timePlaceholder} />
+              </View>
+            </View>
+
+            <View style={HomeS.imageGrid}>
+              <View style={HomeS.postImage} />
+            </View>
+          </View>
         </View>
-
-        <View style={HomeS.story}>
-          <View style={HomeS.boxStory}>
-            <View style={HomeS.imageStory} />
-            <View style={HomeS.backGround}>
-              <View style={{ width: width * 0.15, height: 15, borderRadius: 4 }} />
-            </View>
-          </View>
-          <View style={[HomeS.boxStory, { marginHorizontal: 10 }]}>
-            <View style={HomeS.imageStory} />
-            <View style={HomeS.backGround}>
-              <View style={{ width: width * 0.15, height: 15, borderRadius: 4 }} />
-            </View>
-          </View>
-        </View>
-
-        <View style={HomeS.postBox}>
-          <View style={HomeS.postHeader}>
-            <View style={HomeS.postAvatar} />
-            <View style={HomeS.postInfo}>
-              <View style={HomeS.namePlaceholder} />
-              <View style={HomeS.timePlaceholder} />
-            </View>
-          </View>
-
-          <View style={HomeS.imageGrid}>
-            <View style={HomeS.postImage} />
-          </View>
-
-          <View style={HomeS.postHeader}>
-            <View style={HomeS.postAvatar} />
-            <View style={HomeS.postInfo}>
-              <View style={HomeS.namePlaceholder} />
-              <View style={HomeS.timePlaceholder} />
-            </View>
-          </View>
-          <View style={HomeS.imageGrid}>
-            <View style={HomeS.postImage} />
-          </View>
-        </View>
-      </View>
-    </SkeletonPlaceholder>
+      </SkeletonPlaceholder>
   );
 };
 
@@ -73,6 +74,7 @@ const HomeS = StyleSheet.create({
   postBox: {
     backgroundColor: '#fff',
     borderRadius: 8,
+    marginBottom: 20, 
   },
   postHeader: {
     marginVertical: 10,
@@ -80,7 +82,7 @@ const HomeS = StyleSheet.create({
     alignItems: 'center',
   },
   postAvatar: {
-    width: width * 0.1, // Tỷ lệ theo chiều rộng màn hình
+    width: width * 0.1, 
     height: width * 0.1,
     borderRadius: (width * 0.1) / 2,
     backgroundColor: '#E0E0E0',
@@ -90,13 +92,13 @@ const HomeS = StyleSheet.create({
     justifyContent: 'center',
   },
   namePlaceholder: {
-    width: width * 0.25, // Tỷ lệ theo chiều rộng màn hình
+    width: width * 0.25, 
     height: 15,
     borderRadius: 4,
     backgroundColor: '#E0E0E0',
   },
   timePlaceholder: {
-    width: width * 0.15, // Tỷ lệ theo chiều rộng màn hình
+    width: width * 0.15, 
     height: 12,
     borderRadius: 4,
     backgroundColor: '#E0E0E0',
@@ -107,7 +109,7 @@ const HomeS = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: height * 0.2, // Tỷ lệ theo chiều cao màn hình
+    height: height * 0.2, 
     borderRadius: 8,
     backgroundColor: '#E0E0E0',
   },
@@ -117,13 +119,13 @@ const HomeS = StyleSheet.create({
     marginHorizontal: 10,
   },
   imageStory: {
-    width: width * 0.28, // Tỷ lệ theo chiều rộng màn hình
-    height: height * 0.22, // Tỷ lệ theo chiều cao màn hình
+    width: width * 0.28, 
+    height: height * 0.22, 
     borderRadius: 10,
   },
   backGround: {
     backgroundColor: '#fff',
-    height: height * 0.07, // Tỷ lệ theo chiều cao màn hình
+    height: height * 0.07, 
     width: '100%',
     position: 'absolute',
     bottom: -0.1,
@@ -143,7 +145,7 @@ const HomeS = StyleSheet.create({
   },
   image: {
     marginHorizontal: 10,
-    width: width * 0.1, // Tỷ lệ theo chiều rộng màn hình
+    width: width * 0.1, 
     height: width * 0.1,
     borderRadius: 50,
     borderWidth: 1,
