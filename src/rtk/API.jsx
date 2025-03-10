@@ -832,3 +832,22 @@ export const setStatusSeen = createAsyncThunk(
     }
   }
 );
+
+// Cảnh
+// noti call video
+// params : ID_group, ID_user, isCallVideo(true: callVideo, false: callAudio)
+// return res.status(200).json({ "status": true, message: "Thông báo thành công" });
+//return res.status(4001).json({ "status": false, message: "Không tìm thấy ID_group hoặc không tìm thấy các members khác" });
+export const notiCallVideo = createAsyncThunk(
+  'group/notiCallVideo',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('group/notiCallVideo', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
