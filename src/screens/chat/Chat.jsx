@@ -57,9 +57,9 @@ const Chat = (props) => {// cần ID_group (param)
     const onCallvieo = () => {
         if (!group) return;
         if (group.isPrivate == true) {
-            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true });
+            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar  });
         } else {
-            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true });
+            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar  });
         }
     };
     // call audio
