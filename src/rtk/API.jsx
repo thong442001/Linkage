@@ -824,7 +824,7 @@ export const setStatusSeen = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
-        .post('notification/setStatusSeen', data);
+        .post('notification/setStatusSeen', data); 3
       //console.log(response?.message)
       return response;
     } catch (error) {
