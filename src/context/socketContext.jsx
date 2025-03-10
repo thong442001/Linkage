@@ -13,10 +13,21 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         const newSocket = io('https://linkage.id.vn', {
-            transports: ['websocket', 'polling'],
-            reconnection: true,
-            reconnectionAttempts: 5,
-            timeout: 5000,
+            // transports: ['websocket', 'polling'],
+            // reconnection: true,
+            // reconnectionAttempts: 5,
+            // timeout: 5000,
+
+            transports: ['websocket'], // Chỉ ưu tiên WebSocket, giảm latency
+            reconnection: true, // Cho phép tự động kết nối lại
+            reconnectionAttempts: 10, // Tăng số lần thử lại lên 10 lần
+            reconnectionDelay: 3000, // Chờ 3s trước mỗi lần thử lại (giảm spam request)
+            reconnectionDelayMax: 10000, // Tăng dần delay nếu mất kết nối lâu
+            timeout: 10000, // Tăng timeout lên 10s (tránh mất kết nối do mạng chậm)
+            autoConnect: true, // Tự động kết nối khi component mount
+            forceNew: false, // Không tạo kết nối mới liên tục (tránh bị disconnect loop)
+            withCredentials: true, // Giữ phiên đăng nhập nếu có cookies/session
+            upgrade: true, // Tự động nâng cấp lên WebSocket nếu có thể
         });
         setSocket(newSocket);
 
