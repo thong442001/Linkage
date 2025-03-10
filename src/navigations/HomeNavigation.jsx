@@ -1,5 +1,5 @@
 import React from 'react'
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import FontAwesome from 'react-native-vector-icons/Ionicons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
@@ -30,35 +30,35 @@ const TabHome = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let name;
           if (route.name === 'Home') {
-            name = "home"
+            name = "home-outline"
             color = focused
               ? "#0064E0"
               : "black"
             size = 30
           } else if (route.name === 'Friend') {
-            name = "users";
+            name = "people-outline";
             color = focused
               ? "#0064E0"
               : "black"
-            size = 25
+            size = 30
           } else if (route.name === 'Notification') {
-            name = "bell-o";
+            name = "notifications-outline";
             color = focused
               ? "#0064E0"
               : "black"
-            size = 25
+            size = 30
           } else if (route.name === 'Profile') {
-            name = "user-circle-o";
+            name = "person-outline";
             color = focused
               ? "#0064E0"
               : "black"
-            size = 25
+            size = 30
           } else if (route.name === 'Setting') {
-            name = "server";
+            name = "settings-outline";
             color = focused
               ? "#0064E0"
               : "black"
-            size = 25
+            size = 30
           }
 
           return <FontAwesome name={name} size={size} color={color} />;
@@ -129,9 +129,6 @@ import ChatBot from '../screens/chat/ChatBot';
 import ListFriend from '../screens/friend/ListFriend';
 import HuggingFaceImageGenerator from '../screens/Al/RunwayMLImageGenerator ';
 import QRScannerScreen from '../screens/qrCode/QRScannerScreen';
-import HomeLive from '../screens/live/HomeLive';
-import HostLive from '../screens/live/HostLive';
-import AudienceScreen from '../screens/live/AudienceScreen';
 import QRSannerAddGroup from '../screens/qrCode/QRSannerAddGroup';
 
 const oStackHome = {
@@ -159,12 +156,7 @@ const oStackHome = {
   ListFriend: { name: 'ListFriend', component: ListFriend },
   HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },
   QRScannerScreen: { name: 'QRScannerScreen', component: QRScannerScreen },
-  HostLive: { name: 'HostLive', component: HostLive },
-  HomeLive: { name: 'HomeLive', component: HomeLive },
-  AudienceScreen: { name: 'AudienceScreen', component: AudienceScreen },
   QRSannerAddGroup: { name: 'QRSannerAddGroup', component: QRSannerAddGroup },
-
-
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

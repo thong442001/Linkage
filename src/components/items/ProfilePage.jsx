@@ -38,8 +38,7 @@ const PostItem = memo(({
     const reactions = useSelector(state => state.app.reactions)
     const dispatch = useDispatch();
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
-    // console.log("post_reactions: " + post.post_reactions)
-    // console.log("comments: " + post.comments)
+    //console.log(post.post_reactions)
     //console.log("imgs: " + post?.ID_post_shared?.medias)
 
     // time 
@@ -656,7 +655,7 @@ const PostItem = memo(({
                 && (
                     <View style={[styles.vReactionsOfPost]}>
                         {
-                            post?.post_reactions?.length > 0
+                            post?.post_reactions.length > 0
                             && (
                                 <TouchableOpacity
                                     style={{ flexDirection: "row" }}
@@ -668,22 +667,22 @@ const PostItem = memo(({
                                         </Text>
                                     ))}
                                     <Text style={styles.slReactionsOfPost}>
-                                        {post?.post_reactions?.length}
+                                        {post.post_reactions.length}
                                     </Text>
                                 </TouchableOpacity>
                             )
                         }
-                        {/*so luong  bình luận */}
-                        {
-                            post?.comments?.length > 0
-                            && (
-                                <View>
+                        <View>
+                            {/*so luong  bình luận */}
+                            {
+                                post?.comments?.length > 0
+                                && (
                                     <Text style={styles.slReactionsOfPost}>
-                                        {post?.comments?.length} bình luận
+                                        {post?.comments.length} bình luận
                                     </Text>
-                                </View>
-                            )
-                        }
+                                )
+                            }
+                        </View>
                     </View>
                 )
             }
