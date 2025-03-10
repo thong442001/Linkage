@@ -97,6 +97,8 @@ const PostDetail = (props) => {
     }
   };
 
+
+
   const addReplyToComment = (commentsList, newReply) => {
     return commentsList.map((comment) => {
       if (comment._id === newReply.ID_comment_reply._id) {
@@ -578,8 +580,11 @@ const PostDetail = (props) => {
           <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}
             onPress={() => {
               setSelectedImage(uri);
-              setImageModalVisible(true);
-              // navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+              if (mediaCount > 5) {
+                navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+              } else {
+                setImageModalVisible(true);
+              }
             }}
           >
             {isVideo(uri) ? (
@@ -703,7 +708,7 @@ const PostDetail = (props) => {
       <View style={styles.postContainer}>
         {/* Header share  */}
         {
-          post.ID_post_shared && typeClick === "comment" &&
+          post.ID_post_shared &&
           <View>
             <View style={styles.header}>
               <View style={styles.userInfo}>
@@ -760,7 +765,7 @@ const PostDetail = (props) => {
                           </TouchableOpacity>
                         )
                       }
-                    </View>,
+                    </View>
                   )
                 }
 
@@ -784,6 +789,18 @@ const PostDetail = (props) => {
                 post.ID_post_shared
                   ?
                   <View style={styles.userInfo}>
+                    {/* {
+                      typeClick === "image" && ( // Nếu là chi tiết ảnh thì hiển thị nút Back
+                        <TouchableOpacity
+                          style={{ marginRight: width * 0.04 }}
+                          onPress={() => {
+                            navigation.goBack(); // Quay lại màn trước
+                          }}
+                        >
+                          <Icon name="arrow-back" size={25} color="black" />
+                        </TouchableOpacity>
+                      )
+                    } */}
                     <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
                     <View style={{ marginLeft: 20 }}>
                       <Text style={styles.name}>
@@ -904,11 +921,11 @@ const PostDetail = (props) => {
           {
             post.ID_post_shared
               ? (
-                hasCaption && <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
+                <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
               )
               :
               (
-                hasCaption && <Text style={styles.caption}>{post?.caption}</Text>
+                <Text style={styles.caption}>{post?.caption}</Text>
               )
           }
           {

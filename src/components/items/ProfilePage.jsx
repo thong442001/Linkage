@@ -397,8 +397,11 @@ const PostItem = memo(({
                         style={getMediaStyle(mediaCount, index)}
                         onPress={() => {
                             setSelectedImage(uri);
-                            // setImageModalVisible(true);
-                            navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+                            if (mediaCount > 5) {
+                                navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+                            } else {
+                                setImageModalVisible(true);
+                            }
                         }}
                     >
                         {isVideo(uri) ? (
