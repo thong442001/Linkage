@@ -382,6 +382,8 @@ const PostItem = memo(({
 
     const isVideo = (uri) => uri?.endsWith('.mp4') || uri?.endsWith('.mov');
 
+
+    //render anh
     const renderMediaGrid = (medias) => {
         const mediaCount = medias.length;
 
@@ -395,7 +397,8 @@ const PostItem = memo(({
                         style={getMediaStyle(mediaCount, index)}
                         onPress={() => {
                             setSelectedImage(uri);
-                            setImageModalVisible(true);
+                            // setImageModalVisible(true);
+                            navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
                         }}
                     >
                         {isVideo(uri) ? (
@@ -753,7 +756,7 @@ const PostItem = memo(({
                         style={styles.action}
                         onPress={() => {
                             console.log("ID_post gửi đi:", post._id); // Kiểm tra ID trước khi chuyển trang
-                            navigation.navigate("PostDetail", { ID_post: post._id });
+                            navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "comment" });
                         }}
                     >
                         <Icon3 name="comment" size={20} color="black" />
@@ -890,6 +893,8 @@ const PostItem = memo(({
                 </TouchableOpacity>
             </Modal >
 
+
+            {/* Modal hiển thị ảnh */}
             <Modal
                 visible={isImageModalVisible}
                 transparent={true}

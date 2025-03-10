@@ -32,7 +32,7 @@ const { width, height } = Dimensions.get('window');
 const PostDetail = (props) => {
   const { navigation } = props
   const route = useRoute();
-  const { ID_post } = route.params || {}
+  const { ID_post, typeClick } = route.params || {}
 
   const dispatch = useDispatch()
   const me = useSelector(state => state.app.user)
@@ -73,6 +73,9 @@ const PostDetail = (props) => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [isFirstRender, setIsFirstRender] = useState(true);
 
+  //hien len anh
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isImageModalVisible, setImageModalVisible] = useState(false);
 
   //call api chi tiet bai post
   const callGetChiTietPost = async (ID_post) => {
@@ -564,15 +567,21 @@ const PostDetail = (props) => {
   }
   const isVideo = (uri) => uri?.endsWith('.mp4') || uri?.endsWith('.mov');
 
+
+  //render anh
   const renderMediaGrid = (medias) => {
     const mediaCount = medias.length;
-
     if (mediaCount === 0) return null;
-
     return (
       <View style={styles.mediaContainer}>
         {medias.slice(0, 5).map((uri, index) => (
-          <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
+          <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}
+            onPress={() => {
+              setSelectedImage(uri);
+              setImageModalVisible(true);
+              // navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+            }}
+          >
             {isVideo(uri) ? (
               <View style={styles.videoWrapper}>
                 <Video source={{ uri }} style={styles.video} resizeMode="cover" paused />
@@ -592,6 +601,44 @@ const PostDetail = (props) => {
           </TouchableOpacity>
         ))}
       </View>
+    );
+  };
+
+  const renderMediaSDetail = (medias) => {
+    const mediaCount = medias.length;
+    if (mediaCount === 0) return null;
+
+    return (
+      <FlatList
+        data={medias}
+        keyExtractor={(uri, index) => `${uri}-${index}`}
+        renderItem={({ item: uri, index }) => (
+          <TouchableOpacity
+            style={styles.mediaItemDetail}
+            onPress={() => {
+              setSelectedImage(uri);
+              setImageModalVisible(true);
+            }}
+          >
+            {isVideo(uri) ? (
+              <View style={styles.videoWrapperDetail}>
+                <Video source={{ uri }} style={styles.videoDetail} resizeMode="cover" paused />
+                <View style={styles.playButtonDetail}>
+                  <Icon name="play-circle" size={40} color="white" />
+                </View>
+              </View>
+            ) : (
+              <Image source={{ uri }} style={styles.imageDetail} resizeMode="cover" />
+            )}
+
+            {/* {index === 4 && mediaCount > 5 && (
+              <View style={styles.overlay}>
+                <Text style={styles.overlayText}>+{mediaCount - 5}</Text>
+              </View>
+            )} */}
+          </TouchableOpacity>
+        )}
+      />
     );
   };
 
@@ -656,7 +703,7 @@ const PostDetail = (props) => {
       <View style={styles.postContainer}>
         {/* Header share  */}
         {
-          post.ID_post_shared &&
+          post.ID_post_shared && typeClick === "comment" &&
           <View>
             <View style={styles.header}>
               <View style={styles.userInfo}>
@@ -865,18 +912,11 @@ const PostDetail = (props) => {
               )
           }
           {
-            post.ID_post_shared
-              ? (
-                hasMedia && renderMediaGrid(post.ID_post_shared.medias)
-              )
-              :
-              (
-                hasMedia && renderMediaGrid(post.medias)
-              )
+            typeClick === "image"
+              ? (hasMedia && renderMediaSDetail(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
+              : (hasMedia && renderMediaGrid(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
           }
         </View>
-
-
         {
           !post._destroy &&
           <View style={styles.interactions}>
@@ -1051,6 +1091,21 @@ const PostDetail = (props) => {
           </TouchableOpacity>
         </Modal >
 
+
+        {/* Modal hiển thị ảnh */}
+        <Modal
+          visible={isImageModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setImageModalVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
+            <View style={styles.modalOverlay}>
+              <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
         <View style={[styles.line, { marginBottom: 20 }]}></View>
 
         {/* reaction of post */}
@@ -1157,37 +1212,42 @@ const PostDetail = (props) => {
             </View>
           )
         }
-        <View style={styles.boxCommentAll}>
-          <View
-            style={styles.boxComment}
-          >
-            {/* Thư Viện */}
-            <View style={styles.librarySelect}>
-              <TouchableOpacity
-                onPress={onOpenGallery}
+        {
+          typeClick == "comment" ?
+            <View style={styles.boxCommentAll}>
+              <View
+                style={styles.boxComment}
               >
-                <Icon name="image" size={25} color="#007bff" />
-              </TouchableOpacity>
+                {/* Thư Viện */}
+                <View style={styles.librarySelect}>
+                  <TouchableOpacity
+                    onPress={onOpenGallery}
+                  >
+                    <Icon name="image" size={25} color="#007bff" />
+                  </TouchableOpacity>
 
+                </View>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Viết bình luận "
+                  multiline={true}
+                  value={comment}
+                  onChangeText={setComment}
+                />
+                <View>
+                  <TouchableOpacity
+                    onPress={() => callAddComment('text', comment)}
+                    style={styles.sendButton}
+                  >
+                    <Icon name="send" size={25} color='#007bff' />
+                    {/* <Text style={styles.sendText}>Send</Text> */}
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Viết bình luận "
-              multiline={true}
-              value={comment}
-              onChangeText={setComment}
-            />
-            <View>
-              <TouchableOpacity
-                onPress={() => callAddComment('text', comment)}
-                style={styles.sendButton}
-              >
-                <Icon name="send" size={25} color='#007bff' />
-                {/* <Text style={styles.sendText}>Send</Text> */}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+            :
+            <View></View>
+        }
       </View>
     </View>
   );
