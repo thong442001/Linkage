@@ -17,7 +17,7 @@ import Groupcomponent from '../../components/chat/Groupcomponent';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
 import Icon from 'react-native-vector-icons/Ionicons'
-
+import { useSocket } from '../../context/socketContext';
 const { width, height } = Dimensions.get('window');
 
 const HomeChat = (props) => {// cần param
@@ -28,20 +28,76 @@ const HomeChat = (props) => {// cần param
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
 
+    const { socket } = useSocket();
     const [groups, setGroups] = useState(null);
 
     useEffect(() => {
         callGetAllGroupOfUser(me._id);
-    
+
         const focusListener = navigation.addListener('focus', () => {
             callGetAllGroupOfUser(me._id);
         });
-    
+
+
+        // Khi có nhóm chat mới → Thêm trực tiếp vào danh sách nhóm
+        socket.on("new_group", ({ group, members }) => {
+            console.log("🔔 Nhận sự kiện new_group:", group._id);
+
+            setGroups(prevGroups => {
+                if (!prevGroups) return [group]; // Nếu `groups` chưa có, khởi tạo danh sách
+                if (!prevGroups.some(g => g._id === group._id)) {
+                    return [group, ...prevGroups]; // Thêm nhóm mới lên đầu danh sách
+                }
+                return prevGroups;
+            });
+        });
+
+        // Khi có tin nhắn mới → Cập nhật nhóm đó lên đầu danh sách
+        socket.on("new_message", ({ ID_group, message }) => {
+            setGroups((prevGroups) => {
+                return prevGroups.map(group => {
+                    if (group._id === ID_group) {
+                        return {
+                            ...group,
+                            messageLatest: {
+                                ID_message: message._id,
+                                sender: message.sender,
+                                content: message.content,
+                                createdAt: message.createdAt,
+                                _destroy: message._destroy,
+                            }
+                        };
+                    }
+                    return group;
+                }).sort((a, b) => {
+                    const timeA = a.messageLatest ? new Date(a.messageLatest.createdAt).getTime() : new Date(a.createdAt).getTime();
+                    const timeB = b.messageLatest ? new Date(b.messageLatest.createdAt).getTime() : new Date(b.createdAt).getTime();
+                    return timeB - timeA; // Sắp xếp giảm dần
+                });
+            });
+        });
+
+        socket.on("group_deleted", ({ ID_group }) => {
+            console.log(`🗑️ Nhóm ${ID_group} đã bị xóa`);
+            // Xử lý UI: xóa nhóm khỏi danh sách
+            setGroups(prevGroups => (prevGroups ? prevGroups.filter(group => group._id !== ID_group) : []));
+        });
+
+        socket.on("kicked_from_group", ({ ID_group }) => {
+            console.log(`🚪 Bạn đã bị kick khỏi nhóm ${ID_group}`);
+            // Xử lý UI: Xóa nhóm khỏi danh sách
+            setGroups(prevGroups => prevGroups.filter(group => group._id !== ID_group));
+        });
+
         return () => {
-            focusListener; // Sửa lỗi này
+            socket.off("new_group");
+            socket.off("new_message");
+            socket.off("group_deleted");
+            socket.off("kicked_from_group");
+            focusListener;
         };
     }, [navigation]);
-    
+
 
     //call api getAllGroupOfUser
     const callGetAllGroupOfUser = async (ID_user) => {
@@ -61,6 +117,7 @@ const HomeChat = (props) => {// cần param
             console.log(error)
         }
     }
+
     const onChat = (ID_group) => {
         ID_group != null ? navigation.navigate("Chat", { ID_group: ID_group })
             : console.log("ID_group: " + ID_group);
@@ -77,10 +134,10 @@ const HomeChat = (props) => {// cần param
                     <MaterialIcons name="arrow-back-ios-new" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.header}>Đoạn chat</Text>
-                  {/* Nút quét QR group */}
+                {/* Nút quét QR group */}
                 <TouchableOpacity onPress={() => navigation.navigate("QRSannerAddGroup")} >
-                <Icon name="scan-circle-outline" size={25} color="black" />
-              </TouchableOpacity>
+                    <Icon name="scan-circle-outline" size={25} color="black" />
+                </TouchableOpacity>
                 {/* Nút tạo group */}
                 <TouchableOpacity onPress={() => navigation.navigate("CreateGroup")}>
                     <MaterialIcons name="group-add" size={24} color="black" />
@@ -103,38 +160,38 @@ const HomeChat = (props) => {// cần param
                     loading ?
                         <ChatHomeLoading />
 
-                        :<View>
-                        <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
-                            <View style={styles.container_item}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Image
-                                        source={{ uri: 'https://static.vecteezy.com/system/resources/previews/010/054/157/non_2x/chat-bot-robot-avatar-in-circle-round-shape-isolated-on-white-background-stock-illustration-ai-technology-futuristic-helper-communication-conversation-concept-in-flat-style-vector.jpg' }}
-                                        style={styles.img}
-                                    />
-                                    <Text style={styles.text_name_AI}>AI Chat</Text>
+                        : <View>
+                            <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
+                                <View style={styles.container_item}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <Image
+                                            source={{ uri: 'https://static.vecteezy.com/system/resources/previews/010/054/157/non_2x/chat-bot-robot-avatar-in-circle-round-shape-isolated-on-white-background-stock-illustration-ai-technology-futuristic-helper-communication-conversation-concept-in-flat-style-vector.jpg' }}
+                                            style={styles.img}
+                                        />
+                                        <Text style={styles.text_name_AI}>AI Chat</Text>
+                                    </View>
                                 </View>
-                            </View>
-                        </TouchableOpacity>
-                    
-                        {loading ? <ChatHomeLoading /> : (
-                            <FlatList
-                                data={groups}
-                                keyExtractor={(item) => item._id}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
-                                        <Groupcomponent item={item} />
-                                    </TouchableOpacity>
-                                )}
-                                ListEmptyComponent={
-                                    <Text style={{ textAlign: 'center', color: 'gray', marginTop: 20 }}>
-                                        Bạn chưa có cuộc trò chuyện nào.
-                                    </Text>
-                                }
-                                showsVerticalScrollIndicator={false}
-                            />
-                        )}
-                    </View>
-                    
+                            </TouchableOpacity>
+
+                            {loading ? <ChatHomeLoading /> : (
+                                <FlatList
+                                    data={groups}
+                                    keyExtractor={(item) => item._id}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
+                                            <Groupcomponent item={item} />
+                                        </TouchableOpacity>
+                                    )}
+                                    ListEmptyComponent={
+                                        <Text style={{ textAlign: 'center', color: 'gray', marginTop: 20 }}>
+                                            Bạn chưa có cuộc trò chuyện nào.
+                                        </Text>
+                                    }
+                                    showsVerticalScrollIndicator={false}
+                                />
+                            )}
+                        </View>
+
                 )
             }
         </View >
@@ -189,16 +246,16 @@ const styles = StyleSheet.create({
         // marginLeft: 12,
         // backgroundColor: 'black',
         // borderWidth: 5,
-      },
-      text_name_AI: {
+    },
+    text_name_AI: {
         fontSize: 20,
         fontWeight: '500',
-        marginLeft:10,
-        color:"black",
-      },
-      img: {
+        marginLeft: 10,
+        color: "black",
+    },
+    img: {
         width: 60,
-        height: 60 ,
+        height: 60,
         borderRadius: 50,
-      },
+    },
 });

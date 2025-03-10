@@ -17,14 +17,17 @@ import {
 import FriendAdd from '../../components/chat/FriendAdd';
 import Icon from 'react-native-vector-icons/Ionicons';
 const { width, height } = Dimensions.get('window');
+import { useSocket } from '../../context/socketContext';
+
 const AddFriendGroup = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
-
+    const { socket } = useSocket();
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
 
+    const [group, setGroup] = useState(null);
     const [membersGroup, setMembersGroup] = useState([]);
     const [friends, setFriends] = useState(null);
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -79,6 +82,7 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
                 .unwrap()
                 .then((response) => {
                     //console.log(response.groups)
+                    setGroup(response.group);
                     setMembersGroup(response.group.members);
                 })
                 .catch((error) => {
@@ -100,7 +104,10 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
             await dispatch(addMembers(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log(response?.message)
+                    //console.log(response?.message)
+                    // Emit sự kiện "add_members" để cập nhật danh sách nhóm
+                    socket.emit("add_members", { group: group, members: new_members });
+                    // chuyển trang khi add thành công
                     navigation.navigate("Chat", { ID_group: ID_group })
                 })
                 .catch((error) => {

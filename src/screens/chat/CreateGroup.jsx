@@ -14,11 +14,14 @@ import {
     addGroup,
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
-
+import { useSocket } from '../../context/socketContext';
 const { width, height } = Dimensions.get('window');
+
 const CreateGroup = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
+
+    const { socket } = useSocket();
 
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
@@ -79,7 +82,11 @@ const CreateGroup = (props) => {// cần param
                 .unwrap()
                 .then((response) => {
                     //console.log(response.groups)
-                    navigation.navigate("Chat", { ID_group: response.ID_group })
+                    // Emit sự kiện "new_group" để cập nhật danh sách nhóm
+                    socket.emit("new_group", { group: response.group, members: members });
+
+                    // Chuyển sang màn hình chat của nhóm vừa tạo
+                    navigation.navigate("Chat", { ID_group: response.group._id })
                 })
                 .catch((error) => {
                     console.log('Error1 addGroup:', error);

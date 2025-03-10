@@ -64,9 +64,9 @@ const PostStory = ({ navigation }) => {
     });
   };
 
-     const postStory = (imageUrl) => {
+  const postStory = (imageUrl) => {
     navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
-     }
+  }
 
 
 

@@ -8,6 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { BottomSheetProvider } from './src/context/BottomSheetContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
+import { SocketProvider } from './src/context/socketContext';
 enableScreens();
 
 
@@ -17,12 +18,14 @@ function App(): React.JSX.Element {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <PersistGate persistor={persistor}>
-          <BottomSheetProvider>
-            <SafeAreaView style={styles.container}>
-              <StatusBar />
-              <AppNavigation />
-            </SafeAreaView>
-          </BottomSheetProvider>
+          <SocketProvider>
+            <BottomSheetProvider>
+              <SafeAreaView style={styles.container}>
+                <StatusBar />
+                <AppNavigation />
+              </SafeAreaView>
+            </BottomSheetProvider>
+          </SocketProvider>
         </PersistGate>
       </Provider>
     </GestureHandlerRootView>
