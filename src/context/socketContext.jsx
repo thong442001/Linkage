@@ -3,7 +3,6 @@ import io from 'socket.io-client';
 import { useSelector } from 'react-redux';
 
 const SocketContext = createContext(null);
-
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
@@ -13,22 +12,18 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         const newSocket = io('https://linkage.id.vn', {
-            // transports: ['websocket', 'polling'],
-            // reconnection: true,
-            // reconnectionAttempts: 5,
-            // timeout: 5000,
-
-            transports: ['websocket'], // Chỉ ưu tiên WebSocket, giảm latency
-            reconnection: true, // Cho phép tự động kết nối lại
-            reconnectionAttempts: 10, // Tăng số lần thử lại lên 10 lần
-            reconnectionDelay: 3000, // Chờ 3s trước mỗi lần thử lại (giảm spam request)
-            reconnectionDelayMax: 10000, // Tăng dần delay nếu mất kết nối lâu
-            timeout: 10000, // Tăng timeout lên 10s (tránh mất kết nối do mạng chậm)
-            autoConnect: true, // Tự động kết nối khi component mount
-            forceNew: false, // Không tạo kết nối mới liên tục (tránh bị disconnect loop)
-            withCredentials: true, // Giữ phiên đăng nhập nếu có cookies/session
-            upgrade: true, // Tự động nâng cấp lên WebSocket nếu có thể
+            transports: ['websocket'],
+            reconnection: true,
+            reconnectionAttempts: 10,
+            reconnectionDelay: 3000,
+            reconnectionDelayMax: 10000,
+            timeout: 10000,
+            autoConnect: true,
+            forceNew: false,
+            withCredentials: true,
+            upgrade: true,
         });
+
         setSocket(newSocket);
 
         return () => {
@@ -37,10 +32,7 @@ export const SocketProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        if (!socket || !user) return;
-
-        console.log("📡 Gửi sự kiện user_online:", user._id);
-        socket.emit("user_online", user._id);
+        if (!socket) return;
 
         const handleOnlineUsers = (userList) => {
             console.log("🟢 Danh sách user online:", userList);
@@ -50,11 +42,24 @@ export const SocketProvider = ({ children }) => {
         socket.on("online_users", handleOnlineUsers);
 
         return () => {
-            console.log("📴 Gửi sự kiện user_offline:", user._id);
-            socket.emit("user_offline", user._id);
             socket.off("online_users", handleOnlineUsers);
         };
-    }, [socket, user]);
+    }, [socket]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        if (user && user._id) {
+            console.log("📡 Gửi sự kiện user_online:", user._id);
+            socket.emit("user_online", user._id);
+        } else {
+            console.log("📴 User logout, ngắt kết nối socket...");
+            socket.emit("user_offline");
+            socket.disconnect();
+            setSocket(null);
+        }
+    }, [user, socket]);
+
 
     return (
         <SocketContext.Provider value={{ socket, onlineUsers }}>
@@ -62,4 +67,3 @@ export const SocketProvider = ({ children }) => {
         </SocketContext.Provider>
     );
 };
-

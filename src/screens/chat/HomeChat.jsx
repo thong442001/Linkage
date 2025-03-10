@@ -17,63 +17,51 @@ import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ItemListFriend from '../../components/items/ItemListFriend';
 import ItemFriendHomeChat from '../../components/items/ItemFriendHomeChat';
-// import { useSocket, SocketProvider } from '../../context/socketContext';
-
-
+import {useSocket, SocketProvider} from '../../context/socketContext';
 
 const {width, height} = Dimensions.get('window');
 
 const HomeChat = ({route, navigation}) => {
-
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
   const [groups, setGroups] = useState(null);
   const [friends, setFriends] = useState([]);
-//   const { onlineUsers } = useSocket();
+  const {onlineUsers} = useSocket();
   const [onlineUserDetails, setOnlineUserDetails] = useState([]);
 
+  useEffect(() => {
+    if (!onlineUsers || onlineUsers.length === 0) {
+      console.log('🚫 Không có user nào online.');
+      return;
+    }
 
-//   useEffect(() => {
-//     if (!onlineUsers || onlineUsers.length === 0) {
-//       console.log("🚫 Không có user nào online.");
-//       return;
-//     }
-  
-//     // Lọc danh sách bạn bè đang online
-//     const onlineFriends = friends.filter(friend => 
-//       onlineUsers.includes(friend.ID_userA._id) || onlineUsers.includes(friend.ID_userB._id)
-//     );
-  
-//     console.log("✅ Danh sách bạn bè đang online:", onlineFriends);
-//   }, [onlineUsers, friends]);
-  
+    // Lọc danh sách bạn bè đang online
+    const onlineFriends = friends.filter(
+      friend =>
+        onlineUsers.includes(friend.ID_userA._id) ||
+        onlineUsers.includes(friend.ID_userB._id),
+    );
 
-useEffect(() => {
-    console.log("📍 useEffect chạy - HomeChat được mount!");
-  
+    console.log('✅ Danh sách bạn bè đang online:', onlineFriends);
+  }, [onlineUsers, friends]);
+
+  useEffect(() => {
+    console.log('friend',friends);
+
     callGetAllGroupOfUser(me._id);
     callGetAllFriendOfID_user(me._id);
-  
-    const focusListener = navigation.addListener('focus', () => {
-      console.log("👀 Trang HomeChat được focus!");
-      callGetAllGroupOfUser(me._id);
-    });
-  
-    return () => {
-      console.log("🛑 HomeChat bị unmount!");
-      focusListener;
-    };
+
+
   }, [navigation]);
-  
+
   // lấy danh sách bạn bè
   const callGetAllFriendOfID_user = async ID_user => {
     try {
       await dispatch(getAllFriendOfID_user({me: ID_user, token: token}))
         .unwrap()
         .then(response => {
-     
           setFriends(response.relationships);
         })
         .catch(error => {
@@ -91,7 +79,7 @@ useEffect(() => {
         .then(response => {
           setGroups(response.groups);
           setLoading(false);
-            console.log(response)
+          console.log(response);
         })
         .catch(error => console.log('Error:', error));
     } catch (error) {
@@ -114,7 +102,7 @@ useEffect(() => {
         <Text style={styles.header}>Đoạn chat</Text>
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
-          <Icon name="chatbubbles-outline" size={25} color="black" />
+            <Icon name="chatbubbles-outline" size={25} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('QRSannerAddGroup')}>
@@ -146,9 +134,20 @@ useEffect(() => {
         <View>
           <FlatList
             data={friends}
-            renderItem={({item}) => (
-              <ItemFriendHomeChat item={item} navigation={navigation} />
-            )}
+            renderItem={({item}) => {
+              const friendID =
+                item.ID_userA._id === me._id
+                  ? item.ID_userB._id
+                  : item.ID_userA._id;
+              const isOnline = onlineUsers.includes(friendID);
+              return (
+                <ItemFriendHomeChat
+                  item={item}
+                  navigation={navigation}
+                  isOnline={isOnline}
+                />
+              );
+            }}
             keyExtractor={item => item._id}
             horizontal
             showsHorizontalScrollIndicator={false}

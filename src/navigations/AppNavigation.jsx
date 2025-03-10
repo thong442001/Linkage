@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState, useEffect} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
 import HomeNavigation from './HomeNavigation';
 import UserNavigation from './UserNavigation';
 import Welcome from '../screens/welcome/Welcome';
-import { getAllReaction } from '../rtk/API';
-import { requestPermissions } from '../screens/service/MyFirebaseMessagingService';
-import { setReactions, setFcmToken } from '../rtk/Reducer';
+import {getAllReaction} from '../rtk/API';
+import {requestPermissions} from '../screens/service/MyFirebaseMessagingService';
+import {setReactions, setFcmToken} from '../rtk/Reducer';
 import database from '@react-native-firebase/database';
 import messaging from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-import { useSocket } from '../context/socketContext';
-
+import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
+import {io} from 'socket.io-client'; // Thêm socket.io-client
 
 const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
-
-  const { onlineUsers } = useSocket(); // Lấy danh sách user online từ context
-
+  const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]); // Lưu danh sách user online
 
   const [isSplashVisible, setSplashVisible] = useState(true); // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
@@ -40,8 +38,28 @@ const AppNavigation = () => {
   }, []);
 
   useEffect(() => {
-    console.log("📢 User Online List in AppNavigation:", onlineUsers);
-  }, [onlineUsers]);
+    // Kết nối tới server
+    const newSocket = io('https://linkage.id.vn', {
+      transports: ['websocket', 'polling'],
+      reconnection: true, // Cho phép tự động kết nối lại
+      reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
+      timeout: 5000, // Chờ tối đa 5 giây trước khi báo lỗi
+    });
+    setSocket(newSocket);
+    if (user && socket) {
+      newSocket.emit('user_online', user._id); // Gửi ID user lên server khi đăng nhập
+    }
+
+    newSocket.on('online_users', userList => {
+      setOnlineUsers(userList);
+      console.log('🟢 Danh sách user online:', userList);
+    });
+    console.log('OnlineUsers: ' + onlineUsers);
+
+    return () => {
+      newSocket.off('online_users');
+    };
+  }, [user]);
 
   //call api getAllReaction
   const callGetAllReaction = async () => {
@@ -119,14 +137,16 @@ const AppNavigation = () => {
             notification?.type === 'Lời mời kết bạn' &&
             notification?.ID_relationship
           ) {
-            const { ID_userA, ID_userB } = notification.ID_relationship;
+            const {ID_userA, ID_userB} = notification.ID_relationship;
 
             if (user?._id?.toString() === ID_userA?._id?.toString()) {
-              return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''
-                } đã gửi lời mời kết bạn với bạn`;
+              return `${ID_userB?.first_name || ''} ${
+                ID_userB?.last_name || ''
+              } đã gửi lời mời kết bạn với bạn`;
             } else {
-              return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''
-                } đã gửi lời mời kết bạn với bạn`;
+              return `${ID_userA?.first_name || ''} ${
+                ID_userA?.last_name || ''
+              } đã gửi lời mời kết bạn với bạn`;
             }
           }
 
@@ -134,14 +154,16 @@ const AppNavigation = () => {
             notification?.type === 'Đã thành bạn bè của bạn' &&
             notification?.ID_relationship
           ) {
-            const { ID_userA, ID_userB } = notification.ID_relationship;
+            const {ID_userA, ID_userB} = notification.ID_relationship;
 
             if (user?._id?.toString() === ID_userA?._id?.toString()) {
-              return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''
-                } với bạn đã thành bạn bè`;
+              return `${ID_userB?.first_name || ''} ${
+                ID_userB?.last_name || ''
+              } với bạn đã thành bạn bè`;
             } else {
-              return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''
-                } với bạn đã thành bạn bè`;
+              return `${ID_userA?.first_name || ''} ${
+                ID_userA?.last_name || ''
+              } với bạn đã thành bạn bè`;
             }
           }
 
@@ -149,14 +171,16 @@ const AppNavigation = () => {
             notification?.type === 'Tin nhắn mới' &&
             notification?.ID_message
           ) {
-            const { sender, content } = notification.ID_message;
+            const {sender, content} = notification.ID_message;
 
             if (notification.ID_message.type === "text") {
-              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã gửi một tin nhắn'
-                }`;
-            } else {
-              return `${sender.first_name || ''} ${sender.last_name || ''}: ${'Đã gửi một ảnh mới'
-                }`;
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+                content || 'Đã gửi một tin nhắn'
+              }`;
+            } else{
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+               'Đã gửi một ảnh mới'
+              }`;
             }
           }
 
@@ -167,16 +191,17 @@ const AppNavigation = () => {
             return `Bạn đã được mời vào nhóm mới`;
           }
 
-
+          
           if (
             notification?.type === "Đã đăng story mới" &&
             notification?.ID_post
-          ) {
-            const { sender, content } = notification.ID_post;
+          ) { 
+            const {sender, content} = notification.ID_post;
 
             if (sender) {
-              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã đăng story mới'
-                }`;
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+                content || 'Đã đăng story mới'
+              }`;
             }
           }
 
@@ -190,12 +215,13 @@ const AppNavigation = () => {
           if (
             notification?.type === "Đã đăng bài mới" &&
             notification?.ID_post
-          ) {
-            const { sender, content } = notification.ID_post;
+          ){ 
+            const {sender, content} = notification.ID_post;
 
             if (sender) {
-              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã đăng bài post mới'
-                }`;
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+                content || 'Đã đăng bài post mới'
+              }`;
             }
           }
 
@@ -241,7 +267,7 @@ const AppNavigation = () => {
       });
 
     // Khi người dùng nhấn vào thông báo từ notifee
-    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+    const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS) {
         console.log(
           '🔔 Người dùng đã nhấn vào thông báo:',
