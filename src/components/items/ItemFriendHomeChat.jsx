@@ -11,6 +11,8 @@ const ItemFriendHomeChat = ({ item, navigation }) => {
   const dispatch = useDispatch();
 
 
+
+
   useEffect(() => {
     if (item.ID_userA._id === me._id) {
       setID_friend(item.ID_userB._id);
@@ -22,6 +24,8 @@ const ItemFriendHomeChat = ({ item, navigation }) => {
       setAvatar(item.ID_userA.avatar);
     }
   }, [me, item]);
+
+  
 
   const getID_groupPrivate = async (user1, user2) => {
     // console.log("Tạo phòng chat với:", user1, user2);
