@@ -462,23 +462,49 @@ const PostItem = memo(({
                         </View>
 
                         <TouchableOpacity
-                            disabled={ID_user != post.ID_user._id}
                             onPress={() =>
                                 openBottomSheet(
                                     25,
                                     <View>
-                                        <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
-                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                            <Text style={[styles.deleteText,]}
-                                            >{
-                                                    post._destroy ? (
-                                                        "Phục hồi"
-                                                    ) : "Xóa bài viết"
-                                                }
-                                            </Text>
-                                        </TouchableOpacity>
                                         {
-                                            post._destroy && (
+                                            ID_user != post.ID_user._id
+                                                ? (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            //onDelete(),
+                                                            closeBottomSheet()
+                                                        }}
+                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                                        <Text style={[styles.deleteText,]}
+                                                        >{
+                                                                !post._destroy
+                                                                && (
+                                                                    "Báo cáo"
+                                                                )
+                                                            }
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            onDelete(),
+                                                                closeBottomSheet()
+                                                        }}
+                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                                        <Text style={[styles.deleteText,]}
+                                                        >{
+                                                                post._destroy ? (
+                                                                    "Phục hồi"
+                                                                ) : "Xóa bài viết"
+                                                            }
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )
+                                        }
+
+                                        {
+                                            (post._destroy && ID_user == post.ID_user._id)
+                                            && (
                                                 <TouchableOpacity
                                                     onPress={() => {
                                                         onDeleteVinhVien()
@@ -588,23 +614,49 @@ const PostItem = memo(({
                     {
                         !post.ID_post_shared &&
                         <TouchableOpacity
-                            disabled={ID_user != post.ID_user._id}
                             onPress={() =>
                                 openBottomSheet(
                                     25,
                                     <View>
-                                        <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
-                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                            <Text style={[styles.deleteText,]}
-                                            >{
-                                                    post._destroy ? (
-                                                        "Phục hồi"
-                                                    ) : "Xóa bài viết"
-                                                }
-                                            </Text>
-                                        </TouchableOpacity>
                                         {
-                                            post._destroy && (
+                                            ID_user != post.ID_user._id
+                                                ? (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            //onDelete(),
+                                                            closeBottomSheet()
+                                                        }}
+                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                                        <Text style={[styles.deleteText,]}
+                                                        >{
+                                                                !post._destroy
+                                                                && (
+                                                                    "Báo cáo"
+                                                                )
+                                                            }
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            onDelete(),
+                                                                closeBottomSheet()
+                                                        }}
+                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                                        <Text style={[styles.deleteText,]}
+                                                        >{
+                                                                post._destroy ? (
+                                                                    "Phục hồi"
+                                                                ) : "Xóa bài viết"
+                                                            }
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )
+                                        }
+
+                                        {
+                                            (post._destroy && ID_user == post.ID_user._id)
+                                            && (
                                                 <TouchableOpacity
                                                     onPress={() => {
                                                         onDeleteVinhVien()
@@ -649,34 +701,34 @@ const PostItem = memo(({
             </View>
 
             <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
-            {/* reactions of post */}
-            {post.post_reactions.length > 0 && (
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <TouchableOpacity
-                        style={{ flexDirection: "row", alignItems: "center" }}
-                        onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
-                    >
-                        {uniqueReactions.map((reaction, index) => (
-                            <Text key={index} style={{ color: 'black' }}>
-                                {reaction.ID_reaction.icon}
+                {/* reactions of post */}
+                {post.post_reactions.length > 0 && (
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <TouchableOpacity
+                            style={{ flexDirection: "row", alignItems: "center" }}
+                            onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                        >
+                            {uniqueReactions.map((reaction, index) => (
+                                <Text key={index} style={{ color: 'black' }}>
+                                    {reaction.ID_reaction.icon}
+                                </Text>
+                            ))}
+                            <Text style={styles.slReactionsOfPost}>
+                                {post.post_reactions.length}
                             </Text>
-                        ))}
-                        <Text style={styles.slReactionsOfPost}>
-                            {post.post_reactions.length}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            )}
-
-            {/* số lượng bình luận luôn sát bên phải */}
-            <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                {post?.comments.length > 0 && (
-                    <Text style={styles.slReactionsOfPost}>
-                        {post?.comments.length} bình luận
-                    </Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
+
+                {/* số lượng bình luận luôn sát bên phải */}
+                <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    {post?.comments.length > 0 && (
+                        <Text style={styles.slReactionsOfPost}>
+                            {post?.comments.length} bình luận
+                        </Text>
+                    )}
+                </View>
             </View>
-        </View>
 
 
 

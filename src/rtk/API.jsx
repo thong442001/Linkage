@@ -854,7 +854,7 @@ export const notiCallVideo = createAsyncThunk(
 
 // Tài
 // noti livestream
-// params : IID_livestream, ID_user
+// params : ID_livestream, ID_user
 // return res.status(200).json({ "status": true, message: "Thông báo thành công" });
 // return res.status(4001).json({ "status": false, message: "User không có bạn bè" });
 export const notiLiveStream = createAsyncThunk(
