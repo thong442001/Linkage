@@ -12,6 +12,7 @@ import {
   Modal,
   FlatList,
   PanResponder,
+  Alert,
 } from 'react-native';
 import { addPost, searchYouTubeMusic } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +20,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
+import { launchCamera } from "react-native-image-picker";
 
 import axios from 'axios';
 import { TextInput } from 'react-native-gesture-handler';
@@ -34,6 +36,7 @@ const Story = ({ route }) => {
   const [previewImage, setPreviewImage] = useState(null); // Ảnh hiển thị trước khi upload
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null); // Link ảnh sau khi upload
   const [loading, setLoading] = useState(false);
+
 
   const [text, setText] = useState('');
   const [showText, setShowText] = useState(false);
@@ -63,6 +66,20 @@ const Story = ({ route }) => {
     { status: 3, name: 'Chỉ mình tôi' },
   ];
 
+  const openCamera = () => {
+    launchCamera({ mediaType: "photo", quality: 1 }, (response) => {
+      if (response.didCancel) {
+        Alert.alert("Bạn đã hủy chụp ảnh");
+      } else if (response.errorCode) {
+        Alert.alert("Lỗi khi mở camera:", response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        setPreviewImage(response.assets[0].uri);
+
+      }
+    });
+  };
+
+
   // Gesture xử lý kéo/thả
   const panResponder = useRef(
     PanResponder.create({
@@ -74,14 +91,13 @@ const Story = ({ route }) => {
         });
         pan.setValue({ x: 0, y: 0 });
       },
-      onPanResponderMove: Animated.event(
-        [null, { dx: pan.x, dy: pan.y }],
-        { useNativeDriver: false }
-      ),
+      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
+        useNativeDriver: false,
+      }),
       onPanResponderRelease: () => {
         pan.flattenOffset();
       },
-    })
+    }),
   ).current;
 
   useEffect(() => {
@@ -92,14 +108,14 @@ const Story = ({ route }) => {
 
   const callAddPost = async () => {
     if (!previewImage) {
-      console.log('Chưa có ảnh');
+      Alert.alert("Lỗi", "Vui lòng chọn ảnh trước khi đăng!");
       return;
     }
 
     try {
       const uploadedUrl = await uploadToCloudinary(previewImage);
       if (!uploadedUrl) {
-        console.log('Lỗi khi upload ảnh');
+        Alert.alert("Lỗi", "Không thể tải ảnh lên Cloudinary!");
         return;
       }
 
@@ -114,11 +130,15 @@ const Story = ({ route }) => {
       };
 
       await dispatch(addPost(paramsAPI)).unwrap();
-      navigation.navigate(oStackHome.TabHome.name);
+
+      // Chuyển về màn hình TabHome ngay sau khi đăng thành công
+      navigation.replace(oStackHome.TabHome.name);
     } catch (error) {
-      console.log('Lỗi đăng bài:', error);
+      Alert.alert("Lỗi", "Đăng bài thất bại. Vui lòng thử lại!");
+      console.error("Lỗi đăng bài:", error);
     }
   };
+
 
   const uploadToCloudinary = async imageUri => {
     setLoading(true);
@@ -146,79 +166,6 @@ const Story = ({ route }) => {
     }
   };
 
-  // const MusicPlayer = ({ songUrl }) => {
-  //   const [paused, setPaused] = useState(false);
-  //   console.log("🎶 Đang phát nhạc:", songUrl);
-
-  //   return (
-  //     <View>
-  //       {songUrl && (
-  //         <Video
-  //           source={{ uri: songUrl }}
-  //           audioOnly={true}
-  //           controls={true}
-  //           paused={paused}
-  //           playInBackground={true}
-  //           playWhenInactive={true}
-  //           onError={(error) => console.error("❌ Lỗi phát nhạc:", error)}
-  //           style={{ width: 0, height: 0 }}
-  //         />
-  //       )}
-  //       {songUrl && (
-  //         <TouchableOpacity onPress={() => setPaused(!paused)}>
-  //           <Text style={{ color: "white" }}>{paused ? "▶️ Phát" : "⏸️ Dừng"}</Text>
-  //         </TouchableOpacity>
-  //       )}
-  //     </View>
-  //   );
-  // };
-
-
-  // const searchYouTubeMusic = async (query) => {
-  //   const API_KEY = "AIzaSyCFElZOCK_3MtbZzKOdT_oK0K0RgPKmcRc";
-  //   try {
-  //     console.log("🔎 Đang tìm kiếm:", query);
-
-  //     const response = await axios.get(
-  //       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query} music&type=video&key=${API_KEY}`
-  //     );
-
-  //     console.log("📃 Kết quả YouTube API:", response.data.items);
-
-  //     const videoId = response.data.items[0]?.id.videoId;
-  //     if (videoId) {
-  //       console.log("🎬 Video ID:", videoId);
-
-  //       // Gửi yêu cầu tới Y2Mate để lấy link chuyển đổi
-  //       const y2mateResponse = await axios.post(
-  //         "https://www.y2mate.com/mates/analyzeV2/ajax",
-  //         new URLSearchParams({
-  //           k_query: `https://www.youtube.com/watch?v=${videoId}`,
-  //           k_page: "home",
-  //           hl: "en",
-  //         }),
-  //         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-  //       );
-
-  //       console.log("📃 Phản hồi từ Y2Mate:", y2mateResponse.data);
-
-  //       const audioUrl = `https://www.snappea.com/api/button/mp3/${videoId}`;
-  //       if (audioUrl) {
-  //         setSelectedSongUrl(audioUrl);
-  //         console.log("🎵 Link MP3:", audioUrl);
-  //       } else {
-  //         alert("Không tìm thấy link MP3 từ Y2Mate");
-  //       }
-  //     } else {
-  //       alert("Không tìm thấy bài hát trên YouTube");
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Lỗi lấy nhạc YouTube:", error);
-  //   }
-  // };
-
-
-
   return (
     <TouchableWithoutFeedback>
       <View style={styles.container}>
@@ -242,8 +189,7 @@ const Story = ({ route }) => {
             style={[
               styles.draggableTextContainer,
               { transform: pan.getTranslateTransform() },
-            ]}
-          >
+            ]}>
             <TextInput
               style={styles.draggableText}
               onChangeText={setText}
@@ -277,10 +223,10 @@ const Story = ({ route }) => {
         </TouchableOpacity>
 
         {/* Nút mở Camera */}
-        {/* <TouchableOpacity style={styles.cameraButton} onPress={openCamera}>
+        <TouchableOpacity style={styles.CameraBtn} onPress={openCamera}>
           <Icon name="camera" size={24} color="white" />
           <Text style={{ color: 'white', marginLeft: 5 }}>Chụp ảnh</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
 
         {/* Nút Đăng Story */}
         <TouchableOpacity
@@ -321,46 +267,8 @@ const Story = ({ route }) => {
             </View>
           </View>
         </Modal>
-        {/* <TouchableOpacity onPress={() => searchYouTubeMusic('bray')}>
-          <Text style={styles.musicButton}>🎵 Chọn nhạc</Text>
-        </TouchableOpacity>
 
-        <Modal
-          visible={musicList.length > 0}
-          animationType="slide"
-          transparent={true}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={{color: 'white', fontSize: 18}}>
-                🎵 Chọn bài hát
-              </Text>
-              <FlatList
-                data={musicList}
-                keyExtractor={item => item.id}
-                renderItem={({item}) => (
-                  <TouchableOpacity
-                    style={styles.musicItem}
-                    onPress={() => {
-                      setSelectedSongUrl("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
 
-                      setMusicList([]); // Đóng modal sau khi chọn
-                    }}>
-                    <Image
-                      source={{uri: item.thumbnail}}
-                      style={{width: 50, height: 50, marginRight: 10}}
-                    />
-                    <Text style={styles.musicText}>{item.title}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-              <TouchableOpacity onPress={() => setMusicList([])}>
-                <Text style={{color: 'red', textAlign: 'center'}}>Đóng</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-        <MusicPlayer songUrl={selectedSongUrl} /> */}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -399,11 +307,18 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  privacyText: {
-    color: 'white',
-    marginLeft: 10,
-    fontSize: 14
+
+  CameraBtn: {
+    position: 'absolute',
+    bottom: 140,
+    left: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 10,
+    borderRadius: 20,
   },
+  privacyText: { color: 'white', marginLeft: 10, fontSize: 14 },
   postButton: {
     position: 'absolute',
     bottom: 30,
@@ -436,12 +351,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'black',
-  },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   optionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -449,10 +359,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  optionText: {
-    fontSize: 16,
-    color: 'black',
-  },
+  optionText: { fontSize: 16 },
   addTextButton: {
     position: 'absolute',
     bottom: 30,
@@ -471,13 +378,13 @@ const styles = StyleSheet.create({
   },
   draggableText: { color: 'white', fontSize: 20 },
   draggableTextContainer: {
-    position: "absolute",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     padding: 10,
     borderRadius: 5,
   },
   draggableText: {
-    color: "white",
+    color: 'white',
     fontSize: 18,
   },
 });

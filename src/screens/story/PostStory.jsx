@@ -42,27 +42,26 @@ const PostStory = ({ navigation }) => {
   //   });
   // };
 
-  const onOpenGallery = async () => {
+  const onOpenGallery = () => {
     const options = {
       mediaType: "photo",
       quality: 1,
-      selectionLimit: 1,
+      includeBase64: true, // Một số thiết bị hiển thị nút chụp ảnh
     };
-
+  
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
         console.log("Đã hủy chọn ảnh");
-        navigation.goBack(); // Quay lại nếu không chọn ảnh
       } else if (response.errorMessage) {
         Alert.alert("Lỗi", "Không thể mở thư viện ảnh!");
-        navigation.goBack();
       } else {
         const selectedFile = response.assets[0];
         setSelectedImage(selectedFile.uri);
-        postStory(selectedFile.uri); // Truyền ảnh sang Story mà không cần tải lên Cloudinary
+        postStory(selectedFile.uri);
       }
     });
   };
+  
 
   const postStory = (imageUrl) => {
     navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
