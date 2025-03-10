@@ -53,6 +53,15 @@ const Chat = (props) => {// cần ID_group (param)
 
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
+    // Thong
+    // đang soạn tin nhắn
+    const [isTyping, setIsTyping] = useState(false);
+    const typingTimeoutRef = useRef(null);
+    const [typingUsers, setTypingUsers] = useState([]);
+    const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
+
+
+
     // call video
     const onCallvieo = () => {
         if (!group) return;
@@ -257,6 +266,16 @@ const Chat = (props) => {// cần ID_group (param)
             goBack();
         });
 
+        socket.on("user_typing", ({ ID_group, ID_user }) => {
+            console.log("User: " + ID_user + " đang soạn tin nhắn...");
+            setTypingUsers((prev) => [...new Set([...prev, ID_user])]); // Thêm user vào danh sách
+        });
+
+        socket.on("user_stop_typing", ({ ID_group, ID_user }) => {
+            console.log("User: " + ID_user + " đang soạn tin nhắn...");
+            setTypingUsers((prev) => prev.filter((id) => id !== ID_user)); // Xóa user khỏi danh sách
+        });
+
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardHeight(e.endCoordinates.height);
@@ -273,6 +292,9 @@ const Chat = (props) => {// cần ID_group (param)
             socket.off("receive_message");
             socket.off("group_deleted");
             socket.off("kicked_from_group");
+            // đang soạn
+            socket.off("user_typing");
+            socket.off("user_stop_typing");
             // bàn phím
             keyboardDidShowListener.remove();
             keyboardDidHideListener.remove();
@@ -429,6 +451,27 @@ const Chat = (props) => {// cần ID_group (param)
         socket.emit('send_message_reaction', payload);
     };
 
+    // đang soan tin
+    const handleTyping = (text) => {
+        setMessage(text);
+
+
+        if (!isTyping) {
+            console.log("typing: " + text)
+            socket.emit("typing", { ID_group: params?.ID_group, ID_user: me._id }); // Gửi sự kiện lên server
+            setIsTyping(true);
+        }
+
+        // Dừng typing sau 1.5s nếu không nhập tiếp
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => {
+            console.log("stop_typing: " + text)
+            socket.emit("stop_typing", { ID_group: params?.ID_group, ID_user: me._id }); // Gửi sự kiện stop typing
+            setIsTyping(false);
+        }, 1500);
+    };
+
+
     return (
         <View style={[styles.container,
         {
@@ -491,6 +534,16 @@ const Chat = (props) => {// cần ID_group (param)
             />
             <Button title="Send" onPress={sendMessage} /> */}
 
+            {/* Đang soạn tin nhắn */}
+            {
+                typingUsersInfo?.length > 0
+                && (
+                    <Text style={{ color: "grey" }}>
+                        {typingUsersInfo.map(user => `${user.first_name} ${user.last_name}`).join(", ")} đang nhập...
+                    </Text>
+                )
+            }
+
 
             {/* Hiển thị reply */}
             {
@@ -538,7 +591,8 @@ const Chat = (props) => {// cần ID_group (param)
                     placeholder="Type a message"
                     placeholderTextColor={'grey'}
                     value={message}
-                    onChangeText={setMessage}
+                    //onChangeText={setMessage}
+                    onChangeText={handleTyping}
                 />
                 {/* <TouchableOpacity
                     onPress={() => sendMessage('text', message)}

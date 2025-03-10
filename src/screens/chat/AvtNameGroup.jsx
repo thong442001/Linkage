@@ -76,7 +76,7 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
             const paramsAPI = {
                 ID_group: params.ID_group,
                 avatar: AvtGroup,
-                name: nameGroup,
+                name: nameGroup == "Nhóm chưa có tên" ? null : nameGroup,
             }
             await dispatch(editAvtNameGroup(paramsAPI))
                 .unwrap()
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     addMemberButton: {
         alignItems: "center",
         marginTop: 20,
-       
+
     },
     addMemberText: {
         fontSize: 14,
@@ -292,8 +292,8 @@ const styles = StyleSheet.create({
         borderColor: 'gray',
         borderRadius: 10,
         borderWidth: 0.5,
-        padding:10,
-        marginTop:20
+        padding: 10,
+        marginTop: 20
     }
 });
 
