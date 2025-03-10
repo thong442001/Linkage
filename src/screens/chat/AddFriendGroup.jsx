@@ -100,10 +100,8 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
             await dispatch(addMembers(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log(response.message)
-                    if (response.status) {
-                        navigation.navigate("Chat", { ID_group: ID_group })
-                    }
+                    console.log(response?.message)
+                    navigation.navigate("Chat", { ID_group: ID_group })
                 })
                 .catch((error) => {
                     console.log('Error1 callAddMembers:', error);
