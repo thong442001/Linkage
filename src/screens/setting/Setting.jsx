@@ -27,10 +27,11 @@ const Setting = (props) => {
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
+  const fcmToken = useSelector(state => state.app.fcmToken);
   const [qrVisible, setQrVisible] = useState(false); // 🔥 State để hiển thị modal QR
 
   const onLogout = () => {
-    dispatch(setNoti_token({ ID_user: me._id }))
+    dispatch(setNoti_token({ ID_user: me._id, fcmToken: fcmToken }))
       .unwrap()
       .then((response) => {
         console.log(response);
@@ -106,7 +107,7 @@ const Setting = (props) => {
                 subtitle="Bạn có thể thay đổi tên của bạn"
               />
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               onPress={() => navigation.navigate('ChangePassWord')}>
               <Option
@@ -115,7 +116,7 @@ const Setting = (props) => {
                 subtitle="Bạn có thể thay đổi mật khẩu của bạn"
               />
             </TouchableOpacity>
-            <TouchableOpacity  onPress={() => navigation.navigate('Trash')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Trash')}>
               <Option
                 icon="trash"
                 title="Thùng rác"
