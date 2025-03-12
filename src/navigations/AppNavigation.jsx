@@ -196,7 +196,7 @@ const AppNavigation = () => {
             }
           }
 
-
+          
           if (
             notification?.type === "Đang livestream" &&
             notification?.ID_user &&
