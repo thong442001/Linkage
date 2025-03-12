@@ -205,7 +205,7 @@ const AppNavigation = () => {
             const sender = notification.ID_user; 
             const content = notification.content;
 
-            console.log("sender id: " + sender.first_name + sender.last_name)
+            console.log("sender id: " + sender)
 
 
             if (sender) {
