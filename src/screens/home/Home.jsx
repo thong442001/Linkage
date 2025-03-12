@@ -16,7 +16,7 @@ import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeS from '../../styles/screens/home/HomeS';
 import {
   getAllPostsInHome,
-  changeDestroyPost
+  changeDestroyPost,
 } from '../../rtk/API';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';  // Đảm bảo đã import component này
 import NothingHome from '../../utils/animation/homeanimation/NothingHome';
@@ -37,7 +37,7 @@ const Home = props => {
 
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
-  
+
     const onValueChange = liveSessionsRef.on('value', snapshot => {
       const liveSessions = snapshot.val() ? Object.values(snapshot.val()) : [];
       setLiveSessions(liveSessions);
@@ -45,9 +45,10 @@ const Home = props => {
 
 
     });
-  
+
     return () => liveSessionsRef.off('value', onValueChange); // Hủy lắng nghe khi component bị unmount
   }, []);
+
   const callGetAllPostsInHome = async (ID_user) => {
     try {
       setloading(true)
@@ -142,7 +143,7 @@ const Home = props => {
       callGetAllPostsInHome(me._id); // Gọi API load dữ liệu
     }, [])
   );
-  
+
   const renderPosts = useCallback(({ item }) => (
     <ProfilePage
       post={item}
@@ -190,8 +191,8 @@ const Home = props => {
               <TouchableOpacity onPress={() => navigation.navigate('QRScannerScreen')} style={HomeS.iconsPadding}>
                 <Icon name="scan-circle-outline" size={25} color="black" />
               </TouchableOpacity>
-              <TouchableOpacity 
-              style={HomeS.iconsPadding}
+              <TouchableOpacity
+                style={HomeS.iconsPadding}
                 onPress={() => navigation.navigate('HuggingFaceImageGenerator')}
               >
                 <Icon name="add" size={25} color="black" />
@@ -231,27 +232,27 @@ const Home = props => {
 
         {/* Story */}
         <View style={[HomeS.box, { marginTop: 4 }]}>
-    <View style={HomeS.story}>
-        <FlatList
-            data={stories.concat(liveSessions)}  // Kết hợp stories và liveSessions
-            renderItem={({ item }) => {
+          <View style={HomeS.story}>
+            <FlatList
+              data={stories.concat(liveSessions)}  // Kết hợp stories và liveSessions
+              renderItem={({ item }) => {
                 if (item.liveID) {
-                    return <ItemLive user={item} />;  // Nếu có liveID, render live session
+                  return <ItemLive user={item} />;  // Nếu có liveID, render live session
                 } else {
-                    return <Stories StoryPost={item} />;  // Nếu không có, render story
+                  return <Stories StoryPost={item} />;  // Nếu không có, render story
                 }
-            }}
-            keyExtractor={(item, index) =>
-              item.liveID ? item.liveID : item._id ? item._id.toString() : `story-${index}`
-            }
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            ListHeaderComponent={headerComponentStory}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-            ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
-        />
-    </View>
-</View>
+              }}
+              keyExtractor={(item, index) =>
+                item.liveID ? item.liveID : item._id ? item._id.toString() : `story-${index}`
+              }
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              ListHeaderComponent={headerComponentStory}
+              contentContainerStyle={{ paddingHorizontal: 20 }}
+              ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+            />
+          </View>
+        </View>
       </View>
     );
   };

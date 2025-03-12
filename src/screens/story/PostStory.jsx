@@ -48,7 +48,7 @@ const PostStory = ({ navigation }) => {
       quality: 1,
       includeBase64: true, // Một số thiết bị hiển thị nút chụp ảnh
     };
-  
+
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
         console.log("Đã hủy chọn ảnh");
@@ -61,7 +61,7 @@ const PostStory = ({ navigation }) => {
       }
     });
   };
-  
+
 
   const postStory = (imageUrl) => {
     navigation.replace(oStackHome.Story.name, { newStory: imageUrl });

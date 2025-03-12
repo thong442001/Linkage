@@ -196,8 +196,6 @@ const AppNavigation = () => {
             }
           }
 
-
-
           return 'Bạn có một thông báo mới'; // Nội dung mặc định
         };
 

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,13 +13,13 @@ const ReactionScreen = () => {
   const [selectedTab, setSelectedTab] = useState('all');
 
   const tabs = [
-    {id: 'all', label: 'Tất cả'},
-    {id: 'like', icon: '👍', label: 'Thích'},
-    {id: 'love', icon: '❤️', label: 'Yêu thích'},
-    {id: 'haha', icon: '😂', label: 'Haha'},
-    {id: 'wow', icon: '😮', label: 'Wow'},
-    {id: 'sad', icon: '😢', label: 'Buồn'},
-    {id: 'angry', icon: '😡', label: 'Phẫn nộ'},
+    { id: 'all', label: 'Tất cả' },
+    { id: 'like', icon: '👍', label: 'Thích' },
+    { id: 'love', icon: '❤️', label: 'Yêu thích' },
+    { id: 'haha', icon: '😂', label: 'Haha' },
+    { id: 'wow', icon: '😮', label: 'Wow' },
+    { id: 'sad', icon: '😢', label: 'Buồn' },
+    { id: 'angry', icon: '😡', label: 'Phẫn nộ' },
   ];
 
   const users = [
@@ -55,10 +55,10 @@ const ReactionScreen = () => {
     // Thêm data người dùng vào đây
   ];
 
-  const renderUser = ({item}) => (
+  const renderUser = ({ item }) => (
     <View style={styles.userItem}>
       <View>
-        <Image source={{uri: item.avatar}} style={styles.avatar} />
+        <Image source={{ uri: item.avatar }} style={styles.avatar} />
         <Text style={styles.icon}>
           {tabs.find(tab => tab.id === item.reactionType)?.icon}
         </Text>
@@ -85,7 +85,7 @@ const ReactionScreen = () => {
           data={tabs}
           horizontal
           showsHorizontalScrollIndicator={false}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <TouchableOpacity
               style={[
                 styles.tab,

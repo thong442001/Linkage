@@ -870,3 +870,38 @@ export const notiLiveStream = createAsyncThunk(
     }
   }
 );
+
+// ****************** report ****************
+
+// Report post
+// params :me, ID_post
+export const addReport_post = createAsyncThunk(
+  'report_post/addReport_post',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('report_post/addReport_post', data);
+      console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+// Report user
+// params :me, ID_user
+export const addReport_user = createAsyncThunk(
+  'report_user/addReport_user',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('report_user/addReport_user', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);

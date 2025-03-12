@@ -257,22 +257,22 @@ const Chat = (props) => {// cần ID_group (param)
         });
 
         socket.on("group_deleted", ({ ID_group }) => {
-            console.log(`🗑️ Nhóm ${ID_group} đã bị xóa`);
+            //console.log(`🗑️ Nhóm ${ID_group} đã bị xóa`);
             goBack();
         });
 
         socket.on("kicked_from_group", ({ ID_group }) => {
-            console.log(`🚪 Bạn đã bị kick khỏi nhóm ${ID_group}`);
+            //console.log(`🚪 Bạn đã bị kick khỏi nhóm ${ID_group}`);
             goBack();
         });
 
         socket.on("user_typing", ({ ID_group, ID_user }) => {
-            console.log("User: " + ID_user + " đang soạn tin nhắn...");
+            //console.log("User: " + ID_user + " đang soạn tin nhắn...");
             setTypingUsers((prev) => [...new Set([...prev, ID_user])]); // Thêm user vào danh sách
         });
 
         socket.on("user_stop_typing", ({ ID_group, ID_user }) => {
-            console.log("User: " + ID_user + " đang soạn tin nhắn...");
+            //console.log("User: " + ID_user + " đang soạn tin nhắn...");
             setTypingUsers((prev) => prev.filter((id) => id !== ID_user)); // Xóa user khỏi danh sách
         });
 
