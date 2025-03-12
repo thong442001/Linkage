@@ -5,11 +5,11 @@ import ZegoUIKitPrebuiltLiveStreaming, { HOST_DEFAULT_CONFIG } from '@zegocloud/
 import Keycenter from './Keycenter';
 import database from '@react-native-firebase/database';
 import { useFocusEffect } from '@react-navigation/native';
-
+import { notiLiveStream } from '../../rtk/API';
 const HostLive = (props) => {
   const { route, navigation } = props;
   const { userID, avatar, userName, liveID } = route.params;
-
+  const dispatch =  useDispatch()
   console.log("Avatar URL:", avatar);
   console.log("User ID:", userID);
 
@@ -22,6 +22,21 @@ const HostLive = (props) => {
         liveID: liveID,
         avatar: avatar,
       };
+
+      const notiData = {
+        ID_livestream: liveID,
+        ID_user: userID
+      }
+
+      dispatch(notiLiveStream(notiData))
+            .unwrap()
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+
       database()
         .ref(`/liveSessions/${liveID}`)
         .set(liveData)
