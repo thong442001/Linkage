@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -9,6 +9,8 @@ const IncomingCallScreen = ({ route, navigation }) => {
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const me = useSelector((state) => state.app.user);
+  
+  const ringtoneRef = useRef(null); // Thêm useRef
 
   useEffect(() => {
     if (!group || !me) return;
@@ -32,24 +34,42 @@ const IncomingCallScreen = ({ route, navigation }) => {
   // Phát nhạc chuông khi nhận cuộc gọi
   useEffect(() => {
     const ringtone = new Sound(
-      'incoming_call', // KHÔNG CẦN .mp3 TRÊN ANDROID
+      'incoming_call', 
       Sound.ANDROID_RESOURCE,
       (error) => {
         if (error) {
           console.log('Lỗi khi tải file nhạc:', error);
           return;
         }
-        ringtone.setNumberOfLoops(-1); // Lặp vô hạn
+        ringtone.setNumberOfLoops(-1);
         ringtone.play();
+        ringtoneRef.current = ringtone; // Lưu vào useRef
       }
     );
   
     return () => {
-      ringtone.stop();
-      ringtone.release();
+      if (ringtoneRef.current) {
+        ringtoneRef.current.stop();
+        ringtoneRef.current.release();
+      }
     };
   }, []);
-  
+
+  // Xử lý khi chấp nhận cuộc gọi
+  const handleAcceptCall = () => {
+    if (ringtoneRef.current) {
+      ringtoneRef.current.stop();
+      ringtoneRef.current.release();
+    }
+
+    navigation.navigate('CallPage', {
+      ID_group: group._id,
+      id_user: me._id,
+      MyUsername: me.last_name,
+      status: type,
+      MyAvatar: me.avatar,
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -61,18 +81,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
           <Text style={styles.callingText}>Đang gọi...</Text>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('CallPage', {
-                ID_group: group._id,
-                id_user: me._id,
-                MyUsername: me.last_name,
-                status: type,
-                MyAvatar: me.avatar,
-              })
-            }
-            style={styles.acceptButton}
-          >
+          <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
             <Ionicons name="call" size={40} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.declineButton}>
