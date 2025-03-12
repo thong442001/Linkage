@@ -19,6 +19,7 @@ import Messagecomponent from "../../components/chat/Messagecomponent";
 import {
     getGroupID,
     getMessagesGroup,
+    notiCallVideo,
 } from '../../rtk/API';
 import ChatHeader from '../../components/chat/ChatHeader';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -53,12 +54,32 @@ const Chat = (props) => {// cần ID_group (param)
 
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
+
+    //call API noti call
+    const callNotiCall = async (ID_group,ID_user,isCallVideo) => {
+        try {
+            await dispatch(notiCallVideo({ ID_group: ID_group,ID_user: ID_user,isCallVideo:isCallVideo }))
+            .unwrap()
+            .then((response) => {
+                console.log(response.message)
+            })
+            .catch((error) => {
+                console.log('Error:', error);
+            });
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
     // call video
     const onCallvieo = () => {
         if (!group) return;
         if (group.isPrivate == true) {
+            callNotiCall(group._id,me._id,true);
             navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar });
         } else {
+            callNotiCall(group._id,me._id,true);
             navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar });
         }
     };
@@ -66,9 +87,14 @@ const Chat = (props) => {// cần ID_group (param)
     const onCallAudio = () => {
         if (!group) return;
         if (group.isPrivate == true) {
+            callNotiCall(group._id,me._id,false);
+            console.log("canhphan",group._id);
             navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: false, MyAvatar: myAvatar });
+           
         } else {
+            callNotiCall(group._id,me._id,false);
             navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: false, MyAvatar: myAvatar });
+            
         }
     };
 
@@ -301,7 +327,6 @@ const Chat = (props) => {// cần ID_group (param)
                             console.log("⚠️ Không tìm thấy người dùng");
                         }
                         // chat private
-
                         const otherUser = response.group.members.find(user => user._id !== me._id);
 
                         if (otherUser) {
@@ -316,7 +341,6 @@ const Chat = (props) => {// cần ID_group (param)
                         // group
                         // lấy tên của mình
                         const myUser = response.group.members.find(user => user._id === me._id);
-                        console.log(response.group.members);
                         if (myUser) {
                             setID_user(myUser._id);
                             setmyUsername((myUser.first_name + " " + myUser.last_name));

@@ -76,7 +76,7 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
             const paramsAPI = {
                 ID_group: params.ID_group,
                 avatar: AvtGroup,
-                name: nameGroup,
+                name: nameGroup == "Nhóm chưa có tên" ? null : nameGroup,
             }
             await dispatch(editAvtNameGroup(paramsAPI))
                 .unwrap()
