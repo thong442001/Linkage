@@ -197,6 +197,27 @@ const AppNavigation = () => {
           }
 
 
+          if (
+            notification?.type === "Đang livestream" &&
+            notification?.ID_user &&
+            notification?.content
+          ) {
+            const sender = notification.ID_user; 
+            const content = notification.content;
+
+            console.log("sender id: " + sender.first_name + sender.last_name)
+
+
+            if (sender) {
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đang phát trực tiếp'
+                }`;
+            } 
+
+          }
+          
+          
+          
+          
 
           return 'Bạn có một thông báo mới'; // Nội dung mặc định
         };
