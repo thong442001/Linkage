@@ -1,73 +1,146 @@
-import React,{useState,useEffect} from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Sound from 'react-native-sound';
 
 const IncomingCallScreen = ({ route, navigation }) => {
-  const { group,type } = route.params;
-  const [name, setname] = useState(null);
-  const [avatar, setavatar] = useState(null);
-  const me = useSelector(state => state.app.user);
-    console.log("canhphan",group);
-    useEffect(() => {
-        if(group.isPrivate==true){
-            const otherUser = group.members.find(user => user._id !== me._id);
-            
-            if(otherUser){
-                setname((otherUser.first_name + " " + otherUser.last_name));
-                setavatar(otherUser.avatar);
-            }else {
-                console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
-            }
-        }else{
-            if(group.avatar==null){
-                setavatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4')
-            }else{
-                setavatar(group.avatar);
-            }
-            if(group.name==null){
-                const names = group.members
-                    .filter(user => user._id !== me._id)
-                    .map(user => `${user.first_name} ${user.last_name}`)
-                    .join(", ");
-                    // Cập nhật state một lần duy nhất
-                    setname(names);
-            }else{
-                setname(group.name);
-            }
-    }
-    }, [])
-    
+  const { group, type } = route.params;
+  const [name, setName] = useState(null);
+  const [avatar, setAvatar] = useState(null);
+  const me = useSelector((state) => state.app.user);
 
+  useEffect(() => {
+    if (!group || !me) return;
+
+    if (group.isPrivate) {
+      const otherUser = group.members?.find((user) => user._id !== me._id);
+      setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
+      setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
+    } else {
+      setName(
+        group.name ||
+          group.members
+            ?.filter((user) => user._id !== me._id)
+            .map((user) => `${user.first_name} ${user.last_name}`)
+            .join(', ')
+      );
+      setAvatar(group.avatar || 'https://example.com/default-group-avatar.png');
+    }
+  }, [group, me]);
+
+  // Phát nhạc chuông khi nhận cuộc gọi
+  useEffect(() => {
+    const ringtone = new Sound(
+      'incoming_call', // KHÔNG CẦN .mp3 TRÊN ANDROID
+      Sound.ANDROID_RESOURCE,
+      (error) => {
+        if (error) {
+          console.log('Lỗi khi tải file nhạc:', error);
+          return;
+        }
+        ringtone.setNumberOfLoops(-1); // Lặp vô hạn
+        ringtone.play();
+      }
+    );
+  
+    return () => {
+      ringtone.stop();
+      ringtone.release();
+    };
+  }, []);
+  
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
-      <Image
-        source={{ uri: avatar || 'https://example.com/default-avatar.png' }}
-        style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 20 }}
-      />
-      <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold' }}>
-        {name || "Người gọi"}
-      </Text>
-      <Text style={{ color: '#fff', fontSize: 18 }}>Đang gọi...</Text>
-
-      <View style={{ flexDirection: 'row', marginTop: 30 }}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("CallPage", { ID_group: group._id, id_user: me._id, MyUsername: me.last_name, status: type, MyAvatar: me.avatar})        }
-          style={{ backgroundColor: 'green', padding: 15, borderRadius: 50, marginHorizontal: 20 }}
-        >
-          <Text style={{ color: '#fff', fontSize: 18 }}>Chấp nhận</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ backgroundColor: 'red', padding: 15, borderRadius: 50, marginHorizontal: 20 }}
-        >
-          <Text style={{ color: '#fff', fontSize: 18 }}>Từ chối</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <Image source={{ uri: avatar }} style={styles.backgroundImage} blurRadius={10} />
+      <View style={styles.overlay}>
+        <View style={styles.title}>
+          <Image source={{ uri: avatar }} style={styles.avatar} />
+          <Text style={styles.name}>{name || 'Người gọi'}</Text>
+          <Text style={styles.callingText}>Đang gọi...</Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('CallPage', {
+                ID_group: group._id,
+                id_user: me._id,
+                MyUsername: me.last_name,
+                status: type,
+                MyAvatar: me.avatar,
+              })
+            }
+            style={styles.acceptButton}
+          >
+            <Ionicons name="call" size={40} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.declineButton}>
+            <Ionicons name="call" size={40} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
+          </TouchableOpacity>
+        </View>
       </View>
-          </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingVertical: 50,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 20,
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  name: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  callingText: {
+    color: '#ccc',
+    fontSize: 18,
+    marginVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 40,
+  },
+  acceptButton: {
+    backgroundColor: 'green',
+    padding: 20,
+    borderRadius: 50,
+  },
+  declineButton: {
+    backgroundColor: 'red',
+    padding: 20,
+    borderRadius: 50,
+  },
+  title: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default IncomingCallScreen;

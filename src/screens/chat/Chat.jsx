@@ -64,7 +64,7 @@ const Chat = (props) => {// cần ID_group (param)
                 console.log(response.message)
             })
             .catch((error) => {
-                console.log('Error:', error);
+                console.log('Error:', error.message);
             });
 
         } catch (error) {
