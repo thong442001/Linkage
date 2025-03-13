@@ -881,7 +881,7 @@ export const addReport_post = createAsyncThunk(
     try {
       const response = await AxiosHelper()
         .post('report_post/addReport_post', data);
-      console.log(response)
+      //console.log(response)
       return response;
     } catch (error) {
       return rejectWithValue(error.message);
