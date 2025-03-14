@@ -62,7 +62,7 @@ const Profile = props => {
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
     const [relationship, setRelationship] = useState(null);
-    const [friendRelationships, setFriendRelationships] = useState(null);
+    const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
@@ -395,7 +395,7 @@ const Profile = props => {
                     setloading(false);
                 })
                 .catch(error => {
-                    console.log('Error2 callGuiLoiMoiKetBan:', error);
+                    console.log('Error2 allProfile:', error);
                     setloading(false);
                     setDialogreload(true);
                 });
@@ -714,7 +714,7 @@ const Profile = props => {
                                 {user?.first_name} {user?.last_name}
                             </Text>
                             <View style={ProfileS.boxInformation}>
-                                <Text style={ProfileS.friendNumber}>{friendRelationships.length} </Text>
+                                <Text style={ProfileS.friendNumber}>{friendRelationships?.length} </Text>
                                 <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
                                     {' '}
                                     Người bạn

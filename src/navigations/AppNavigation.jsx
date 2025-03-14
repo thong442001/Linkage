@@ -4,9 +4,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import HomeNavigation from './HomeNavigation';
 import UserNavigation from './UserNavigation';
 import Welcome from '../screens/welcome/Welcome';
-import { getAllReaction } from '../rtk/API';
+import {
+  getAllReaction,
+  checkBanUser,
+  setNoti_token
+} from '../rtk/API';
 import { requestPermissions } from '../screens/service/MyFirebaseMessagingService';
-import { setReactions, setFcmToken } from '../rtk/Reducer';
+import {
+  setReactions,
+  setFcmToken,
+  logout,
+} from '../rtk/Reducer';
 import database from '@react-native-firebase/database';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
@@ -15,6 +23,7 @@ import { useSocket } from '../context/socketContext';
 const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
+  const token = useSelector(state => state.app.token);
   const { onlineUsers } = useSocket();
 
   const [isSplashVisible, setSplashVisible] = useState(true); // Trạng thái để kiểm soát màn hình chào
@@ -24,6 +33,8 @@ const AppNavigation = () => {
   console.log('📲 FCM Token từ Redux:', fcmToken);
 
   useEffect(() => {
+    // check user có bị khóa ko
+    callCheckBanUser();
     //reactions
     callGetAllReaction();
     // Hiển thị màn hình chào trong 2 giây
@@ -55,6 +66,37 @@ const AppNavigation = () => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  //call api getAllReaction
+  const callCheckBanUser = async () => {
+    try {
+      await dispatch(checkBanUser({ ID_user: user._id, token: token }))
+        .unwrap()
+        .then(response => {
+          console.log("status : " + response.status)
+        })
+        .catch(error => {
+          console.log('Tài khoản đã bị khó');
+          // quay về trang login
+          onLogout();
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onLogout = () => {
+    dispatch(setNoti_token({ ID_user: user._id, fcmToken: fcmToken }))
+      .unwrap()
+      .then((response) => {
+        //console.log(response);
+        // xóa user trong redux
+        dispatch(logout())
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   useEffect(() => {
