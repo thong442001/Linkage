@@ -963,7 +963,7 @@ const styles = StyleSheet.create({
     postContainer: {
         backgroundColor: '#fff',
         padding: width * 0.025, // 2.5% chiều rộng màn hình
-        marginBottom: height * 0.015, // 1.5% chiều cao màn hình
+        marginBottom: height * 0.005, // 1.5% chiều cao màn hình
     },
     header1: {
         backgroundColor: 'white',

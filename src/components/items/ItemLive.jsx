@@ -11,12 +11,12 @@ const ItemLive = ({ user }) => {
   return (
     <TouchableOpacity
     style={styles.boxStory}
-    onPress={() => navigation.navigate('HomeLive', { 
-      userID: user.userID, 
-      userName: user.userName, 
-      liveID: user.liveID,
-      avatar: user.avatar
-    })}>
+      onPress={() => navigation.navigate('AudienceScreen', { 
+        userID: user.userID, 
+        userName: user.userName, 
+        liveID: user.liveID,
+        avatar: user.avatar
+      })}>
 
 
 
