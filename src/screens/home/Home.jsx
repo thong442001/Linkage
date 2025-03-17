@@ -62,6 +62,7 @@ const Home = props => {
     return () => liveSessionsRef.off('value', onValueChange);
   }, []);
 
+  
   const callGetAllPostsInHome = async ID_user => {
     try {
       // Nếu đang làm mới thì không set loading lại để tránh hiển thị skeleton loading

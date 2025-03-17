@@ -39,7 +39,7 @@ export default function AudienceScreen(props) {
         },
         {
           text: "Thoát",
-          onPress: () => navigation.navigate('TabHome') // Điều hướng về Home
+          onPress: () => navigation.goBack() // Điều hướng về Home
         }
       ]
     );
@@ -84,7 +84,7 @@ export default function AudienceScreen(props) {
           config={{
             ...AUDIENCE_DEFAULT_CONFIG,
             onLeaveLiveStreaming: () => {
-              navigation.navigate('TabHome');
+              navigation.goBack()
             },
           }}
         />

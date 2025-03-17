@@ -824,6 +824,7 @@ const Profile = props => {
                     <Icon name="videocam" size={20} color="red" />
                     <Text style={{ marginLeft: 5, color: 'black' }}>
                         Phát trực tiếp 
+                        {liveID}
                     </Text>
                 </View>
             </TouchableOpacity>
