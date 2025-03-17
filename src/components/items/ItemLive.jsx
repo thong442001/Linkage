@@ -15,7 +15,7 @@ const ItemLive = ({ user }) => {
         userID: user.userID, 
         userName: user.userName, 
         liveID: user.liveID,
-        avatar: user.avatar
+        avatar: user.avatar3
       })}>
 
 
