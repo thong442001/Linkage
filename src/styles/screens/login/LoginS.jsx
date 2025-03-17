@@ -2,6 +2,10 @@ import { Dimensions, StyleSheet } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 const styles = StyleSheet.create({
+  socialIcon: {
+    width: width * 0.08,
+    height: width * 0.08,
+  },
   errorText: {
     color: 'red',
     fontWeight: '400',

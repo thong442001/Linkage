@@ -28,6 +28,8 @@ import {
 } from '../../rtk/API';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
+import LoadingPostModal from '../../utils/animation/loadingPost/LoadingPostModal';
 const { width, height } = Dimensions.get('window');
 const PostDetail = (props) => {
   const { navigation } = props
@@ -702,7 +704,7 @@ const PostDetail = (props) => {
 
   const header = () => {
     if (!post) {
-      return <Text>Đang tải dữ liệu...</Text>;
+      return <LoadingPostModal/>
     }
     return (
       <View style={styles.postContainer}>

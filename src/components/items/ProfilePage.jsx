@@ -32,6 +32,7 @@ const PostItem = memo(({
     onDeleteVinhVien = () => { },
     updatePostReaction = () => { },
     deletPostReaction = () => { },
+    currentTime
 }) => {
     const navigation = useNavigation();
     const me = useSelector(state => state.app.user)
@@ -307,8 +308,10 @@ const PostItem = memo(({
         // const interval = setInterval(updateDiff, 1000);
 
         // return () => clearInterval(interval);
-    }, []);
+    }, [currentTime]);
 
+
+    
     const callAddPost_Reaction = async (ID_reaction, name, icon) => {
         try {
             const paramsAPI = {
@@ -769,20 +772,17 @@ const PostItem = memo(({
                 !post._destroy &&
                 <View style={styles.interactions}>
                     <TouchableOpacity
-                        ref={reactionRef} // Gắn ref vào đây
-                        style={[
-                            styles.action,
-                            userReaction &&
-                            { backgroundColor: 'white' }
-                        ]}
-                        onLongPress={() => {
-                            handleLongPress();
-                        }}
-                        onPress={() => userReaction
-                            ? callDeletePost_reaction(post._id, userReaction._id)
-                            : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
-                        }
-                    >
+                      delayLongPress={200}
+    delayPressOut={0}
+    ref={reactionRef}
+    style={[styles.action, userReaction && { backgroundColor: 'white' }]}
+    onLongPress={handleLongPress}
+    onPress={() =>
+        userReaction
+            ? callDeletePost_reaction(post._id, userReaction._id)
+            : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+    }
+>
                         {/* <Icon2 name="like" size={25} color="black" /> */}
                         <Text
                             style={styles.actionText}

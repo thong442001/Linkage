@@ -39,12 +39,12 @@ const HomeHeader = ({ navigation, me, headerTranslate }) => {
           <TouchableOpacity
             style={HomeS.iconsPadding}
             onPress={() => navigation.navigate(oStackHome.Search.name)}>
-            <Icon name="search" size={20} color="black" />
+            <Icon name="search" size={25} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
             style={HomeS.iconsPadding}
             onPress={() => navigation.navigate(oStackHome.HomeChat.name)}>
-            <Icon name="mail" size={20} color="black" />
+            <Icon name="chatbubble-ellipses" size={25} color="black" />
           </TouchableOpacity>
         </View>
       </View>

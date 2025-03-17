@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Animated, FlatList, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { Animated, FlatList, View, RefreshControl,Dimensions  } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import HomeS from '../../styles/screens/home/HomeS';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';
@@ -8,9 +7,9 @@ import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 import ProfilePage from '../../components/items/ProfilePage';
 import { getAllPostsInHome, changeDestroyPost } from '../../rtk/API';
 import database from '@react-native-firebase/database';
-import { oStackHome } from '../../navigations/HomeNavigation';
 import HomeHeader from './HomeHeader';
 import HomeStories from './HomeStories';
+const { height } = Dimensions.get('window');
 
 const Home = props => {
   const { navigation } = props;
@@ -21,20 +20,30 @@ const Home = props => {
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
   const [liveSessions, setLiveSessions] = useState([]);
-  const HEADER_HEIGHT = 100;
+  const [refreshing, setRefreshing] = useState(false);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  const HEADER_HEIGHT = height * 0.1;
 
   // Animated value
-  const scrollY = useRef(new Animated.Value(0)).current; // Khai báo scrollY trước
+  const scrollY = useRef(new Animated.Value(0)).current; 
   const clampedScrollY = Animated.diffClamp(scrollY, 0, HEADER_HEIGHT);
   const headerTranslate = clampedScrollY.interpolate({
     inputRange: [0, HEADER_HEIGHT],
     outputRange: [0, -HEADER_HEIGHT],
     extrapolate: 'clamp',
-    
   });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Cập nhật mỗi phút
+  
+    return () => clearInterval(timer);
+  }, [refreshing]); // Thêm refreshing vào dependencies
   
 
-
+  
   useEffect(() => {
     const listenerId = scrollY.addListener(({ value }) => {
       console.log("scrollY value: ", value);
@@ -44,7 +53,6 @@ const Home = props => {
     };
   }, [scrollY]);
   
-
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
     const onValueChange = liveSessionsRef.on('value', snapshot => {
@@ -56,8 +64,11 @@ const Home = props => {
 
   const callGetAllPostsInHome = async ID_user => {
     try {
-      setloading(true);
-      await dispatch(getAllPostsInHome({ me: ID_user, token: token }))
+      // Nếu đang làm mới thì không set loading lại để tránh hiển thị skeleton loading
+      if (!refreshing) {
+        setloading(true);
+      }
+      await dispatch(getAllPostsInHome({ me: ID_user, token }))
         .unwrap()
         .then(response => {
           setPosts(response.posts);
@@ -66,11 +77,34 @@ const Home = props => {
         })
         .catch(error => {
           console.log('Error getAllPostsInHome:: ', error);
+          setloading(false);
         });
     } catch (error) {
       console.log(error);
+      setloading(false);
     }
   };
+
+
+  useEffect(() => {
+    callGetAllPostsInHome(me._id);
+  }, [me._id]);
+  
+  // Hàm xử lý làm mới khi kéo xuống
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setCurrentTime(Date.now()); // Cập nhật thời gian ngay khi làm mới
+    callGetAllPostsInHome(me._id).finally(() => {
+      setRefreshing(false);
+    });
+  }, [me._id]);
+
+  // Có thể bỏ useFocusEffect nếu bạn chỉ muốn cập nhật khi kéo làm mới
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     callGetAllPostsInHome(me._id);
+  //   }, [])
+  // );
 
   const callChangeDestroyPost = async ID_post => {
     try {
@@ -129,51 +163,54 @@ const Home = props => {
     );
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      callGetAllPostsInHome(me._id);
-    }, [])
-  );
-
   const renderPosts = useCallback(
     ({ item }) => (
       <ProfilePage
         post={item}
         ID_user={me._id}
+        currentTime={currentTime}
         onDelete={() => callChangeDestroyPost(item._id)}
         updatePostReaction={updatePostReaction}
         deletPostReaction={deletPostReaction}
       />
     ),
-    [posts]
+    [posts, currentTime, me._id]
   );
 
   return (
     <View style={HomeS.container}>
-      {loading ? (
+      {loading && !refreshing ? (
         <HomeLoading />
       ) : (
         <>
-        <HomeHeader navigation={navigation} me={me} headerTranslate={headerTranslate} />
-        <Animated.FlatList
-          data={posts}
-          renderItem={renderPosts}
-          keyExtractor={item => item._id}
-          showsHorizontalScrollIndicator={false}
-          ListHeaderComponent={
-            <HomeStories navigation={navigation} me={me} stories={stories} liveSessions={liveSessions} />
-            
-          }
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingTop: 42}}
-          ListEmptyComponent={<NothingHome />}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
-          )}
-          scrollEventThrottle={16}
-        />
-      </>
+          <HomeHeader navigation={navigation} me={me} headerTranslate={headerTranslate} />
+          <Animated.FlatList
+            data={posts}
+            renderItem={renderPosts}
+            keyExtractor={item => item._id}
+            showsHorizontalScrollIndicator={false}
+            ListHeaderComponent={
+              <HomeStories navigation={navigation} me={me} stories={stories} liveSessions={liveSessions} />
+            }
+            showsVerticalScrollIndicator={false}
+            extraData={currentTime}  
+            contentContainerStyle={{ paddingTop: 42 }}
+            ListEmptyComponent={<NothingHome />}
+            refreshControl={
+              <RefreshControl 
+                refreshing={refreshing} 
+                onRefresh={onRefresh}
+                progressViewOffset={HEADER_HEIGHT} 
+
+              />
+            }
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: true }
+            )}
+            scrollEventThrottle={16}
+          />
+        </>
       )}
     </View>
   );
