@@ -292,34 +292,29 @@ const UpPost = (props) => {
 
     //call api addPost
     const callAddPost = async () => {
-        try {
-            if (caption == '' && medias.length == 0) {
-                console.log('chưa có dữ liệu');
-                return;
-            }
-            const paramsAPI = {
-                ID_user: me._id,
-                caption: caption,
-                medias: medias,
-                status: selectedOption.name,
-                type: typePost,
-                ID_post_shared: null,
-                tags: tags,
-            }
-            console.log("push", paramsAPI);
-            await dispatch(addPost(paramsAPI))
-                .unwrap()
-                .then((response) => {
-                    console.log(response)
-                    navigation.goBack()
-                })
-                .catch((error) => {
-                    console.log('Error1 addPost:', error);
-                });
-
-        } catch (error) {
-            console.log(error)
+        if (caption == '' && medias.length == 0) {
+            console.log('chưa có dữ liệu');
+            return;
         }
+        const paramsAPI = {
+            ID_user: me._id,
+            caption: caption,
+            medias: medias,
+            status: selectedOption.name,
+            type: typePost,
+            ID_post_shared: null,
+            tags: tags,
+        }
+        console.log("push", paramsAPI);
+        await dispatch(addPost(paramsAPI))
+            .unwrap()
+            .then((response) => {
+                console.log(response)
+                navigation.goBack()
+            })
+            .catch((error) => {
+                console.log('Error1 addPost:', error);
+            });
     }
 
     const handleSelectOption = (option) => {

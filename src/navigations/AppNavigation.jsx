@@ -77,7 +77,7 @@ const AppNavigation = () => {
           console.log("status : " + response.status)
         })
         .catch(error => {
-          console.log('Tài khoản đã bị khó');
+          console.log('Tài khoản đã bị khóa');
           // quay về trang login
           onLogout();
         });
