@@ -19,7 +19,6 @@ import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useSocket } from '../../context/socketContext';
 const { width, height } = Dimensions.get('window');
-
 const HomeChat = (props) => {// cần param
     const { route, navigation } = props;
     const { params } = route;
@@ -28,8 +27,54 @@ const HomeChat = (props) => {// cần param
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
 
+    const [searchText, setSearchText] = useState('');
+    const [filteredGroups, setFilteredGroups] = useState([]);
+
+
     const { socket } = useSocket();
     const [groups, setGroups] = useState(null);
+
+    const normalizeText = (text) => {
+        return text
+            .toLowerCase()
+            .normalize('NFD') // Tách dấu ra khỏi chữ
+            .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D');
+    };
+    
+// search
+useEffect(() => {
+    if (!searchText.trim()) {
+        setFilteredGroups(groups || []);
+    } else {
+        const lowerSearch = normalizeText(searchText);
+
+        const filtered = (groups || []).filter(group => {
+            if (group.isPrivate) {
+                const otherUser = group.members.find(user => user._id !== me._id);
+                if (otherUser) {
+                    const fullName = `${otherUser.first_name} ${otherUser.last_name}`;
+                    return normalizeText(fullName).includes(lowerSearch);
+                }
+                return false;
+            }
+
+            const groupName = group.name || '';
+            if (normalizeText(groupName).includes(lowerSearch)) return true;
+
+            const memberNames = group.members
+                .filter(user => user._id !== me._id)
+                .map(user => `${user.first_name} ${user.last_name}`);
+
+            return memberNames.some(name => normalizeText(name).includes(lowerSearch));
+        });
+
+        setFilteredGroups(filtered);
+    }
+}, [searchText, groups]);
+
+
 
     useEffect(() => {
         callGetAllGroupOfUser(me._id);
@@ -151,6 +196,8 @@ const HomeChat = (props) => {// cần param
                     style={styles.search}
                     placeholder='Search'
                     placeholderTextColor={"#ADB5BD"}
+                    value={searchText}
+                    onChangeText={setSearchText}
                 />
             </View>
             {/* groups */}
@@ -175,7 +222,7 @@ const HomeChat = (props) => {// cần param
 
                             {loading ? <ChatHomeLoading /> : (
                                 <FlatList
-                                    data={groups}
+                                    data={filteredGroups}
                                     keyExtractor={(item) => item._id}
                                     renderItem={({ item }) => (
                                         <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
