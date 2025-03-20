@@ -20,8 +20,7 @@ import {
     joinGroupPrivate,
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
-    huyLoiMoiKetBan,
-    huyBanBe,
+    setRelationNguoiLa,
     editAvatarOfUser,
     editBackgroundOfUser,
     allProfile, // allProfile
@@ -92,7 +91,7 @@ const Profile = props => {
         setSelectedImage(null);
         closeBottomSheet();
     };
-
+    
 
     const openBottomSheetAvatar = () => {
         if (stories?.stories.length > 0) {
@@ -211,21 +210,26 @@ const Profile = props => {
     //đổi ảnh bìa
     const onOpenGalleryChangeBackground = async () => {
         try {
+            setisLoading(true)
+            closeBottomSheet()
             const options = { mediaType: 'image', quality: 1 };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
+                    setisLoading(false)
                     console.log('Đã hủy chọn ảnh');
                     return;
                 }
 
                 if (response.errorMessage) {
+                    setisLoading(false)
                     console.log('Lỗi khi mở thư viện:', response.errorMessage);
                     return;
                 }
 
                 const selectedFile = response.assets?.[0];
                 if (!selectedFile) {
+                    setisLoading(false)
                     console.log('Không có ảnh nào được chọn!');
                     return;
                 }
@@ -234,6 +238,7 @@ const Profile = props => {
 
                 const fileUrl = await uploadFile(selectedFile);
                 if (!fileUrl) {
+                    setisLoading(false)
                     console.log('❌ Upload ảnh thất bại!');
                     return;
                 }
@@ -246,12 +251,14 @@ const Profile = props => {
                         if (res.status) {
                             dispatch(changeBackground(fileUrl));
                             console.log('✅ Đổi background thành công');
-                            closeBottomSheet();
                         } else {
+                            setisLoading(false)
                             console.log('❌ Đổi background thất bại');
                         }
+                        setisLoading(false);
                     })
                     .catch(err => {
+                        setisLoading(false)
                         console.log('❌ Lỗi khi gửi API đổi background:', err);
                     });
             });
@@ -281,45 +288,57 @@ const Profile = props => {
                 <View style={ProfileS.rectangle}>
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
-
-                {/* Các tùy chọn */}
-                <TouchableOpacity
-                    style={ProfileS.option}
-                    onPress={onOpenGalleryChangeAvatar}>
-                    <View style={ProfileS.anhBia}>
-                        <Icon name="images" size={25} />
-                    </View>
-                    <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={ProfileS.option}
-                    onPress={() => openImageModal(user?.avatar)}>
-                    <View style={ProfileS.anhBia}>
-                        <Icon name="images" size={25} />
-                    </View>
-                    <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
-                </TouchableOpacity>
-
-
-                {stories?.stories.length > 0 &&
-                    (
+    
+                {/* Nếu là profile của mình thì hiển thị tùy chọn đổi ảnh đại diện */}
+                {user?._id === me?._id ? (
+                    <>
                         <TouchableOpacity
                             style={ProfileS.option}
-                            onPress={() => {
-                                closeBottomSheet();
-                                navigation.navigate('StoryViewer', { StoryView: stories });
-                            }}>
+                            onPress={onOpenGalleryChangeAvatar}>
                             <View style={ProfileS.anhBia}>
                                 <Icon name="images" size={25} />
                             </View>
-                            <Text style={ProfileS.optionText}>Xem story</Text>
+                            <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
                         </TouchableOpacity>
-                    )
-                }
+    
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={() => openImageModal(user?.avatar)}>
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="images" size={25} />
+                            </View>
+                            <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
+                        </TouchableOpacity>
+                    </>
+                ) : (
+                    // Nếu là profile người khác, chỉ hiển thị modal xem ảnh
+                    <TouchableOpacity
+                        style={ProfileS.option}
+                        onPress={() => openImageModal(user?.avatar)}>
+                        <View style={ProfileS.anhBia}>
+                            <Icon name="images" size={25} />
+                        </View>
+                        <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
+                    </TouchableOpacity>
+                )}
+    
+                {stories?.stories.length > 0 && (
+                    <TouchableOpacity
+                        style={ProfileS.option}
+                        onPress={() => {
+                            closeBottomSheet();
+                            navigation.navigate('StoryViewer', { StoryView: stories });
+                        }}>
+                        <View style={ProfileS.anhBia}>
+                            <Icon name="images" size={25} />
+                        </View>
+                        <Text style={ProfileS.optionText}>Xem story</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         );
     };
+    
     const detail_selection_background = () => {
         return (
             <View style={ProfileS.containerBottomSheet}>
@@ -327,14 +346,17 @@ const Profile = props => {
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
 
-                <TouchableOpacity
-                    style={ProfileS.option}
-                    onPress={onOpenGalleryChangeBackground}>
-                    <View style={ProfileS.anhBia}>
-                        <Icon name="images" size={25} />
-                    </View>
-                    <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
-                </TouchableOpacity>
+                {user?._id === me?._id  &&(
+   <TouchableOpacity
+   style={ProfileS.option}
+   onPress={onOpenGalleryChangeBackground}>
+   <View style={ProfileS.anhBia}>
+       <Icon name="images" size={25} />
+   </View>
+   <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+</TouchableOpacity>
+                )}
+             
 
                 <TouchableOpacity
                     style={ProfileS.option}
@@ -449,40 +471,19 @@ const Profile = props => {
     };
 
     //huyLoiMoiKetBan
-    const callHuyLoiMoiKetBan = async () => {
+    const callSetRelationNguoiLa = async () => {
         try {
             const paramsAPI = {
                 ID_relationship: relationship?._id,
             };
-            await dispatch(huyLoiMoiKetBan(paramsAPI))
+            await dispatch(setRelationNguoiLa(paramsAPI))
                 .unwrap()
                 .then(response => {
                     //console.log(response);
                     setRelationship(response.relationship);
                 })
                 .catch(error => {
-                    console.log('Error2 callHuyLoiMoiKetBan:', error);
-                    setDialogreload(true);
-                });
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    //huyBanBe
-    const callHuyBanBe = async () => {
-        try {
-            const paramsAPI = {
-                ID_relationship: relationship?._id,
-            };
-            await dispatch(huyBanBe(paramsAPI))
-                .unwrap()
-                .then(response => {
-                    //console.log(response);
-                    setRelationship(response.relationship);
-                })
-                .catch(error => {
-                    console.log('Error2 callHuyBanBe:', error);
+                    console.log('Error2 callSetRelationNguoiLa:', error);
                     setDialogreload(true);
                 });
         } catch (error) {
@@ -635,7 +636,6 @@ const Profile = props => {
                     <Snackbar
                         visible={dialogReLoad}
                         onDismiss={() => {
-                            callAllProfile();
                             setDialogreload(false);
                         }}
                         duration={1000}>
@@ -733,11 +733,7 @@ const Profile = props => {
                                             </TouchableOpacity>
                                         )}
                                         {relationship?.relation == 'Bạn bè' && (
-                                            <TouchableOpacity
-                                                style={ProfileS.btnAddStory}
-                                                onPress={() => {
-                                                    setMenuVisible(true);
-                                                }}>
+                                            <TouchableOpacity style={ProfileS.btnAddStory}>
                                                 <Text style={ProfileS.textAddStory}>Bạn bè</Text>
                                             </TouchableOpacity>
                                         )}
@@ -747,7 +743,7 @@ const Profile = props => {
                                                 relationship?.relation == 'B gửi lời kết bạn A')) && (
                                                 <TouchableOpacity
                                                     style={ProfileS.btnAddStory}
-                                                    onPress={callHuyLoiMoiKetBan}>
+                                                    onPress={callSetRelationNguoiLa}>
                                                     <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
                                                 </TouchableOpacity>
                                             )}
@@ -906,8 +902,8 @@ const Profile = props => {
     };
 
 
-
-
+    
+    
     return (
         <View style={ProfileS.container}>
             <LoadingModal visible={isLoading} />
@@ -930,24 +926,24 @@ const Profile = props => {
             <View>
                 <View>
 
-                    <View style={ProfileS.post}>
-                        {loading ? (
-                            <>
-                                <ProfileLoading />
-                                <FriendLoading />
-                            </>
-                        ) : (
-                            <FlatList
-                                data={posts}
-                                renderItem={renderPosts}
-                                keyExtractor={item => item._id}
-                                showsHorizontalScrollIndicator={false}
-                                ListHeaderComponent={headerFriends}
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ paddingBottom: 50 }}
-                            />
-                        )}
-                    </View>
+                <View style={ProfileS.post}>
+    {loading ? (
+        <>
+            <ProfileLoading />
+            <FriendLoading/>
+        </>
+    ) : (
+        <FlatList
+            data={posts}    
+            renderItem={renderPosts}
+            keyExtractor={item => item._id}
+            showsHorizontalScrollIndicator={false}
+            ListHeaderComponent={headerFriends}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 50 }}
+        />
+    )}
+</View>
 
                 </View>
             </View>
@@ -960,42 +956,24 @@ const Profile = props => {
                 onRequestClose={() => setMenuVisible(false)}>
                 <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
                     <View style={ProfileS.overlay}>
-
-                        {
-                            relationship?.relation == 'Bạn bè'
-                                ? (
-                                    <View style={ProfileS.dialog}>
-                                        <TouchableOpacity
-                                            style={ProfileS.btnXoa}
-                                            onPress={() => {
-                                                setMenuVisible(false);
-                                                callHuyBanBe();
-                                            }}>
-                                            <Text style={ProfileS.text_button}>Hủy bạn bè</Text>
-                                        </TouchableOpacity>
-                                    </View>
-
-                                ) : (
-                                    <View style={ProfileS.dialog}>
-                                        <TouchableOpacity
-                                            style={ProfileS.btnXacNhan}
-                                            onPress={() => {
-                                                setMenuVisible(false);
-                                                callChapNhanLoiMoiKetBan();
-                                            }}>
-                                            <Text style={ProfileS.text_button}>Xác Nhận</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            style={ProfileS.btnXoa}
-                                            onPress={() => {
-                                                setMenuVisible(false);
-                                                callHuyLoiMoiKetBan();
-                                            }}>
-                                            <Text style={ProfileS.text_button}>Xóa</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )
-                        }
+                        <View style={ProfileS.dialog}>
+                            <TouchableOpacity
+                                style={ProfileS.btnXacNhan}
+                                onPress={() => {
+                                    setMenuVisible(false);
+                                    callChapNhanLoiMoiKetBan();
+                                }}>
+                                <Text style={ProfileS.text_button}>Xác Nhận</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={ProfileS.btnXoa}
+                                onPress={() => {
+                                    setMenuVisible(false);
+                                    callSetRelationNguoiLa();
+                                }}>
+                                <Text style={ProfileS.text_button}>Xóa</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>

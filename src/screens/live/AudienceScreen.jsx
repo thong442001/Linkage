@@ -69,7 +69,7 @@ export default function AudienceScreen(props) {
         <TouchableOpacity onPress={handleExit} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Phiên live của {userName}</Text>
+        <Text style={styles.headerTitle}>Phát trực tiếp</Text>
       </View>
 
       {/* Màn hình Live Streaming của Zego */}
