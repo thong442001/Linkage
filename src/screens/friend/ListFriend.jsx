@@ -36,7 +36,6 @@ const ListFriend = (props) => {
       console.log(error)
     }
   }
-  console.log(friends);
   return (
     <View style={styles.container}>
       <View style={styles.containerHeader}>

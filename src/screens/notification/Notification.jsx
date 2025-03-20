@@ -45,7 +45,6 @@ const Notification = () => {
   }, {});
 
   // Hàm mở rộng nhóm thông báo
-
   const toggleExpand = (type) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedGroups(prevState => ({

@@ -23,6 +23,7 @@ import {
     addPost_Reaction, // thả biểu cảm
     addPost, // api share
     deletePost_reaction,//xóa post_reaction
+    addReport_post,// report post
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
 const PostItem = memo(({
@@ -83,6 +84,25 @@ const PostItem = memo(({
             openBottomSheet(50, renderBottomSheetContent());
         }
     }, [selectedTab]);
+
+    const callAddReport_post = async () => {
+        try {
+            const paramsAPI = {
+                me: ID_user,
+                ID_post: post._id
+            }
+            await dispatch(addReport_post(paramsAPI))
+                .unwrap()
+                .then(response => {
+                    console.log('status callAddReport_post:', response.status);
+                })
+                .catch(error => {
+                    console.log('Lỗi khi callAddReport_post:', error);
+                });
+        } catch (error) {
+            console.log('Lỗi trong addReport_post:', error);
+        }
+    };
 
 
     const renderBottomSheetContent = () => {
@@ -316,7 +336,7 @@ const PostItem = memo(({
         try {
             const paramsAPI = {
                 ID_post: post._id,
-                ID_user: me._id,
+                ID_user: ID_user,
                 ID_reaction: ID_reaction,
             };
             await dispatch(addPost_Reaction(paramsAPI))
@@ -450,7 +470,7 @@ const PostItem = memo(({
     const callAddPostShare = async () => {
         try {
             const paramsAPI = {
-                ID_user: me._id,
+                ID_user: ID_user,
                 caption: captionShare,
                 medias: [],
                 status: selectedOption.name,
@@ -649,8 +669,8 @@ const PostItem = memo(({
                             <TouchableOpacity
                                 onPress={() =>
                                     openBottomSheet(
-                                        25,
-                                        <View>
+                                        15,
+                                        <View style = {{backgroundColor: '#d9d9d9d9', borderRadius: 10, padding: 10}}>
                                             {
                                                 ID_user != post.ID_user._id
                                                     ? (
@@ -660,14 +680,20 @@ const PostItem = memo(({
                                                                 closeBottomSheet()
                                                             }}
                                                             style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                            <Text style={[styles.deleteText,]}
-                                                            >{
-                                                                    !post._destroy
-                                                                    && (
-                                                                        "Báo cáo"
-                                                                    )
-                                                                }
-                                                            </Text>
+                                                            <View style = {{flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start'}}>
+                                                                <View>
+                                                                    <Icon name="alert-circle" size={20} color="black" />
+                                                                </View>
+                                                                <Text style={[styles.deleteText,]}>
+                                                                    {
+                                                                        !post._destroy
+                                                                        && (
+                                                                            "Báo cáo"
+                                                                        )
+                                                                    }
+                                                                </Text>
+                                                            </View>
+
                                                         </TouchableOpacity>
                                                     ) : (
                                                         <TouchableOpacity
@@ -1128,15 +1154,14 @@ const styles = StyleSheet.create({
     deleteButton: {
         paddingVertical: 10,
         paddingHorizontal: 15,
-        backgroundColor: '#ff4d4d', // Màu nền đỏ
         borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10,
+        // alignItems: 'center',
     },
     deleteText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: 'white', // Màu chữ trắng
+        color: 'black', // Màu chữ trắng
+        marginLeft: 10
     },
     //reaction
     reactionBar: {

@@ -5,6 +5,22 @@ import axios from "axios";
 const CLIENT_ID = "1517c266c3f940ad9c9826a65577eaa9";
 const CLIENT_SECRET = "f24bc1b5e1bf4eca8e5b772b81de1c79";
 
+export const checkBanUser = createAsyncThunk(
+  'user/checkBanUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response =
+        await AxiosHelper(data.token)
+          //.get('post/getMyPosts', data);
+          .get(`user/checkBanUser?ID_user=${data.ID_user}`);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const login = createAsyncThunk(
   'user/login',
   async (data, { rejectWithValue }) => {
@@ -485,12 +501,8 @@ export const addPost = createAsyncThunk(
       const response =
         await AxiosHelper()
           .post('post/addPost', data);
-      //console.log(response)
-      if (response.status == true) {
-        return response;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
+      console.log(response)
+      return response;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -863,6 +875,41 @@ export const notiLiveStream = createAsyncThunk(
     try {
       const response = await AxiosHelper()
         .post('post/notiLiveStream', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// ****************** report ****************
+
+// Report post
+// params :me, ID_post
+export const addReport_post = createAsyncThunk(
+  'report_post/addReport_post',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('report_post/addReport_post', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+// Report user
+// params :me, ID_user
+export const addReport_user = createAsyncThunk(
+  'report_user/addReport_user',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('report_user/addReport_user', data);
       //console.log(response)
       return response;
     } catch (error) {

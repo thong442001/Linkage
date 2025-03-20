@@ -133,6 +133,7 @@ import QRSannerAddGroup from '../screens/qrCode/QRSannerAddGroup';
 import HomeLive from '../screens/live/HomeLive';
 import HostLive from '../screens/live/HostLive';
 import AudienceScreen from '../screens/live/AudienceScreen';
+import IncomingCallScreen from '../screens/call/IncomingCallScreen';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -163,6 +164,7 @@ const oStackHome = {
   HostLive: { name: 'HostLive', component: HostLive },
   HomeLive: { name: 'HomeLive', component: HomeLive },
   AudienceScreen: { name: 'AudienceScreen', component: AudienceScreen },
+  IncomingCallScreen: { name: 'IncomingCallScreen', component: IncomingCallScreen },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

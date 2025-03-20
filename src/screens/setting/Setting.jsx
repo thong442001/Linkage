@@ -34,7 +34,7 @@ const Setting = (props) => {
     dispatch(setNoti_token({ ID_user: me._id, fcmToken: fcmToken }))
       .unwrap()
       .then((response) => {
-        console.log(response);
+        //console.log(response);
         // xóa user trong redux
         dispatch(logout())
       })

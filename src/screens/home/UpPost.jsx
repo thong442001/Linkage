@@ -243,11 +243,11 @@ const UpPost = (props) => {
                 name: file.fileName || (file.type.startsWith('video/') ? 'video.mp4' : 'image.png'),
             });
             data.append('upload_preset', 'ml_default');
-    
+
             const response = await axios.post('https://api.cloudinary.com/v1_1/ddbolgs7p/upload', data, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-    
+
             const fileUrl = response.data.secure_url;
             console.log('🌍 Link file Cloudinary:', fileUrl);
             return fileUrl;
@@ -259,7 +259,7 @@ const UpPost = (props) => {
             setLoadingUpload(false);
         }
     };
-    
+
 
     // Hàm tải lên nhiều file cùng lúc
     const uploadMultipleFiles = async (files) => {
@@ -274,7 +274,7 @@ const UpPost = (props) => {
             setLoadingUpload(false);
         }
     };
-    
+
 
     // Mở thư viện và chọn nhiều ảnh/video
     const onOpenGallery = async () => {
@@ -304,40 +304,29 @@ const UpPost = (props) => {
     //call api addPost
     const callAddPost = async () => {
         if (caption == '' && medias.length == 0) {
-            console.log('Chưa có dữ liệu');
+            console.log('chưa có dữ liệu');
             return;
         }
-        
-        setIsPosting(true); // Bật trạng thái đăng bài
-        
-        try {
-            const paramsAPI = {
-                ID_user: me._id,
-                caption: caption,
-                medias: medias,
-                status: selectedOption.name,
-                type: typePost,
-                ID_post_shared: null,
-                tags: tags,
-            };
-            
-            console.log("Push", paramsAPI);
-            await dispatch(addPost(paramsAPI))
-                .unwrap()
-                .then((response) => {
-                    console.log(response);
-                    navigation.goBack();
-                })
-                .catch((error) => {
-                    console.log('Error addPost:', error);
-                });
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setIsPosting(false); // Tắt trạng thái đăng bài sau khi xong
+        const paramsAPI = {
+            ID_user: me._id,
+            caption: caption,
+            medias: medias,
+            status: selectedOption.name,
+            type: typePost,
+            ID_post_shared: null,
+            tags: tags,
         }
-    };
-    
+        console.log("push", paramsAPI);
+        await dispatch(addPost(paramsAPI))
+            .unwrap()
+            .then((response) => {
+                console.log(response)
+                navigation.goBack()
+            })
+            .catch((error) => {
+                console.log('Error1 addPost:', error);
+            });
+    }
 
     const handleSelectOption = (option) => {
         setSelectedOption(option);
@@ -378,16 +367,16 @@ const UpPost = (props) => {
                     <Text style={UpPostS.txtCreate}>Tạo bài viết</Text>
                 </View>
                 <TouchableOpacity
-    style={(caption == '' && medias.length == 0) || isPosting ? UpPostS.btnPost : UpPostS.btnPost2}
-    onPress={callAddPost}
-    disabled={(caption == '' && medias.length == 0) || isPosting}
->
-    {isPosting ? (
-        <ActivityIndicator size="small" color="white" />
-    ) : (
-        <Text style={(caption == '' && medias.length == 0) ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
-    )}
-</TouchableOpacity>
+                    style={(caption == '' && medias.length == 0) || isPosting ? UpPostS.btnPost : UpPostS.btnPost2}
+                    onPress={callAddPost}
+                    disabled={(caption == '' && medias.length == 0) || isPosting}
+                >
+                    {isPosting ? (
+                        <ActivityIndicator size="small" color="white" />
+                    ) : (
+                        <Text style={(caption == '' && medias.length == 0) ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
+                    )}
+                </TouchableOpacity>
             </View>
             <View style={UpPostS.line}></View>
             <View style={[UpPostS.boxMargin, { flex: 1 }]}>
@@ -503,10 +492,10 @@ const UpPost = (props) => {
 
 
             {loadingUpload && (
-    <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -25, marginTop: -25 }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-    </View>
-)}
+                <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -25, marginTop: -25 }}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+            )}
 
             < Modal
                 transparent={true}  // Cho phép nền của modal trong suốt, giúp nhìn thấy nền bên dưới modal.

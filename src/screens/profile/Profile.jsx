@@ -25,6 +25,7 @@ import {
     editBackgroundOfUser,
     allProfile, // allProfile
     changeDestroyPost, // changeDestroy
+    addReport_user,
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS';
@@ -60,7 +61,7 @@ const Profile = props => {
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
     const [relationship, setRelationship] = useState(null);
-    const [friendRelationships, setFriendRelationships] = useState(null);
+    const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
@@ -74,10 +75,10 @@ const Profile = props => {
 
     useFocusEffect(
         React.useCallback(() => {
-          setliveID(String(Math.floor(Math.random() * 100000000)));
+            setliveID(String(Math.floor(Math.random() * 100000000)));
         }, [])
-      );
-    
+    );
+
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
@@ -100,6 +101,9 @@ const Profile = props => {
             // Nếu không có story, chỉ mở Bottom Sheet với các tùy chọn hình ảnh
             openBottomSheet(22, detail_selection_image());
         }
+    };
+    const openBottomSheetReportUser = () => {
+        openBottomSheet(22, detail_selection_report_user());
     };
 
 
@@ -188,13 +192,13 @@ const Profile = props => {
                             dispatch(changeAvatar(fileUrl));
                             console.log('✅ Đổi avatar thành công');
                         } else {
-                            setisLoading(false);  
+                            setisLoading(false);
                             console.log('❌ Đổi avatar thất bại');
                         }
-                        setisLoading(false); 
+                        setisLoading(false);
                     })
                     .catch(err => {
-                        setisLoading(false);  
+                        setisLoading(false);
                         console.log('❌ Lỗi khi gửi API đổi avatar:', err);
                     });
             });
@@ -365,7 +369,25 @@ const Profile = props => {
             </View>
         );
     };
-    
+    const detail_selection_report_user = () => {
+        return (
+            <View style={ProfileS.containerBottomSheet}>
+                <View style={ProfileS.rectangle}>
+                    <View style={ProfileS.lineBottomSheet}></View>
+                </View>
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={callAddReport_user}
+                >
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="ban" size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Báo cáo</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
     //callAllProfile
     const callAllProfile = async () => {
@@ -378,6 +400,7 @@ const Profile = props => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then(response => {
+                    //console.log("posts profile: " + response.posts);
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
@@ -394,7 +417,7 @@ const Profile = props => {
                     setloading(false);
                 })
                 .catch(error => {
-                    console.log('Error2 callGuiLoiMoiKetBan:', error);
+                    console.log('Error2 allProfile:', error);
                     setloading(false);
                     setDialogreload(true);
                 });
@@ -566,6 +589,31 @@ const Profile = props => {
         await getID_groupPrivate(params?._id, me?._id);
     };
 
+
+    const callAddReport_user = async () => {
+        try {
+            if (!me?._id || !user?._id || me._id === user._id) return; // Kiểm tra hợp lệ
+            console.log('me: ', me._id);
+            console.log('ID_user: ', user?._id);
+            const paramsAPI = {
+                me: me._id.toString(),
+                ID_user: user?._id,
+            }
+            await dispatch(addReport_user(paramsAPI))
+                .unwrap()
+                .then(response => {
+                    console.log('status callAddReport_user:', response.status);
+                    closeBottomSheet();
+                })
+                .catch(error => {
+                    console.log('Lỗi khi callAddReport_user:', error);
+                    closeBottomSheet();
+                });
+        } catch (error) {
+            console.log('Lỗi trong callAddReport_user:', error);
+        }
+    };
+
     const renderPosts = useCallback(({ item }) => (
         <ProfilePage
             post={item}
@@ -666,7 +714,7 @@ const Profile = props => {
                                 {user?.first_name} {user?.last_name}
                             </Text>
                             <View style={ProfileS.boxInformation}>
-                                <Text style={ProfileS.friendNumber}>{friendRelationships.length} </Text>
+                                <Text style={ProfileS.friendNumber}>{friendRelationships?.length} </Text>
                                 <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
                                     {' '}
                                     Người bạn
@@ -719,7 +767,12 @@ const Profile = props => {
                                                 onPress={onChat}>
                                                 <Text style={ProfileS.textEdit}>Nhắn tin</Text>
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={ProfileS.btnMore}>
+                                            {/* btn ... */}
+                                            <TouchableOpacity
+                                                disabled={me._id == user?._id}
+                                                style={ProfileS.btnMore}
+                                                onPress={openBottomSheetReportUser}
+                                            >
                                                 <Icon
                                                     name="ellipsis-horizontal"
                                                     size={25}
@@ -740,7 +793,11 @@ const Profile = props => {
                                                     Chỉnh sửa trang cá nhân
                                                 </Text>
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={ProfileS.btnMore}>
+                                            {/* btn ... */}
+                                            <TouchableOpacity
+                                                disabled={me._id == user?._id}
+                                                style={ProfileS.btnMore}
+                                            >
                                                 <Icon
                                                     name="ellipsis-horizontal"
                                                     size={25}
@@ -797,50 +854,49 @@ const Profile = props => {
                 </View>
 
                 {user?._id === me?._id && (
-    <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
-        <View style={ProfileS.boxLive}>
-            <View style={ProfileS.title2}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
-                    Bài viết
-                </Text>
-                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
-            </View>
-            <View style={ProfileS.boxAllThink}>
-                <View style={ProfileS.boxThink}>
-                    <Image
-                        style={ProfileS.avataStatus}
-                        source={{ uri: user?.avatar }}
-                    />
-                    <Text style={{ fontSize: 13, marginLeft: 10 }}>
-                        Bạn đang nghĩ gì?
-                    </Text>
-                </View>
-                <Icon name="image" size={30} color="#3FF251" />
-            </View>
-        </View>
-        <View style={ProfileS.boxLivestream}>
-            <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive',  { userID: me._id , avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
-                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                    <Icon name="videocam" size={20} color="red" />
-                    <Text style={{ marginLeft: 5, color: 'black' }}>
-                        Phát trực tiếp 
-                        {liveID}
-                    </Text>
-                </View>
-            </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={ProfileS.btnManage}>
-            <View style={ProfileS.boxManange}>
-                <Icon2 name="comment-text" size={17} color="black" />
-                <Text style={{ fontSize: 13, color: 'black' }}>
-                    Quản lí bài viết
-                </Text>
-            </View>
-        </TouchableOpacity>
-    </View>
-)}
+                    <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
+                        <View style={ProfileS.boxLive}>
+                            <View style={ProfileS.title2}>
+                                <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
+                                    Bài viết
+                                </Text>
+                                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
+                            </View>
+                            <View style={ProfileS.boxAllThink}>
+                                <View style={ProfileS.boxThink}>
+                                    <Image
+                                        style={ProfileS.avataStatus}
+                                        source={{ uri: user?.avatar }}
+                                    />
+                                    <Text style={{ fontSize: 13, marginLeft: 10 }}>
+                                        Bạn đang nghĩ gì?
+                                    </Text>
+                                </View>
+                                <Icon name="image" size={30} color="#3FF251" />
+                            </View>
+                        </View>
+                        <View style={ProfileS.boxLivestream}>
+                            <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
+                                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                                    <Icon name="videocam" size={20} color="red" />
+                                    <Text style={{ marginLeft: 5, color: 'black' }}>
+                                        Phát trực tiếp
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity style={ProfileS.btnManage}>
+                            <View style={ProfileS.boxManange}>
+                                <Icon2 name="comment-text" size={17} color="black" />
+                                <Text style={{ fontSize: 13, color: 'black' }}>
+                                    Quản lí bài viết
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
-                
+
             </View>
         );
     };
@@ -850,7 +906,7 @@ const Profile = props => {
     
     return (
         <View style={ProfileS.container}>
-            <LoadingModal visible={isLoading}/>
+            <LoadingModal visible={isLoading} />
             <View style={ProfileS.boxHeader}>
                 <View style={ProfileS.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
