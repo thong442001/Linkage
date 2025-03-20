@@ -61,34 +61,31 @@ const Chat = (props) => {// cần ID_group (param)
     const [typingUsers, setTypingUsers] = useState([]);
     const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
 
-
-
-
     //call API noti call
-    const callNotiCall = async (ID_group,ID_user,isCallVideo) => {
+    const callNotiCall = async (ID_group, ID_user, isCallVideo) => {
         try {
-            await dispatch(notiCallVideo({ ID_group: ID_group,ID_user: ID_user,isCallVideo:isCallVideo }))
-            .unwrap()
-            .then((response) => {
-                console.log(response.message)
-            })
-            .catch((error) => {
-                console.log('Error:', error.message);
-            });
+            await dispatch(notiCallVideo({ ID_group: ID_group, ID_user: ID_user, isCallVideo: isCallVideo }))
+                .unwrap()
+                .then((response) => {
+                    console.log(response.message)
+                })
+                .catch((error) => {
+                    console.log('Error:', error.message);
+                });
 
         } catch (error) {
             console.log(error)
         }
     }
-    
+
     // call video
     const onCallvieo = () => {
         if (!group) return;
         if (group.isPrivate == true) {
-            callNotiCall(group._id,me._id,true);
+            callNotiCall(group._id, me._id, true);
             navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar });
         } else {
-            callNotiCall(group._id,me._id,true);
+            callNotiCall(group._id, me._id, true);
             navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar });
         }
     };
@@ -96,14 +93,14 @@ const Chat = (props) => {// cần ID_group (param)
     const onCallAudio = () => {
         if (!group) return;
         if (group.isPrivate == true) {
-            callNotiCall(group._id,me._id,false);
-            console.log("canhphan",group._id);
+            callNotiCall(group._id, me._id, false);
+            console.log("canhphan", group._id);
             navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: false, MyAvatar: myAvatar });
-           
+
         } else {
-            callNotiCall(group._id,me._id,false);
+            callNotiCall(group._id, me._id, false);
             navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: false, MyAvatar: myAvatar });
-            
+
         }
     };
 
@@ -446,6 +443,10 @@ const Chat = (props) => {// cần ID_group (param)
     const toSettingChat = () => {
         navigation.navigate("SettingChat", { ID_group: group._id });
     };
+    const onToGame3La = () => {
+        navigation.navigate("NguoiMoi", { group: group });
+    };
+
 
     useEffect(() => {
         // Cuộn xuống tin nhắn cuối cùng khi danh sách tin nhắn thay đổi
@@ -478,7 +479,6 @@ const Chat = (props) => {// cần ID_group (param)
     // đang soan tin
     const handleTyping = (text) => {
         setMessage(text);
-
 
         if (!isTyping) {
             console.log("typing: " + text)
@@ -523,6 +523,7 @@ const Chat = (props) => {// cần ID_group (param)
                     onToSettingChat={toSettingChat}
                     onCallVideo={onCallvieo}
                     onCallAudio={onCallAudio}
+                    onToGame3La={onToGame3La}
                 />
             }
             <FlatList

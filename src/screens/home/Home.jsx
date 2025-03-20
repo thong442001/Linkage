@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Animated, FlatList, View, RefreshControl,Dimensions  } from 'react-native';
+import { Animated, FlatList, View, RefreshControl, Dimensions } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import HomeS from '../../styles/screens/home/HomeS';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';
@@ -7,8 +7,10 @@ import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 import ProfilePage from '../../components/items/ProfilePage';
 import { getAllPostsInHome, changeDestroyPost } from '../../rtk/API';
 import database from '@react-native-firebase/database';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'; 
 import HomeHeader from './HomeHeader';
 import HomeStories from './HomeStories';
+
 const { height } = Dimensions.get('window');
 
 const Home = props => {
@@ -22,6 +24,9 @@ const Home = props => {
   const [liveSessions, setLiveSessions] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
+
+  const tabBarHeight = useBottomTabBarHeight(); // Lấy chiều cao tab bar
+  const [isTabBarVisible, setIsTabBarVisible] = useState(true); // Trạng thái tab bar
 
   const HEADER_HEIGHT = height * 0.1;
 
@@ -40,19 +45,26 @@ const Home = props => {
     }, 60000); // Cập nhật mỗi phút
   
     return () => clearInterval(timer);
-  }, [refreshing]); // Thêm refreshing vào dependencies
-  
+  }, [refreshing]);
 
-  
+  // Lắng nghe sự kiện cuộn
   useEffect(() => {
+    let lastScroll = 0; // Biến lưu giá trị cuộn trước đó
     const listenerId = scrollY.addListener(({ value }) => {
-      console.log("scrollY value: ", value);
+      if (value > lastScroll && value > 50) {
+        setIsTabBarVisible(false); // Cuộn xuống, ẩn tab bar
+      } else if (value < lastScroll && value < 50) {
+        setIsTabBarVisible(true); // Cuộn lên, hiện tab bar
+      }
+      lastScroll = value;
     });
+    
     return () => {
       scrollY.removeListener(listenerId);
     };
   }, [scrollY]);
-  
+
+  // Lấy dữ liệu live sessions
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
     const onValueChange = liveSessionsRef.on('value', snapshot => {
@@ -62,10 +74,8 @@ const Home = props => {
     return () => liveSessionsRef.off('value', onValueChange);
   }, []);
 
-  
   const callGetAllPostsInHome = async ID_user => {
     try {
-      // Nếu đang làm mới thì không set loading lại để tránh hiển thị skeleton loading
       if (!refreshing) {
         setloading(true);
       }
@@ -86,26 +96,18 @@ const Home = props => {
     }
   };
 
-
   useEffect(() => {
     callGetAllPostsInHome(me._id);
   }, [me._id]);
-  
-  // Hàm xử lý làm mới khi kéo xuống
+
+  // Làm mới khi kéo xuống
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setCurrentTime(Date.now()); // Cập nhật thời gian ngay khi làm mới
+    setCurrentTime(Date.now());
     callGetAllPostsInHome(me._id).finally(() => {
       setRefreshing(false);
     });
   }, [me._id]);
-
-  // Có thể bỏ useFocusEffect nếu bạn chỉ muốn cập nhật khi kéo làm mới
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     callGetAllPostsInHome(me._id);
-  //   }, [])
-  // );
 
   const callChangeDestroyPost = async ID_post => {
     try {
@@ -201,8 +203,7 @@ const Home = props => {
               <RefreshControl 
                 refreshing={refreshing} 
                 onRefresh={onRefresh}
-                progressViewOffset={HEADER_HEIGHT} 
-
+                progressViewOffset={HEADER_HEIGHT}
               />
             }
             onScroll={Animated.event(
@@ -211,6 +212,19 @@ const Home = props => {
             )}
             scrollEventThrottle={16}
           />
+          {/* Điều chỉnh hiển thị tab bar */}
+          <Animated.View
+            style={{
+              transform: [
+                { translateY: isTabBarVisible ? 0 : tabBarHeight }
+              ],
+              position: 'absolute',
+              bottom: 0,
+              width: '100%',
+            }}
+          >
+            {/* Nội dung tab bar */}
+          </Animated.View>
         </>
       )}
     </View>
