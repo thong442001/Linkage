@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
-import { useSocket } from '../../context/socketContext';
+import { useSocket } from '../../../context/socketContext';
 
 const NguoiDuocMoi = ({ route, navigation }) => {
   const { group, type } = route.params;
