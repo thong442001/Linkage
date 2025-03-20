@@ -304,29 +304,40 @@ const UpPost = (props) => {
     //call api addPost
     const callAddPost = async () => {
         if (caption == '' && medias.length == 0) {
-            console.log('chưa có dữ liệu');
+            console.log('Chưa có dữ liệu');
             return;
         }
-        const paramsAPI = {
-            ID_user: me._id,
-            caption: caption,
-            medias: medias,
-            status: selectedOption.name,
-            type: typePost,
-            ID_post_shared: null,
-            tags: tags,
+        
+        setIsPosting(true); // Bật trạng thái đăng bài
+        
+        try {
+            const paramsAPI = {
+                ID_user: me._id,
+                caption: caption,
+                medias: medias,
+                status: selectedOption.name,
+                type: typePost,
+                ID_post_shared: null,
+                tags: tags,
+            };
+            
+            console.log("Push", paramsAPI);
+            await dispatch(addPost(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    console.log(response);
+                    navigation.goBack();
+                })
+                .catch((error) => {
+                    console.log('Error addPost:', error);
+                });
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsPosting(false); // Tắt trạng thái đăng bài sau khi xong
         }
-        console.log("push", paramsAPI);
-        await dispatch(addPost(paramsAPI))
-            .unwrap()
-            .then((response) => {
-                console.log(response)
-                navigation.goBack()
-            })
-            .catch((error) => {
-                console.log('Error1 addPost:', error);
-            });
-    }
+    };
+    
 
     const handleSelectOption = (option) => {
         setSelectedOption(option);

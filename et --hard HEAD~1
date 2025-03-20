@@ -1,0 +1,280 @@
+[33mcommit 91985934cad222a55fa012b723c9c271e294316e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 5248daa 1220ea8
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Thu Mar 20 10:23:18 2025 +0700
+
+    20/3
+
+[33mcommit 5248daadb732644c16e6565de5b0d7d7b784e477[m
+Merge: 1da47fc e853a2c
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Thu Mar 20 10:19:21 2025 +0700
+
+    20/3
+
+[33mcommit 1220ea86a857f9a19245a003fde4ec5391956f77[m[33m ([m[1;32mDo_NewUiHome[m[33m)[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Thu Mar 20 10:15:50 2025 +0700
+
+    20/3
+
+[33mcommit e853a2cc0e1732f4073ce78bcb047e8fb569a5dc[m
+Merge: ce00167 6acbbff
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Wed Mar 19 16:23:11 2025 +0700
+
+    19/3-merge-canh
+
+[33mcommit ce00167ace6fc11046875d50cd8a12f8abf0d761[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Wed Mar 19 15:28:39 2025 +0700
+
+    19/3-1
+
+[33mcommit 8bb73abca28b563d06905b4358059a2012f83e0e[m[33m ([m[1;31morigin/Do_NewUiHome[m[33m)[m
+Author: donad777 <121440572+donad777@users.noreply.github.com>
+Date:   Mon Mar 17 14:13:27 2025 +0100
+
+    NewUIHome
+
+[33mcommit ad3c16554b7a633cb1866cff4e4b55983f5c5a1a[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Mon Mar 17 11:19:33 2025 +0700
+
+    17/3
+
+[33mcommit 24ac7a064e92765beeabafd100a72c74a86e8f4b[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Mon Mar 17 10:48:55 2025 +0700
+
+    17/3
+
+[33mcommit 3a0a9f166d34089326077b779a076594043da248[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Fri Mar 14 17:12:34 2025 +0700
+
+    14/3-ban-post-user
+
+[33mcommit 378475a84bcfe62956c035263fc314158185fcef[m
+Merge: 90acbcf 2d89a49
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Fri Mar 14 11:20:15 2025 +0700
+
+    14/3
+
+[33mcommit bce071dc02c57f57480bf68b31be9743a935ddce[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Thu Mar 13 15:24:06 2025 +0700
+
+    13/3-report-user
+
+[33mcommit 90acbcfc86bc239e8f51754f34c0f90d2f175890[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Wed Mar 12 19:19:59 2025 +0700
+
+    12/3
+
+[33mcommit 2d89a4930b98786a6e3c23a75d63a693e84e572c[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Wed Mar 12 17:01:21 2025 +0700
+
+    12/3-Thong-noti-livestream
+
+[33mcommit 748432645597d77e679cec642b7478c51d6180f3[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Wed Mar 12 16:45:43 2025 +0700
+
+    12/3-1
+
+[33mcommit 1da47fca3fb6df5fd39fc4e3606aed737fdba7ab[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Wed Mar 12 16:45:01 2025 +0700
+
+    12/3
+
+[33mcommit bafff2576d6e5fa6aff2aa3166245c6f4cbdc917[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Wed Mar 12 16:44:26 2025 +0700
+
+    12/3
+
+[33mcommit 6acbbff4bdbd2b6601dee02f5d75d950e6dd85c5[m[33m ([m[1;31morigin/Canh_notiCall[m[33m)[m
+Author: unknown <phanhuucanh123@gmail.com>
+Date:   Wed Mar 12 16:32:54 2025 +0700
+
+    canh fix noti
+
+[33mcommit 250b64c27be30be74e76e91ea7dc4c2ce42e5bbc[m
+Author: unknown <phanhuucanh123@gmail.com>
+Date:   Wed Mar 12 15:59:27 2025 +0700
+
+    canh noti call
+
+[33mcommit 5da8f2cfdb0ccfdb080786e8eb5e923ad5359731[m
+Author: unknown <phanhuucanh123@gmail.com>
+Date:   Wed Mar 12 08:38:17 2025 +0700
+
+    Noti call
+
+[33mcommit 0403fcf25e40a9f57a22c471e788d4fe10b76142[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Wed Mar 12 08:35:34 2025 +0700
+
+    12/3
+
+[33mcommit 6cf0577fde58fa901d539c893b3ed62f2ec22302[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Tue Mar 11 13:11:04 2025 +0700
+
+    11/3-tokens-noti
+
+[33mcommit 7033516e7a2c3160cae7babbe5ace601b189b83d[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 19:42:00 2025 +0700
+
+    10/3-dang-soan-tin
+
+[33mcommit b80cd5419011a891d530e8c643d85b0c272734c6[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 16:49:21 2025 +0700
+
+    10/3-users-online
+
+[33mcommit b1d88c29253bec7a84de5aac2ed514f90979f033[m
+Merge: 557700b c257c33
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 15:38:05 2025 +0700
+
+    10/3-merge-QThong-2
+
+[33mcommit 557700b99a0f26693f7cb2a2585c4f9d8826c005[m
+Merge: 0dc72a1 4c7ccc2
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 15:36:02 2025 +0700
+
+    10/3-merge-Do-1
+
+[33mcommit 4c7ccc2f772379f17ecd5be303e68a2356b1ffd9[m[33m ([m[1;31morigin/Do_10/3_ImageDetail[m[33m)[m
+Merge: 40ac7ba 1ab7648
+Author: donad777 <121440572+donad777@users.noreply.github.com>
+Date:   Mon Mar 10 13:23:35 2025 +0100
+
+    Merge branch 'main' of https://github.com/thong442001/Linkage
+
+[33mcommit 40ac7ba3a1ae9e3fc08e2ce1d96b0d97a9e56eba[m
+Author: donad777 <121440572+donad777@users.noreply.github.com>
+Date:   Mon Mar 10 13:22:32 2025 +0100
+
+    Complete_DetailImage_VisionImage
+
+[33mcommit c092b15206e4496a73beefbaa4dc217a33300375[m
+Merge: 013fae2 393d8b0
+Author: donad777 <121440572+donad777@users.noreply.github.com>
+Date:   Mon Mar 10 13:18:34 2025 +0100
+
+    Complete_Merge
+
+[33mcommit 013fae22690a0af76e754da1ce0ea9de173ed445[m
+Author: donad777 <121440572+donad777@users.noreply.github.com>
+Date:   Mon Mar 10 13:15:07 2025 +0100
+
+    DetailImage
+
+[33mcommit 0079e396f8a5821222c7e1888b0c475d158dbe09[m
+Author: donad777 <121440572+donad777@users.noreply.github.com>
+Date:   Mon Mar 10 11:01:16 2025 +0100
+
+    10/3
+
+[33mcommit 0dc72a1c08365a48440a267414d82e18560fadf4[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 15:30:10 2025 +0700
+
+    10/3-socket-2
+
+[33mcommit c257c333431596dab39f4eb63d7fa54abf5a1279[m[33m ([m[1;31morigin/QThong_homechat[m[33m)[m
+Author: TANGQUANGTHONG <quangthong2808@gmail.com>
+Date:   Mon Mar 10 15:28:25 2025 +0700
+
+    Qthong_homechat
+
+[33mcommit b06e7b6369e140d61539c3e6bfbc5a6d4b11ecb7[m
+Merge: acc8808 a30ce7f
+Author: donad777 <121440572+donad777@users.noreply.github.com>
+Date:   Mon Mar 10 08:51:07 2025 +0100
+
+    Merge branch 'main' of https://github.com/thong442001/Linkage
+
+[33mcommit 2cdd3d3539ac16f576add8c85c078a1a45552390[m
+Author: TANGQUANGTHONG <quangthong2808@gmail.com>
+Date:   Mon Mar 10 14:32:16 2025 +0700
+
+    thong
+
+[33mcommit dc0b96daaa260b3df2574734b264a98eb8c4a7ae[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 14:08:06 2025 +0700
+
+    10/3-api-noti-livestream
+
+[33mcommit d2eb5286193de2753a6c8ebe91c8455ba48d0181[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 13:51:27 2025 +0700
+
+    10/3-api-canh-noti
+
+[33mcommit 50540cfd369f8acd65d496b2287d05eb57be226a[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 13:24:08 2025 +0700
+
+    10/3-fix-socket
+
+[33mcommit 1ab7648d3c3ddd11cc721fce162a463a7aa1eb4c[m
+Merge: 393d8b0 b37c5e6
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 13:20:01 2025 +0700
+
+    10/3-merge-Qthong
+
+[33mcommit b37c5e6439afa520e416632542721386152fe166[m[33m ([m[1;31morigin/QThong_noti_homechat[m[33m)[m
+Author: TANGQUANGTHONG <quangthong2808@gmail.com>
+Date:   Mon Mar 10 12:47:45 2025 +0700
+
+    push
+
+[33mcommit 393d8b00fd293292797727d9a61a4936cbee1e93[m
+Merge: 49f232c fc36373
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 12:39:55 2025 +0700
+
+    10/3-merge-Canh2
+
+[33mcommit 49f232c666ab86731d5e0e2cec756ff09b93b50a[m
+Merge: c72dd94 624e1b3
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 12:29:14 2025 +0700
+
+    10/3-merge-Tai
+
+[33mcommit c72dd94d59a5f404b4a8270370a3db0fc0b08bab[m
+Merge: bf14afa 5eab2af
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 12:13:33 2025 +0700
+
+    10/3-merge-Canh
+
+[33mcommit bf14afa7638060db51f1af2527ab4d65e20ace19[m
+Author: thongdeptraiwa <thong442001@gmail.com>
+Date:   Mon Mar 10 12:05:20 2025 +0700
+
+    10/3-1
+
+[33mcommit 30873259e519d4dea5e61521ed427c6b602ea61a[m[33m ([m[1;31morigin/QThong_Fix_story[m[33m)[m
+Author: TANGQUANGTHONG <quangthong2808@gmail.com>
+Date:   Sun Mar 9 17:37:01 2025 +0700
+
+    push
+
+[33mcommit 624e1b34b7e91d60d332f17a70d98b74cb8d1a2c[m[33m ([m[1;31morigin/Tai_LiveStream[m[33m, [m[1;32mTai_LiveStream[m[33m)[m
+Author: taivt2004 <vtt2004abc@gmail.com>
+Date:   Sun Mar 9 16:02:09

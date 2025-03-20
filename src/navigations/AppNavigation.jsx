@@ -288,6 +288,28 @@ const AppNavigation = () => {
 
           }
 
+          if (
+            notification?.type === "Đang livestream"
+            && notification?.content
+          ) {
+            const sender = notification.ID_relationship.ID_userA._id == user._id
+              ? notification.ID_relationship.ID_userB
+              : notification.ID_relationship.ID_userA;
+            const content = notification.content;
+
+            console.log("sender id: " + sender)
+
+
+            if (sender) {
+              return `${sender.first_name || ''} ${sender.last_name || ''} ${'đang phát trực tiếp'
+                }`;
+            }
+
+          }
+
+
+
+
 
           return 'Bạn có một thông báo mới'; // Nội dung mặc định
         };

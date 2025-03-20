@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
     },
     search: {
         flex: 1,
-        marginLeft: 10,
     },
     container_item: {
         flexDirection: 'row',
