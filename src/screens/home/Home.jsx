@@ -41,13 +41,11 @@ const Home = props => {
     const onValueChange = liveSessionsRef.on('value', snapshot => {
       const liveSessions = snapshot.val() ? Object.values(snapshot.val()) : [];
       setLiveSessions(liveSessions);
-      console.log('phien live tu realtime:', liveSessions);
-
-
     });
-
-    return () => liveSessionsRef.off('value', onValueChange); // Hủy lắng nghe khi component bị unmount
+  
+    return () => liveSessionsRef.off('value', onValueChange); 
   }, []);
+
 
   const callGetAllPostsInHome = async (ID_user) => {
     try {

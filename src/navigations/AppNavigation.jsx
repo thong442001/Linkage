@@ -9,14 +9,19 @@ import {requestPermissions} from '../screens/service/MyFirebaseMessagingService'
 import {setReactions, setFcmToken, logout} from '../rtk/Reducer';
 import database from '@react-native-firebase/database';
 import messaging from '@react-native-firebase/messaging';
-import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-import {useSocket} from '../context/socketContext';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import { useSocket } from '../context/socketContext';
+import { useNavigation } from '@react-navigation/native';
+import { navigate } from '../navigations/NavigationService';
+
 
 const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-  const {onlineUsers} = useSocket();
+  const navigation = useNavigation(); // Lấy navigation
+  const { onlineUsers } = useSocket(); // Lấy danh sách user online từ context
+
 
   const [isSplashVisible, setSplashVisible] = useState(true); // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
@@ -69,7 +74,7 @@ const AppNavigation = () => {
           console.log('status : ' + response.status);
         })
         .catch(error => {
-          console.log('Tài khoản đã bị khó');
+          console.log('Tài khoản đã bị khóa');
           // quay về trang login
           onLogout();
         });
@@ -166,6 +171,7 @@ const AppNavigation = () => {
           if (
             notification?.type === 'Đã thành bạn bè của bạn' &&
             notification?.ID_relationship
+
           ) {
             const {ID_userA, ID_userB} = notification.ID_relationship;
             if (user?._id?.toString() === ID_userA?._id?.toString()) {
@@ -222,24 +228,90 @@ const AppNavigation = () => {
             notification?.type === 'Đã đăng bài mới' &&
             notification?.ID_post
           ) {
-            // Lấy thông tin của người đăng bài từ ID_post.ID_user
-            const { ID_user, caption } = notification.ID_post;
-            if (ID_user) {
-              return `${ID_user.first_name || ''} ${ID_user.last_name || ''}: ${
-                 'Đã đăng bài post mới'
-              }`;
+            const { sender, content } = notification.ID_post;
+
+            if (sender) {
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã đăng bài post mới'}`;
             }
           }
-          
-          // ====== THÊM MỚI DỰA VÀO ẢNH ======
-          // 1. Bạn đã được mời livestream
           if (
-            notification?.type === 'Bạn đã được mời livestream' &&
-            notification?.ID_livestream
+            notification?.type === "Bạn có 1 cuộc gọi đến" &&
+            notification?.ID_group
           ) {
-            // tuỳ bạn hiển thị ra ai mời, hoặc tên livestream, ...
-            return 'Bạn đã được mời tham gia livestream mới';
+            // Điều hướng đến màn hình nhận cuộc gọi
+            navigate("IncomingCallScreen", { group: notification.ID_group, type: false });
+            const { members, isPrivate, name } = notification.ID_group;
+            if (isPrivate == true) {
+              const sender = members.find(member => member._id !== user._id);
+              return `${sender.first_name || ''} ${sender.last_name || ''} đang gọi cho bạn`;
+            } else {
+              if (name == null) {
+                const names = members
+                  .filter(memders => memders._id !== user._id)
+                  .map(user => `${user.first_name} ${user.last_name}`)
+                  .join(", ");
+                return `${names} đang gọi cho bạn`;
+              } else {
+                return `${name} đang gọi cho bạn`;
+              }
+            }
+
           }
+          if (
+            notification?.type === "Bạn có 1 cuộc gọi video đến" &&
+            notification?.ID_group
+          ) {
+            navigate("IncomingCallScreen", { group: notification.ID_group, type: true });
+            const { members, isPrivate, name } = notification.ID_group;
+            if (isPrivate == true) {
+              const sender = members.find(member => member._id !== user._id);
+              return `${sender.first_name || ''} ${sender.last_name || ''} đang gọi video call cho bạn`;
+            } else {
+              if (name == null) {
+                const names = members
+                  .filter(memders => memders._id !== user._id)
+                  .map(user => `${user.first_name} ${user.last_name}`)
+                  .join(", ");
+                return `Tham gia cuộc gọi video call ${names}`;
+              } else {
+                return `Tham gia cuộc gọi video call ${name}`;
+              }
+            }
+
+          }
+
+          if (
+            notification?.type === "Đang livestream" &&
+            notification?.ID_user &&
+            notification?.content
+          ) {
+            const sender = notification.ID_user;
+            const content = notification.content;
+
+            console.log("sender id: " + sender)
+
+
+            if (sender) {
+              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đang phát trực tiếp'
+                }`;
+            }
+
+          }
+
+          // game 3 la
+          if (
+            notification?.type === "Mời chơi game 3 lá" &&
+            notification?.ID_group
+          ) {
+            navigate("NguoiDuocMoi", { group: notification.ID_group });
+            const { members, isPrivate } = notification.ID_group;
+            if (isPrivate == true) {
+              const sender = members.find(member => member._id !== user._id);
+              return `${sender.first_name || ''} ${sender.last_name || ''} đang mời bạn chơi game 3 lá`;
+            }
+
+          }
+
 
           // 2. Bạn đã được chia sẻ bài viết của bạn
           if (
@@ -323,17 +395,7 @@ const AppNavigation = () => {
     };
   }, []);
 
-  return (
-    <NavigationContainer>
-      {isSplashVisible ? (
-        <Welcome /> // Hiển thị màn hình chào trước
-      ) : user ? (
-        <HomeNavigation />
-      ) : (
-        <UserNavigation />
-      )}
-    </NavigationContainer>
-  );
+  return isSplashVisible ? <Welcome /> : user ? <HomeNavigation /> : <UserNavigation />;
 };
 
 export default AppNavigation;

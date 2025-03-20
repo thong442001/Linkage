@@ -501,12 +501,8 @@ export const addPost = createAsyncThunk(
       const response =
         await AxiosHelper()
           .post('post/addPost', data);
-      //console.log(response)
-      if (response.status == true) {
-        return response;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
+      console.log(response)
+      return response;
     } catch (error) {
       return rejectWithValue(error.message);
     }
