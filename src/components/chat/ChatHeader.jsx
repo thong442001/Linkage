@@ -3,7 +3,16 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from "rea
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/Ionicons';
 const { width, height } = Dimensions.get('window');
-export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat, onCallVideo, onCallAudio }) {
+export default function ChatHeader({
+    name,
+    avatar,
+    onGoBack,
+    isPrivate,
+    onToSettingChat,
+    onCallVideo,
+    onCallAudio,
+    onToGame3La = () => { },
+}) {
 
     return (
         <View style={styles.container}>
@@ -40,11 +49,19 @@ export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSett
                     </TouchableOpacity>
                     {
                         isPrivate == false
-                        && <TouchableOpacity
-                            onPress={onToSettingChat}
-                        >
-                            <Icon name="alert-circle-sharp" size={24} color="#007bff" />
-                        </TouchableOpacity>
+                            ? (
+                                <TouchableOpacity
+                                    onPress={onToSettingChat}
+                                >
+                                    <Icon name="alert-circle-sharp" size={24} color="#007bff" />
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity
+                                    onPress={onToGame3La}
+                                >
+                                    <Icon name="game-controller" size={24} color="#007bff" />
+                                </TouchableOpacity>
+                            )
                     }
                 </View>
             </View>

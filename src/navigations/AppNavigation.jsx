@@ -247,19 +247,19 @@ const AppNavigation = () => {
             notification?.ID_group
           ) {
             // Điều hướng đến màn hình nhận cuộc gọi
-            navigate("IncomingCallScreen", { group: notification.ID_group,type: false});
-            const {members,isPrivate,name} = notification.ID_group;
-            if(isPrivate == true){
+            navigate("IncomingCallScreen", { group: notification.ID_group, type: false });
+            const { members, isPrivate, name } = notification.ID_group;
+            if (isPrivate == true) {
               const sender = members.find(member => member._id !== user._id);
               return `${sender.first_name || ''} ${sender.last_name || ''} đang gọi cho bạn`;
-            }else{
-              if(name == null){
+            } else {
+              if (name == null) {
                 const names = members
-                .filter(memders => memders._id !== user._id)
-                .map(user => `${user.first_name} ${user.last_name}`)
-                .join(", ");          
+                  .filter(memders => memders._id !== user._id)
+                  .map(user => `${user.first_name} ${user.last_name}`)
+                  .join(", ");
                 return `${names} đang gọi cho bạn`;
-              }else{
+              } else {
                 return `${name} đang gọi cho bạn`;
               }
             }
@@ -269,25 +269,37 @@ const AppNavigation = () => {
             notification?.type === "Bạn có 1 cuộc gọi video đến" &&
             notification?.ID_group
           ) {
-            navigate("IncomingCallScreen", { group: notification.ID_group,type: true });
-            const {members,isPrivate,name} = notification.ID_group;
-            if(isPrivate == true){
+            navigate("IncomingCallScreen", { group: notification.ID_group, type: true });
+            const { members, isPrivate, name } = notification.ID_group;
+            if (isPrivate == true) {
               const sender = members.find(member => member._id !== user._id);
               return `${sender.first_name || ''} ${sender.last_name || ''} đang gọi video call cho bạn`;
-            }else{
-              if(name == null){
+            } else {
+              if (name == null) {
                 const names = members
-                .filter(memders => memders._id !== user._id)
-                .map(user => `${user.first_name} ${user.last_name}`)
-                .join(", "); 
+                  .filter(memders => memders._id !== user._id)
+                  .map(user => `${user.first_name} ${user.last_name}`)
+                  .join(", ");
                 return `Tham gia cuộc gọi video call ${names}`;
-              }else{
+              } else {
                 return `Tham gia cuộc gọi video call ${name}`;
               }
             }
 
           }
+          // game 3 la
+          if (
+            notification?.type === "Mời chơi game 3 lá" &&
+            notification?.ID_group
+          ) {
+            navigate("NguoiDuocMoi", { group: notification.ID_group });
+            const { members, isPrivate } = notification.ID_group;
+            if (isPrivate == true) {
+              const sender = members.find(member => member._id !== user._id);
+              return `${sender.first_name || ''} ${sender.last_name || ''} đang mời bạn chơi game 3 lá`;
+            }
 
+          }
 
           return 'Bạn có một thông báo mới'; // Nội dung mặc định
         };
