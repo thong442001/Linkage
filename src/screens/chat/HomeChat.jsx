@@ -76,7 +76,7 @@ const HomeChat = ({ route, navigation }) => {
                 .then(response => {
                     setGroups(response.groups);
                     setLoading(false);
-                    console.log(response);
+                    //console.log(response);
                 })
                 .catch(error => console.log('Error:', error));
         } catch (error) {

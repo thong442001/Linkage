@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions } from "rea
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/Ionicons';
 const { width, height } = Dimensions.get('window');
-export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat, onCallVideo,onCallAudio }) {
+export default function ChatHeader({ name, avatar, onGoBack, isPrivate, onToSettingChat, onCallVideo, onCallAudio }) {
 
     return (
         <View style={styles.container}>
@@ -60,37 +60,37 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: width * 0.01,
         elevation: 5, // Chỉ có tác dụng trên Android
-      },
-      headerContainer: {
+    },
+    headerContainer: {
         flexDirection: "row",
         alignItems: "center",
         padding: width * 0.04, // 4% chiều rộng màn hình
-      },
-      userInfo: {
+    },
+    userInfo: {
         flexDirection: "row",
         alignItems: "center",
         flex: 1,
         marginLeft: width * 0.04, // 4% chiều rộng màn hình
-      },
-      avatar: {
+    },
+    avatar: {
         width: width * 0.11, // 11% chiều rộng màn hình
         height: width * 0.11,
         borderRadius: (width * 0.11) / 2,
-      },
-      userName: {
+    },
+    userName: {
         width: width * 0.35, // 30% chiều rộng màn hình
         fontSize: width * 0.045, // 4.5% chiều rộng màn hình
         fontWeight: "bold",
         color: "black",
         marginLeft: width * 0.025, // 2.5% chiều rộng màn hình
-      },
-      lastSeen: {
+    },
+    lastSeen: {
         fontSize: width * 0.03, // 3% chiều rộng màn hình
         color: "gray",
-      },
-      actionIcons: {
+    },
+    actionIcons: {
         flexDirection: "row",
         alignItems: "center",
         gap: width * 0.04, // 4% chiều rộng màn hình
-      },
+    },
 });

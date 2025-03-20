@@ -88,7 +88,8 @@ const Login = (props) => {
     dispatch(login(data))
       .unwrap()
       .then((response) => {
-        console.log(response);
+        //console.log(response);
+        //console.log("fcmToken login: " + fcmToken);
         setLoading(false);
       })
       .catch((error) => {
@@ -102,7 +103,7 @@ const Login = (props) => {
     dispatch(loginGG(data))
       .unwrap()
       .then((response) => {
-        console.log(response);
+        //console.log(response);
         setLoading(false);
       })
       .catch((error) => {
@@ -121,7 +122,7 @@ const Login = (props) => {
       // Đăng nhập Google
       const userInfo = await GoogleSignin.signIn();
       const { idToken } = await GoogleSignin.getTokens(); // Lấy ID Token
-      console.log(idToken)
+      //console.log(idToken)
 
       if (!idToken) {
         console.log("Không lấy được ID Token!");

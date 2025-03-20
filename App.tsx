@@ -9,6 +9,9 @@ import { BottomSheetProvider } from './src/context/BottomSheetContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { enableScreens } from 'react-native-screens';
 import { SocketProvider } from './src/context/socketContext';
+import { NavigationContainer } from '@react-navigation/native';
+import { navigationRef } from './src/navigations/NavigationService';
+
 enableScreens();
 
 
@@ -22,7 +25,9 @@ function App(): React.JSX.Element {
             <BottomSheetProvider>
               <SafeAreaView style={styles.container}>
                 <StatusBar />
-                <AppNavigation />
+                <NavigationContainer ref={navigationRef}>
+                  <AppNavigation />
+                </NavigationContainer>
               </SafeAreaView>
             </BottomSheetProvider>
           </SocketProvider>

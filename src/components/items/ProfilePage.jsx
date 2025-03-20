@@ -23,6 +23,7 @@ import {
     addPost_Reaction, // thả biểu cảm
     addPost, // api share
     deletePost_reaction,//xóa post_reaction
+    addReport_post,// report post
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
 const PostItem = memo(({
@@ -83,6 +84,25 @@ const PostItem = memo(({
             openBottomSheet(50, renderBottomSheetContent());
         }
     }, [selectedTab]);
+
+    const callAddReport_post = async () => {
+        try {
+            const paramsAPI = {
+                me: ID_user,
+                ID_post: post._id
+            }
+            await dispatch(addReport_post(paramsAPI))
+                .unwrap()
+                .then(response => {
+                    console.log('status callAddReport_post:', response.status);
+                })
+                .catch(error => {
+                    console.log('Lỗi khi callAddReport_post:', error);
+                });
+        } catch (error) {
+            console.log('Lỗi trong addReport_post:', error);
+        }
+    };
 
 
     const renderBottomSheetContent = () => {
@@ -316,7 +336,7 @@ const PostItem = memo(({
         try {
             const paramsAPI = {
                 ID_post: post._id,
-                ID_user: me._id,
+                ID_user: ID_user,
                 ID_reaction: ID_reaction,
             };
             await dispatch(addPost_Reaction(paramsAPI))
@@ -450,7 +470,7 @@ const PostItem = memo(({
     const callAddPostShare = async () => {
         try {
             const paramsAPI = {
-                ID_user: me._id,
+                ID_user: ID_user,
                 caption: captionShare,
                 medias: [],
                 status: selectedOption.name,

@@ -148,7 +148,7 @@ const PostDetail = (props) => {
           setReply(null);
         })
         .catch((error) => {
-          console.error('Error1 addComment:', error);
+           console.log('Error1 addComment:', error);
         });
     } catch (error) {
       console.log('Lỗi khi callAddComment:', error);
