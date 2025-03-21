@@ -2,6 +2,7 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
+import { set } from '@react-native-firebase/database';
 const ItemNotification = ({data}) => {
   const me = useSelector(state => state.app.user);
   const navigation = useNavigation();
@@ -48,7 +49,7 @@ const ItemNotification = ({data}) => {
 
     // return () => clearInterval(interval);
   }, []);
-
+  
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
@@ -101,6 +102,88 @@ const ItemNotification = ({data}) => {
         setAvatar(data.ID_relationship.ID_userA.avatar);
       }
     }
+    if(data.type == 'Đã đăng bài mới'){
+     setName(data.ID_post.ID_user.first_name + 
+      ' ' + data.ID_post.ID_user.last_name
+     )
+     setAvatar(data.ID_post.ID_user.avatar);
+    }
+    if(data.type == 'Bạn có 1 cuộc gọi video đến'){
+      if (data.ID_group.isPrivate) {
+        const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
+        setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
+        setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
+      } else {
+        setName(
+          data.ID_group.name ||
+          data.ID_group.members
+              ?.filter((user) => user._id !== me._id)
+              .map((user) => `${user.first_name} ${user.last_name}`)
+              .join(', ')
+        );
+        setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
+      }
+    }
+    if(data.type == 'Bạn có 1 cuộc gọi đến'){
+      if (data.ID_group.isPrivate) {
+        const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
+        setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
+        setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
+      } else {
+        setName(
+          data.ID_group.name ||
+          data.ID_group.members
+              ?.filter((user) => user._id !== me._id)
+              .map((user) => `${user.first_name} ${user.last_name}`)
+              .join(', ')
+        );
+        setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
+      }
+    }
+    if(data.type == 'Bạn đã được mời vào nhóm mới'){
+      if (data.ID_group.isPrivate) {
+        const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
+        setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
+        setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
+      } else {
+        setName(
+          data.ID_group.name ||
+          data.ID_group.members
+              ?.filter((user) => user._id !== me._id)
+              .map((user) => `${user.first_name} ${user.last_name}`)
+              .join(', ')
+        );
+        setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
+      }
+    }
+    if(data.type == 'Tin nhắn mới'){
+      setName(data.ID_message.sender.first_name+ ' ' 
+        + data.ID_message.sender.last_name)
+      setAvatar(data.ID_message.sender.avatar)
+    }
+    if(data.type=='Đang livestream'){
+      if (data.ID_relationship.ID_userA._id == me._id) {
+        setName(
+          data.ID_relationship.ID_userB.first_name +
+            ' ' +
+            data.ID_relationship.ID_userB.last_name,
+        );
+        setAvatar(data.ID_relationship.ID_userB.avatar);
+
+      } else {
+        setName(
+          data.ID_relationship.ID_userA.first_name +
+            ' ' +
+            data.ID_relationship.ID_userA.last_name,
+        );
+        setAvatar(data.ID_relationship.ID_userA.avatar);
+      }
+    }
+    if(data.type=='Đã thả biểu cảm vào bài viết của bạn'){
+      setName(data.ID_post_reaction.ID_user?.first_name + ' ' + data.ID_post_reaction.ID_user?.last_name)
+      setAvatar(data.ID_post_reaction.ID_user?.avatar);
+    }
+
   }, []);
 
   // Xác định màn hình cần chuyển đến dựa vào loại thông báo
@@ -122,7 +205,9 @@ const ItemNotification = ({data}) => {
           <View style={styles.container_name}>
             <Text style={styles.text_name}>{name}</Text>
             <Text style={styles.text_content}>
-              {data.content ??data.type ??'Bạn có thông báo mới'}
+              {
+                data.type == 'Đang livestream' ? 'Đang livestream' : (data.content ?? data.type ??'Bạn có thông báo mới')
+              }
             </Text>
           </View>
           <Text style={styles.text_time}>{timeAgo}</Text>
@@ -138,7 +223,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
     marginBottom: 13,
   },
   img: {

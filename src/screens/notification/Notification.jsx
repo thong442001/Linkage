@@ -4,22 +4,23 @@ import {View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, LayoutAn
 import {useSelector, useDispatch} from 'react-redux';
 import ItemNotification from '../../components/items/ItemNotification';
 import {getAllNotificationOfUser} from '../../rtk/API';
+import Icon from 'react-native-vector-icons/Ionicons'
+import { oStackHome } from '../../navigations/HomeNavigation';
 
-const Notification = () => {
-  const [notifications, setNotifications] = useState([]); // State chứa danh sách thông báo
-  const [expandedGroups, setExpandedGroups] = useState({}); // Trạng thái mở rộng từng nhóm
-
+const Notification = (props) => {
+  const [notifications, setNotifications] = useState([]); 
+  const [isExpanded, setIsExpanded] = useState(false); // ✅ Thêm state mở rộng
+ 
+  const {navigation} = props;
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
 
-    
   const callGetAllNotificationOfUser = async () => {
     try {
       await dispatch(getAllNotificationOfUser({me: me._id, token: token}))
         .unwrap()
         .then(response => {
-          console.log(response);
           setNotifications(response.notifications);
         })
         .catch(error => {
@@ -36,52 +37,39 @@ const Notification = () => {
     }, []),
   );
 
-  // Nhóm thông báo theo loại
-  const groupedNotifications = notifications.reduce((acc, item) => {
-    const type = item.type || 'Khác';
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(item);
-    return acc;
-  }, {});
-
-  // Hàm mở rộng nhóm thông báo
-  const toggleExpand = (type) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedGroups(prevState => ({
-      ...prevState,
-      [type]: !prevState[type]
-    }));
+  const toggleExpand = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // animation smooth
+    setIsExpanded(!isExpanded);
   };
+
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Thông báo</Text>
-      {Object.keys(groupedNotifications).map((type, index) => (
-        <View key={index} style={styles.categoryContainer}>
-          <Text style={styles.categoryTitle}>{type}</Text>
-          <FlatList
-            data={
-              expandedGroups[type]
-                ? groupedNotifications[type]
-                : groupedNotifications[type].slice(0, 4)
-            }
-            renderItem={({item}) => <ItemNotification data={item} />}
-            keyExtractor={(item, index) => index.toString()}
-            scrollEnabled={false} // ⚡ Ngăn FlatList cuộn, chỉ ScrollView cuộn
-          />
-          {groupedNotifications[type].length > 4 && (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => toggleExpand(type)}>
-              <Text style={styles.text_button}>
-                {expandedGroups[type] ? 'Ẩn bớt' : 'Xem thêm thông báo'}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      ))}
+      <View style={styles.header}>
+        <Text style={styles.title}>Thông báo</Text>
+        <TouchableOpacity  onPress={() => navigation.navigate(oStackHome.Search.name)}>
+        <Icon name="search-outline" size={30} color='black' />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.categoryContainer}>
+        <FlatList
+          data={isExpanded ? notifications : notifications.slice(0, 7)} // 👈 Toggle số lượng hiển thị
+          renderItem={({item}) => <ItemNotification data={item} />}
+          keyExtractor={(item, index) => index.toString()}
+          scrollEnabled={false}
+        />
+        {notifications.length > 7 && (
+          <TouchableOpacity style={styles.button} onPress={toggleExpand}>
+            <Text style={styles.text_button}>
+              {isExpanded ? 'Ẩn bớt' : 'Xem thêm thông báo'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </ScrollView>
   );
 };
+
 
 export default Notification;
 
@@ -90,9 +78,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingTop: 30,
+    paddingHorizontal:20
   },
   title: {
-    fontSize: 28,
+    fontSize: 25,
     fontWeight: 'bold',
     color: 'black',
     textAlign: 'center',
@@ -100,10 +89,9 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     marginBottom: 50,
-    paddingHorizontal: 10,
   },
   categoryTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
     marginBottom: 5,
@@ -122,4 +110,9 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: 'black',
   },
+  header:{
+    flexDirection: 'row',
+    justifyContent:'space-between',
+    alignItems:'center'
+  }
 });

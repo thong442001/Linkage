@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
+import { useSocket } from '../../context/socketContext'; // socket context của bạn
 
 const IncomingCallScreen = ({ route, navigation }) => {
   const { group, type } = route.params;
@@ -61,7 +62,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
       ringtoneRef.current.stop();
       ringtoneRef.current.release();
     }
-
+    if(group.isPrivate==true) {
     navigation.navigate('CallPage', {
       ID_group: group._id,
       id_user: me._id,
@@ -69,6 +70,15 @@ const IncomingCallScreen = ({ route, navigation }) => {
       status: type,
       MyAvatar: me.avatar,
     });
+  }else{
+    navigation.navigate('CallGroup', {  
+      ID_group: group._id,
+      id_user: me._id,
+      MyUsername: me.last_name,
+      status: type,
+      MyAvatar: me.avatar,
+    });
+  }
   };
 
   return (
