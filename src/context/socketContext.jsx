@@ -14,18 +14,21 @@ export const SocketProvider = ({ children }) => {
         if (!user || !user._id) return; // Chỉ khởi tạo khi có user
 
         console.log("🔄 Khởi tạo socket...");
-        const newSocket = io('https://linkage.id.vn', {
-            transports: ['websocket'],
-            reconnection: true,
-            reconnectionAttempts: 10,
-            reconnectionDelay: 3000,
-            reconnectionDelayMax: 10000,
-            timeout: 10000,
-            autoConnect: true,
-            forceNew: false,
-            withCredentials: true,
-            upgrade: true,
-        });
+        const newSocket = io(
+            //'http://192.168.1.20:3001',
+            'https://linkage.id.vn',
+            {
+                transports: ['websocket'],
+                reconnection: true,
+                reconnectionAttempts: 10,
+                reconnectionDelay: 3000,
+                reconnectionDelayMax: 10000,
+                timeout: 10000,
+                autoConnect: true,
+                forceNew: false,
+                withCredentials: true,
+                upgrade: true,
+            });
 
         setSocket(newSocket);
 

@@ -91,7 +91,7 @@ const Profile = props => {
         setSelectedImage(null);
         closeBottomSheet();
     };
-    
+
 
     const openBottomSheetAvatar = () => {
         if (stories?.stories.length > 0) {
@@ -288,7 +288,7 @@ const Profile = props => {
                 <View style={ProfileS.rectangle}>
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
-    
+
                 {/* Nếu là profile của mình thì hiển thị tùy chọn đổi ảnh đại diện */}
                 {user?._id === me?._id ? (
                     <>
@@ -300,7 +300,7 @@ const Profile = props => {
                             </View>
                             <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
                         </TouchableOpacity>
-    
+
                         <TouchableOpacity
                             style={ProfileS.option}
                             onPress={() => openImageModal(user?.avatar)}>
@@ -321,7 +321,7 @@ const Profile = props => {
                         <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
                     </TouchableOpacity>
                 )}
-    
+
                 {stories?.stories.length > 0 && (
                     <TouchableOpacity
                         style={ProfileS.option}
@@ -338,7 +338,7 @@ const Profile = props => {
             </View>
         );
     };
-    
+
     const detail_selection_background = () => {
         return (
             <View style={ProfileS.containerBottomSheet}>
@@ -346,17 +346,17 @@ const Profile = props => {
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
 
-                {user?._id === me?._id  &&(
-   <TouchableOpacity
-   style={ProfileS.option}
-   onPress={onOpenGalleryChangeBackground}>
-   <View style={ProfileS.anhBia}>
-       <Icon name="images" size={25} />
-   </View>
-   <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
-</TouchableOpacity>
+                {user?._id === me?._id && (
+                    <TouchableOpacity
+                        style={ProfileS.option}
+                        onPress={onOpenGalleryChangeBackground}>
+                        <View style={ProfileS.anhBia}>
+                            <Icon name="images" size={25} />
+                        </View>
+                        <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+                    </TouchableOpacity>
                 )}
-             
+
 
                 <TouchableOpacity
                     style={ProfileS.option}
@@ -902,8 +902,8 @@ const Profile = props => {
     };
 
 
-    
-    
+
+
     return (
         <View style={ProfileS.container}>
             <LoadingModal visible={isLoading} />
@@ -926,24 +926,24 @@ const Profile = props => {
             <View>
                 <View>
 
-                <View style={ProfileS.post}>
-    {loading ? (
-        <>
-            <ProfileLoading />
-            <FriendLoading/>
-        </>
-    ) : (
-        <FlatList
-            data={posts}    
-            renderItem={renderPosts}
-            keyExtractor={item => item._id}
-            showsHorizontalScrollIndicator={false}
-            ListHeaderComponent={headerFriends}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 50 }}
-        />
-    )}
-</View>
+                    <View style={ProfileS.post}>
+                        {loading ? (
+                            <>
+                                <ProfileLoading />
+                                <FriendLoading />
+                            </>
+                        ) : (
+                            <FlatList
+                                data={posts}
+                                renderItem={renderPosts}
+                                keyExtractor={item => item._id}
+                                showsHorizontalScrollIndicator={false}
+                                ListHeaderComponent={headerFriends}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingBottom: 50 }}
+                            />
+                        )}
+                    </View>
 
                 </View>
             </View>

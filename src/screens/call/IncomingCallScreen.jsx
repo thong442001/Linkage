@@ -9,7 +9,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const me = useSelector((state) => state.app.user);
-  
+
   const ringtoneRef = useRef(null); // Thêm useRef
 
   useEffect(() => {
@@ -22,10 +22,10 @@ const IncomingCallScreen = ({ route, navigation }) => {
     } else {
       setName(
         group.name ||
-          group.members
-            ?.filter((user) => user._id !== me._id)
-            .map((user) => `${user.first_name} ${user.last_name}`)
-            .join(', ')
+        group.members
+          ?.filter((user) => user._id !== me._id)
+          .map((user) => `${user.first_name} ${user.last_name}`)
+          .join(', ')
       );
       setAvatar(group.avatar || 'https://example.com/default-group-avatar.png');
     }
@@ -34,7 +34,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
   // Phát nhạc chuông khi nhận cuộc gọi
   useEffect(() => {
     const ringtone = new Sound(
-      'incoming_call', 
+      'incoming_call',
       Sound.ANDROID_RESOURCE,
       (error) => {
         if (error) {
@@ -46,7 +46,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
         ringtoneRef.current = ringtone; // Lưu vào useRef
       }
     );
-  
+
     return () => {
       if (ringtoneRef.current) {
         ringtoneRef.current.stop();

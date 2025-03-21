@@ -121,7 +121,7 @@ const PostDetail = (props) => {
   //call api chi tiet bai post
   const callAddComment = async (type, content) => {
     try {
-      if ((comment == null && type === 'text') || post == null) {
+      if ((content == null && type === 'text') || post == null) {
         console.log('thiếu ')
         return null;
       }
@@ -130,13 +130,13 @@ const PostDetail = (props) => {
         ID_post: post._id,
         content: content,
         type: type,
-        ID_comment_reply: reply || undefined,
+        ID_comment_reply: reply?._id || null,
       };
 
       await dispatch(addComment(paramsAPI))
         .unwrap()
         .then((response) => {
-          if (response.comment?.ID_comment_reply) {
+          if (response.comment.ID_comment_reply) {
             setComments((prevComments) => [...addReplyToComment(prevComments, response.comment)]);
           } else {
             setComments((prevComments) => [...prevComments, response.comment]);
@@ -146,7 +146,7 @@ const PostDetail = (props) => {
           setReply(null);
         })
         .catch((error) => {
-           console.log('Error1 addComment:', error);
+          console.log('Error1 addComment:', error);
         });
     } catch (error) {
       console.log('Lỗi khi callAddComment:', error);

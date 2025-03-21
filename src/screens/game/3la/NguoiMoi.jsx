@@ -6,7 +6,7 @@ import Sound from 'react-native-sound';
 import { useSocket } from '../../../context/socketContext';
 
 const NguoiMoi = ({ route, navigation }) => {
-  const { group, type } = route.params;
+  const { group } = route.params;
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const me = useSelector((state) => state.app.user);
@@ -18,7 +18,7 @@ const NguoiMoi = ({ route, navigation }) => {
   useEffect(() => {
     if (!group || !me) return;
 
-    socket.emit("joinGroup", group?.id);
+    socket.emit("joinGroup", group._id);
 
     if (group.isPrivate) {
       const otherUser = group.members?.find((user) => user._id !== me._id);

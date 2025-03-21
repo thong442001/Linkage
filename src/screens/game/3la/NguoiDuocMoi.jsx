@@ -6,7 +6,7 @@ import Sound from 'react-native-sound';
 import { useSocket } from '../../../context/socketContext';
 
 const NguoiDuocMoi = ({ route, navigation }) => {
-  const { group, type } = route.params;
+  const { group } = route.params;
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const me = useSelector((state) => state.app.user);
@@ -18,7 +18,7 @@ const NguoiDuocMoi = ({ route, navigation }) => {
   useEffect(() => {
     if (!group || !me) return;
 
-    socket.emit("joinGroup", group?.id);
+    socket.emit("joinGroup", group._id);
 
     if (group.isPrivate) {
       const otherUser = group.members?.find((user) => user._id !== me._id);
@@ -27,6 +27,7 @@ const NguoiDuocMoi = ({ route, navigation }) => {
     }
 
     socket.on("lang-nghe-chap-nhan-choi-game-3-la", ({ ID_group }) => {
+      console.log('chap-nhan-choi-game-3-la');
       navigation.navigate('InGame3La');
     });
 
@@ -36,7 +37,7 @@ const NguoiDuocMoi = ({ route, navigation }) => {
     });
 
     return () => {
-      //socket.off("lang-nghe-chap-nhan-choi-game-3-la");
+      socket.off("lang-nghe-chap-nhan-choi-game-3-la");
       socket.off("lang-nghe-tu-choi-choi-game-3-la");
     };
 
@@ -76,6 +77,7 @@ const NguoiDuocMoi = ({ route, navigation }) => {
       ID_group: group._id,
     }
     socket.emit('chap-nhan-choi-game-3-la', payload);
+
   };
 
   // Xử lý khi chấp nhận cuộc gọi
