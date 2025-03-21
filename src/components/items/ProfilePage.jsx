@@ -501,7 +501,7 @@ const PostItem = memo(({
                 {
                     post.ID_post_shared &&
                     <View>
-                        <View style={styles.header}>
+                        <View style={[styles.headerShare]}>
                             <View style={styles.userInfo}>
                                 <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                                 <View style={{ marginLeft: width * 0.01 }}>
@@ -765,7 +765,6 @@ const PostItem = memo(({
                                 hasCaption && <Text style={styles.caption}>{post.caption}</Text>
                             )
                     }
-
                 </View>
             </View>
             {
@@ -1006,8 +1005,10 @@ const styles = StyleSheet.create({
     header1: {
         backgroundColor: 'white',
         borderColor: 'gray',
-        borderWidth: 0.2,
-        borderRadius: 7,
+        borderWidth: 0.4,
+        borderTopLeftRadius: 7,
+        borderTopRightRadius: 7,
+        // borderRadius: 7,
         // shadowColor: '#000',
         // shadowOffset: { width: 0, height: 2 },
         // shadowOpacity: 0.25,
@@ -1022,7 +1023,26 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         // marginBottom: height * 0.015,
         marginHorizontal: width * 0.04, // 2.5% chiều rộng 
-        marginVertical: height * 0.015, // 1.5% chiều cao  
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
+    },
+    headerMainNull: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // marginBottom: height * 0.015,
+        marginHorizontal: width * 0.04, // 2.5% chiều rộng 
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
+    },
+    headerShare: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // marginBottom: height * 0.015,
+        marginHorizontal: width * 0.04, // 2.5% chiều rộng 
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
     },
     footer: {
         flexDirection: 'row',

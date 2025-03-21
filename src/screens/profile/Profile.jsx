@@ -866,7 +866,7 @@ const Profile = props => {
                                         style={ProfileS.avataStatus}
                                         source={{ uri: user?.avatar }}
                                     />
-                                    <Text style={{ fontSize: 13, marginLeft: 10 }}>
+                                    <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
                                         Bạn đang nghĩ gì?
                                     </Text>
                                 </View>
