@@ -1,9 +1,9 @@
 import React from 'react';
-import { Modal, View } from 'react-native';
+import { Modal, View, Text } from 'react-native';
 import LottieView from 'lottie-react-native';
-import styles from './LoadingModalStyles';
+import styles from './LoadingPostStyles';
 
-const LoadingModal = ({ visible }) => {
+const LoadingPostModal = ({ visible, message }) => {
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
       <View style={styles.modalBackground}>
@@ -11,12 +11,12 @@ const LoadingModal = ({ visible }) => {
           source={require('./loading.json')} 
           autoPlay
           loop
-          style={styles.loadingAnimation}
-
+          style={styles.successAnimation}
         />
+        <Text style={styles.successMessage}>{message}</Text>
       </View>
     </Modal>
   );
 };
 
-export default LoadingModal;
+export default LoadingPostModal;

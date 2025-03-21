@@ -115,6 +115,7 @@ const Login = (props) => {
   const handleGoogleLogin = async () => {
     try {
       // Đăng xuất trước để chọn lại tài khoản
+      setLoading(true);
       await GoogleSignin.signOut();
       await GoogleSignin.hasPlayServices();
 
@@ -125,6 +126,7 @@ const Login = (props) => {
 
       if (!idToken) {
         console.log("Không lấy được ID Token!");
+        setLoading(false); 
         return;
       }
 
@@ -136,7 +138,10 @@ const Login = (props) => {
       onLoginGG({ email: user.email, name: user.displayName, picture: user.photoURL, fcmToken: fcmToken });
 
     } catch (error) {
-      console.error("Lỗi đăng nhập:", error.message);
+      console.log("Lỗi đăng nhập:", error.message);
+    }
+    finally {
+      setLoading(false);  
     }
   };
 
@@ -182,10 +187,11 @@ const Login = (props) => {
           <Text style={styles.forgotPasswordText}>Bạn quên mật khẩu ư?</Text>
         </Pressable>
         {/* loginGG */}
-        <Button
-          title="Đăng nhập Google"
-          onPress={handleGoogleLogin}
-        />
+        <View style={{alignItems: 'center', justifyContent: 'center'}}>
+            <TouchableOpacity onPress={handleGoogleLogin} style={{padding: 5, borderRadius: 25}}>
+            <Image source={require('../../../assets/images/google.png')} style={styles.socialIcon} />
+            </TouchableOpacity>
+        </View>
       </View>
 
       <ButtonCreateNewAccount onPress={() => navigation.navigate('Screen1')} />

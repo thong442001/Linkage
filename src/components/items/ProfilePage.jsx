@@ -33,6 +33,7 @@ const PostItem = memo(({
     onDeleteVinhVien = () => { },
     updatePostReaction = () => { },
     deletPostReaction = () => { },
+    currentTime
 }) => {
     const navigation = useNavigation();
     const me = useSelector(state => state.app.user)
@@ -327,7 +328,9 @@ const PostItem = memo(({
         // const interval = setInterval(updateDiff, 1000);
 
         // return () => clearInterval(interval);
-    }, []);
+    }, [currentTime]);
+
+
 
     const callAddPost_Reaction = async (ID_reaction, name, icon) => {
         try {
@@ -493,287 +496,307 @@ const PostItem = memo(({
 
     return (
         <View style={styles.postContainer}>
-            {/* Header share  */}
-            {
-                post.ID_post_shared &&
-                <View>
-                    <View style={styles.header}>
-                        <View style={styles.userInfo}>
-                            <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                            <View style={{ marginLeft: width * 0.01 }}>
-                                <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
-                                <View style={styles.boxName}>
-                                    <Text style={styles.time}>{timeAgo}</Text>
-                                    {/* <Icon name="earth" size={12} color="gray" /> */}
-                                    {
-                                        getIcon(post.status)
-                                    }
+            <View>
+                {/* Header share  */}
+                {
+                    post.ID_post_shared &&
+                    <View>
+                        <View style={[styles.headerShare]}>
+                            <View style={styles.userInfo}>
+                                <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                                <View style={{ marginLeft: width * 0.01 }}>
+                                    <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                                    <View style={styles.boxName}>
+                                        <Text style={styles.time}>{timeAgo}</Text>
+                                        {/* <Icon name="earth" size={12} color="gray" /> */}
+                                        {
+                                            getIcon(post.status)
+                                        }
+                                    </View>
+
                                 </View>
 
                             </View>
 
-                        </View>
-
-                        <TouchableOpacity
-                            onPress={() =>
-                                openBottomSheet(
-                                    25,
-                                    <View>
-                                        {
-                                            ID_user != post.ID_user._id
-                                                ? (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            callAddReport_post()
-                                                            closeBottomSheet()
-                                                        }}
-                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                        <Text style={[styles.deleteText,]}
-                                                        >{
-                                                                !post._destroy
-                                                                && (
-                                                                    "Báo cáo"
-                                                                )
-                                                            }
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                ) : (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            onDelete()
-                                                            closeBottomSheet()
-                                                        }}
-                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                        <Text style={[styles.deleteText,]}
-                                                        >{
-                                                                post._destroy ? (
-                                                                    "Phục hồi"
-                                                                ) : "Xóa bài viết"
-                                                            }
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )
-                                        }
-
-                                        {
-                                            (post._destroy && ID_user == post.ID_user._id)
-                                            && (
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        onDeleteVinhVien()
-                                                        closeBottomSheet()
-                                                    }}
-                                                    style={styles.deleteButton}>
-                                                    <Text style={styles.deleteText}
-                                                    >Xóa vĩnh viễn
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            )
-                                        }
-                                    </View>,
-                                )
-                            }
-
-                        >
-                            <Icon name="ellipsis-horizontal" size={22} color="black" />
-                        </TouchableOpacity>
-                    </View>
-                    <View>
-                        {
-                            hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>
-                        }
-                    </View>
-                </View>
-            }
-            {/* Header goc  */}
-            <View style={post.ID_post_shared ? styles.header1 : styles.header2} >
-                <View style={styles.header}>
-                    <View style={{ padding: 10 }}>
-                        {
-                            post.ID_post_shared
-                                ?
-                                <View style={styles.userInfo}>
-                                    <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
-                                    <View style={{ marginLeft: width * 0.01 }}>
-                                        <Text style={styles.name}>
-                                            {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
-                                            {post.ID_post_shared.tags.length > 0 && (
-                                                <Text>
-                                                    <Text style={{ color: 'gray' }}> cùng với </Text>
-                                                    <Text onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.tags[0]._id })} style={[styles.name]}>
-                                                        {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
-                                                    </Text>
-                                                    {post.ID_post_shared.tags.length > 1 && (
-                                                        <>
-                                                            <Text style={{ color: 'gray' }}> và </Text>
-                                                            <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
-                                                                {post.ID_post_shared.tags.length - 1} người khác
-                                                            </Text>
-                                                        </>
-                                                    )}
-                                                </Text>
-                                            )}
-                                        </Text>
-                                        {/* <Text style={styles.name}>{post.ID_post_shared.ID_user.first_name + " " + post.ID_post_shared.ID_user.last_name}</Text> */}
-                                        <View style={styles.boxName}>
-                                            <Text style={styles.time}>{timeAgoShare}</Text>
-                                            {/* <Icon name="earth" size={12} color="gray" /> */}
-                                            {
-                                                getIcon(post.ID_post_shared.status)
-                                            }
-                                        </View>
-                                    </View>
-                                </View>
-                                :
-                                <View style={styles.userInfo}>
-                                    <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                                    <View style={{ marginLeft: width * 0.01 }}>
-                                        <Text style={styles.name}>
-                                            {post.ID_user.first_name} {post.ID_user.last_name}
-                                            {post.tags.length > 0 && (
-                                                <Text>
-                                                    <Text style={{ color: 'gray' }}> cùng với </Text>
-                                                    <Text onPress={() => navigation.navigate('Profile', { _id: post.tags[0]._id })} style={[styles.name]}>
-                                                        {post.tags[0]?.first_name} {post.tags[0]?.last_name}
-                                                    </Text>
-                                                    {post.tags.length > 1 && (
-                                                        <>
-                                                            <Text style={{ color: 'gray' }}> và </Text>
-                                                            <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
-                                                                {post.tags.length - 1} người khác
-                                                            </Text>
-                                                        </>
-                                                    )}
-                                                </Text>
-                                            )}
-                                        </Text>
-                                        {/* <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text> */}
-                                        <View style={styles.boxName}>
-                                            <Text style={styles.time}>{timeAgo}</Text>
-                                            {/* <Icon name="earth" size={12} color="gray" /> */}
-                                            {
-                                                getIcon(post.status)
-                                            }
-                                        </View>
-                                    </View>
-                                </View>
-                        }
-                    </View>
-
-
-                    <View>
-
-                    </View>
-                    {
-                        !post.ID_post_shared &&
-                        <TouchableOpacity
-                            onPress={() =>
-                                openBottomSheet(
-                                    25,
-                                    <View>
-                                        {
-                                            ID_user != post.ID_user._id
-                                                ? (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            callAddReport_post()
-                                                            closeBottomSheet()
-                                                        }}
-                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                        <Text style={[styles.deleteText,]}
-                                                        >{
-                                                                !post._destroy
-                                                                && (
-                                                                    "Báo cáo"
-                                                                )
-                                                            }
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                ) : (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            onDelete(),
-                                                                closeBottomSheet()
-                                                        }}
-                                                        style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                        <Text style={[styles.deleteText,]}
-                                                        >{
-                                                                post._destroy ? (
-                                                                    "Phục hồi"
-                                                                ) : "Xóa bài viết"
-                                                            }
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )
-                                        }
-
-                                        {
-                                            (post._destroy && ID_user == post.ID_user._id)
-                                            && (
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        onDeleteVinhVien()
-                                                        closeBottomSheet()
-                                                    }}
-                                                    style={styles.deleteButton}>
-                                                    <Text style={styles.deleteText}
-                                                    >Xóa vĩnh viễn
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            )
-                                        }
-                                    </View>,
-                                )
-                            }
-
-                        >
-                            <Icon name="ellipsis-horizontal" size={22} color="black" />
-                        </TouchableOpacity>
-                    }
-                </View>
-                {
-                    post?.ID_post_shared
-                        ? (
-                            <Text style={styles.caption}>{post.ID_post_shared.caption}</Text>
-                        )
-                        :
-                        (
-                            hasCaption && <Text style={styles.caption}>{post.caption}</Text>
-                        )
-                }
-                {
-                    post?.ID_post_shared
-                        ? (
-                            hasMedia && renderMediaGrid(post.ID_post_shared.medias)
-                        )
-                        :
-                        (
-                            hasMedia && renderMediaGrid(post.medias)
-                        )
-                }
-            </View>
-
-            <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center' }}>
-                {/* reactions of post */}
-                {
-                    post.post_reactions.length > 0 && (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <TouchableOpacity
-                                style={{ flexDirection: "row", alignItems: "center" }}
-                                onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                                onPress={() =>
+                                    openBottomSheet(
+                                        25,
+                                        <View>
+                                            {
+                                                ID_user != post.ID_user._id
+                                                    ? (
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                //onDelete(),
+                                                                closeBottomSheet()
+                                                            }}
+                                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                                            <Text style={[styles.deleteText,]}
+                                                            >{
+                                                                    !post._destroy
+                                                                    && (
+                                                                        "Báo cáo"
+                                                                    )
+                                                                }
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    ) : (
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                onDelete(),
+                                                                    closeBottomSheet()
+                                                            }}
+                                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                                                            <Text style={[styles.deleteText,]}
+                                                            >{
+                                                                    post._destroy ? (
+                                                                        "Phục hồi"
+                                                                    ) : "Xóa bài viết"
+                                                                }
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    )
+                                            }
+
+                                            {
+                                                (post._destroy && ID_user == post.ID_user._id)
+                                                && (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            onDeleteVinhVien()
+                                                            closeBottomSheet()
+                                                        }}
+                                                        style={styles.deleteButton}>
+                                                        <Text style={styles.deleteText}
+                                                        >Xóa vĩnh viễn
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            }
+                                        </View>,
+                                    )
+                                }
+
                             >
-                                {
-                                    topReactions.map((reaction, index) => (
-                                        <Text key={index} style={{ color: 'black' }}>
-                                            {reaction.ID_reaction.icon}
-                                        </Text>
-                                    ))}
+                                <Icon name="ellipsis-horizontal" size={22} color="black" />
                             </TouchableOpacity>
                         </View>
-                    )}
+                        <View>
+                            {
+                                hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>
+                            }
+                        </View>
+                    </View>
+                }
+                {/* Header goc  */}
+                <View style={post.ID_post_shared ? styles.header1 : styles.header2} >
+                    <View style={styles.header}>
+                        <View>
+                            {
+                                post.ID_post_shared
+                                    ?
+                                    <View style={styles.userInfo}>
+                                        <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
+                                        <View style={{ marginLeft: width * 0.01 }}>
+                                            <Text style={styles.name}>
+                                                {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
+                                                {post.ID_post_shared.tags.length > 0 && (
+                                                    <Text>
+                                                        <Text style={{ color: 'gray' }}> cùng với </Text>
+                                                        <Text onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.tags[0]._id })} style={[styles.name]}>
+                                                            {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
+                                                        </Text>
+                                                        {post.ID_post_shared.tags.length > 1 && (
+                                                            <>
+                                                                <Text style={{ color: 'gray' }}> và </Text>
+                                                                <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
+                                                                    {post.ID_post_shared.tags.length - 1} người khác
+                                                                </Text>
+                                                            </>
+                                                        )}
+                                                    </Text>
+                                                )}
+                                            </Text>
+                                            {/* <Text style={styles.name}>{post.ID_post_shared.ID_user.first_name + " " + post.ID_post_shared.ID_user.last_name}</Text> */}
+                                            <View style={styles.boxName}>
+                                                <Text style={styles.time}>{timeAgoShare}</Text>
+                                                {/* <Icon name="earth" size={12} color="gray" /> */}
+                                                {
+                                                    getIcon(post.ID_post_shared.status)
+                                                }
+                                            </View>
+                                        </View>
+                                    </View>
+                                    :
+                                    <View style={styles.userInfo}>
+                                        <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                                        <View style={{ marginLeft: width * 0.01 }}>
+                                            <Text style={styles.name}>
+                                                {post.ID_user.first_name} {post.ID_user.last_name}
+                                                {post.tags.length > 0 && (
+                                                    <Text>
+                                                        <Text style={{ color: 'gray' }}> cùng với </Text>
+                                                        <Text onPress={() => navigation.navigate('Profile', { _id: post.tags[0]._id })} style={[styles.name]}>
+                                                            {post.tags[0]?.first_name} {post.tags[0]?.last_name}
+                                                        </Text>
+                                                        {post.tags.length > 1 && (
+                                                            <>
+                                                                <Text style={{ color: 'gray' }}> và </Text>
+                                                                <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
+                                                                    {post.tags.length - 1} người khác
+                                                                </Text>
+                                                            </>
+                                                        )}
+                                                    </Text>
+                                                )}
+                                            </Text>
+                                            {/* <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text> */}
+                                            <View style={styles.boxName}>
+                                                <Text style={styles.time}>{timeAgo}</Text>
+                                                {/* <Icon name="earth" size={12} color="gray" /> */}
+                                                {
+                                                    getIcon(post.status)
+                                                }
+                                            </View>
+                                        </View>
+                                    </View>
+                            }
+                        </View>
 
+                        {
+                            !post.ID_post_shared &&
+                            <TouchableOpacity
+                                onPress={() =>
+                                    openBottomSheet(
+                                        17,
+                                        <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
+                                            {
+                                                ID_user != post.ID_user._id
+                                                    ? (
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                //onDelete(),
+                                                                closeBottomSheet()
+                                                            }}
+                                                            style={[styles.deleteButton]}>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                <View>
+                                                                    <Icon name="alert-circle" size={20} color="black" />
+                                                                </View>
+                                                                <Text style={[styles.deleteText,]}>
+                                                                    {
+                                                                        !post._destroy
+                                                                        && (
+                                                                            "Báo cáo"
+                                                                        )
+                                                                    }
+                                                                </Text>
+                                                            </View>
+
+                                                        </TouchableOpacity>
+                                                    ) : (
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                onDelete(),
+                                                                    closeBottomSheet()
+                                                            }}
+                                                            style={[styles.deleteButton]}>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                {
+                                                                    post._destroy ?
+                                                                        <View>
+                                                                            <Icon name="refresh-sharp" size={20} color="black" />
+                                                                        </View>
+                                                                        :
+                                                                        <View>
+                                                                            <Icon name="trash" size={20} color="black" />
+                                                                        </View>
+                                                                }
+                                                                <Text style={[styles.deleteText,]}>
+                                                                    {
+                                                                        post._destroy ? (
+                                                                            "Phục hồi"
+                                                                        ) : "Xóa bài viết"
+                                                                    }
+                                                                </Text>
+                                                            </View>
+
+                                                        </TouchableOpacity>
+                                                    )
+                                            }
+
+                                            {
+                                                (post._destroy && ID_user == post.ID_user._id)
+                                                && (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            onDeleteVinhVien()
+                                                            closeBottomSheet()
+                                                        }}
+                                                        style={styles.deleteButton}>
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                            <View>
+                                                                <Icon name="trash" size={20} color="black" />
+                                                            </View>
+                                                            <Text style={styles.deleteText}
+                                                            >Xóa vĩnh viễn
+                                                            </Text>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                )
+                                            }
+                                        </View>,
+                                    )
+                                }
+
+                            >
+                                <Icon name="ellipsis-horizontal" size={22} color="black" />
+                            </TouchableOpacity>
+                        }
+                    </View>
+                    {
+                        post?.ID_post_shared
+                            ? (
+                                <Text style={styles.caption}>{post.ID_post_shared.caption}</Text>
+                            )
+                            :
+                            (
+                                hasCaption && <Text style={styles.caption}>{post.caption}</Text>
+                            )
+                    }
+                </View>
+            </View>
+            {
+                post?.ID_post_shared
+                    ? (
+                        hasMedia && renderMediaGrid(post.ID_post_shared.medias)
+                    )
+                    :
+                    (
+                        hasMedia && renderMediaGrid(post.medias)
+                    )
+            }
+            <View style={styles.footer}>
+                {/* reactions of post */}
+                {post.post_reactions.length > 0 ? (
+                    <View style={styles.footer2}>
+                        <TouchableOpacity
+                            style={{ flexDirection: "row", alignItems: "center" }}
+                            onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                        >
+                            {topReactions.map((reaction, index) => (
+                                <Text key={index} style={{ color: 'black' }}>
+                                    {reaction.ID_reaction.icon}
+                                </Text>
+                            ))}
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <View style={{ flex: 1 }} /> // Thêm View rỗng để giữ khoảng trống
+                )}
                 {/* số lượng bình luận luôn sát bên phải */}
-                <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                <View>
                     {post?.comments.length > 0 && (
                         <Text style={styles.slReactionsOfPost}>
                             {post?.comments.length} bình luận
@@ -782,25 +805,19 @@ const PostItem = memo(({
                 </View>
             </View>
 
-
-
-
             {
                 !post._destroy &&
                 <View style={styles.interactions}>
                     <TouchableOpacity
-                        ref={reactionRef} // Gắn ref vào đây
-                        style={[
-                            styles.action,
-                            userReaction &&
-                            { backgroundColor: 'white' }
-                        ]}
-                        onLongPress={() => {
-                            handleLongPress();
-                        }}
-                        onPress={() => userReaction
-                            ? callDeletePost_reaction(post._id, userReaction._id)
-                            : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+                        delayLongPress={200}
+                        delayPressOut={0}
+                        ref={reactionRef}
+                        style={[styles.action, userReaction && { backgroundColor: 'white' }]}
+                        onLongPress={handleLongPress}
+                        onPress={() =>
+                            userReaction
+                                ? callDeletePost_reaction(post._id, userReaction._id)
+                                : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
                         }
                     >
                         {/* <Icon2 name="like" size={25} color="black" /> */}
@@ -814,8 +831,7 @@ const PostItem = memo(({
                                 styles.actionText,
                                 userReaction &&
                                 { color: '#FF9D00' }
-                            ]}
-                        >
+                            ]}>
                             {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
                         </Text>
                     </TouchableOpacity>
@@ -982,19 +998,21 @@ const PostItem = memo(({
 const styles = StyleSheet.create({
     postContainer: {
         backgroundColor: '#fff',
-        padding: width * 0.025, // 2.5% chiều rộng màn hình
-        marginBottom: height * 0.015, // 1.5% chiều cao màn hình
+        // padding: width * 0.025, // 2.5% chiều rộng màn hình
+        marginBottom: height * 0.005, // 1.5% chiều cao màn hình
     },
     header1: {
         backgroundColor: 'white',
-        borderColor: 'black',
-        borderWidth: 0.2,
-        borderRadius: 7,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5, // Dành cho Android
+        borderColor: 'gray',
+        borderWidth: 0.4,
+        borderTopLeftRadius: 7,
+        borderTopRightRadius: 7,
+        // borderRadius: 7,
+        // shadowColor: '#000',
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 0.25,
+        // shadowRadius: 3.84,
+        // elevation: 5, // Dành cho Android
     },
     header2: {
     },
@@ -1002,7 +1020,39 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: height * 0.015,
+        // marginBottom: height * 0.015,
+        marginHorizontal: width * 0.04, // 2.5% chiều rộng 
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
+    },
+    headerMainNull: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // marginBottom: height * 0.015,
+        marginHorizontal: width * 0.04, // 2.5% chiều rộng 
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
+    },
+    headerShare: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // marginBottom: height * 0.015,
+        marginHorizontal: width * 0.04, // 2.5% chiều rộng 
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
+    },
+    footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: width * 0.04,
+        justifyContent: 'space-between',
+        marginTop: height * 0.015,
+    },
+    footer2: {
+        // marginTop: height * 0.02,
+        // alignItems:'center'
     },
     avatar: {
         width: width * 0.11, // 11% chiều rộng màn hình
@@ -1011,7 +1061,6 @@ const styles = StyleSheet.create({
     },
     userInfo: {
         flex: 1,
-        marginLeft: width * 0.01,
         alignItems: 'center',
         flexDirection: 'row'
     },
@@ -1025,21 +1074,21 @@ const styles = StyleSheet.create({
         color: 'grey',
     },
     name: {
-        fontSize: width * 0.04, // 4% chiều rộng màn hình
-        fontWeight: 'bold',
+        fontSize: width * 0.045, // 4% chiều rộng màn hình
+        fontWeight: '500',
         color: 'black',
         width: width * 0.6
     },
     caption: {
         marginBottom: height * 0.015,
-        fontSize: width * 0.035, // 3.5% chiều rộng màn hình
+        fontSize: width * 0.045, // 4% chiều rộng màn hình
         color: 'black',
         marginLeft: width * 0.04
     },
     mediaContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     singleMedia: {
         width: '100%',
@@ -1123,33 +1172,33 @@ const styles = StyleSheet.create({
     },
     interactions: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         marginTop: height * 0.015,
         paddingVertical: height * 0.015,
         borderTopWidth: 0.5,
         borderTopColor: '#ddd',
+        marginHorizontal: width * 0.04,
     },
     action: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     actionText: {
-        marginLeft: width * 0.015,
         fontSize: width * 0.035,
         color: 'black',
+        marginLeft: width * 0.01,
     },
     deleteButton: {
         paddingVertical: 10,
         paddingHorizontal: 15,
-        backgroundColor: '#ff4d4d', // Màu nền đỏ
         borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10,
+        // alignItems: 'center',
     },
     deleteText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: 'white', // Màu chữ trắng
+        color: 'black', // Màu chữ trắng
+        marginLeft: 10
     },
     //reaction
     reactionBar: {
@@ -1178,7 +1227,8 @@ const styles = StyleSheet.create({
     },
     slReactionsOfPost: {
         color: 'black',
-        marginHorizontal: 5,
+        // flex: 'flex-end',
+        flexDirection: 'flex-start',
     },
     //modal share
     overlay1: {

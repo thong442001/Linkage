@@ -18,6 +18,7 @@ import {
     addComment_Reaction, // api tạo comment_reaction
     deleteComment_reaction, // api delete reaction
 } from '../../rtk/API';
+import Svg, { Path } from 'react-native-svg';
 const ListComment = memo(({ comment, onReply }) => {
 
     const dispatch = useDispatch()
@@ -219,10 +220,27 @@ const ListComment = memo(({ comment, onReply }) => {
         />
     ), [onReply]);
 
+    const baseHeight = 25; // Chiều cao của đường kẻ cho reply đầu tiên
+    const extraHeight = 110; // Khoảng cách tăng thêm cho mỗi reply sau đó
+    const totalHeight = baseHeight + (replys.length - 1) * extraHeight;
+
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: 'row', marginHorizontal: 5 }}>
-                <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
+                <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
+
+                    {/* Kiểm tra nếu có replys thì mới hiển thị đường kẻ */}
+                    {replys.length > 0 && (
+                        <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
+                            <Svg height={totalHeight} width="20">
+                                <Path d={`M 4 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
+                            </Svg>
+                        </View>
+                    )}
+                </View>
+
+
                 <View style={{ maxWidth: "90%" }}>
                     <View>
                         <View style={styles.boxContent}>

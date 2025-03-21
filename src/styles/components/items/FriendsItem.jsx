@@ -1,6 +1,8 @@
 import {StyleSheet} from 'react-native';
 const styles = StyleSheet.create({
   container: {
+    marginVertical: 5,
+    borderRadius: 10,
     flexDirection: 'row',
     padding: 10,
   },

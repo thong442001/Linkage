@@ -13,11 +13,11 @@ const ProfileS = StyleSheet.create({
         height: height * 0.05,
     },
     containerBottomSheet: {
-        backgroundColor: "#ffffff",
-        borderTopLeftRadius: width * 0.2,
-        borderTopRightRadius: width * 0.2,
+        backgroundColor: "#d9d9d960",
+        borderRadius: width * 0.05,
         paddingVertical: width * 0.05,
         paddingHorizontal: width * 0.05,
+        marginTop: height * 0.02,
     },
     rectangle: {
         alignItems: "center",

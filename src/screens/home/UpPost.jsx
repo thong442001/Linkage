@@ -43,6 +43,11 @@ const UpPost = (props) => {
     const [loading, setLoading] = useState(false);
     const [modalVisibleAI, setModalVisibleAI] = useState(false);
 
+
+    const [loadingUpload, setLoadingUpload] = useState(false);
+    const [isPosting, setIsPosting] = useState(false);
+
+
     // Mô hình tạo ảnh
     const MODEL_URL = 'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5';
     const API_KEY = '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'; // Thay bằng API key của bạn
@@ -230,6 +235,7 @@ const UpPost = (props) => {
     // Hàm tải lên một file lên Cloudinary
     const uploadFile = async (file) => {
         try {
+            setLoadingUpload(true);
             const data = new FormData();
             data.append('file', {
                 uri: file.uri,
@@ -239,31 +245,36 @@ const UpPost = (props) => {
             data.append('upload_preset', 'ml_default');
 
             const response = await axios.post('https://api.cloudinary.com/v1_1/ddbolgs7p/upload', data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
 
             const fileUrl = response.data.secure_url;
             console.log('🌍 Link file Cloudinary:', fileUrl);
-            return fileUrl; // Trả về URL file đã tải lên
+            return fileUrl;
         } catch (error) {
             console.log('uploadFile -> ', error.response ? error.response.data : error.message);
             console.log("Lỗi khi tải file");
-            return null; // Trả về null nếu có lỗi
+            return null;
+        } finally {
+            setLoadingUpload(false);
         }
     };
+
 
     // Hàm tải lên nhiều file cùng lúc
     const uploadMultipleFiles = async (files) => {
         try {
+            setLoadingUpload(true);
             const uploadedUrls = await Promise.all(files.map(file => uploadFile(file)));
-            const validUrls = uploadedUrls.filter(url => url !== null); // Loại bỏ file lỗi
-            setMedias(prev => [...prev, ...validUrls]); // Cập nhật danh sách medias
+            const validUrls = uploadedUrls.filter(url => url !== null);
+            setMedias(prev => [...prev, ...validUrls]);
         } catch (error) {
             console.log('uploadMultipleFiles -> ', error);
+        } finally {
+            setLoadingUpload(false);
         }
     };
+
 
     // Mở thư viện và chọn nhiều ảnh/video
     const onOpenGallery = async () => {
@@ -293,29 +304,40 @@ const UpPost = (props) => {
     //call api addPost
     const callAddPost = async () => {
         if (caption == '' && medias.length == 0) {
-            console.log('chưa có dữ liệu');
+            console.log('Chưa có dữ liệu');
             return;
         }
-        const paramsAPI = {
-            ID_user: me._id,
-            caption: caption,
-            medias: medias,
-            status: selectedOption.name,
-            type: typePost,
-            ID_post_shared: null,
-            tags: tags,
+        
+        setIsPosting(true); // Bật trạng thái đăng bài
+        
+        try {
+            const paramsAPI = {
+                ID_user: me._id,
+                caption: caption,
+                medias: medias,
+                status: selectedOption.name,
+                type: typePost,
+                ID_post_shared: null,
+                tags: tags,
+            };
+            
+            console.log("Push", paramsAPI);
+            await dispatch(addPost(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    console.log(response);
+                    navigation.goBack();
+                })
+                .catch((error) => {
+                    console.log('Error addPost:', error);
+                });
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsPosting(false); // Tắt trạng thái đăng bài sau khi xong
         }
-        console.log("push", paramsAPI);
-        await dispatch(addPost(paramsAPI))
-            .unwrap()
-            .then((response) => {
-                console.log(response)
-                navigation.goBack()
-            })
-            .catch((error) => {
-                console.log('Error1 addPost:', error);
-            });
-    }
+    };
+    
 
     const handleSelectOption = (option) => {
         setSelectedOption(option);
@@ -356,12 +378,15 @@ const UpPost = (props) => {
                     <Text style={UpPostS.txtCreate}>Tạo bài viết</Text>
                 </View>
                 <TouchableOpacity
-                    style={(caption == '' && medias.length == 0) ? UpPostS.btnPost : UpPostS.btnPost2}
+                    style={(caption == '' && medias.length == 0) || isPosting ? UpPostS.btnPost : UpPostS.btnPost2}
                     onPress={callAddPost}
-                    disabled={caption == '' && medias.length == 0} // Nếu caption rỗng thì không nhấn được
+                    disabled={(caption == '' && medias.length == 0) || isPosting}
                 >
-                    {/* hi */}
-                    <Text style={(caption == '' && medias.length == 0) ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
+                    {isPosting ? (
+                        <ActivityIndicator size="small" color="white" />
+                    ) : (
+                        <Text style={(caption == '' && medias.length == 0) ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
+                    )}
                 </TouchableOpacity>
             </View>
             <View style={UpPostS.line}></View>
@@ -475,6 +500,14 @@ const UpPost = (props) => {
                 </View>
             </View>
             {/* Modal để hiển thị danh sách */}
+
+
+            {loadingUpload && (
+                <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -25, marginTop: -25 }}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+            )}
+
             < Modal
                 transparent={true}  // Cho phép nền của modal trong suốt, giúp nhìn thấy nền bên dưới modal.
                 visible={modalVisible}  // Điều khiển việc modal có hiển thị hay không dựa trên trạng thái `modalVisible`.

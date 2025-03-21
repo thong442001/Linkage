@@ -289,9 +289,8 @@ const AppNavigation = () => {
           }
 
           if (
-            notification?.type === "Đang livestream" &&
-            notification?.ID_user &&
-            notification?.content
+            notification?.type === "Đang livestream"
+            && notification?.content
           ) {
             const sender = notification.ID_user;
             const content = notification.content;
@@ -300,7 +299,7 @@ const AppNavigation = () => {
 
 
             if (sender) {
-              return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đang phát trực tiếp'
+              return `${sender.first_name || ''} ${sender.last_name || ''} ${'đang phát trực tiếp'
                 }`;
             }
 

@@ -3,6 +3,13 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 const HomeS = StyleSheet.create({
+   
+    line: {
+        height: 0.5,  // hoặc 1 nếu bạn muốn đường kẻ dày hơn
+        width: '100%',
+        backgroundColor: 'gray',
+        marginVertical: 5, // khoảng cách trên dưới đường kẻ, bạn có thể điều chỉnh
+      },
     noPostsContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -14,19 +21,18 @@ const HomeS = StyleSheet.create({
         color: 'gray',
     },
     container: {
-        flex: 1,
-        backgroundColor: "#D9D9D9D9"
+        backgroundColor: "#ECEAEA"
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: height * 0.01,
+        marginVertical: height * 0.01,
         marginHorizontal: width * 0.05,
     },
     box: {
+        marginVertical: 5,
         backgroundColor: "#fff",
-        marginBottom: height * 0.005
     },
     box1: {
         backgroundColor: "#fff",
@@ -47,7 +53,7 @@ const HomeS = StyleSheet.create({
         paddingLeft: width * 0.04,
     },
     line: {
-        height: 0.5,
+        height: 0.6,
         width: '100%',
         backgroundColor: 'gray',
     },
