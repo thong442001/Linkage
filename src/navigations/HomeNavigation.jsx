@@ -1,5 +1,8 @@
-import React from 'react'
-import FontAwesome from 'react-native-vector-icons/Ionicons';
+import React, { useEffect, useRef, useState } from 'react'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
@@ -20,83 +23,153 @@ const oTab = {
 
 const Tab = createBottomTabNavigator();
 
+
+const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
+  return (
+    <Animated.View
+      style={[
+        styles.tabBarContainer,
+        {
+          transform: [
+            {
+              translateY: tabAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [100, 0],
+              }),
+            },
+          ],
+          opacity: tabAnimation,
+        },
+      ]}
+    >
+      <View style={styles.tabBarContent}>
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
+          };
+
+            // Xác định bộ icon và tên icon
+            let iconComponent;
+            let iconName;
+            if (route.name === 'Home') {
+              iconComponent = Feather;
+              iconName = 'home';
+            } else if (route.name === 'Friend') {
+              iconComponent = FontAwesome;
+              iconName = 'user-o';
+            } else if (route.name === 'Notification') {
+              iconComponent = FontAwesome;
+              iconName = 'bell-o';
+            } else if (route.name === 'Profile') {
+              iconComponent = FontAwesome;
+              iconName = 'user-circle-o';
+            } else if (route.name === 'Setting') {
+              iconComponent = MaterialIcons;
+              iconName = 'settings';
+            }
+  
+            const Icon = iconComponent; // Gán component icon cho tab
+  
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={styles.tabButton}
+            >
+              <Icon
+                name={iconName}
+                size={28}
+                color={isFocused ? '#0064E0' : '#8e8e93'}
+              />
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </Animated.View>
+  );
+};
+
 const TabHome = () => {
   const me = useSelector(state => state.app.user);
+  const [isTabVisible, setTabVisible] = useState(true);
+  const [shouldHide, setShouldHide] = useState(false); // Quản lý việc ẩn
+
+   // Khai báo Animated.Value cho tabAnimation, mặc định hiển thị (1)
+   const tabAnimation = useRef(new Animated.Value(1)).current;
+
+   // Khi isTabVisible thay đổi, chạy animation
+   useEffect(() => {
+     Animated.timing(tabAnimation, {
+       toValue: isTabVisible ? 1 : 0,
+       duration: 400,
+       useNativeDriver: true,
+     }).start();
+   }, [isTabVisible, tabAnimation]);
+ 
+   // Hàm điều khiển hiển thị Bottom Tab
+   const handleScroll = (visible) => {
+     setTabVisible(visible);
+   };
   //console.log(theme);
   return (
     <Tab.Navigator
       initialRouteName='Home'
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let name;
-          if (route.name === 'Home') {
-            name = "home-outline"
-            color = focused
-              ? "#0064E0"
-              : "black"
-            size = 30
-          } else if (route.name === 'Friend') {
-            name = "people-outline";
-            color = focused
-              ? "#0064E0"
-              : "black"
-            size = 30
-          } else if (route.name === 'Notification') {
-            name = "notifications-outline";
-            color = focused
-              ? "#0064E0"
-              : "black"
-            size = 30
-          } else if (route.name === 'Profile') {
-            name = "person-outline";
-            color = focused
-              ? "#0064E0"
-              : "black"
-            size = 30
-          } else if (route.name === 'Setting') {
-            name = "settings-outline";
-            color = focused
-              ? "#0064E0"
-              : "black"
-            size = 30
-          }
+      tabBar={(props) => <CustomTabBar {...props} tabAnimation={tabAnimation} />}
 
-          return <FontAwesome name={name} size={size} color={color} />;
-        },
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: '#D17842',
         tabBarActiveBackgroundColor: "white",
         tabBarInactiveBackgroundColor: "white",
-        //ẩn bottom khi bàn phím xuất hiện
         tabBarHideOnKeyboard: true,
-
       })}
     >
-      {
-        Object.keys(oTab).map((item, index) => {
-          if (oTab[item].name == 'Profile') {
-            return <Tab.Screen
+      {Object.keys(oTab).map((item, index) => {
+        if (oTab[item].name === 'Profile') {
+          return (
+            <Tab.Screen
               key={index}
               name={oTab[item].name}
               component={oTab[item].component}
               options={{ title: "" }}
               listeners={({ navigation }) => ({
                 tabPress: (e) => {
-                  e.preventDefault(); // Chặn mặc định
-                  navigation.navigate("Profile", { _id: me._id }); // Reset về profile của chính bạn
+                  e.preventDefault();
+                  navigation.navigate("Profile", { _id: me._id });
                 },
               })}
             />
-          } else {
-            return <Tab.Screen
+          );
+        } else {
+          return (
+            <Tab.Screen
               key={index}
               name={oTab[item].name}
               component={oTab[item].component}
               options={{ title: "" }}
+              initialParams={{ handleScroll }} // Truyền hàm handleScroll vào Home nếu cần
             />
-          }
-        })
-      }
+          );
+        }
+      })}
       {/* <Tab.Screen name="Home" component={Home} options={{ title: '' }} />
       <Tab.Screen name="Search" component={Search} options={{ title: '' }} />
       <Tab.Screen name="AddPostNavigation" component={AddPostNavigation} options={{ title: '' }} />
@@ -136,6 +209,8 @@ import AudienceScreen from '../screens/live/AudienceScreen';
 import IncomingCallScreen from '../screens/call/IncomingCallScreen';
 import InGame3La from '../screens/game/3la/InGame3La';
 import NguoiDuocMoi from '../screens/game/3la/NguoiDuocMoi';
+import NguoiMoi from '../screens/game/3la/NguoiMoi';
+import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -169,6 +244,7 @@ const oStackHome = {
   IncomingCallScreen: { name: 'IncomingCallScreen', component: IncomingCallScreen },
   InGame3La: { name: 'InGame3La', component: InGame3La },
   NguoiDuocMoi: { name: 'NguoiDuocMoi', component: NguoiDuocMoi },
+  NguoiMoi: { name: 'NguoiMoi', component: NguoiMoi },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -217,3 +293,25 @@ const HomeNavigation = () => {
 
 export { oTab, oStackHome }
 export default HomeNavigation
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    position: 'absolute',
+    bottom: 20, 
+    left: 20,
+    right: 20,
+    backgroundColor: 'white',
+    borderRadius: 30,
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+      paddingVertical: 10,
+  },
+  tabBarContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  tabButton: {
+    alignItems: 'center',
+    flex: 1,
+  },
+});
