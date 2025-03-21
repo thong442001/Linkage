@@ -91,12 +91,12 @@ const Profile = props => {
         setSelectedImage(null);
         closeBottomSheet();
     };
-    
+
 
     const openBottomSheetAvatar = () => {
         if (stories?.stories.length > 0) {
             // Nếu có story, mở Bottom Sheet với thêm tùy chọn xem story
-            openBottomSheet(30, detail_selection_image());
+            openBottomSheet(35, detail_selection_image());
         } else {
             // Nếu không có story, chỉ mở Bottom Sheet với các tùy chọn hình ảnh
             openBottomSheet(22, detail_selection_image());
@@ -280,65 +280,64 @@ const Profile = props => {
             callAllProfile(); // Gọi API load dữ liệu
         }, [params?._id, me])
     );
-
     //bottom sheet
     const detail_selection_image = () => {
         return (
-            <View style={ProfileS.containerBottomSheet}>
+            <View>
                 <View style={ProfileS.rectangle}>
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
-    
-                {/* Nếu là profile của mình thì hiển thị tùy chọn đổi ảnh đại diện */}
-                {user?._id === me?._id ? (
-                    <>
-                        <TouchableOpacity
-                            style={ProfileS.option}
-                            onPress={onOpenGalleryChangeAvatar}>
-                            <View style={ProfileS.anhBia}>
-                                <Icon name="images" size={25} />
-                            </View>
-                            <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
-                        </TouchableOpacity>
-    
+                <View style={ProfileS.containerBottomSheet}>
+                    {/* Nếu là profile của mình thì hiển thị tùy chọn đổi ảnh đại diện */}
+                    {user?._id === me?._id ? (
+                        <>
+                            <TouchableOpacity
+                                style={ProfileS.option}
+                                onPress={onOpenGalleryChangeAvatar}>
+                                <View style={ProfileS.anhBia}>
+                                    <Icon name="image" size={25} color="black" />
+                                </View>
+                                <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={ProfileS.option}
+                                onPress={() => openImageModal(user?.avatar)}>
+                                <View style={ProfileS.anhBia}>
+                                    <Icon name="person-circle-outline" size={25} color="black" />
+                                </View>
+                                <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
+                            </TouchableOpacity>
+                        </>
+                    ) : (
+                        // Nếu là profile người khác, chỉ hiển thị modal xem ảnh
                         <TouchableOpacity
                             style={ProfileS.option}
                             onPress={() => openImageModal(user?.avatar)}>
                             <View style={ProfileS.anhBia}>
-                                <Icon name="images" size={25} />
+                                <Icon name="person-circle-outline" size={25} color="black" />
                             </View>
                             <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
                         </TouchableOpacity>
-                    </>
-                ) : (
-                    // Nếu là profile người khác, chỉ hiển thị modal xem ảnh
-                    <TouchableOpacity
-                        style={ProfileS.option}
-                        onPress={() => openImageModal(user?.avatar)}>
-                        <View style={ProfileS.anhBia}>
-                            <Icon name="images" size={25} />
-                        </View>
-                        <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
-                    </TouchableOpacity>
-                )}
-    
-                {stories?.stories.length > 0 && (
-                    <TouchableOpacity
-                        style={ProfileS.option}
-                        onPress={() => {
-                            closeBottomSheet();
-                            navigation.navigate('StoryViewer', { StoryView: stories });
-                        }}>
-                        <View style={ProfileS.anhBia}>
-                            <Icon name="images" size={25} />
-                        </View>
-                        <Text style={ProfileS.optionText}>Xem story</Text>
-                    </TouchableOpacity>
-                )}
+                    )}
+                    {stories?.stories.length > 0 && (
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={() => {
+                                closeBottomSheet();
+                                navigation.navigate('StoryViewer', { StoryView: stories });
+                            }}>
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="radio-button-on" size={25} color="black" />
+                            </View>
+                            <Text style={ProfileS.optionText}>Xem story</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
         );
     };
-    
+
     const detail_selection_background = () => {
         return (
             <View style={ProfileS.containerBottomSheet}>
@@ -346,17 +345,17 @@ const Profile = props => {
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
 
-                {user?._id === me?._id  &&(
-   <TouchableOpacity
-   style={ProfileS.option}
-   onPress={onOpenGalleryChangeBackground}>
-   <View style={ProfileS.anhBia}>
-       <Icon name="images" size={25} />
-   </View>
-   <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
-</TouchableOpacity>
+                {user?._id === me?._id && (
+                    <TouchableOpacity
+                        style={ProfileS.option}
+                        onPress={onOpenGalleryChangeBackground}>
+                        <View style={ProfileS.anhBia}>
+                            <Icon name="images" size={25} />
+                        </View>
+                        <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+                    </TouchableOpacity>
                 )}
-             
+
 
                 <TouchableOpacity
                     style={ProfileS.option}
@@ -902,8 +901,8 @@ const Profile = props => {
     };
 
 
-    
-    
+
+
     return (
         <View style={ProfileS.container}>
             <LoadingModal visible={isLoading} />
@@ -926,24 +925,24 @@ const Profile = props => {
             <View>
                 <View>
 
-                <View style={ProfileS.post}>
-    {loading ? (
-        <>
-            <ProfileLoading />
-            <FriendLoading/>
-        </>
-    ) : (
-        <FlatList
-            data={posts}    
-            renderItem={renderPosts}
-            keyExtractor={item => item._id}
-            showsHorizontalScrollIndicator={false}
-            ListHeaderComponent={headerFriends}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 50 }}
-        />
-    )}
-</View>
+                    <View style={ProfileS.post}>
+                        {loading ? (
+                            <>
+                                <ProfileLoading />
+                                <FriendLoading />
+                            </>
+                        ) : (
+                            <FlatList
+                                data={posts}
+                                renderItem={renderPosts}
+                                keyExtractor={item => item._id}
+                                showsHorizontalScrollIndicator={false}
+                                ListHeaderComponent={headerFriends}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingBottom: 50 }}
+                            />
+                        )}
+                    </View>
 
                 </View>
             </View>
