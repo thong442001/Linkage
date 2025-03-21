@@ -46,7 +46,14 @@ const Search = props => {
   const clearHistorySearch = () => {
     setModalVisible(true);
   };
-
+  const normalizeText = (text) => {
+    return text
+        .toLowerCase()
+        .normalize('NFD') // Tách dấu ra khỏi chữ
+        .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D');
+};
   const handleSearch = query => {
     setSearchQuery(query);
     if (query === '') {
@@ -56,9 +63,9 @@ const Search = props => {
       setIsSearching(true);
       setFilteredProducts(
         data.filter(user =>
-          (user.first_name + ' ' + user.last_name)
+          normalizeText((user.first_name + ' ' + user.last_name))
             .toLowerCase()
-            .includes(query.toLowerCase()),
+            .includes(normalizeText(query).toLowerCase()),
         ),
       );
     }
