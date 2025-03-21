@@ -81,27 +81,14 @@ const Chat = (props) => {// cần ID_group (param)
     // call video
     const onCallvieo = () => {
         if (!group) return;
-        if (group.isPrivate == true) {
-            callNotiCall(group._id, me._id, true);
-            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar });
-        } else {
-            callNotiCall(group._id, me._id, true);
-            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: true, MyAvatar: myAvatar });
-        }
+        callNotiCall(group._id, me._id, true);
+        navigation.navigate("Ringing",{ID_group:params?.ID_group,status:true});
     };
     // call audio
     const onCallAudio = () => {
         if (!group) return;
-        if (group.isPrivate == true) {
-            callNotiCall(group._id, me._id, false);
-            console.log("canhphan", group._id);
-            navigation.navigate("CallPage", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: false, MyAvatar: myAvatar });
-
-        } else {
-            callNotiCall(group._id, me._id, false);
-            navigation.navigate("CallGroup", { ID_group: group._id, id_user: ID_user, MyUsername: myUsername, status: false, MyAvatar: myAvatar });
-
-        }
+        callNotiCall(group._id, me._id, false);
+        navigation.navigate("Ringing",{ID_group:params?.ID_group,status:false});
     };
 
     //up lên cloudiary
