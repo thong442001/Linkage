@@ -831,8 +831,7 @@ const PostItem = memo(({
                                 styles.actionText,
                                 userReaction &&
                                 { color: '#FF9D00' }
-                            ]}
-                        >
+                            ]}>
                             {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
                         </Text>
                     </TouchableOpacity>

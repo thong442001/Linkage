@@ -11,14 +11,17 @@ export default function AudienceScreen(props) {
   const { liveID, userName, userID } = route.params;
   const navigation = useNavigation();
   const prebuiltRef = useRef();
-  const [isLiveEnded, setIsLiveEnded] = useState(false);
+  const [isHostOnline, setIsHostOnline] = useState(false);
 
   useEffect(() => {
     const liveRef = database().ref(`/liveSessions/${liveID}`);
 
     liveRef.on('value', snapshot => {
-      if (!snapshot.exists()) {
-        setIsLiveEnded(true);
+      const sessionData = snapshot.val();
+      if (sessionData && sessionData.isHostOnline) {
+        setIsHostOnline(true);  // Host đang online
+      } else {
+        setIsHostOnline(false);  // Host offline hoặc phiên live đã kết thúc
       }
     });
 
@@ -74,24 +77,19 @@ export default function AudienceScreen(props) {
 
       {/* Màn hình Live Streaming của Zego */}
       <View style={styles.liveContainer}>
-        <ZegoUIKitPrebuiltLiveStreaming
-          ref={prebuiltRef}
-          userID={userID}
-          appID={Keycenter.appID}
-          appSign={Keycenter.appSign}
-          userName={userName}
-          liveID={liveID}
-          config={{
-            ...AUDIENCE_DEFAULT_CONFIG,
-            onLeaveLiveStreaming: () => {
-              navigation.goBack()
-            },
-          }}
-        />
-        {/* Khi phiên live kết thúc, overlay hiển thị */}
-        {isLiveEnded && (
+        {isHostOnline ? (
+          <ZegoUIKitPrebuiltLiveStreaming
+            ref={prebuiltRef}
+            userID={userID}
+            appID={Keycenter.appID}
+            appSign={Keycenter.appSign}
+            userName={userName}
+            liveID={liveID}
+            config={AUDIENCE_DEFAULT_CONFIG}
+          />
+        ) : (
           <View style={styles.overlay}>
-            <Text style={styles.liveEndedText}>Phiên live đã kết thúc</Text>
+            <Text style={styles.liveEndedText}>Host chưa online hoặc phiên live đã kết thúc</Text>
           </View>
         )}
       </View>

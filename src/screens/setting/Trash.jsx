@@ -10,6 +10,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
 import { useFocusEffect } from '@react-navigation/native';
+import LottieView from 'lottie-react-native'; // Import Lottie
 
 const Trash = props => {
   const { route, navigation } = props;
@@ -25,7 +26,6 @@ const Trash = props => {
     }, [])
   );
 
-  //call api callGetPostsUserIdDestroyTrue
   const callGetPostsUserIdDestroyTrue = async (ID_user) => {
     try {
       await dispatch(getPostsUserIdDestroyTrue({ me: ID_user, token: token }))
@@ -44,8 +44,6 @@ const Trash = props => {
 
   const callDeletePost = async (ID_post) => {
     try {
-      //console.log('Xóa bài viết với ID:', ID_post);
-
       await dispatch(deletePost({ _id: ID_post }))
         .unwrap()
         .then(response => {
@@ -53,7 +51,7 @@ const Trash = props => {
           setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
         })
         .catch(error => {
-          console.log('Lỗi khi xóa ĩnh viễn bài viết:', error);
+          console.log('Lỗi khi xóa vĩnh viễn bài viết:', error);
         });
     } catch (error) {
       console.log('Lỗi trong callDeletePost:', error);
@@ -62,8 +60,6 @@ const Trash = props => {
 
   const callChangeDestroyPost = async (ID_post) => {
     try {
-      console.log('Xóa bài viết với ID:', ID_post);
-
       await dispatch(changeDestroyPost({ _id: ID_post }))
         .unwrap()
         .then(response => {
@@ -81,68 +77,90 @@ const Trash = props => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={30} color="#000" />
-      </TouchableOpacity>
-      <View>
-        <View style={styles.post}>
-          {posts && posts.length > 0 ? (
-            <FlatList
-              data={posts}
-              renderItem={({ item }) =>
-                //console.log('📌 Post data thùng rác   :', item);
-                <ProfilePage
-                  post={item}
-                  ID_user={me._id}
-                  onDelete={() => callChangeDestroyPost(item._id)}
-                  onDeleteVinhVien={() => callDeletePost(item._id)}
-                />
-              }
-              keyExtractor={item => item._id}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 3 }}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Thùng rác</Text>
+      </View>
+      <View style={styles.post}>
+        {posts && posts.length > 0 ? (
+          <FlatList
+            data={posts}
+            renderItem={({ item }) =>
+              <ProfilePage
+
+                post={item}
+                ID_user={me._id}
+                onDelete={() => callChangeDestroyPost(item._id)}
+                onDeleteVinhVien={() => callDeletePost(item._id)}
+              />
+            }
+            keyExtractor={item => item._id}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 3 }}
+          />
+        ) : (
+          <View style={styles.emptyContainer}>
+            <LottieView
+              source={require('../../utils/animation/bin/bin.json')}
+              autoPlay
+              loop
+              style={styles.lottieAnimation}
             />
-          ) : (
-            <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 16, color: 'gray' }}>
-              Chưa có bài nào
-            </Text>
-          )}
-        </View>
+            <Text style={styles.emptyText}>Chưa có bài nào</Text>
+          </View>
+        )}
       </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    backgroundColor: '#e6eaec',
+    borderRadius: 10, // Bo góc cho header
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    marginBottom: 20, // Khoảng cách giữa header và nội dung
   },
   backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 10,
-    backgroundColor: 'transparent', // Xóa nền để phù hợp với màu đen
-    padding: 10,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginRight: 10,
   },
-  title: {
-    fontSize: 22,
+  headerTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: 20,
+    color: 'black', // Màu trắng cho chữ trong header
   },
-
+  post: {
+    flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  lottieAnimation: {
+    width: 200, // Điều chỉnh kích thước animation
+    height: 200,
+  },
   emptyText: {
     textAlign: 'center',
-    marginTop: 20,
     fontSize: 16,
     color: 'gray',
   },
 });
+
 export default Trash;

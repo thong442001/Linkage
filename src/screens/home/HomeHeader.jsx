@@ -13,7 +13,7 @@ const HomeHeader = ({ navigation, me, headerTranslate }) => {
           position: 'absolute',
           left: 0,
           right: 0,
-          zIndex: 10,
+          zIndex: 1,
           transform: [{ translateY: headerTranslate }],
         },
       ]}>
