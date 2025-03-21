@@ -16,6 +16,7 @@ const Ringing = props => {
   const [ID_user, setID_user] = useState(null);
   const [myUsername, setmyUsername] = useState(null);
   const [myAvatar, setmyAvatar] = useState(null);
+  //hàm vào cuộc gọi
     const onCall =() => {
         if (!group) return;
         if (group.isPrivate ==true){
