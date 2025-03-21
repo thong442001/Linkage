@@ -71,10 +71,9 @@ const FriendRequestItem = props => {
               {data.ID_userA.first_name} {data.ID_userA.last_name}
             </Text>
           )}
-          <Text style={styles.sentTime}>{timeAgo}</Text>
         </View>
         <View>
-          <Text style={styles.mutualFriends}> Bạn chung</Text>
+          <Text style={styles.mutualFriends}>{timeAgo}</Text>
         </View>
         <View style={styles.actions}>
           <TouchableOpacity

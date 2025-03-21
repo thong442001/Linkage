@@ -24,6 +24,7 @@ const oTab = {
 const Tab = createBottomTabNavigator();
 
 
+
 const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
   return (
     <Animated.View
@@ -47,6 +48,7 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
           const { options } = descriptors[route.key];
           const isFocused = state.index === index;
 
+          // Điều hướng tab
           const onPress = () => {
             const event = navigation.emit({
               type: 'tabPress',
@@ -65,28 +67,55 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
             });
           };
 
-            // Xác định bộ icon và tên icon
-            let iconComponent;
-            let iconName;
-            if (route.name === 'Home') {
-              iconComponent = Feather;
-              iconName = 'home';
-            } else if (route.name === 'Friend') {
-              iconComponent = FontAwesome;
-              iconName = 'user-o';
-            } else if (route.name === 'Notification') {
-              iconComponent = FontAwesome;
-              iconName = 'bell-o';
-            } else if (route.name === 'Profile') {
-              iconComponent = FontAwesome;
-              iconName = 'user-circle-o';
-            } else if (route.name === 'Setting') {
-              iconComponent = MaterialIcons;
-              iconName = 'settings';
+          // Xác định bộ icon và tên icon
+          let iconComponent;
+          let iconName;
+          if (route.name === 'Home') {
+            iconComponent = Feather;
+            iconName = 'home';
+          } else if (route.name === 'Friend') {
+            iconComponent = FontAwesome;
+            iconName = 'user-o';
+          } else if (route.name === 'Notification') {
+            iconComponent = FontAwesome;
+            iconName = 'bell-o';
+          } else if (route.name === 'Profile') {
+            iconComponent = FontAwesome;
+            iconName = 'user-circle-o';
+          } else if (route.name === 'Setting') {
+            iconComponent = MaterialIcons;
+            iconName = 'settings';
+          }
+          const Icon = iconComponent;
+
+          // Animated.Value để điều khiển hiệu ứng fade + scale
+          const circleAnim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
+
+          useEffect(() => {
+            // Khi tab được focus => circleAnim = 1, ngược lại = 0
+            if (isFocused) {
+              Animated.timing(circleAnim, {
+                toValue: 1,
+                duration: 300,
+                easing: Easing.out(Easing.circle),
+                useNativeDriver: true,
+              }).start();
+            } else {
+              Animated.timing(circleAnim, {
+                toValue: 0,
+                duration: 300,
+                easing: Easing.in(Easing.circle),
+                useNativeDriver: true,
+              }).start();
             }
-  
-            const Icon = iconComponent; // Gán component icon cho tab
-  
+          }, [isFocused, circleAnim]);
+
+          // Style vòng tròn: scale + opacity
+          const circleStyle = {
+            transform: [{ scale: circleAnim }],
+            opacity: circleAnim,
+          };
+
           return (
             <TouchableOpacity
               key={index}
@@ -94,11 +123,16 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
               onLongPress={onLongPress}
               style={styles.tabButton}
             >
-              <Icon
-                name={iconName}
-                size={28}
-                color={isFocused ? '#0064E0' : '#8e8e93'}
-              />
+              <View style={styles.iconWrapper}>
+                {/* Vòng tròn màu nằm dưới icon */}
+                <Animated.View style={[styles.circle, circleStyle]} />
+                <Icon
+                  name={iconName}
+                  size={26}
+                  color={isFocused ? '#fff' : '#8e8e93'}
+                  style={styles.iconStyle}
+                />
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -106,6 +140,7 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
     </Animated.View>
   );
 };
+
 
 const TabHome = () => {
   const me = useSelector(state => state.app.user);
@@ -210,7 +245,7 @@ import IncomingCallScreen from '../screens/call/IncomingCallScreen';
 import InGame3La from '../screens/game/3la/InGame3La';
 import NguoiDuocMoi from '../screens/game/3la/NguoiDuocMoi';
 import NguoiMoi from '../screens/game/3la/NguoiMoi';
-import { Animated, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -297,14 +332,12 @@ export default HomeNavigation
 const styles = StyleSheet.create({
   tabBarContainer: {
     position: 'absolute',
-    bottom: 20, 
+    bottom: 20,
     left: 20,
     right: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#f4f6f7',
     borderRadius: 30,
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-      paddingVertical: 10,
+    paddingVertical: 10,
   },
   tabBarContent: {
     flexDirection: 'row',
@@ -313,5 +346,23 @@ const styles = StyleSheet.create({
   tabButton: {
     alignItems: 'center',
     flex: 1,
+  },
+
+  iconWrapper: {
+    width: 40,  // đủ lớn để chứa vòng tròn
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  circle: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#48b9f2', // màu tùy chỉnh
+  },
+  iconStyle: {
+    zIndex: 1, // icon nằm trên vòng tròn
   },
 });

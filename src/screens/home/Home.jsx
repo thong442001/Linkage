@@ -232,17 +232,23 @@ const Home = props => {
                 useNativeDriver: true,
                 listener: (event) => {
                   const currentScrollY = event.nativeEvent.contentOffset.y;
-                  if (currentScrollY - previousScrollY.current > 0) {
-                    // Cuộn xuống => Ẩn Bottom Tab
-                    props.route.params.handleScroll(false);
-                  } else if (currentScrollY - previousScrollY.current < 0) {
-                    // Cuộn lên => Hiện Bottom Tab
+                  // Nếu cuộn quá thấp thì hiển thị bottom tab
+                  if (currentScrollY < 50) {
                     props.route.params.handleScroll(true);
+                  } else {
+                    if (currentScrollY - previousScrollY.current > 0) {
+                      // Cuộn xuống => Ẩn bottom tab
+                      props.route.params.handleScroll(false);
+                    } else if (currentScrollY - previousScrollY.current < 0) {
+                      // Cuộn lên => Hiện bottom tab
+                      props.route.params.handleScroll(true);
+                    }
                   }
-                  previousScrollY.current = currentScrollY; // Cập nhật giá trị cuộn trước đó
+                  previousScrollY.current = currentScrollY;
                 },
               }
             )}
+            
             scrollEventThrottle={16}
           />
         </>
