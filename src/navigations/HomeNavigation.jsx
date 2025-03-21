@@ -134,7 +134,9 @@ import HomeLive from '../screens/live/HomeLive';
 import HostLive from '../screens/live/HostLive';
 import AudienceScreen from '../screens/live/AudienceScreen';
 import IncomingCallScreen from '../screens/call/IncomingCallScreen';
-
+import InGame3La from '../screens/game/3la/InGame3La';
+import NguoiDuocMoi from '../screens/game/3la/NguoiDuocMoi';
+import NguoiMoi from '../screens/game/3la/NguoiMoi';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
@@ -165,6 +167,9 @@ const oStackHome = {
   HomeLive: { name: 'HomeLive', component: HomeLive },
   AudienceScreen: { name: 'AudienceScreen', component: AudienceScreen },
   IncomingCallScreen: { name: 'IncomingCallScreen', component: IncomingCallScreen },
+  InGame3La: { name: 'InGame3La', component: InGame3La },
+  NguoiDuocMoi: { name: 'NguoiDuocMoi', component: NguoiDuocMoi },
+  NguoiMoi: { name: 'NguoiMoi', component: NguoiMoi },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
