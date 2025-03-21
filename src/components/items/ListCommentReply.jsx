@@ -257,6 +257,13 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
                                 </Svg>
                             </View>
                         )}
+                        {replys.length > 0 && level >=3 && (
+                            <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
+                                <Svg height={totalHeight} width="20">
+                                    <Path d={`M 2 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
+                                </Svg>
+                            </View>
+                        )}
                     </View>
 
                 </View>
