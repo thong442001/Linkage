@@ -18,7 +18,7 @@ const NguoiDuocMoi = ({ route, navigation }) => {
   useEffect(() => {
     if (!group || !me) return;
 
-    socket.emit("joinGroup", group?.id);
+    socket.emit("joinGroup", group?._id);
 
     if (group.isPrivate) {
       const otherUser = group.members?.find((user) => user._id !== me._id);

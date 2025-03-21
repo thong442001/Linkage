@@ -93,7 +93,7 @@ const HomeChat = ({ route, navigation }) => {
     return (
         <View style={styles.container}>
             <View style={styles.vHeader}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={() => navigation.navigate('TabHome')}>
                     <MaterialIcons name="arrow-back-ios-new" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.header}>Đoạn chat</Text>

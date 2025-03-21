@@ -4,19 +4,16 @@ const { width, height } = Dimensions.get('window');
 const CommentS = StyleSheet.create({
     postContainer: {
         backgroundColor: '#fff',
-        padding: width * 0.025, // 2.5% chiều rộng màn hình
-        marginBottom: height * 0.015, // 1.5% chiều cao màn hình
+        // padding: width * 0.025, // 2.5% chiều rộng màn hình
+        marginBottom: height * 0.005, // 1.5% chiều cao màn hình
     },
     header1: {
         backgroundColor: 'white',
-        borderColor: 'black',
-        borderWidth: 0.2,
-        borderRadius: 7,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5, // Dành cho Android
+        borderColor: 'gray',
+        borderWidth: 0.4,
+        // borderRadius: 7,
+        borderTopLeftRadius: 7,
+        borderTopRightRadius: 7,
     },
     header2: {
     },
@@ -47,16 +44,22 @@ const CommentS = StyleSheet.create({
         color: 'grey',
     },
     name: {
-        fontSize: width * 0.04, // 4% chiều rộng màn hình
+        fontSize: width * 0.045, // 4% chiều rộng màn hình
         fontWeight: 'bold',
         color: 'black',
         width: width * 0.6
     },
     caption: {
         marginBottom: height * 0.015,
-        fontSize: width * 0.035, // 3.5% chiều rộng màn hình
+        fontSize: width * 0.045, // 3.5% chiều rộng màn hình
         color: 'black',
         marginLeft: width * 0.04
+    },
+    captionShare: {
+        marginBottom: height * 0.015,
+        fontSize: width * 0.045, // 3.5% chiều rộng màn hình
+        color: 'black',
+        // marginLeft: width * 0.04
     },
     mediaContainer: {
         flexDirection: 'row',
@@ -521,32 +524,32 @@ const CommentS = StyleSheet.create({
     },
     // chi tiet anh
     mediaItemDetail: {
-        width: "100%", 
+        width: "100%",
         height: 300, // Đặt chiều cao cố định hoặc dùng "auto" nếu muốn theo tỷ lệ
         marginBottom: 10, // Khoảng cách giữa các ảnh
-      },
-      imageDetail: {
+    },
+    imageDetail: {
         width: "100%",
         height: "100%",
         // borderRadius: 10, // Bo góc nhẹ
-      },
-      videoWrapperDetail: {
+    },
+    videoWrapperDetail: {
         width: "100%",
         height: "100%",
         position: "relative",
-      },
-      videoDetail: {
+    },
+    videoDetail: {
         width: "100%",
         height: "100%",
         // borderRadius: 10,
-      },
-      playButtonDetail: {
+    },
+    playButtonDetail: {
         position: "absolute",
         top: "50%",
         left: "50%",
         transform: [{ translateX: -20 }, { translateY: -20 }],
-      },
-      overlayDetail: {
+    },
+    overlayDetail: {
         position: "absolute",
         top: 0,
         left: 0,
@@ -556,12 +559,12 @@ const CommentS = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
-      },
-      overlayTextDetail: {
+    },
+    overlayTextDetail: {
         color: "white",
         fontSize: 24,
         fontWeight: "bold",
-      },
+    },
 });
 
 

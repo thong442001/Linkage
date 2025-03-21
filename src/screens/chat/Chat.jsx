@@ -446,7 +446,7 @@ const Chat = (props) => {// cần ID_group (param)
     const onToGame3La = () => {
         const payload = {
             ID_group: params.ID_group,
-            ID_user: me._id,
+            me: me._id,
         };
         socket.emit('moi-choi-game-3-la', payload);
         navigation.navigate("NguoiMoi", { group: group });

@@ -205,43 +205,67 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
     };
 
     const renderReply = useCallback(({ item }) => (
-        <ListCommentReply comment={item} onReply={(e) => onReply(e)} isReply={true} level={1} />
+        <ListCommentReply comment={item} onReply={(e) => onReply(e)} isReply={true} level={level + 1} />
     ), [onReply]);
 
+    const baseHeight = 30; // Chiều cao của đường kẻ cho reply đầu tiên
+    const extraHeight = 110; // Khoảng cách tăng thêm cho mỗi reply sau đó
+    const totalHeight = baseHeight + (replys.length - 1) * extraHeight;
 
     return (
         <View style={[styles.container, level > 0 && styles.replyContainer]}>
-            <View style={{ flexDirection: 'row', marginTop: 10, maxWidth: "78%", paddingLeft: level === 1 ? 20 : 0 }}>
+            <View style={{ flexDirection: 'row', marginTop: 10, maxWidth: "78%", paddingLeft: level === 1 ? 20 : level === 2 ? 80 : 130 }}>
                 <View style={{ flexDirection: 'row' }}>
                     {/* Đường kẻ vuông góc dưới bên trái */}
-                    <Svg height="50" width="50">
-                        {/* Đoạn thẳng đi xuống */}
-                        <Path
-                            d="M 2 0 V 20"
-                            stroke="gray"
-                            strokeWidth="1"
-                            fill="transparent"
-                        />
-                        {/* Đoạn cong bo góc */}
-                        <Path
-                            d="M 2 17 Q 2 30 20 30"
-                            stroke="gray"
-                            strokeWidth="1"
-                            fill="transparent"
-                        />
-                        {/* Đoạn thẳng đi ngang */}
-                        <Path
-                            d="M 20 30 H 45"
-                            stroke="gray"
-                            strokeWidth="1"
-                            fill="transparent"
-                        />
-                    </Svg>
+                    {
+                        level <= 2 && (
+                            <Svg height="50" width="50">
+                                {/* Đoạn thẳng đi xuống */}
+                                <Path
+                                    d="M 2 0 V 20"
+                                    stroke="gray"
+                                    strokeWidth="1"
+                                    fill="transparent"
+                                />
+                                {/* Đoạn cong bo góc */}
+                                <Path
+                                    d="M 2 17 Q 2 30 20 30"
+                                    stroke="gray"
+                                    strokeWidth="1"
+                                    fill="transparent"
+                                />
+                                {/* Đoạn thẳng đi ngang */}
+                                <Path
+                                    d="M 20 30 H 45"
+                                    stroke="gray"
+                                    strokeWidth="1"
+                                    fill="transparent"
+                                />
+                            </Svg>
+                        )
+                    }
+
 
                     {/* Avatar */}
-                    <View>
+                    <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                         <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
+                        {/* Kiểm tra nếu có replys thì mới hiển thị đường kẻ */}
+                        {replys.length > 0 && level <= 2 && (
+                            <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
+                                <Svg height={totalHeight} width="20">
+                                    <Path d={`M 2 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
+                                </Svg>
+                            </View>
+                        )}
+                        {replys.length > 0 && level >=3 && (
+                            <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
+                                <Svg height={totalHeight} width="20">
+                                    <Path d={`M 2 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
+                                </Svg>
+                            </View>
+                        )}
                     </View>
+
                 </View>
 
                 <View >

@@ -501,7 +501,7 @@ const PostItem = memo(({
                 {
                     post.ID_post_shared &&
                     <View>
-                        <View style={styles.header}>
+                        <View style={[styles.headerShare]}>
                             <View style={styles.userInfo}>
                                 <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
                                 <View style={{ marginLeft: width * 0.01 }}>
@@ -669,8 +669,8 @@ const PostItem = memo(({
                             <TouchableOpacity
                                 onPress={() =>
                                     openBottomSheet(
-                                        25,
-                                        <View>
+                                        17,
+                                        <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
                                             {
                                                 ID_user != post.ID_user._id
                                                     ? (
@@ -679,15 +679,21 @@ const PostItem = memo(({
                                                                 //onDelete(),
                                                                 closeBottomSheet()
                                                             }}
-                                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                            <Text style={[styles.deleteText,]}
-                                                            >{
-                                                                    !post._destroy
-                                                                    && (
-                                                                        "Báo cáo"
-                                                                    )
-                                                                }
-                                                            </Text>
+                                                            style={[styles.deleteButton]}>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                <View>
+                                                                    <Icon name="alert-circle" size={20} color="black" />
+                                                                </View>
+                                                                <Text style={[styles.deleteText,]}>
+                                                                    {
+                                                                        !post._destroy
+                                                                        && (
+                                                                            "Báo cáo"
+                                                                        )
+                                                                    }
+                                                                </Text>
+                                                            </View>
+
                                                         </TouchableOpacity>
                                                     ) : (
                                                         <TouchableOpacity
@@ -695,14 +701,27 @@ const PostItem = memo(({
                                                                 onDelete(),
                                                                     closeBottomSheet()
                                                             }}
-                                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                            <Text style={[styles.deleteText,]}
-                                                            >{
-                                                                    post._destroy ? (
-                                                                        "Phục hồi"
-                                                                    ) : "Xóa bài viết"
+                                                            style={[styles.deleteButton]}>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                {
+                                                                    post._destroy ?
+                                                                        <View>
+                                                                            <Icon name="refresh-sharp" size={20} color="black" />
+                                                                        </View>
+                                                                        :
+                                                                        <View>
+                                                                            <Icon name="trash" size={20} color="black" />
+                                                                        </View>
                                                                 }
-                                                            </Text>
+                                                                <Text style={[styles.deleteText,]}>
+                                                                    {
+                                                                        post._destroy ? (
+                                                                            "Phục hồi"
+                                                                        ) : "Xóa bài viết"
+                                                                    }
+                                                                </Text>
+                                                            </View>
+
                                                         </TouchableOpacity>
                                                     )
                                             }
@@ -716,9 +735,14 @@ const PostItem = memo(({
                                                             closeBottomSheet()
                                                         }}
                                                         style={styles.deleteButton}>
-                                                        <Text style={styles.deleteText}
-                                                        >Xóa vĩnh viễn
-                                                        </Text>
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                            <View>
+                                                                <Icon name="trash" size={20} color="black" />
+                                                            </View>
+                                                            <Text style={styles.deleteText}
+                                                            >Xóa vĩnh viễn
+                                                            </Text>
+                                                        </View>
                                                     </TouchableOpacity>
                                                 )
                                             }
@@ -741,7 +765,6 @@ const PostItem = memo(({
                                 hasCaption && <Text style={styles.caption}>{post.caption}</Text>
                             )
                     }
-
                 </View>
             </View>
             {
@@ -982,8 +1005,10 @@ const styles = StyleSheet.create({
     header1: {
         backgroundColor: 'white',
         borderColor: 'gray',
-        borderWidth: 0.2,
-        borderRadius: 7,
+        borderWidth: 0.4,
+        borderTopLeftRadius: 7,
+        borderTopRightRadius: 7,
+        // borderRadius: 7,
         // shadowColor: '#000',
         // shadowOffset: { width: 0, height: 2 },
         // shadowOpacity: 0.25,
@@ -998,7 +1023,26 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         // marginBottom: height * 0.015,
         marginHorizontal: width * 0.04, // 2.5% chiều rộng 
-        marginVertical: height * 0.015, // 1.5% chiều cao  
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
+    },
+    headerMainNull: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // marginBottom: height * 0.015,
+        marginHorizontal: width * 0.04, // 2.5% chiều rộng 
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
+    },
+    headerShare: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // marginBottom: height * 0.015,
+        marginHorizontal: width * 0.04, // 2.5% chiều rộng 
+        marginVertical: height * 0.015, // 1.5% chiều cao 
+        // marginTop: height * 0.015,
     },
     footer: {
         flexDirection: 'row',
@@ -1148,15 +1192,14 @@ const styles = StyleSheet.create({
     deleteButton: {
         paddingVertical: 10,
         paddingHorizontal: 15,
-        backgroundColor: '#ff4d4d', // Màu nền đỏ
         borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10,
+        // alignItems: 'center',
     },
     deleteText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: 'white', // Màu chữ trắng
+        color: 'black', // Màu chữ trắng
+        marginLeft: 10
     },
     //reaction
     reactionBar: {
