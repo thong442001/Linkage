@@ -26,6 +26,7 @@ import {
     allProfile, // allProfile
     changeDestroyPost, // changeDestroy
     addReport_user,
+    huyBanBe,// huy friend
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import HomeS from '../../styles/screens/home/HomeS';
@@ -104,6 +105,9 @@ const Profile = props => {
     };
     const openBottomSheetReportUser = () => {
         openBottomSheet(22, detail_selection_report_user());
+    };
+    const openBottomSheetHuyBanBe = () => {
+        openBottomSheet(22, detail_selection_huy_friend());
     };
 
 
@@ -367,6 +371,7 @@ const Profile = props => {
             </View>
         );
     };
+
     const detail_selection_report_user = () => {
         return (
             <View style={ProfileS.containerBottomSheet}>
@@ -382,6 +387,26 @@ const Profile = props => {
                         <Icon name="ban" size={25} />
                     </View>
                     <Text style={ProfileS.optionText}>Báo cáo</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+    const detail_selection_huy_friend = () => {
+        return (
+            <View style={ProfileS.containerBottomSheet}>
+                <View style={ProfileS.rectangle}>
+                    <View style={ProfileS.lineBottomSheet}></View>
+                </View>
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={callHuyBanBe}
+                >
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="ban" size={25} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Hủy bạn bè</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -482,6 +507,33 @@ const Profile = props => {
                 })
                 .catch(error => {
                     console.log('Error2 callSetRelationNguoiLa:', error);
+                    setDialogreload(true);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    //huy Ban be
+    const callHuyBanBe = async () => {
+        try {
+            const paramsAPI = {
+                ID_relationship: relationship?._id,
+            };
+            await dispatch(huyBanBe(paramsAPI))
+                .unwrap()
+                .then(response => {
+                    //console.log(response);
+                    //setRelationship(response.relationship);
+
+                    // tắc bottom sheet
+                    closeBottomSheet();
+                    // render lại trang để reset lại bạn bè 
+                    callAllProfile(); // Gọi API load dữ liệu
+
+                })
+                .catch(error => {
+                    console.log('Error2 huyBanBe:', error);
                     setDialogreload(true);
                 });
         } catch (error) {
@@ -726,12 +778,16 @@ const Profile = props => {
                                         {relationship?.relation == 'Người lạ' && (
                                             <TouchableOpacity
                                                 style={ProfileS.btnAddStory}
-                                                onPress={callGuiLoiMoiKetBan}>
+                                                onPress={callGuiLoiMoiKetBan}
+                                            >
                                                 <Text style={ProfileS.textAddStory}>+ Thêm bạn bè</Text>
                                             </TouchableOpacity>
                                         )}
                                         {relationship?.relation == 'Bạn bè' && (
-                                            <TouchableOpacity style={ProfileS.btnAddStory}>
+                                            <TouchableOpacity
+                                                style={ProfileS.btnAddStory}
+                                                onPress={openBottomSheetHuyBanBe}
+                                            >
                                                 <Text style={ProfileS.textAddStory}>Bạn bè</Text>
                                             </TouchableOpacity>
                                         )}

@@ -712,7 +712,7 @@ const PostDetail = (props) => {
           {/* Header share  */}
           {
             post.ID_post_shared &&
-            <View style = {{marginVertical: 10, marginHorizontal: 15}}>
+            <View style={{ marginVertical: 10, marginHorizontal: 15 }}>
               <View style={styles.header}>
                 <View style={styles.userInfo}>
                   <View style={{ marginRight: width * 0.04 }}>
