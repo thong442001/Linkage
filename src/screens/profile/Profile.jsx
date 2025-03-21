@@ -64,6 +64,7 @@ const Profile = props => {
     const [relationship, setRelationship] = useState(null);
     const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
+    const [mutualFriendsCount, setMutualFriendsCount] = useState(0);
     // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
     // dialog reLoad
@@ -437,6 +438,7 @@ const Profile = props => {
                         },
                         stories: response.stories || []
                     });
+                    setMutualFriendsCount(response.mutualFriendsCount);
                     setloading(false);
                 })
                 .catch(error => {
@@ -764,11 +766,26 @@ const Profile = props => {
                                 {user?.first_name} {user?.last_name}
                             </Text>
                             <View style={ProfileS.boxInformation}>
-                                <Text style={ProfileS.friendNumber}>{friendRelationships?.length} </Text>
+                                <Text style={ProfileS.friendNumber}>{friendRelationships?.length}</Text>
                                 <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
                                     {' '}
-                                    Người bạn
+                                    người bạn
                                 </Text>
+                                {
+                                    mutualFriendsCount > 0
+                                    && (
+                                        <Text style={ProfileS.friendNumber}> * {mutualFriendsCount}</Text>
+                                    )
+                                }
+                                {
+                                    mutualFriendsCount > 0
+                                    && (
+                                        <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
+                                            {' '}
+                                            bạn chung
+                                        </Text>
+                                    )
+                                }
                             </View>
 
                             {/* btn me vs friend */}
@@ -870,7 +887,15 @@ const Profile = props => {
                         <View style={ProfileS.title}>
                             <View>
                                 <Text style={ProfileS.textFriend}>Bạn bè</Text>
-                                <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} Người bạn</Text>
+                                {
+                                    mutualFriendsCount > 0
+                                        ? (
+                                            <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} {'('}{mutualFriendsCount} bạn chung{')'}</Text>
+                                        ) : (
+                                            <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} người bạn</Text>
+                                        )
+                                }
+
                             </View>
                             <TouchableOpacity onPress={() => navigation.navigate('ListFriend', { _id: params._id })}>
                                 <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
@@ -907,51 +932,53 @@ const Profile = props => {
                     </View>
                 </View>
 
-                {user?._id === me?._id && (
-                    <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
-                        <View style={ProfileS.boxLive}>
-                            <View style={ProfileS.title2}>
-                                <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
-                                    Bài viết
-                                </Text>
-                                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
-                            </View>
-                            <View style={ProfileS.boxAllThink}>
-                                <View style={ProfileS.boxThink}>
-                                    <Image
-                                        style={ProfileS.avataStatus}
-                                        source={{ uri: user?.avatar }}
-                                    />
-                                    <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
-                                        Bạn đang nghĩ gì?
+                {
+                    user?._id === me?._id && (
+                        <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
+                            <View style={ProfileS.boxLive}>
+                                <View style={ProfileS.title2}>
+                                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
+                                        Bài viết
                                     </Text>
+                                    <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
                                 </View>
-                                <Icon name="image" size={30} color="#3FF251" />
+                                <View style={ProfileS.boxAllThink}>
+                                    <View style={ProfileS.boxThink}>
+                                        <Image
+                                            style={ProfileS.avataStatus}
+                                            source={{ uri: user?.avatar }}
+                                        />
+                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
+                                            Bạn đang nghĩ gì?
+                                        </Text>
+                                    </View>
+                                    <Icon name="image" size={30} color="#3FF251" />
+                                </View>
                             </View>
-                        </View>
-                        <View style={ProfileS.boxLivestream}>
-                            <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
-                                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                    <Icon name="videocam" size={20} color="red" />
-                                    <Text style={{ marginLeft: 5, color: 'black' }}>
-                                        Phát trực tiếp
+                            <View style={ProfileS.boxLivestream}>
+                                <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
+                                    <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                                        <Icon name="videocam" size={20} color="red" />
+                                        <Text style={{ marginLeft: 5, color: 'black' }}>
+                                            Phát trực tiếp
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                            <TouchableOpacity style={ProfileS.btnManage}>
+                                <View style={ProfileS.boxManange}>
+                                    <Icon2 name="comment-text" size={17} color="black" />
+                                    <Text style={{ fontSize: 13, color: 'black' }}>
+                                        Quản lí bài viết
                                     </Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity style={ProfileS.btnManage}>
-                            <View style={ProfileS.boxManange}>
-                                <Icon2 name="comment-text" size={17} color="black" />
-                                <Text style={{ fontSize: 13, color: 'black' }}>
-                                    Quản lí bài viết
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                )}
+                    )
+                }
 
 
-            </View>
+            </View >
         );
     };
 
