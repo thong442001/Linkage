@@ -340,31 +340,30 @@ const Profile = props => {
 
     const detail_selection_background = () => {
         return (
-            <View style={ProfileS.containerBottomSheet}>
+            <View >
                 <View style={ProfileS.rectangle}>
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
-
-                {user?._id === me?._id && (
+                <View style={ProfileS.containerBottomSheet}>
+                    {user?._id === me?._id && (
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={onOpenGalleryChangeBackground}>
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="swap-vertical" size={25} color = "black"/>
+                            </View>
+                            <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity
                         style={ProfileS.option}
-                        onPress={onOpenGalleryChangeBackground}>
+                        onPress={() => openImageModal(user?.background)}>
                         <View style={ProfileS.anhBia}>
-                            <Icon name="images" size={25} />
+                            <Icon name="image" size={25} color = "black"/>
                         </View>
-                        <Text style={ProfileS.optionText}>Đổi ảnh bìa</Text>
+                        <Text style={ProfileS.optionText}>Xem ảnh bìa</Text>
                     </TouchableOpacity>
-                )}
-
-
-                <TouchableOpacity
-                    style={ProfileS.option}
-                    onPress={() => openImageModal(user?.background)}>
-                    <View style={ProfileS.anhBia}>
-                        <Icon name="images" size={25} />
-                    </View>
-                    <Text style={ProfileS.optionText}>Xem ảnh bìa</Text>
-                </TouchableOpacity>
+                </View>
             </View>
         );
     };
@@ -642,7 +641,7 @@ const Profile = props => {
                     </Snackbar>
                     <View>
                         <View>
-                            <Pressable onPress={() => openBottomSheet(25, detail_selection_background)}>
+                            <Pressable onPress={() => openBottomSheet(30, detail_selection_background)}>
                                 {user?.background != null ? (
                                     <Image
                                         style={ProfileS.backGroundImage}
