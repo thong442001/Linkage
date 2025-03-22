@@ -462,7 +462,52 @@ const AppNavigation = () => {
         return 'default-channel';
     }
   };
+//chuyển trang khi ấn vào thông báo
+  const navigateToScreen = (notification) => {
+    if (!notification || !notification.type) {
+      console.warn("⚠ Không có thông tin điều hướng từ thông báo");
+      return;
+    }
   
+    switch (notification.type) {
+      case 'Tin nhắn mới':
+        navigation.navigate('Chat', { ID_group: notification?.ID_message?.ID_group?._id });
+        break;
+  
+      case 'Lời mời kết bạn':
+        navigation.navigate('Friend');
+        break;
+  
+      case 'Đã thành bạn bè của bạn':
+        navigation.navigate('ListFriend');
+        break;
+  
+      case 'Bạn đã được mời vào nhóm mới':
+        navigation.navigate('HomeChat');
+        break;
+  
+      // case 'Đã đăng story mới':
+      //   navigation.navigate('StoryScreen', { storyId: notification?.ID_post?._id });
+      //   break;
+  
+      // case 'Đã đăng bài mới':
+      //   navigation.navigate('PostDetailScreen', { postId: notification?.ID_post?._id });
+      //   break;
+  
+      // case 'Đang livestream':
+      //   navigation.navigate('LivestreamScreen', { livestreamId: notification?.ID_user?._id });
+      //   break;
+  
+      // case 'Bình luận':
+      //   navigation.navigate('CommentScreen', { postId: notification?.ID_comment?.postId });
+      //   break;
+  
+      default:
+        console.warn("⚠ Không tìm thấy màn hình phù hợp với loại thông báo:", notification.type);
+        break;
+    }
+  };
+
   const showNotification = async (notification) => {
     try {
       const channelId = getChannelId(notification?.type);
@@ -473,11 +518,19 @@ const AppNavigation = () => {
         return;
       }
   
+      const formattedData = {};
+      Object.keys(notification).forEach(key => {
+        formattedData[key] = typeof notification[key] === 'string'
+          ? notification[key]
+          : JSON.stringify(notification[key]); // ✅ Chỉ stringify nếu không phải string
+      });
+      
       await notifee.displayNotification({
         title: notification?.title || 'Thông báo',
         body: generateNotificationContent(notification, user),
+        data: formattedData,
         android: {
-          channelId: channelId,
+          channelId: getChannelId(notification?.type),
           smallIcon: 'ic_launcher',
         },
       });
@@ -521,6 +574,7 @@ const AppNavigation = () => {
         let notification;
         try {
           notification = JSON.parse(remoteMessage.data.notification);
+          // navigateToScreen(notification);
         } catch (error) {
           console.error('❌ Lỗi khi parse JSON notification:', error);
           return;
@@ -547,32 +601,43 @@ const AppNavigation = () => {
       },
     );
 
-    // Khi app bị kill và mở từ thông báo
-    const initialNotification = messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log(
-            '🔔 App được mở từ thông báo khi bị kill:',
-            remoteMessage,
-          );
+  // Khi app bị kill và mở từ thông báo
+  messaging().getInitialNotification().then(remoteMessage => {
+    if (remoteMessage?.data?.notification) {
+      let notification;
+      try {
+        notification = JSON.parse(remoteMessage.data.notification);
+        console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
+        // navigateToScreen(notification);
+      } catch (error) {
+        console.error('❌ Lỗi khi parse JSON notification:', error);
+      }
+    }
+  });
+
+  const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+    if (type === EventType.PRESS) {
+      console.log('🔔 Người dùng đã nhấn vào thông báo:', detail.notification);
+      
+      let notificationData = detail.notification?.data;
+      
+      Object.keys(notificationData).forEach(key => {
+        try {
+          notificationData[key] = JSON.parse(notificationData[key]); // ✅ Chuyển về object
+        } catch (e) {
+          // Nếu lỗi thì giữ nguyên, vì có thể nó đã là string
         }
       });
-
-    // Khi người dùng nhấn vào thông báo từ notifee
-    const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
-      if (type === EventType.PRESS) {
-        console.log(
-          '🔔 Người dùng đã nhấn vào thông báo:',
-          detail.notification,
-        );
-      }
-    });
-
+  
+      navigateToScreen(notificationData);
+    }
+  });
+  
+    
     return () => {
-      unsubscribeForeground();
       unsubscribeOpenedApp();
       unsubscribeNotifee();
+      unsubscribeForeground();
       // initialNotification();
     };
   }, []);

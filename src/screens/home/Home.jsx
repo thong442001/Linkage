@@ -256,23 +256,6 @@ const Home = props => {
   };
 
 
-  const sendTestNotification = async () => {
-    await notifee.createChannel({
-      id: 'default-channel',
-      name: 'Default Channel',
-    });
-
-    await notifee.displayNotification({
-      title: '🔥 Test Thông Báo',
-      body: '🚀 Đây là thông báo test khi mở app!',
-      android: {
-        channelId: 'default-channel',
-        importance: notifee.AndroidImportance.HIGH,
-        smallIcon: 'ic_launcher',
-      },
-    });
-  };
-
   return (
     <View style={HomeS.container}>
       {/* Nếu đang tải dữ liệu, hiển thị HomeLoading */}
