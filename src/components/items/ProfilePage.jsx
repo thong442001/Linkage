@@ -522,7 +522,7 @@ const PostItem = memo(({
                                 onPress={() =>
                                     openBottomSheet(
                                         25,
-                                        <View>
+                                        <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
                                             {
                                                 ID_user != post.ID_user._id
                                                     ? (
@@ -547,14 +547,19 @@ const PostItem = memo(({
                                                                 onDelete(),
                                                                     closeBottomSheet()
                                                             }}
-                                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                            <Text style={[styles.deleteText,]}
-                                                            >{
-                                                                    post._destroy ? (
-                                                                        "Phục hồi"
-                                                                    ) : "Xóa bài viết"
-                                                                }
-                                                            </Text>
+                                                            style={[styles.deleteButton]}>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                <View>
+                                                                    <Icon name="trash" size={20} color="black" />
+                                                                </View>
+                                                                <Text style={[styles.deleteText,]}
+                                                                >{
+                                                                        post._destroy ? (
+                                                                            "Phục hồi"
+                                                                        ) : "Xóa bài viết"
+                                                                    }
+                                                                </Text>
+                                                            </View>
                                                         </TouchableOpacity>
                                                     )
                                             }
@@ -669,7 +674,7 @@ const PostItem = memo(({
                             <TouchableOpacity
                                 onPress={() =>
                                     openBottomSheet(
-                                        17,
+                                        25,
                                         <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
                                             {
                                                 ID_user != post.ID_user._id

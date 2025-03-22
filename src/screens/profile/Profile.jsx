@@ -101,14 +101,14 @@ const Profile = props => {
             openBottomSheet(35, detail_selection_image());
         } else {
             // Nếu không có story, chỉ mở Bottom Sheet với các tùy chọn hình ảnh
-            openBottomSheet(22, detail_selection_image());
+            openBottomSheet(25, detail_selection_image());
         }
     };
     const openBottomSheetReportUser = () => {
-        openBottomSheet(22, detail_selection_report_user());
+        openBottomSheet(25, detail_selection_report_user());
     };
     const openBottomSheetHuyBanBe = () => {
-        openBottomSheet(22, detail_selection_huy_friend());
+        openBottomSheet(25, detail_selection_huy_friend());
     };
 
 
