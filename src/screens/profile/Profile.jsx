@@ -25,7 +25,6 @@ import {
     editBackgroundOfUser,
     allProfile, // allProfile
     changeDestroyPost, // changeDestroy
-    addReport_user,
     huyBanBe,// huy friend
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
@@ -382,7 +381,10 @@ const Profile = props => {
 
                 <TouchableOpacity
                     style={ProfileS.option}
-                    onPress={callAddReport_user}
+                    onPress={() => {
+                        closeBottomSheet();
+                        navigation.navigate('Report', { ID_post: null, ID_user: user._id });
+                    }}
                 >
                     <View style={ProfileS.anhBia}>
                         <Icon name="ban" size={25} />
@@ -639,31 +641,6 @@ const Profile = props => {
 
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id);
-    };
-
-
-    const callAddReport_user = async () => {
-        try {
-            if (!me?._id || !user?._id || me._id === user._id) return; // Kiểm tra hợp lệ
-            console.log('me: ', me._id);
-            console.log('ID_user: ', user?._id);
-            const paramsAPI = {
-                me: me._id.toString(),
-                ID_user: user?._id,
-            }
-            await dispatch(addReport_user(paramsAPI))
-                .unwrap()
-                .then(response => {
-                    console.log('status callAddReport_user:', response.status);
-                    closeBottomSheet();
-                })
-                .catch(error => {
-                    console.log('Lỗi khi callAddReport_user:', error);
-                    closeBottomSheet();
-                });
-        } catch (error) {
-            console.log('Lỗi trong callAddReport_user:', error);
-        }
     };
 
     const renderPosts = useCallback(({ item }) => (

@@ -23,7 +23,6 @@ import {
     addPost_Reaction, // thả biểu cảm
     addPost, // api share
     deletePost_reaction,//xóa post_reaction
-    addReport_post,// report post
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
 const PostItem = memo(({
@@ -84,26 +83,6 @@ const PostItem = memo(({
             openBottomSheet(50, renderBottomSheetContent());
         }
     }, [selectedTab]);
-
-    const callAddReport_post = async () => {
-        try {
-            const paramsAPI = {
-                me: ID_user,
-                ID_post: post._id
-            }
-            await dispatch(addReport_post(paramsAPI))
-                .unwrap()
-                .then(response => {
-                    console.log('status callAddReport_post:', response.status);
-                })
-                .catch(error => {
-                    console.log('Lỗi khi callAddReport_post:', error);
-                });
-        } catch (error) {
-            console.log('Lỗi trong addReport_post:', error);
-        }
-    };
-
 
     const renderBottomSheetContent = () => {
         return (
@@ -528,8 +507,8 @@ const PostItem = memo(({
                                                     ? (
                                                         <TouchableOpacity
                                                             onPress={() => {
-                                                                //onDelete(),
                                                                 closeBottomSheet()
+                                                                navigation.navigate('Report', { ID_post: post._id, ID_user: null })
                                                             }}
                                                             style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
                                                             <Text style={[styles.deleteText,]}
@@ -544,8 +523,8 @@ const PostItem = memo(({
                                                     ) : (
                                                         <TouchableOpacity
                                                             onPress={() => {
-                                                                onDelete(),
-                                                                    closeBottomSheet()
+                                                                onDelete()
+                                                                closeBottomSheet()
                                                             }}
                                                             style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
                                                             <Text style={[styles.deleteText,]}
@@ -676,8 +655,8 @@ const PostItem = memo(({
                                                     ? (
                                                         <TouchableOpacity
                                                             onPress={() => {
-                                                                //onDelete(),
                                                                 closeBottomSheet()
+                                                                navigation.navigate('Report', { ID_post: post._id, ID_user: null })
                                                             }}
                                                             style={[styles.deleteButton]}>
                                                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -698,8 +677,8 @@ const PostItem = memo(({
                                                     ) : (
                                                         <TouchableOpacity
                                                             onPress={() => {
-                                                                onDelete(),
-                                                                    closeBottomSheet()
+                                                                onDelete()
+                                                                closeBottomSheet()
                                                             }}
                                                             style={[styles.deleteButton]}>
                                                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>

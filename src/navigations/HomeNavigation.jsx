@@ -147,22 +147,22 @@ const TabHome = () => {
   const [isTabVisible, setTabVisible] = useState(true);
   const [shouldHide, setShouldHide] = useState(false); // Quản lý việc ẩn
 
-   // Khai báo Animated.Value cho tabAnimation, mặc định hiển thị (1)
-   const tabAnimation = useRef(new Animated.Value(1)).current;
+  // Khai báo Animated.Value cho tabAnimation, mặc định hiển thị (1)
+  const tabAnimation = useRef(new Animated.Value(1)).current;
 
-   // Khi isTabVisible thay đổi, chạy animation
-   useEffect(() => {
-     Animated.timing(tabAnimation, {
-       toValue: isTabVisible ? 1 : 0,
-       duration: 400,
-       useNativeDriver: true,
-     }).start();
-   }, [isTabVisible, tabAnimation]);
- 
-   // Hàm điều khiển hiển thị Bottom Tab
-   const handleScroll = (visible) => {
-     setTabVisible(visible);
-   };
+  // Khi isTabVisible thay đổi, chạy animation
+  useEffect(() => {
+    Animated.timing(tabAnimation, {
+      toValue: isTabVisible ? 1 : 0,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  }, [isTabVisible, tabAnimation]);
+
+  // Hàm điều khiển hiển thị Bottom Tab
+  const handleScroll = (visible) => {
+    setTabVisible(visible);
+  };
   //console.log(theme);
   return (
     <Tab.Navigator
@@ -247,6 +247,7 @@ import NguoiDuocMoi from '../screens/game/3la/NguoiDuocMoi';
 import NguoiMoi from '../screens/game/3la/NguoiMoi';
 import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Ringing from '../screens/call/Ringing';
+import Report from '../screens/report/Report';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -282,6 +283,7 @@ const oStackHome = {
   NguoiDuocMoi: { name: 'NguoiDuocMoi', component: NguoiDuocMoi },
   NguoiMoi: { name: 'NguoiMoi', component: NguoiMoi },
   Ringing: { name: 'Ringing', component: Ringing },
+  Report: { name: 'Report', component: Report },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

@@ -99,8 +99,6 @@ const PostDetail = (props) => {
     }
   };
 
-
-
   const addReplyToComment = (commentsList, newReply) => {
     return commentsList.map((comment) => {
       if (comment._id === newReply.ID_comment_reply._id) {

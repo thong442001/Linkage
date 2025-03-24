@@ -48,7 +48,7 @@ const Story = ({ route }) => {
   const [medias, setMedias] = useState([]);
   const [typePost, setTypePost] = useState('Story');
   const me = useSelector(state => state.app.user);
-
+  console.log('me:', me);
   const [selectedSongUrl, setSelectedSongUrl] = useState(null);
 
   const [musicList, setMusicList] = useState([]);
@@ -128,7 +128,7 @@ const Story = ({ route }) => {
         ID_post_shared: null,
         tags: [],
       };
-
+console.log('paramsAPI:', paramsAPI);
       await dispatch(addPost(paramsAPI)).unwrap();
 
       // Chuyển về màn hình TabHome ngay sau khi đăng thành công

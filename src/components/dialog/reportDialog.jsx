@@ -1,8 +1,25 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 
 const SelectAvatarDialog = ({ visible, onClose, onCamera, onGallery }) => {
+
+    
+
+    const renderReport = useCallback(
+        ({ item }) => (
+          <ProfilePage
+            post={item}
+            ID_user={me._id}
+            currentTime={currentTime}
+            onDelete={() => callChangeDestroyPost(item._id)}
+            updatePostReaction={updatePostReaction}
+            deletPostReaction={deletPostReaction}
+          />
+        ),
+        [posts, currentTime, me._id]
+      );
+
     return (
         <Modal
             transparent={true}

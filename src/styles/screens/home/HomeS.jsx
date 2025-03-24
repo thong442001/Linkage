@@ -3,13 +3,13 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 const HomeS = StyleSheet.create({
-   
+
     line: {
         height: 0.5,  // hoặc 1 nếu bạn muốn đường kẻ dày hơn
         width: '100%',
         backgroundColor: 'gray',
         marginVertical: 5, // khoảng cách trên dưới đường kẻ, bạn có thể điều chỉnh
-      },
+    },
     noPostsContainer: {
         flex: 1,
         justifyContent: 'center',

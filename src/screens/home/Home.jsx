@@ -5,7 +5,11 @@ import HomeS from '../../styles/screens/home/HomeS';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';
 import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 import ProfilePage from '../../components/items/ProfilePage';
-import { getAllPostsInHome, changeDestroyPost } from '../../rtk/API';
+import { 
+  getAllPostsInHome, 
+  changeDestroyPost,
+  getAllReason
+ } from '../../rtk/API';
 import database from '@react-native-firebase/database';
 import HomeHeader from './HomeHeader';
 import HomeStories from './HomeStories';
