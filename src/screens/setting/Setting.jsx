@@ -10,19 +10,23 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../rtk/Reducer';
+import {useSelector, useDispatch} from 'react-redux';
+import {logout} from '../../rtk/Reducer';
 import QRCode from 'react-native-qrcode-svg';
+import {setNoti_token} from '../../rtk/API';
 import {
-  setNoti_token
-} from '../../rtk/API'
-const { width, height } = Dimensions.get('window');
-const Setting = (props) => {
+  setNotificationPreference,
+  getNotificationPreference,
+} from '../../noti/notificationHelper';
+import {FlatList, Switch} from 'react-native-gesture-handler';
 
-  const { route, navigation } = props;
-  const { params } = route;
+const {width, height} = Dimensions.get('window');
+
+const Setting = props => {
+  const {route, navigation} = props;
+  const {params} = route;
 
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
@@ -30,32 +34,88 @@ const Setting = (props) => {
   const fcmToken = useSelector(state => state.app.fcmToken);
   const [qrVisible, setQrVisible] = useState(false); // 🔥 State để hiển thị modal QR
 
+  const [preferences, setPreferences] = useState({});
+  const [showNotificationList, setShowNotificationList] = useState(false); // Trạng thái mở/đóng danh sách thông báo
+
   const onLogout = () => {
-    dispatch(setNoti_token({ ID_user: me._id, fcmToken: fcmToken }))
+    dispatch(setNoti_token({ID_user: me._id, fcmToken: fcmToken}))
       .unwrap()
-      .then((response) => {
+      .then(response => {
         //console.log(response);
         // xóa user trong redux
-        dispatch(logout())
+        dispatch(logout());
       })
-      .catch((error) => {
+      .catch(error => {
         console.log(error);
       });
   };
 
+  const channels = [
+    {id: 'message-channel', name: 'Tin nhắn'},
+    {id: 'friend-request-channel', name: 'Lời mời kết bạn'},
+    {id: 'call-channel', name: 'Cuộc gọi'},
+    {id: 'livestream-channel', name: 'Livestream'},
+    {id: 'comment-channel', name: 'Bình luận'},
+    {id: 'post-channel', name: 'Bài viết mới'},
+  ];
 
-  const Option = ({ icon, title, subtitle, color = 'black' }) => (
+  const settingsOptions = [
+    {
+      id: '1',
+      title: 'Thay đổi tên',
+      screen: 'ChangeDisplayName',
+      icon: 'person',
+    },
+    {
+      id: '2',
+      title: 'Thay đổi mật khẩu',
+      screen: 'ChangePassWord',
+      icon: 'lock-closed',
+    },
+    {id: '3', title: 'Thùng rác', screen: 'Trash', icon: 'trash'},
+    {
+      id: '4',
+      title: 'Đăng xuất',
+      action: onLogout,
+      icon: 'exit-outline',
+      color: 'red',
+    },
+    {id: '5', title: 'Game', screen: 'MiniGameScreen', icon: 'game-controller'},
+  ];
+
+  //tắt thông báo
+  useEffect(() => {
+    const loadPreferences = async () => {
+      const prefs = {};
+      for (const channel of channels) {
+        prefs[channel.id] = await getNotificationPreference(channel.id);
+      }
+      setPreferences(prefs);
+    };
+    loadPreferences();
+  }, []);
+
+  const toggleNotification = async channelId => {
+    const newStatus = !preferences[channelId];
+    setPreferences({...preferences, [channelId]: newStatus});
+    await setNotificationPreference(channelId, newStatus);
+  };
+
+  const toggleNotificationList = () => {
+    setShowNotificationList(!showNotificationList);
+  };
+
+  const Option = ({icon, title, subtitle, color = 'black'}) => (
     <View style={styles.option}>
       <Icon name={icon} size={20} color={color} />
       <View style={styles.optionText}>
-        <Text style={[styles.optionTitle, { color }]}>{title}</Text>
+        <Text style={[styles.optionTitle, {color}]}>{title}</Text>
         {subtitle && <Text style={styles.optionSubtitle}>{subtitle}</Text>}
       </View>
     </View>
   );
 
   return (
-
     <View style={styles.container}>
       <View style={styles.container}>
         <View style={styles.header}>
@@ -72,7 +132,9 @@ const Setting = (props) => {
               />
             </Pressable>
             <View style={styles.profileInfo}>
-              <Text style={styles.name}>{me.first_name} {me.last_name}</Text>
+              <Text style={styles.name}>
+                {me.first_name} {me.last_name}
+              </Text>
             </View>
             <TouchableOpacity onPress={() => setQrVisible(true)}>
               <Icon name="qr-code-outline" size={22} color="black" />
@@ -85,10 +147,7 @@ const Setting = (props) => {
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
                   <Text style={styles.modalTitle}>Mã QR của bạn</Text>
-                  <QRCode
-                    value={`chatapp://chat/${me._id}`}
-                    size={200}
-                  />
+                  <QRCode value={`chatapp://chat/${me._id}`} size={200} />
                   <TouchableOpacity
                     onPress={() => setQrVisible(false)}
                     style={styles.closeButton}>
@@ -98,49 +157,67 @@ const Setting = (props) => {
               </View>
             </Modal>
           </View>
-          <ScrollView style={styles.list}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('ChangeDisplayName')}>
-              <Option
-                icon="person"
-                title="Thay đổi tên"
-                subtitle="Bạn có thể thay đổi tên của bạn"
-              />
-            </TouchableOpacity>
+          <FlatList
+            ListHeaderComponent={
+              <>
+                {/* Nút mở/đóng danh sách thông báo */}
+                <TouchableOpacity onPress={toggleNotificationList}>
+                  <Option
+                    icon="notifications" // Icon giống các mục cài đặt
+                    title="Cài đặt thông báo"
+                    subtitle={
+                      showNotificationList ? 'Nhấn để ẩn' : 'Nhấn để hiển thị'
+                    }
+                  />
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate('ChangePassWord')}>
-              <Option
-                icon="lock-closed"
-                title="Thay đổi mật khẩu"
-                subtitle="Bạn có thể thay đổi mật khẩu của bạn"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Trash')}>
-              <Option
-                icon="trash"
-                title="Thùng rác"
-                subtitle="Chứa các bài viết đã xóa"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onLogout}>
-              <Option
-                icon="exit-outline"
-                title="Đăng xuất"
-                subtitle="Đăng xuất khỏi tài khoản của bạn"
-                color="red"
-              />
-            </TouchableOpacity>
+                {/* Danh sách thông báo nếu bật */}
+                {showNotificationList && (
+                  <FlatList
+                    data={channels}
+                    keyExtractor={item => item.id}
+                    renderItem={({item}) => (
+                      <TouchableOpacity style={styles.optionContainer}>
+                        {/* Biểu tượng thông báo */}
+                        <Text style={styles.icon}>🔔</Text>
 
-            <TouchableOpacity onPress={() => navigation.navigate("MiniGameScreen")}>
-              <Option
-                icon="exit-outline"
-                title="Game"
-                subtitle="Sign out from your account"
-                color="red"
-              />
-            </TouchableOpacity>
-          </ScrollView>
+                        {/* Nội dung thông báo */}
+                        <View style={styles.textContainer}>
+                          <Text style={styles.title}>{item.name}</Text>
+                          <Text style={styles.subtitle}>
+                            Bật/tắt thông báo cho {item.name}
+                          </Text>
+                        </View>
+
+                        {/* Công tắc bật/tắt */}
+                        <Switch
+                          style={styles.switch}
+                          value={preferences[item.id]}
+                          onValueChange={() => toggleNotification(item.id)}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  />
+                )}
+              </>
+            }
+            data={settingsOptions}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                onPress={() =>
+                  item.screen ? navigation.navigate(item.screen) : item.action()
+                }>
+                <Option
+                  icon={item.icon}
+                  title={item.title}
+                  color={item.color}
+                />
+              </TouchableOpacity>
+            )}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+          />
         </View>
 
         {/* canhphan */}
@@ -245,12 +322,54 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  modalTitle: {fontSize: 18, fontWeight: 'bold', marginBottom: 10},
   closeButton: {
     marginTop: 10,
     padding: 10,
     backgroundColor: 'blue',
     borderRadius: 5,
   },
-  closeButtonText: { color: 'white', fontSize: 16 },
+  closeButtonText: {color: 'white', fontSize: 16},
+  item: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderBottomWidth: 1,
+  },
+  text: {fontSize: 16},
+  optionContainer: {
+    backgroundColor: '#ffffff', // Màu nền trắng
+    borderRadius: 10, // Bo góc
+    marginVertical: 6, // Khoảng cách giữa các mục
+    marginHorizontal: 15, // Lề hai bên
+    padding: 12, // Khoảng cách nội dung bên trong
+    flexDirection: 'row', // Hiển thị ngang
+    alignItems: 'center', // Căn giữa theo chiều dọc
+    shadowColor: '#000', // Đổ bóng
+    shadowOffset: {width: 0, height: 2}, // Vị trí bóng
+    shadowOpacity: 0.1, // Độ trong suốt của bóng
+    shadowRadius: 4, // Độ mờ của bóng
+    elevation: 3, // Bóng cho Android
+  },
+  icon: {
+    fontSize: 24, // Kích thước icon lớn hơn
+    marginRight: 12, // Khoảng cách với text
+    color: '#3498db', // Màu xanh dương
+  },
+  textContainer: {
+    flex: 1, // Cho phép text mở rộng
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold', // In đậm
+    color: '#333', // Màu chữ tối hơn
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#777', // Màu chữ xám nhạt hơn
+    marginTop: 2, // Khoảng cách với title
+  },
+  switch: {
+    transform: [{scaleX: 1.1}, {scaleY: 1.1}], // Tăng kích thước Switch
+  },
 });
