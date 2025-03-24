@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#48b9f2', // màu tùy chỉnh
+    backgroundColor: '#0064E0', // màu tùy chỉnh
   },
   iconStyle: {
     zIndex: 1, // icon nằm trên vòng tròn
