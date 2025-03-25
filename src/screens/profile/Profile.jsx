@@ -983,7 +983,6 @@ const Profile = props => {
             <View style={HomeS.line}></View>
             <View>
                 <View>
-
                     <View style={ProfileS.post}>
                         {loading ? (
                             <>

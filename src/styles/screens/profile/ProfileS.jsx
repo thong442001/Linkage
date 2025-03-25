@@ -46,6 +46,7 @@ const ProfileS = StyleSheet.create({
     },
     container: {
         flex: 1,
+        backgroundColor: "#A1A6AD"
     },
     header: {
         flexDirection: 'row',
