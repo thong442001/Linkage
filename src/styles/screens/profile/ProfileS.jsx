@@ -49,11 +49,18 @@ const ProfileS = StyleSheet.create({
         backgroundColor: "#A1A6AD"
     },
     header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        position: 'absolute',
+        top: 15,
+        left: 15,
+        backgroundColor: '#ffff',
+        borderRadius: width * 0.5,
+    },
+    header1: {
+        width: width * 0.1,
+        height: height * 0.05,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginHorizontal: width * 0.05,
-        marginVertical: height * 0.014,
+        padding: width * 0.02,
     },
     titleName: {
         fontSize: height * 0.025,

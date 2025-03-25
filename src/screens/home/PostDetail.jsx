@@ -14,6 +14,7 @@ import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import Icon4 from 'react-native-vector-icons/FontAwesome5';
+import Icon5 from 'react-native-vector-icons/AntDesign';
 import styles from '../../styles/components/items/CommentS';
 import ListComment from '../../components/items/ListComment';
 import { useRoute } from '@react-navigation/native';
@@ -30,12 +31,14 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import LoadingPostModal from '../../utils/animation/loadingPost/LoadingPostModal';
+import { set } from '@react-native-firebase/database';
+import { oStackHome } from '../../navigations/HomeNavigation';
 const { width, height } = Dimensions.get('window');
 const PostDetail = (props) => {
   const { navigation } = props
   const route = useRoute();
-  const { ID_post, typeClick } = route.params || {}
-
+  const { ID_post, typeClick: initialTypeClick } = route.params || {}
+  const [typeClick, setTypeClick] = useState(initialTypeClick); // Khởi tạo typeClick từ params
   const dispatch = useDispatch()
   const me = useSelector(state => state.app.user)
   const reactions = useSelector(state => state.app.reactions)
@@ -581,7 +584,7 @@ const PostDetail = (props) => {
             onPress={() => {
               setSelectedImage(uri);
               if (mediaCount > 5) {
-                navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "image" });
+                setTypeClick("image");
               } else {
                 setImageModalVisible(true);
               }
@@ -716,7 +719,7 @@ const PostDetail = (props) => {
                   <View style={{ marginRight: width * 0.04 }}>
                     <TouchableOpacity
                       onPress={() => {
-                        navigation.goBack();// back về
+                        navigation.navigate(oStackHome.TabHome);// back về
                       }}
                     >
                       <Icon name="arrow-back" size={25} color="black" />
@@ -838,7 +841,7 @@ const PostDetail = (props) => {
                       <View style={{ marginRight: width * 0.04 }}>
                         <TouchableOpacity
                           onPress={() => {
-                            navigation.goBack();// back về
+                            navigation.navigate(oStackHome.TabHome);// back về
                           }}
                         >
                           <Icon name="arrow-back" size={25} color="black" />
@@ -934,7 +937,7 @@ const PostDetail = (props) => {
           </View>
         </View>
         {
-          typeClick === "image"
+          typeClick == "image"
             ? (hasMedia && renderMediaSDetail(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
             : (hasMedia && renderMediaGrid(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
         }
@@ -956,17 +959,17 @@ const PostDetail = (props) => {
                 : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
               }
             >
-              {/* <Icon2 name="like" size={25} color="black" /> */}
+              {/* <Icon5 name="like2" size={25} color="black" /> */}
               <Text
                 style={styles.actionText}
               >
-                {userReaction ? userReaction.ID_reaction.icon : reactions[0].icon} {/* Nếu đã react, hiển thị icon đó */}
+                {userReaction ? userReaction.ID_reaction.icon : <Icon5 name="like2" size={20} color="black" />} {/* Nếu đã react, hiển thị icon đó */}
               </Text>
               <Text
                 style={[
                   styles.actionText,
                   userReaction &&
-                  { color: '#FF9D00' }
+                  { color: '#0064E0' }
                 ]}
               >
                 {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
@@ -974,6 +977,7 @@ const PostDetail = (props) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.action}
+              onPress={() => { setTypeClick("comment") }}
             >
               <Icon3 name="comment" size={20} color="black" />
               <Text style={styles.actionText}>Bình luận</Text>
@@ -984,8 +988,6 @@ const PostDetail = (props) => {
             </TouchableOpacity>
           </View>
         }
-
-
 
         {/* reactions biểu cảm */}
         < Modal
@@ -1160,7 +1162,11 @@ const PostDetail = (props) => {
                         </Text>
                       ))}
                       <Text style={styles.slReactionsOfPost}>
-                        {reactionsOfPost.length}
+                        {reactionsOfPost.some(reaction => reaction.ID_user._id === me._id)
+                          ? reactionsOfPost.length === 1
+                            ? `${me?.first_name + " " + me?.last_name}`
+                            : `Bạn và ${reactionsOfPost.length - 1} người khác`
+                          : `${reactionsOfPost.length}`}
                       </Text>
                     </TouchableOpacity>
                   )
