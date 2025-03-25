@@ -82,13 +82,21 @@ const Chat = (props) => {// cần ID_group (param)
     const onCallvieo = () => {
         if (!group) return;
         callNotiCall(group._id, me._id, true);
-        navigation.navigate("Ringing",{ID_group:params?.ID_group,status:true});
+        //navigation.navigate("Ringing",{ID_group:params?.ID_group,status:true});
+        navigation.navigate('Ringing', {
+            group: group,
+            type: true,
+        });
     };
     // call audio
     const onCallAudio = () => {
         if (!group) return;
         callNotiCall(group._id, me._id, false);
-        navigation.navigate("Ringing",{ID_group:params?.ID_group,status:false});
+        //navigation.navigate("Ringing",{ID_group:params?.ID_group,status:false});
+        navigation.navigate('Ringing', {
+            group: group,
+            type: false,
+        });
     };
 
     //up lên cloudiary

@@ -10,11 +10,13 @@ const IncomingCallScreen = ({ route, navigation }) => {
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const me = useSelector((state) => state.app.user);
-
+  const { socket } = useSocket();
   const ringtoneRef = useRef(null); // Thêm useRef
 
   useEffect(() => {
     if (!group || !me) return;
+
+    socket.emit("joinGroup", group._id);
 
     if (group.isPrivate) {
       const otherUser = group.members?.find((user) => user._id !== me._id);
@@ -30,6 +32,17 @@ const IncomingCallScreen = ({ route, navigation }) => {
       );
       setAvatar(group.avatar || 'https://example.com/default-group-avatar.png');
     }
+
+
+    socket.on("lang-nghe-tu-choi-call", () => {
+      console.log(`lang-nghe-tu-choi-call`);
+      navigation.goBack();
+    });
+
+    return () => {
+      socket.off("lang-nghe-tu-choi-call");
+    };
+
   }, [group, me]);
 
   // Phát nhạc chuông khi nhận cuộc gọi
@@ -62,23 +75,29 @@ const IncomingCallScreen = ({ route, navigation }) => {
       ringtoneRef.current.stop();
       ringtoneRef.current.release();
     }
-    if(group.isPrivate==true) {
-    navigation.navigate('CallPage', {
-      ID_group: group._id,
-      id_user: me._id,
-      MyUsername: me.last_name,
-      status: type,
-      MyAvatar: me.avatar,
-    });
-  }else{
-    navigation.navigate('CallGroup', {  
-      ID_group: group._id,
-      id_user: me._id,
-      MyUsername: me.last_name,
-      status: type,
-      MyAvatar: me.avatar,
-    });
-  }
+    socket.emit('chap-nhan-call', { ID_group: group._id });
+    if (group.isPrivate == true) {
+      navigation.navigate('CallPage', {
+        ID_group: group._id,
+        id_user: me._id,
+        MyUsername: me.last_name,
+        status: type,
+        MyAvatar: me.avatar,
+      });
+    } else {
+      navigation.navigate('CallGroup', {
+        ID_group: group._id,
+        id_user: me._id,
+        MyUsername: me.last_name,
+        status: type,
+        MyAvatar: me.avatar,
+      });
+    }
+  };
+
+  // Xử lý khi chấp nhận cuộc gọi
+  const handlCancelCall = () => {
+    socket.emit('tu-choi-call', { ID_group: group._id });
   };
 
   return (
@@ -94,7 +113,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
           <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
             <Ionicons name="call" size={40} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.declineButton}>
+          <TouchableOpacity onPress={() => handlCancelCall()} style={styles.declineButton}>
             <Ionicons name="call" size={40} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
           </TouchableOpacity>
         </View>
