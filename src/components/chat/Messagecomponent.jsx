@@ -23,6 +23,8 @@ export default function MessageComponent({
   onReply,
   onRevoke,
   onIcon,
+  onChoiGame3la,
+  onHuyGame3la
 }) {
   const isCurrentUser = message.sender._id === currentUserID; // Kiểm tra tin nhắn có phải của user hiện tại không
 
@@ -171,247 +173,301 @@ export default function MessageComponent({
     }));
 
   return (
-    <View
-      style={[
-        styles.messageContainer,
-        isCurrentUser ? styles.currentUserContainer : styles.otherUserContainer,
-      ]}>
-      {!isCurrentUser && (
-        <Image style={styles.avatar} source={{ uri: message.sender.avatar }} />
-      )}
-
-      {/* Nhấn giữ tin nhắn để mở menu */}
-      <TouchableWithoutFeedback
-        onLongPress={() => {
-          if (message._destroy != true) {
-            handleLongPress();
-          }
-        }}>
-        <View>
-          <View>
-            {!isCurrentUser && (
-              <Text style={styles.username}>
-                {message.sender?.first_name} {message.sender?.last_name}
-              </Text>
-            )}
-          </View>
-          <View
-            ref={messageRef} // Gắn ref vào đây
-            style={[
-              styles.messageWrapper,
-              isCurrentUser && styles.currentUserMessage,
-            ]}>
-            {/* Hiển thị tin nhắn trả lời nếu có */}
-            {message.ID_message_reply && message._destroy == false && (
-              <View>
-                <View style={styles.replyContainer}>
-                  <Text style={styles.replyText} numberOfLines={2}>
-                    {message.ID_message_reply.content ||
-                      'Tin nhắn không tồn tại'}
-                  </Text>
-                </View>
-              </View>
-            )}
-            {/* Nội dung tin nhắn chính */}
-            {
-              // tin nhắn bị thu hồi
-              message._destroy == true ? (
-                <Text style={[styles.messageTextThuHoi]}>
-                  Tin nhắn đã được thu hồi
-                </Text>
-              ) : message.type == 'text' ? (
-                <Text
-                  style={[
-                    styles.messageText,
-                    isCurrentUser && styles.currentUserText,
-                  ]}>
-                  {message.content}
-                </Text>
-              ) : message.type == 'image' ? (
-                <Image
-                  style={[
-                    styles.messageImage,
-                    isCurrentUser && styles.currentUserText,
-                  ]}
-                  source={{ uri: message.content }}
-                />
-              ) : (
-                message.type == 'video' && (
-                  <Video
-                    source={{ uri: message.content }} // URL video
-                    style={[
-                      styles.messageVideo,
-                      isCurrentUser && styles.currentUserText,
-                    ]}
-                    controls={true} // Hiển thị điều khiển video
-                    resizeMode="contain" // Cách hiển thị video
-                  />
-                )
-              )
-            }
-            {/* thời gian */}
-            <Text style={styles.messageTime}>
-              {formatTime(message.createdAt)}
-            </Text>
-            {/* butonsheet reaction biểu cảm */}
-            <TouchableOpacity
-              onPress={() => openBottomSheet(50, renderBottomSheetContent())}>
-              <View style={{ flexDirection: 'row' }}>
-                {message?.message_reactionList.map((reaction, index) => (
-                  <View key={index} style={styles.reactionButton}>
-                    <Text style={styles.reactionText}>
-                      {reaction.ID_reaction.icon} {reaction.quantity}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-
-      {/* Hiển thị Snackbar dưới cùng màn hình */}
-      <Snackbar
-        visible={dialogCopyVisible}
-        onDismiss={() => setDialogCopyVisible(false)}
-        duration={1000}>
-        Đã sao chép tin nhắn!
-      </Snackbar>
-
-      {/* Menu tùy chọn khi nhấn giữ */}
-      <Modal
-        visible={menuVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMenuVisible(false)}>
-        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-          <View style={styles.overlay}>
+    <View>
+      {
+        message.type == 'game3la'
+          ? (
             <View
-              style={[
-                {
-                  position: 'absolute',
-                  top: menuPosition.top,
-                },
-                isCurrentUser
-                  ? {
-                    right: 10,
-                    alignItems: 'flex-end', // Căn phải
-                  }
-                  : {
-                    left: menuPosition.left,
-                  },
-              ]} // Cập nhật vị trí menu
+              style={{
+                backgroundColor: 'grey',
+                width: '80%',
+                height: 80,
+                alignSelf: 'center',
+                borderRadius: 20,
+                margin: 10,
+                justifyContent: 'center',
+              }}
             >
-              <View style={[styles.reactionBar]}>
-                {/* reaction biểu cảm */}
-                {reactions.map((reaction, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.reactionButton}
-                    onPress={() => {
-                      onIcon(message._id, reaction._id);
-                      setMenuVisible(false);
-                    }}>
-                    <Text style={styles.onreactionText}>{reaction.icon}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <View
-                style={[
-                  styles.messageWrapper,
-                  isCurrentUser && styles.currentUserMessage,
-                ]}>
-                {!isCurrentUser && (
-                  <Text style={styles.username}>
-                    {message.sender?.first_name} {message.sender?.last_name}
-                  </Text>
-                )}
-                {/* Hiển thị tin nhắn trả lời nếu có */}
-                {message.ID_message_reply && message._destroy == false && (
-                  <View style={styles.replyContainer}>
-                    <Text style={styles.replyText} numberOfLines={2}>
-                      {message.ID_message_reply.content}
+              <Text style={{ textAlign: 'center', color: 'black', fontSize: 16 }}>
+                {message.content}
+              </Text>
+              {
+                message._destroy == true
+                  ? (
+                    <Text style={{ textAlign: 'center', color: 'black', fontSize: 16 }}>
+                      game đã kết thúc
                     </Text>
-                  </View>
-                )}
-                {/* Nội dung tin nhắn chính */}
-                {
-                  // tin nhắn bị thu hồi
-                  message._destroy == true ? (
-                    <Text style={[styles.messageTextThuHoi]}>
-                      Tin nhắn đã được thu hồi
-                    </Text>
-                  ) : message.type == 'text' ? (
-                    <Text
-                      style={[
-                        styles.messageText,
-                        isCurrentUser && styles.currentUserText,
-                      ]}>
-                      {message.content}
-                    </Text>
-                  ) : message.type == 'image' ? (
-                    <Image
-                      style={[
-                        styles.messageImage,
-                        isCurrentUser && styles.currentUserText,
-                      ]}
-                      source={{ uri: message.content }}
-                    />
                   ) : (
-                    message.type == 'video' && (
-                      <Video
-                        source={{ uri: message.content }} // URL video
-                        style={[
-                          styles.messageVideo,
-                          isCurrentUser && styles.currentUserText,
-                        ]}
-                        controls={true} // Hiển thị điều khiển video
-                        resizeMode="contain" // Cách hiển thị video
-                      />
-                    )
-                  )
-                }
-                {/* thời gian */}
-                <Text style={styles.messageTime}>
-                  {formatTime(message.createdAt)}
-                </Text>
-              </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                      <TouchableOpacity
+                        style={{ backgroundColor: 'blue', width: 100, height: 30 }}
+                        onPress={() => {
+                          onChoiGame3la(message._id); // chấp nhận chơi game
+                        }}>
+                        <Text style={{ textAlign: 'center', color: 'white', fontSize: 16 }}>Chơi</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{ backgroundColor: 'red', width: 100, height: 30 }}
+                        onPress={() => {
+                          onHuyGame3la(message._id); // từ chối chơi game
+                        }}>
+                        <Text style={{ textAlign: 'center', color: 'white', fontSize: 16 }}>Hủy</Text>
+                      </TouchableOpacity>
 
-              <View style={[styles.menu]}>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => {
-                    onReply(message); // Gửi tin nhắn được chọn về component cha
-                    setMenuVisible(false); // tắc modal
-                  }}>
-                  <Text style={styles.menuText}>Trả lời</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => {
-                    copyToClipboard(message.content); // copy
-                    setMenuVisible(false); // tắc modal
-                  }}>
-                  <Text style={styles.menuText}>Sao chép</Text>
-                </TouchableOpacity>
-                {isCurrentUser && (
-                  <TouchableOpacity
-                    style={styles.menuItem}
-                    onPress={() => {
-                      onRevoke(message._id); // Thu hồi tin nhắn
-                      setMenuVisible(false); // tắc modal
-                    }}>
-                    <Text style={styles.menuText}>Thu hồi</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
+                    </View>
+                  )
+              }
+
             </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    </View>
+
+          ) : (
+            <View
+              style={
+                [
+                  styles.messageContainer,
+                  isCurrentUser ? styles.currentUserContainer : styles.otherUserContainer,
+                ]
+              }>
+              {!isCurrentUser && (
+                <Image style={styles.avatar} source={{ uri: message.sender.avatar }} />
+              )}
+
+              {/* Nhấn giữ tin nhắn để mở menu */}
+              <TouchableWithoutFeedback
+                onLongPress={() => {
+                  if (message._destroy != true) {
+                    handleLongPress();
+                  }
+                }}>
+                <View>
+                  <View>
+                    {!isCurrentUser && (
+                      <Text style={styles.username}>
+                        {message.sender?.first_name} {message.sender?.last_name}
+                      </Text>
+                    )}
+                  </View>
+                  <View
+                    ref={messageRef} // Gắn ref vào đây
+                    style={[
+                      styles.messageWrapper,
+                      isCurrentUser && styles.currentUserMessage,
+                    ]}>
+                    {/* Hiển thị tin nhắn trả lời nếu có */}
+                    {message.ID_message_reply && message._destroy == false && (
+                      <View>
+                        <View style={styles.replyContainer}>
+                          <Text style={styles.replyText} numberOfLines={2}>
+                            {message.ID_message_reply.content ||
+                              'Tin nhắn không tồn tại'}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+                    {/* Nội dung tin nhắn chính */}
+                    {
+                      // tin nhắn bị thu hồi
+                      message._destroy == true ? (
+                        <Text style={[styles.messageTextThuHoi]}>
+                          Tin nhắn đã được thu hồi
+                        </Text>
+                      ) : message.type == 'text' ? (
+                        <Text
+                          style={[
+                            styles.messageText,
+                            isCurrentUser && styles.currentUserText,
+                          ]}>
+                          {message.content}
+                        </Text>
+                      ) : message.type == 'image' ? (
+                        <Image
+                          style={[
+                            styles.messageImage,
+                            isCurrentUser && styles.currentUserText,
+                          ]}
+                          source={{ uri: message.content }}
+                        />
+                      ) : (
+                        message.type == 'video' && (
+                          <Video
+                            source={{ uri: message.content }} // URL video
+                            style={[
+                              styles.messageVideo,
+                              isCurrentUser && styles.currentUserText,
+                            ]}
+                            controls={true} // Hiển thị điều khiển video
+                            resizeMode="contain" // Cách hiển thị video
+                          />
+                        )
+                      )
+                    }
+                    {/* thời gian */}
+                    <Text style={styles.messageTime}>
+                      {formatTime(message.createdAt)}
+                    </Text>
+                    {/* butonsheet reaction biểu cảm */}
+                    <TouchableOpacity
+                      onPress={() => openBottomSheet(50, renderBottomSheetContent())}>
+                      <View style={{ flexDirection: 'row' }}>
+                        {message?.message_reactionList.map((reaction, index) => (
+                          <View key={index} style={styles.reactionButton}>
+                            <Text style={styles.reactionText}>
+                              {reaction.ID_reaction.icon} {reaction.quantity}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+
+              {/* Hiển thị Snackbar dưới cùng màn hình */}
+              <Snackbar
+                visible={dialogCopyVisible}
+                onDismiss={() => setDialogCopyVisible(false)}
+                duration={1000}>
+                Đã sao chép tin nhắn!
+              </Snackbar>
+
+              {/* Menu tùy chọn khi nhấn giữ */}
+              <Modal
+                visible={menuVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setMenuVisible(false)}>
+                <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+                  <View style={styles.overlay}>
+                    <View
+                      style={[
+                        {
+                          position: 'absolute',
+                          top: menuPosition.top,
+                        },
+                        isCurrentUser
+                          ? {
+                            right: 10,
+                            alignItems: 'flex-end', // Căn phải
+                          }
+                          : {
+                            left: menuPosition.left,
+                          },
+                      ]} // Cập nhật vị trí menu
+                    >
+                      <View style={[styles.reactionBar]}>
+                        {/* reaction biểu cảm */}
+                        {reactions.map((reaction, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={styles.reactionButton}
+                            onPress={() => {
+                              onIcon(message._id, reaction._id);
+                              setMenuVisible(false);
+                            }}>
+                            <Text style={styles.onreactionText}>{reaction.icon}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+
+                      <View
+                        style={[
+                          styles.messageWrapper,
+                          isCurrentUser && styles.currentUserMessage,
+                        ]}>
+                        {!isCurrentUser && (
+                          <Text style={styles.username}>
+                            {message.sender?.first_name} {message.sender?.last_name}
+                          </Text>
+                        )}
+                        {/* Hiển thị tin nhắn trả lời nếu có */}
+                        {message.ID_message_reply && message._destroy == false && (
+                          <View style={styles.replyContainer}>
+                            <Text style={styles.replyText} numberOfLines={2}>
+                              {message.ID_message_reply.content}
+                            </Text>
+                          </View>
+                        )}
+                        {/* Nội dung tin nhắn chính */}
+                        {
+                          // tin nhắn bị thu hồi
+                          message._destroy == true ? (
+                            <Text style={[styles.messageTextThuHoi]}>
+                              Tin nhắn đã được thu hồi
+                            </Text>
+                          ) : message.type == 'text' ? (
+                            <Text
+                              style={[
+                                styles.messageText,
+                                isCurrentUser && styles.currentUserText,
+                              ]}>
+                              {message.content}
+                            </Text>
+                          ) : message.type == 'image' ? (
+                            <Image
+                              style={[
+                                styles.messageImage,
+                                isCurrentUser && styles.currentUserText,
+                              ]}
+                              source={{ uri: message.content }}
+                            />
+                          ) : (
+                            message.type == 'video' && (
+                              <Video
+                                source={{ uri: message.content }} // URL video
+                                style={[
+                                  styles.messageVideo,
+                                  isCurrentUser && styles.currentUserText,
+                                ]}
+                                controls={true} // Hiển thị điều khiển video
+                                resizeMode="contain" // Cách hiển thị video
+                              />
+                            )
+                          )
+                        }
+                        {/* thời gian */}
+                        <Text style={styles.messageTime}>
+                          {formatTime(message.createdAt)}
+                        </Text>
+                      </View>
+
+                      <View style={[styles.menu]}>
+                        <TouchableOpacity
+                          style={styles.menuItem}
+                          onPress={() => {
+                            onReply(message); // Gửi tin nhắn được chọn về component cha
+                            setMenuVisible(false); // tắc modal
+                          }}>
+                          <Text style={styles.menuText}>Trả lời</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.menuItem}
+                          onPress={() => {
+                            copyToClipboard(message.content); // copy
+                            setMenuVisible(false); // tắc modal
+                          }}>
+                          <Text style={styles.menuText}>Sao chép</Text>
+                        </TouchableOpacity>
+                        {isCurrentUser && (
+                          <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => {
+                              onRevoke(message._id); // Thu hồi tin nhắn
+                              setMenuVisible(false); // tắc modal
+                            }}>
+                            <Text style={styles.menuText}>Thu hồi</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+              </Modal>
+            </View>
+          )
+      }
+    </View >
+
   );
 }
 

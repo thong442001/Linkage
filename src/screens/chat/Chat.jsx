@@ -60,6 +60,7 @@ const Chat = (props) => {// cần ID_group (param)
     const typingTimeoutRef = useRef(null);
     const [typingUsers, setTypingUsers] = useState([]);
     const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
+    const [validateGame, setValidateGame] = useState(true);
 
     //call API noti call
     const callNotiCall = async (ID_group, ID_user, isCallVideo) => {
@@ -294,6 +295,21 @@ const Chat = (props) => {// cần ID_group (param)
             setTypingUsers((prev) => prev.filter((id) => id !== ID_user)); // Xóa user khỏi danh sách
         });
 
+        socket.on("lang-nghe-moi-choi-game-3-la", (data) => {
+            console.log("lang-nghe-moi-choi-game-3-la")
+            if (data.sender == me._id && data.type == 'game3la' && group) {
+                console.log("lang-nghe-moi-choi-game-3-la1")
+                navigation.navigate("ManHinhCho", { group: group, ID_message: data._id });
+            }
+        });
+
+        socket.on("lang-nghe-chap-nhan-choi-game-3-la", () => {
+            console.log("lang-nghe-chap-nhan-choi-game-3-la")
+        });
+        socket.on("lang-nghe-tu-choi-choi-game-3-la", () => {
+            console.log("lang-nghe-tu-choi-choi-game-3-la")
+        });
+
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardHeight(e.endCoordinates.height);
@@ -313,6 +329,10 @@ const Chat = (props) => {// cần ID_group (param)
             // đang soạn
             socket.off("user_typing");
             socket.off("user_stop_typing");
+            // game
+            socket.off("lang-nghe-moi-choi-game-3-la");
+            socket.off("lang-nghe-chap-nhan-choi-game-3-la");
+            socket.off("lang-nghe-tu-choi-choi-game-3-la");
             // bàn phím
             keyboardDidShowListener.remove();
             keyboardDidHideListener.remove();
@@ -444,9 +464,24 @@ const Chat = (props) => {// cần ID_group (param)
             me: me._id,
         };
         socket.emit('moi-choi-game-3-la', payload);
-        navigation.navigate("NguoiMoi", { group: group });
+        //navigation.navigate("ManHinhCho", { group: group });
     };
-
+    const onChoiGame3la = (ID_message) => {
+        const payload = {
+            ID_message: ID_message,
+            ID_group: params.ID_group,
+        };
+        socket.emit('chap-nhan-choi-game-3-la', payload);
+        navigation.navigate('InGame3La');
+    };
+    const onHuyGame3la = (ID_message) => {
+        const payload = {
+            ID_message: ID_message,
+            ID_group: params.ID_group,
+        };
+        socket.emit('tu-choi-choi-game-3-la', payload);
+        //navigation.navigate("ManHinhCho", { group: group });
+    };
 
     useEffect(() => {
         // Cuộn xuống tin nhắn cuối cùng khi danh sách tin nhắn thay đổi
@@ -515,7 +550,7 @@ const Chat = (props) => {// cần ID_group (param)
             {
                 (groupName != null
                     && groupAvatar != null)
-                && < ChatHeader
+                && <ChatHeader
                     name={groupName}
                     avatar={groupAvatar}
                     onGoBack={goBack}
@@ -526,6 +561,8 @@ const Chat = (props) => {// cần ID_group (param)
                     onToGame3La={onToGame3La}
                 />
             }
+
+
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
                 contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10 }}
@@ -537,6 +574,8 @@ const Chat = (props) => {// cần ID_group (param)
                         onReply={() => setReply(item)}
                         onRevoke={revokeMessage}
                         onIcon={iconMessage}
+                        onChoiGame3la={onChoiGame3la}
+                        onHuyGame3la={onHuyGame3la}
                     />
                 )}
                 keyExtractor={(item) => item._id}

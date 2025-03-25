@@ -5,8 +5,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
 import { useSocket } from '../../../context/socketContext';
 
-const NguoiDuocMoi = ({ route, navigation }) => {
-  const { group } = route.params;
+const ManHinhCho = ({ route, navigation }) => {
+  const { group, ID_message } = route.params;
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const me = useSelector((state) => state.app.user);
@@ -24,21 +24,31 @@ const NguoiDuocMoi = ({ route, navigation }) => {
       const otherUser = group.members?.find((user) => user._id !== me._id);
       setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người mời chơi game 3 lá');
       setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
+    } else {
+      setName(
+        group.name ||
+        group.members
+          ?.filter((user) => user._id !== me._id)
+          .map((user) => `${user.first_name} ${user.last_name}`)
+          .join(', ')
+      );
+      setAvatar(group.avatar || 'https://example.com/default-group-avatar.png');
     }
 
-    socket.on("lang-nghe-chap-nhan-choi-game-3-la", ({ ID_group }) => {
-      console.log('chap-nhan-choi-game-3-la');
-      navigation.navigate('InGame3La');
+    socket.on("lang-nghe-chap-nhan-choi-game-3-la", () => {
+      console.log(`Bạn đã được chấp nhận chơi game 3 lá`);
+      handleAccept();
     });
 
-    socket.on("lang-nghe-tu-choi-choi-game-3-la", ({ ID_group }) => {
+    socket.on("lang-nghe-tu-choi-choi-game-3-la", () => {
       console.log(`Bạn đã bị từ chối chơi game 3 lá`);
-      navigation.goBack();
+      handleCancel();
     });
 
     return () => {
       socket.off("lang-nghe-chap-nhan-choi-game-3-la");
       socket.off("lang-nghe-tu-choi-choi-game-3-la");
+      //handleCancel();
     };
 
   }, [group, me]);
@@ -73,11 +83,8 @@ const NguoiDuocMoi = ({ route, navigation }) => {
       ringtoneRef.current.stop();
       ringtoneRef.current.release();
     }
-    const payload = {
-      ID_group: group._id,
-    }
-    socket.emit('chap-nhan-choi-game-3-la', payload);
 
+    navigation.navigate('InGame3La');
   };
 
   // Xử lý khi chấp nhận cuộc gọi
@@ -86,11 +93,16 @@ const NguoiDuocMoi = ({ route, navigation }) => {
       ringtoneRef.current.stop();
       ringtoneRef.current.release();
     }
-    const payload = {
-      ID_group: group._id,
-    }
-    socket.emit('tu-choi-choi-game-3-la', payload);
     navigation.goBack();
+  };
+
+  const handleCancel1 = () => {
+    console.log('123')
+    const payload = {
+      ID_message: ID_message,
+      ID_group: group?._id,
+    };
+    socket.emit('tu-choi-choi-game-3-la', payload);
   };
 
   return (
@@ -103,10 +115,12 @@ const NguoiDuocMoi = ({ route, navigation }) => {
           <Text style={styles.callingText}>Đang mời chơi game 3 lá...</Text>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleAccept} style={styles.acceptButton}>
+          {/* <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
             <Ionicons name="call" size={40} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleCancel} style={styles.declineButton}>
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            onPress={() => handleCancel1()}
+            style={styles.declineButton}>
             <Ionicons name="call" size={40} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
           </TouchableOpacity>
         </View>
@@ -174,4 +188,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NguoiDuocMoi;
+export default ManHinhCho;

@@ -243,8 +243,7 @@ import HostLive from '../screens/live/HostLive';
 import AudienceScreen from '../screens/live/AudienceScreen';
 import IncomingCallScreen from '../screens/call/IncomingCallScreen';
 import InGame3La from '../screens/game/3la/InGame3La';
-import NguoiDuocMoi from '../screens/game/3la/NguoiDuocMoi';
-import NguoiMoi from '../screens/game/3la/NguoiMoi';
+import ManHinhCho from '../screens/game/3la/ManHinhCho';
 import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Ringing from '../screens/call/Ringing';
 import Report from '../screens/report/Report';
@@ -280,8 +279,7 @@ const oStackHome = {
   AudienceScreen: { name: 'AudienceScreen', component: AudienceScreen },
   IncomingCallScreen: { name: 'IncomingCallScreen', component: IncomingCallScreen },
   InGame3La: { name: 'InGame3La', component: InGame3La },
-  NguoiDuocMoi: { name: 'NguoiDuocMoi', component: NguoiDuocMoi },
-  NguoiMoi: { name: 'NguoiMoi', component: NguoiMoi },
+  ManHinhCho: { name: 'ManHinhCho', component: ManHinhCho },
   Ringing: { name: 'Ringing', component: Ringing },
   Report: { name: 'Report', component: Report },
 }
