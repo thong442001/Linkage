@@ -47,6 +47,11 @@ const UpPost = (props) => {
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [isPosting, setIsPosting] = useState(false);
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filtered, setFiltered] = useState([]);
+    
+    
+
 
     // Mô hình tạo ảnh
     const MODEL_URL = 'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5';
@@ -118,6 +123,7 @@ const UpPost = (props) => {
                 .then((response) => {
                     //console.log(response.groups)
                     setFriends(response.relationships);
+                    console.log('canhphan',response.relationships);
                 })
                 .catch((error) => {
                     console.log('Error1 getAllFriendOfID_user:', error);
@@ -365,6 +371,35 @@ const UpPost = (props) => {
         setTags(tempSelectedUsers); // Cập nhật danh sách tags
         setTagVisible(false); // Đóng modal
     }
+    //tách dấu
+    const normalizeText = (text) => {
+        return text
+            .toLowerCase()
+            .normalize('NFD') // Tách dấu ra khỏi chữ
+            .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D');
+    };
+    //search
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setFiltered(friends || []);
+        } else {
+            const filteredFriends = friends.filter(user => {
+                // Xác định ai là bạn bè của bạn
+                const friend = user.ID_userA._id === me._id ? user.ID_userB : user.ID_userB._id === me._id ? user.ID_userA : null;
+                
+                // Nếu không tìm thấy bạn bè (myId không có trong cặp), bỏ qua
+                if (!friend) return false;
+    
+                // Lấy tên đầy đủ của bạn bè để lọc
+                const fullName = `${friend.first_name || ''} ${friend.last_name || ''}`.toLowerCase();
+                return normalizeText(fullName).includes(normalizeText(searchQuery).toLowerCase());
+            });
+            setFiltered(filteredFriends);
+        }
+    }, [searchQuery, friends, me]); // Thêm myId vào dependencies nếu nó có thể thay đổi
+    
 
     return (
         <View style={UpPostS.Container}>
@@ -552,6 +587,17 @@ const UpPost = (props) => {
                                     {/* <View style={{ marginLeft: 10 }}> */}
                                     {/* <Text style={UpPostS.name}>{me?.first_name + " " + me?.last_name}</Text> */}
                                     <View style={UpPostS.boxTag}>
+                                        <View style={UpPostS.search}>
+                                        <TouchableOpacity>
+                                            <Icon name="search-outline" size={30} color='black' />
+                                        </TouchableOpacity>
+                                        <TextInput 
+                                        placeholder='Tìm kiếm' 
+                                        placeholderTextColor={'black'} 
+                                        value={searchQuery} 
+                                        onChangeText={setSearchQuery}
+                                        style={{color:'black'}}/>
+                                        </View>
                                         <TouchableOpacity style={UpPostS.btnTag} onPress={() => handleAddTag()}>
                                             <Text style={UpPostS.tag}>
                                                 Gắn thẻ
@@ -559,7 +605,7 @@ const UpPost = (props) => {
                                         </TouchableOpacity>
                                     </View>
                                     <FlatList
-                                        data={friends}
+                                        data={filtered}
                                         keyExtractor={(item) => item._id}
                                         extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
                                         renderItem={({ item }) => (

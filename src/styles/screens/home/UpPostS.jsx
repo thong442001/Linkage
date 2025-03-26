@@ -3,6 +3,15 @@ import React from 'react'
 const { width, height } = Dimensions.get('window');
 
 const UpPostS = StyleSheet.create({
+    search:{
+        flexDirection:'row',
+        alignItems: 'center',
+        backgroundColor:'#E4E4E4',
+        paddingHorizontal:10,
+        borderRadius:20,
+        width:'60%',
+
+    },
     loadingContainer: {
         position: 'absolute',
         top: '50%',
@@ -298,7 +307,10 @@ const UpPostS = StyleSheet.create({
     boxTag: {
         // backgroundColor: '#0064E0',
         alignSelf: 'flex-end',
-        marginBottom: 20
+        flexDirection:'row',
+        marginBottom: 20,
+        justifyContent:'space-between',
+        width:'100%',
     }
 })
 
