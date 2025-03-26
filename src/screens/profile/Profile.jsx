@@ -100,14 +100,14 @@ const Profile = props => {
             openBottomSheet(35, detail_selection_image());
         } else {
             // Nếu không có story, chỉ mở Bottom Sheet với các tùy chọn hình ảnh
-            openBottomSheet(22, detail_selection_image());
+            openBottomSheet(25, detail_selection_image());
         }
     };
     const openBottomSheetReportUser = () => {
-        openBottomSheet(22, detail_selection_report_user());
+        openBottomSheet(25, detail_selection_report_user());
     };
     const openBottomSheetHuyBanBe = () => {
-        openBottomSheet(22, detail_selection_huy_friend());
+        openBottomSheet(25, detail_selection_huy_friend());
     };
 
 
@@ -672,21 +672,31 @@ const Profile = props => {
                     </Snackbar>
                     <View>
                         <View>
-                            <Pressable onPress={() => openBottomSheet(30, detail_selection_background)}>
-                                {user?.background != null ? (
-                                    <Image
-                                        style={ProfileS.backGroundImage}
-                                        // source={{ uri: user?.background }}
-                                        source={{ uri: user?.background }}
-                                    />
-                                ) : (
-                                    <Image
-                                        style={ProfileS.backGroundImage}
-                                        source={require('./../../../assets/images/phongcanh.jpg')}
-                                    />
-                                )}
-                            </Pressable>
-
+                            <View>
+                                <Pressable onPress={() => openBottomSheet(30, detail_selection_background)}>
+                                    {user?.background != null ? (
+                                        <Image
+                                            style={ProfileS.backGroundImage}
+                                            // source={{ uri: user?.background }}
+                                            source={{ uri: user?.background }}
+                                        />
+                                    ) : (
+                                        <Image
+                                            style={ProfileS.backGroundImage}
+                                            source={require('./../../../assets/images/phongcanh.jpg')}
+                                        />
+                                    )}
+                                </Pressable>
+                                <View style={ProfileS.header}>
+                                    <TouchableOpacity
+                                        style={ProfileS.header1}
+                                        onPress={() => navigation.goBack()}>
+                                        <View>
+                                            <Icon name="chevron-back" size={20} color="black" />
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                             <Pressable
                                 onPress={openBottomSheetAvatar}
                             >
@@ -965,25 +975,8 @@ const Profile = props => {
     return (
         <View style={ProfileS.container}>
             <LoadingModal visible={isLoading} />
-            <View style={ProfileS.boxHeader}>
-                <View style={ProfileS.header}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <View>
-                            <Icon name="chevron-back" size={20} color="black" />
-                        </View>
-                    </TouchableOpacity>
-                    <Text style={ProfileS.titleName}>
-                        {user?.first_name} {user?.last_name}
-                    </Text>
-                    <View>
-                        <Icon name="search" size={20} color="black" />
-                    </View>
-                </View>
-            </View>
-            <View style={HomeS.line}></View>
             <View>
                 <View>
-
                     <View style={ProfileS.post}>
                         {loading ? (
                             <>
