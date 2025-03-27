@@ -182,7 +182,6 @@ const Chat = (props) => {// cần ID_group (param)
         socket.on('receive_message', (data) => {
             console.log(data);
             setMessages((prevMessages) => [
-               
                 {
                     _id: data._id,
                     ID_group: data.ID_group,
@@ -288,7 +287,7 @@ const Chat = (props) => {// cần ID_group (param)
 
         socket.on("user_typing", ({ ID_group, ID_user }) => {
             //console.log("User: " + ID_user + " đang soạn tin nhắn...");
-            if(ID_user == me._id) return;
+            if (ID_user == me._id) return;
             setTypingUsers((prev) => [...new Set([...prev, ID_user])]); // Thêm user vào danh sách
 
         });
@@ -300,8 +299,9 @@ const Chat = (props) => {// cần ID_group (param)
 
         socket.on("lang-nghe-moi-choi-game-3-la", (data) => {
             console.log("lang-nghe-moi-choi-game-3-la")
+            //console.log(data);
             if (data.sender == me._id && data.type == 'game3la' && group) {
-                console.log("lang-nghe-moi-choi-game-3-la1")
+                //console.log("lang-nghe-moi-choi-game-3-la1")
                 navigation.navigate("ManHinhCho", { group: group, ID_message: data._id });
             }
         });
@@ -567,7 +567,7 @@ const Chat = (props) => {// cần ID_group (param)
 
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
-                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10,justifyContent: 'flex-end' }}
+                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10, justifyContent: 'flex-end' }}
                 data={messages || []}
                 renderItem={({ item }) => (
                     <Messagecomponent
