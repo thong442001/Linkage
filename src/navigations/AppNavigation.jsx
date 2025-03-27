@@ -14,6 +14,7 @@ import { useSocket } from '../context/socketContext';
 import { useNavigation } from '@react-navigation/native';
 import { navigate } from '../navigations/NavigationService';
 import { getNotificationPreference } from '../noti/notificationHelper';
+import {io} from 'socket.io-client';
 
 
 const AppNavigation = () => {
@@ -21,8 +22,8 @@ const AppNavigation = () => {
   const user = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
   const navigation = useNavigation(); // Lấy navigation
-  const { onlineUsers } = useSocket(); // Lấy danh sách user online từ context
-
+  const [socket, setSocket] = useState(null);
+   const [onlineUsers, setOnlineUsers] = useState([]); // Lưu danh sách user online
   const [isSplashVisible, setSplashVisible] = useState(true); // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
   //console.log("****: " + reactions)
@@ -44,9 +45,32 @@ const AppNavigation = () => {
     };
   }, []);
 
+
   useEffect(() => {
-    console.log('🔵 Danh sách user online: ', onlineUsers);
-  }, [onlineUsers]);
+    // Kết nối tới server
+    const newSocket = io('https://linkage.id.vn', {
+      transports: ['websocket', 'polling'],
+      reconnection: true, // Cho phép tự động kết nối lại
+      reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
+      timeout: 5000, // Chờ tối đa 5 giây trước khi báo lỗi
+    });
+    setSocket(newSocket);
+    if (user && socket) {
+      newSocket.emit('user_online', user._id); // Gửi ID user lên server khi đăng nhập
+    }
+
+    newSocket.on('online_users', userList => {
+      setOnlineUsers(userList);
+      console.log('🟢 Danh sách user online:', userList);
+    });
+    console.log('OnlineUsers: ' + onlineUsers);
+
+    return () => {
+      newSocket.off('online_users');
+    };
+  }, [user]);
+
+  
 
   //call api getAllReaction
   const callGetAllReaction = async () => {
