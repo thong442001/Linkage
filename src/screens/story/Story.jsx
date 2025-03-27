@@ -213,7 +213,7 @@ const Story = ({ route }) => {
           <TouchableOpacity
             style={styles.exitButton}
             onPress={() => navigation.navigate(oStackHome.TabHome.name)}>
-            <Text style={styles.exitText}>❌</Text>
+        <Icon name="close-outline" size={30} color="white" />
           </TouchableOpacity>
         </View>
 

@@ -16,6 +16,7 @@ import Video from 'react-native-video';
 import { useDispatch } from 'react-redux';
 import { deletePost } from '../../rtk/API';
 import { oStackHome } from '../../navigations/HomeNavigation';
+import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
 
 const { width, height } = Dimensions.get('window');
 const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
@@ -231,14 +232,14 @@ const Story = () => {
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-            {currentUserId === StoryView.user._id && (
-              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
-                <Text style={styles.deleteText}>🗑️</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
-              <Text style={styles.exitText}>❌</Text>
-            </TouchableOpacity>
+      {currentUserId === StoryView.user._id && (
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
+          <Icon name="trash-outline" size={24} color="white" />
+        </TouchableOpacity>
+      )}
+      <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
+        <Icon name="close-outline" size={30} color="white" />
+      </TouchableOpacity>
           </View>
         </View>
 
