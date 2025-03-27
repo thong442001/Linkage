@@ -9,50 +9,67 @@ import {
   Text,
   TouchableWithoutFeedback,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Video from 'react-native-video';
+import { useDispatch } from 'react-redux';
+import { deletePost } from '../../rtk/API';
+import { oStackHome } from '../../navigations/HomeNavigation';
 
 const { width, height } = Dimensions.get('window');
 const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 
 const Story = () => {
   const route = useRoute();
-  const { StoryView, currentUserId } = route.params || {};
+  const { StoryView, currentUserId, onDeleteStory } = route.params || {};
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
-  const emojiScale = useRef(new Animated.Value(1)).current; // Giá trị scale ban đầu
+  const [videoDuration, setVideoDuration] = useState(5000);
+  const [stories, setStories] = useState(StoryView?.stories || []);
+  const emojiScale = useRef(new Animated.Value(1)).current;
+  const videoRef = useRef(null);
+  const progressBars = useRef([]);
 
-  const progressBars = useRef(StoryView.stories.map(() => new Animated.Value(0))).current;
+  // Đồng bộ progressBars với stories
+  useEffect(() => {
+    progressBars.current = stories.map(() => new Animated.Value(0));
+  }, [stories]);
 
-  if (!StoryView || !StoryView.stories || StoryView.stories.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text style={{ color: 'white' }}>Không có dữ liệu Story</Text>
-      </View>
-    );
-  }
+  const isVideo = (media) => {
+    return media?.toLowerCase().endsWith('.mp4') || stories[currentIndex]?.type === 'video';
+  };
 
   const startProgress = (index) => {
-    progressBars[index].setValue(0);
-    Animated.timing(progressBars[index], {
+    if (!stories[index] || !progressBars.current[index]) return; // Kiểm tra an toàn
+    progressBars.current[index].setValue(0);
+    const duration = isVideo(stories[index].medias[0]) ? videoDuration : 5000;
+
+    Animated.timing(progressBars.current[index], {
       toValue: 1,
-      duration: 5000,
+      duration: duration,
       useNativeDriver: false,
     }).start(({ finished }) => {
-      if (finished) handleNextStory();
+      if (finished && !isVideo(stories[index].medias[0])) {
+        handleNextStory();
+      }
     });
   };
 
   useEffect(() => {
-    startProgress(currentIndex);
-  }, [currentIndex]);
+    if (currentIndex >= 0 && currentIndex < stories.length) {
+      startProgress(currentIndex);
+    }
+  }, [currentIndex, videoDuration, stories]);
 
   const handleNextStory = () => {
-    if (currentIndex + 1 < StoryView.stories.length) {
-      progressBars[currentIndex].setValue(1);
+    if (currentIndex + 1 < stories.length) {
+      progressBars.current[currentIndex]?.setValue(1);
       setCurrentIndex((prevIndex) => prevIndex + 1);
-      setSelectedEmoji(null); // Reset emoji khi chuyển story
+      setSelectedEmoji(null);
+      setVideoDuration(5000);
     } else {
       navigation.goBack();
     }
@@ -60,9 +77,10 @@ const Story = () => {
 
   const handlePrevStory = () => {
     if (currentIndex > 0) {
-      progressBars[currentIndex].setValue(0);
+      progressBars.current[currentIndex]?.setValue(0);
       setCurrentIndex((prevIndex) => prevIndex - 1);
-      setSelectedEmoji(null); // Reset emoji khi chuyển story
+      setSelectedEmoji(null);
+      setVideoDuration(5000);
     }
   };
 
@@ -75,38 +93,112 @@ const Story = () => {
     }
   };
 
-  // Xử lý chọn emoji và thêm hiệu ứng nảy lên
   const handleSelectEmoji = (emoji) => {
     setSelectedEmoji(emoji);
-    emojiScale.setValue(1); // Reset scale về ban đầu
+    emojiScale.setValue(1);
     Animated.sequence([
       Animated.timing(emojiScale, {
-        toValue: 1.5, // Nảy lên
+        toValue: 1.5,
         duration: 300,
         useNativeDriver: true,
       }),
       Animated.timing(emojiScale, {
-        toValue: 1, // Trở lại kích thước bình thường
+        toValue: 1,
         duration: 300,
         useNativeDriver: true,
       }),
     ]).start();
   };
 
+  const onVideoLoad = (data) => {
+    if (data.duration) {
+      setVideoDuration(data.duration * 1000);
+    }
+  };
+
+  const onVideoEnd = () => {
+    handleNextStory();
+  };
+
+  const callDeleteStory = async (ID_story) => {
+    try {
+      await dispatch(deletePost({ _id: ID_story }))
+        .unwrap()
+        .then(response => {
+          console.log('Xóa story vĩnh viễn thành công:', response);
+          const newStories = stories.filter(story => story._id !== ID_story);
+          setStories(newStories);
+          if (onDeleteStory) {
+            onDeleteStory(ID_story);
+          }
+          // Điều chỉnh currentIndex nếu cần
+          if (currentIndex >= newStories.length && currentIndex > 0) {
+            setCurrentIndex(newStories.length - 1);
+          }
+        })
+        .catch(error => {
+          console.log('Lỗi khi xóa story:', error);
+          throw error;
+        });
+    } catch (error) {
+      console.log('Lỗi trong callDeleteStory:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteStory = () => {
+    if (currentUserId !== StoryView.user._id) {
+      Alert.alert("Thông báo", "Bạn chỉ có thể xóa story của chính mình!");
+      return;
+    }
+
+    Alert.alert(
+      "Xác nhận",
+      "Bạn có chắc muốn xóa vĩnh viễn story này?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          onPress: async () => {
+            try {
+              const storyId = stories[currentIndex]._id;
+              await callDeleteStory(storyId);
+              Alert.alert("Thành công", "Story đã được xóa vĩnh viễn!");
+              navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: storyId });
+            }
+               catch (error) {
+              Alert.alert("Lỗi", "Không thể xóa story. Vui lòng thử lại!");
+              console.error("Lỗi xóa story:", error);
+            }
+          },
+          style: "destructive",
+        },
+      ]
+    );
+  };
+
+  if (!StoryView || !stories || stories.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: 'white' }}>Không có dữ liệu Story</Text>
+      </View>
+    );
+  }
+
   return (
     <TouchableWithoutFeedback onPress={handlePress}>
       <View style={styles.container}>
         <View style={styles.progressBarContainer}>
-          {StoryView.stories.map((_, index) => (
+          {stories.map((_, index) => (
             <View key={index} style={styles.progressBarBackground}>
               <Animated.View
                 style={[
                   styles.progressBar,
                   {
-                    width: progressBars[index].interpolate({
+                    width: progressBars.current[index]?.interpolate({
                       inputRange: [0, 1],
                       outputRange: ['0%', '100%'],
-                    }),
+                    }) || '0%',
                   },
                 ]}
               />
@@ -114,10 +206,22 @@ const Story = () => {
           ))}
         </View>
 
-        <Image
-          source={{ uri: StoryView.stories[currentIndex]?.medias[0] }}
-          style={styles.image}
-        />
+        {isVideo(stories[currentIndex]?.medias[0]) ? (
+          <Video
+            ref={videoRef}
+            source={{ uri: stories[currentIndex]?.medias[0] }}
+            style={styles.image}
+            resizeMode="cover"
+            onLoad={onVideoLoad}
+            onEnd={onVideoEnd}
+            repeat={false}
+          />
+        ) : (
+          <Image
+            source={{ uri: stories[currentIndex]?.medias[0] }}
+            style={styles.image}
+          />
+        )}
 
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
@@ -126,9 +230,16 @@ const Story = () => {
               {StoryView.user.first_name + ' ' + StoryView.user.last_name}
             </Text>
           </View>
-          <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.exitText}>❌</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            {currentUserId === StoryView.user._id && (
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
+                <Text style={styles.deleteText}>🗑️</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.exitText}>❌</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.emojiContainer}>
@@ -139,9 +250,10 @@ const Story = () => {
           ))}
         </View>
 
-        {/* Emoji được chọn với hiệu ứng animation */}
         {selectedEmoji && (
-          <Animated.View style={[styles.selectedEmojiContainer, { transform: [{ scale: emojiScale }] }]}>
+          <Animated.View
+            style={[styles.selectedEmojiContainer, { transform: [{ scale: emojiScale }] }]}
+          >
             <Text style={styles.selectedEmoji}>{selectedEmoji}</Text>
           </Animated.View>
         )}
@@ -196,6 +308,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   avatar: {
     width: 40,
     height: 40,
@@ -211,7 +327,16 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
   },
+  deleteButton: {
+    padding: 8,
+    borderRadius: 20,
+    marginRight: 10,
+  },
   exitText: {
+    fontSize: 20,
+    color: 'white',
+  },
+  deleteText: {
     fontSize: 20,
     color: 'white',
   },

@@ -2,27 +2,49 @@ import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'rea
 import React, { memo } from 'react';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import { useNavigation } from '@react-navigation/native';
+import Video from 'react-native-video'; // Import react-native-video
 
 const { width, height } = Dimensions.get('window');
 
 const Stories = memo(({ StoryPost }) => {
-
-  // console.log('Props received in Stories:', StoryPost.user._id); // Kiểm tra props nhận được
-
   const navigation = useNavigation();
-  // if (!StoryPost) return null; // Kiểm tra nếu stories không tồn tại
+
+  // Kiểm tra nếu StoryPost không tồn tại
+  if (!StoryPost || !StoryPost.stories || !StoryPost.user) return null;
 
   const allMedias = StoryPost.stories.flatMap(story => story.medias);
-  // console.log("Danh sách ảnh từ tất cả stories:", allMedias);
-
   const firstImages = StoryPost.stories.map(story => story.medias?.[0] || null);
-  // console.log("firstImage:", firstImages); // Kiểm tra props nhận được
+
+  // Hàm kiểm tra xem media tại index 0 có phải là video không
+  const isVideoAtIndex0 = () => {
+    const firstStory = StoryPost.stories[0];
+    return (
+      firstStory?.mediaType === 'video' ||
+      firstStory?.medias[0]?.toLowerCase().endsWith('.mp4')
+    );
+  };
 
   return (
     <TouchableOpacity
       style={styles.boxStory}
-      onPress={() => navigation.navigate(oStackHome.StoryViewer.name, { StoryView: StoryPost, currentUserId: StoryPost.user._id })}>
-      <Image style={styles.imageStories} source={{ uri: firstImages[0] }} />
+      onPress={() =>
+        navigation.navigate(oStackHome.StoryViewer.name, {
+          StoryView: StoryPost,
+          currentUserId: StoryPost.user._id,
+        })
+      }>
+      {isVideoAtIndex0() ? (
+        <Video
+          source={{ uri: firstImages[0] }}
+          style={styles.imageStories}
+          paused={true} // Dừng video để hiển thị frame đầu tiên
+          resizeMode="cover"
+          posterResizeMode="cover"
+          muted={true} // Tắt âm thanh
+        />
+      ) : (
+        <Image style={styles.imageStories} source={{ uri: firstImages[0] }} />
+      )}
 
       <Image
         style={styles.avataStories}
@@ -35,21 +57,22 @@ const Stories = memo(({ StoryPost }) => {
     </TouchableOpacity>
   );
 });
+
 export default Stories;
 
 const styles = StyleSheet.create({
   boxStory: {
-    marginLeft: width * 0.025, // Khoảng cách 2.5% chiều rộng màn hình
+    marginLeft: width * 0.025,
   },
   imageStories: {
-    width: width * 0.32, // 32% chiều rộng màn hình
-    height: height * 0.25, // 24% chiều cao màn hình
-    borderRadius: width * 0.025, // Bo góc theo tỷ lệ màn hình
+    width: width * 0.32,
+    height: height * 0.25,
+    borderRadius: width * 0.025,
   },
   avataStories: {
-    width: width * 0.1, // 10% chiều rộng màn hình
-    height: width * 0.1, // Vuông với chiều rộng
-    borderRadius: width * 0.1 / 2, // Làm tròn avatar
+    width: width * 0.1,
+    height: width * 0.1,
+    borderRadius: width * 0.1 / 2,
     borderWidth: 2,
     borderColor: '#1190FF',
     position: 'absolute',
@@ -58,15 +81,15 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: 'bold',
-    fontSize: width * 0.04, // 4% chiều rộng màn hình
+    fontSize: width * 0.04,
     color: '#FFFFFF',
     position: 'absolute',
     bottom: height * 0.012,
     left: width * 0.02,
   },
   backGround: {
-    width: width * 0.32, // Phù hợp với `imageStories`
-    height: height * 0.05, // 5% chiều cao màn hình
+    width: width * 0.32,
+    height: height * 0.05,
     backgroundColor: 'rgba(0,0,0,0.1)',
     position: 'absolute',
     borderBottomLeftRadius: width * 0.025,
@@ -74,6 +97,6 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   selectedBorder: {
-    borderColor: 'gray', // Viền xám khi được chọn
+    borderColor: 'gray',
   },
 });

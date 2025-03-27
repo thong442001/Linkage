@@ -21,7 +21,6 @@ import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import { launchCamera } from "react-native-image-picker";
-
 import axios from 'axios';
 import { TextInput } from 'react-native-gesture-handler';
 
@@ -33,27 +32,18 @@ const { width, height } = Dimensions.get('window');
 const Story = ({ route }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const [previewImage, setPreviewImage] = useState(null); // Ảnh hiển thị trước khi upload
-  const [uploadedImageUrl, setUploadedImageUrl] = useState(null); // Link ảnh sau khi upload
+  const [previewMedia, setPreviewMedia] = useState(null);
+  const [mediaType, setMediaType] = useState('photo');
+  const [uploadedMediaUrl, setUploadedMediaUrl] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [isPosted, setIsPosted] = useState(false); // Thêm state để kiểm soát trạng thái đăng
 
   const [text, setText] = useState('');
   const [showText, setShowText] = useState(false);
-  const [scale, setScale] = useState(new Animated.Value(1));
-
+  const [scale] = useState(new Animated.Value(1));
   const pan = useRef(new Animated.ValueXY()).current;
 
-  const [stories, setStories] = useState([]);
-  const [medias, setMedias] = useState([]);
-  const [typePost, setTypePost] = useState('Story');
   const me = useSelector(state => state.app.user);
-  console.log('me:', me);
-  const [selectedSongUrl, setSelectedSongUrl] = useState(null);
-
-  const [musicList, setMusicList] = useState([]);
-
-  // Quản lý trạng thái của quyền riêng tư
   const [selectedOption, setSelectedOption] = useState({
     status: 1,
     name: 'Công khai',
@@ -67,28 +57,29 @@ const Story = ({ route }) => {
   ];
 
   const openCamera = () => {
-    launchCamera({ mediaType: "photo", quality: 1 }, (response) => {
+    launchCamera({ 
+      mediaType: 'mixed',
+      quality: 1,
+      videoQuality: 'high',
+      durationLimit: 10
+    }, (response) => {
       if (response.didCancel) {
-        Alert.alert("Bạn đã hủy chụp ảnh");
+        Alert.alert("Bạn đã hủy chụp");
       } else if (response.errorCode) {
         Alert.alert("Lỗi khi mở camera:", response.errorMessage);
       } else if (response.assets && response.assets.length > 0) {
-        setPreviewImage(response.assets[0].uri);
-
+        const asset = response.assets[0];
+        setPreviewMedia(asset.uri);
+        setMediaType(asset.type.includes('video') ? 'video' : 'photo');
       }
     });
   };
 
-
-  // Gesture xử lý kéo/thả
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        pan.setOffset({
-          x: pan.x._value,
-          y: pan.y._value,
-        });
+        pan.setOffset({ x: pan.x._value, y: pan.y._value });
         pan.setValue({ x: 0, y: 0 });
       },
       onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
@@ -97,56 +88,63 @@ const Story = ({ route }) => {
       onPanResponderRelease: () => {
         pan.flattenOffset();
       },
-    }),
+    })
   ).current;
 
   useEffect(() => {
-    if (route.params?.newStory) {
-      setPreviewImage(route.params.newStory);
+    if (route.params?.newStory && route.params?.mediaType) {
+      setPreviewMedia(route.params.newStory);
+      setMediaType(route.params.mediaType);
     }
-  }, [route.params?.newStory]);
+  }, [route.params?.newStory, route.params?.mediaType]);
 
   const callAddPost = async () => {
-    if (!previewImage) {
-      Alert.alert("Lỗi", "Vui lòng chọn ảnh trước khi đăng!");
+    if (!previewMedia) {
+      Alert.alert("Lỗi", "Vui lòng chọn media trước khi đăng!");
       return;
     }
 
+    if (isPosted) {
+      return; // Ngăn gọi lại nếu đã đăng thành công
+    }
+
+    setLoading(true);
     try {
-      const uploadedUrl = await uploadToCloudinary(previewImage);
+      const uploadedUrl = await uploadToCloudinary(previewMedia);
       if (!uploadedUrl) {
-        Alert.alert("Lỗi", "Không thể tải ảnh lên Cloudinary!");
+        Alert.alert("Lỗi", "Không thể tải media lên Cloudinary!");
         return;
       }
 
       const paramsAPI = {
         ID_user: me._id,
-        caption: '',
+        caption: text,
         medias: [uploadedUrl],
         status: selectedOption.name,
-        type: typePost,
+        type: 'Story',
+        mediaType: mediaType,
         ID_post_shared: null,
         tags: [],
       };
-console.log('paramsAPI:', paramsAPI);
-      await dispatch(addPost(paramsAPI)).unwrap();
 
-      // Chuyển về màn hình TabHome ngay sau khi đăng thành công
+      await dispatch(addPost(paramsAPI)).unwrap();
+      setIsPosted(true); // Đánh dấu đã đăng thành công
+      Alert.alert("Thành công", "Đã đăng Story thành công!");
       navigation.replace(oStackHome.TabHome.name);
     } catch (error) {
       Alert.alert("Lỗi", "Đăng bài thất bại. Vui lòng thử lại!");
       console.error("Lỗi đăng bài:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-
-  const uploadToCloudinary = async imageUri => {
-    setLoading(true);
+  const uploadToCloudinary = async (mediaUri) => {
     const formData = new FormData();
     formData.append('file', {
-      uri: imageUri,
-      type: 'image/jpeg',
-      name: 'upload.jpg',
+      uri: mediaUri,
+      type: mediaType === 'photo' ? 'image/jpeg' : 'video/mp4',
+      name: mediaType === 'photo' ? 'upload.jpg' : 'upload.mp4',
     });
     formData.append('upload_preset', UPLOAD_PRESET);
 
@@ -154,35 +152,34 @@ console.log('paramsAPI:', paramsAPI);
       const response = await axios.post(CLOUDINARY_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      const imageUrl = response.data.secure_url;
-      setUploadedImageUrl(imageUrl);
-      console.log('Ảnh đã tải lên:', imageUrl);
-      return imageUrl;
+      const mediaUrl = response.data.secure_url;
+      setUploadedMediaUrl(mediaUrl);
+      console.log(`${mediaType === 'photo' ? 'Ảnh' : 'Video'} đã tải lên:`, mediaUrl);
+      return mediaUrl;
     } catch (error) {
       console.error('Lỗi upload:', error);
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <TouchableWithoutFeedback>
       <View style={styles.container}>
-        {previewImage ? (
-          <Image source={{ uri: previewImage }} style={styles.image} />
+        {previewMedia ? (
+          mediaType === 'photo' ? (
+            <Image source={{ uri: previewMedia }} style={styles.image} />
+          ) : (
+            <Video
+              source={{ uri: previewMedia }}
+              style={styles.image}
+              resizeMode="cover"
+              paused={true}
+            />
+          )
         ) : (
-          <Text style={{ color: 'white', fontSize: 16 }}>Chưa có ảnh</Text>
+          <Text style={{ color: 'white', fontSize: 16 }}>Chưa có media</Text>
         )}
 
-        {/* Nút thêm Text */}
-        <TouchableOpacity
-          style={styles.addTextButton}
-          onPress={() => setShowText(true)}>
-          <Text style={{ color: 'white' }}>Thêm Text</Text>
-        </TouchableOpacity>
-
-        {/* Text có thể kéo thả và thu phóng */}
         {showText && (
           <Animated.View
             {...panResponder.panHandlers}
@@ -199,7 +196,13 @@ console.log('paramsAPI:', paramsAPI);
             />
           </Animated.View>
         )}
-        {/* Avatar & Nút Thoát */}
+
+        <TouchableOpacity
+          style={styles.addTextButton}
+          onPress={() => setShowText(true)}>
+          <Text style={{ color: 'white' }}>Thêm Text</Text>
+        </TouchableOpacity>
+
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
             <Image source={{ uri: me?.avatar }} style={styles.avatar} />
@@ -214,7 +217,6 @@ console.log('paramsAPI:', paramsAPI);
           </TouchableOpacity>
         </View>
 
-        {/* Nút Chọn Quyền Riêng Tư */}
         <TouchableOpacity
           style={styles.privacyButton}
           onPress={() => setModalVisible(true)}>
@@ -222,23 +224,24 @@ console.log('paramsAPI:', paramsAPI);
           <Text style={styles.privacyText}>{selectedOption.name}</Text>
         </TouchableOpacity>
 
-        {/* Nút mở Camera */}
         <TouchableOpacity style={styles.CameraBtn} onPress={openCamera}>
           <Icon name="camera" size={24} color="white" />
-          <Text style={{ color: 'white', marginLeft: 5 }}>Chụp ảnh</Text>
+          <Text style={{ color: 'white', marginLeft: 5 }}>Chụp media</Text>
         </TouchableOpacity>
 
-        {/* Nút Đăng Story */}
         <TouchableOpacity
-          style={styles.postButton}
+          style={[
+            styles.postButton,
+            (loading || isPosted) && styles.disabledButton, // Thay đổi giao diện khi disabled
+          ]}
           onPress={callAddPost}
-          disabled={loading}>
+          disabled={loading || isPosted} // Vô hiệu hóa khi đang loading hoặc đã đăng
+        >
           <Text style={styles.postText}>
-            {loading ? 'Đang đăng...' : 'Đăng'}
+            {loading ? 'Đang đăng...' : isPosted ? 'Đã đăng' : 'Đăng'}
           </Text>
         </TouchableOpacity>
 
-        {/* Modal Chọn Quyền Riêng Tư */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -267,8 +270,6 @@ console.log('paramsAPI:', paramsAPI);
             </View>
           </View>
         </Modal>
-
-
       </View>
     </TouchableWithoutFeedback>
   );
@@ -307,7 +308,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-
   CameraBtn: {
     position: 'absolute',
     bottom: 140,
@@ -328,15 +328,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 20,
   },
-
-  musicButton: {
-    position: 'absolute',
-    bottom: 180,
-    right: 20,
-    backgroundColor: '#71AFD8',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+  disabledButton: {
+    backgroundColor: '#A9A9A9', // Màu xám khi bị vô hiệu hóa
+    opacity: 0.7,
   },
   postText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
   modalContainer: {
@@ -377,16 +371,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   draggableText: { color: 'white', fontSize: 20 },
-  draggableTextContainer: {
-    position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 10,
-    borderRadius: 5,
-  },
-  draggableText: {
-    color: 'white',
-    fontSize: 18,
-  },
 });
 
 export default Story;
