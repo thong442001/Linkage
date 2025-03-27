@@ -8,9 +8,11 @@ import {
     TouchableWithoutFeedback,
     Modal,
     Pressable,
-    Alert
+    Alert,
+    Dimensions,
+    Animated
 } from 'react-native';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
@@ -43,6 +45,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import { sendPushNotification } from '../services/NotificationService';
 import FriendLoading from '../../utils/skeleton_loading/FriendLoading';
+import PostProfileLoading from '../../utils/skeleton_loading/PostProfileLoading';
+const { height } = Dimensions.get('window');
+
+const HEADER_HEIGHT = height * 0.1;
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -55,7 +61,7 @@ const Profile = props => {
     const [avatar, setavatar] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
     const [isImageModalVisible, setImageModalVisible] = useState(false);
-    const [liveID, setliveID] = useState('')
+    const [liveID, setliveID] = useState('');
     const FCM_SERVER_KEY = "BOa0rmhBQ7uccvqyUyiwuj-U7e_ljHnHI_jyZhobPyBPNJmP6AadvOuZc8dVd8QKxdFKpBp_RD-vWwEdc0R5o54";
 
     const [user, setUser] = useState(null);
@@ -64,15 +70,37 @@ const Profile = props => {
     const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
     const [mutualFriendsCount, setMutualFriendsCount] = useState(0);
-    // visible phản hồi kết bạn
     const [menuVisible, setMenuVisible] = useState(false);
-    // dialog reLoad
     const [dialogReLoad, setDialogreload] = useState(false);
-    //loading skeleton
-    const [loading, setloading] = useState(true)
+    const [loading, setloading] = useState(true);
+    const [isLoading, setisLoading] = useState(false);
 
-    //loading khi doi anh
-    const [isLoading, setisLoading] = useState(false)
+    // Animated value for scroll handling
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const previousScrollY = useRef(0);
+
+    useEffect(() => {
+        const listenerId = scrollY.addListener(({ value }) => {
+            const currentScrollY = value;
+            if (currentScrollY < 50) {
+                // Nếu cuộn gần đầu trang, luôn hiện Bottom Tab
+                props.route.params.handleScroll(true);
+            } else {
+                if (currentScrollY - previousScrollY.current > 0) {
+                    // Cuộn xuống => Ẩn Bottom Tab
+                    props.route.params.handleScroll(false);
+                } else if (currentScrollY - previousScrollY.current < 0) {
+                    // Cuộn lên => Hiện Bottom Tab
+                    props.route.params.handleScroll(true);
+                }
+            }
+            previousScrollY.current = currentScrollY;
+        });
+
+        return () => {
+            scrollY.removeListener(listenerId);
+        };
+    }, [scrollY]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -83,9 +111,7 @@ const Profile = props => {
     const openImageModal = imageUrl => {
         setSelectedImage(imageUrl);
         setImageModalVisible(true);
-
     };
-
 
     const closeImageModal = () => {
         setImageModalVisible(false);
@@ -93,25 +119,22 @@ const Profile = props => {
         closeBottomSheet();
     };
 
-
     const openBottomSheetAvatar = () => {
         if (stories?.stories.length > 0) {
-            // Nếu có story, mở Bottom Sheet với thêm tùy chọn xem story
             openBottomSheet(35, detail_selection_image());
         } else {
-            // Nếu không có story, chỉ mở Bottom Sheet với các tùy chọn hình ảnh
             openBottomSheet(25, detail_selection_image());
         }
     };
+
     const openBottomSheetReportUser = () => {
         openBottomSheet(25, detail_selection_report_user());
     };
+
     const openBottomSheetHuyBanBe = () => {
         openBottomSheet(25, detail_selection_huy_friend());
     };
 
-
-    //up lên cloudiary
     const uploadFile = async file => {
         try {
             const data = new FormData();
@@ -132,7 +155,7 @@ const Profile = props => {
                 },
             );
 
-            console.log('📂 Response từ Cloudinary:', response.data); // Kiểm tra dữ liệu nhận về
+            console.log('📂 Response từ Cloudinary:', response.data);
 
             if (!response.data.secure_url) {
                 throw new Error('Không nhận được secure_url từ Cloudinary!');
@@ -151,29 +174,28 @@ const Profile = props => {
         }
     };
 
-    //đổi avatar
     const onOpenGalleryChangeAvatar = async () => {
         try {
-            setisLoading(true)
-            closeBottomSheet()
+            setisLoading(true);
+            closeBottomSheet();
             const options = { mediaType: 'image', quality: 1 };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('Đã hủy chọn ảnh');
                     return;
                 }
 
                 if (response.errorMessage) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('Lỗi khi mở thư viện:', response.errorMessage);
                     return;
                 }
 
                 const selectedFile = response.assets?.[0];
                 if (!selectedFile) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('Không có ảnh nào được chọn!');
                     return;
                 }
@@ -182,7 +204,7 @@ const Profile = props => {
 
                 const fileUrl = await uploadFile(selectedFile);
                 if (!fileUrl) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('❌ Upload ảnh thất bại!');
                     return;
                 }
@@ -211,29 +233,28 @@ const Profile = props => {
         }
     };
 
-    //đổi ảnh bìa
     const onOpenGalleryChangeBackground = async () => {
         try {
-            setisLoading(true)
-            closeBottomSheet()
+            setisLoading(true);
+            closeBottomSheet();
             const options = { mediaType: 'image', quality: 1 };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('Đã hủy chọn ảnh');
                     return;
                 }
 
                 if (response.errorMessage) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('Lỗi khi mở thư viện:', response.errorMessage);
                     return;
                 }
 
                 const selectedFile = response.assets?.[0];
                 if (!selectedFile) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('Không có ảnh nào được chọn!');
                     return;
                 }
@@ -242,7 +263,7 @@ const Profile = props => {
 
                 const fileUrl = await uploadFile(selectedFile);
                 if (!fileUrl) {
-                    setisLoading(false)
+                    setisLoading(false);
                     console.log('❌ Upload ảnh thất bại!');
                     return;
                 }
@@ -256,13 +277,13 @@ const Profile = props => {
                             dispatch(changeBackground(fileUrl));
                             console.log('✅ Đổi background thành công');
                         } else {
-                            setisLoading(false)
+                            setisLoading(false);
                             console.log('❌ Đổi background thất bại');
                         }
                         setisLoading(false);
                     })
                     .catch(err => {
-                        setisLoading(false)
+                        setisLoading(false);
                         console.log('❌ Lỗi khi gửi API đổi background:', err);
                     });
             });
@@ -271,20 +292,12 @@ const Profile = props => {
         }
     };
 
-
-    // Chạy lại nếu params._id hoặc me thay đổi
-    // để vào trang profile bạn bè
-    // useEffect(() => {
-    //     callAllProfile();
-    //     //callGetAllFriendOfID_user();
-    // }, [params?._id, me]);
-
     useFocusEffect(
         useCallback(() => {
-            callAllProfile(); // Gọi API load dữ liệu
+            callAllProfile();
         }, [params?._id, me])
     );
-    //bottom sheet
+
     const detail_selection_image = () => {
         return (
             <View>
@@ -292,7 +305,6 @@ const Profile = props => {
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
                 <View style={ProfileS.containerBottomSheet}>
-                    {/* Nếu là profile của mình thì hiển thị tùy chọn đổi ảnh đại diện */}
                     {user?._id === me?._id ? (
                         <>
                             <TouchableOpacity
@@ -314,7 +326,6 @@ const Profile = props => {
                             </TouchableOpacity>
                         </>
                     ) : (
-                        // Nếu là profile người khác, chỉ hiển thị modal xem ảnh
                         <TouchableOpacity
                             style={ProfileS.option}
                             onPress={() => openImageModal(user?.avatar)}>
@@ -344,7 +355,7 @@ const Profile = props => {
 
     const detail_selection_background = () => {
         return (
-            <View >
+            <View>
                 <View style={ProfileS.rectangle}>
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
@@ -415,10 +426,9 @@ const Profile = props => {
         );
     };
 
-    //callAllProfile
     const callAllProfile = async () => {
         try {
-            setloading(true)
+            setloading(true);
             const paramsAPI = {
                 ID_user: params?._id,
                 me: me._id,
@@ -426,7 +436,6 @@ const Profile = props => {
             await dispatch(allProfile(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    //console.log("posts profile: " + response.posts);
                     setUser(response.user);
                     setPosts(response.posts);
                     setRelationship(response.relationship);
@@ -476,7 +485,6 @@ const Profile = props => {
         }
     };
 
-    //chapNhanLoiMoiKetBan
     const callChapNhanLoiMoiKetBan = async () => {
         try {
             const paramsAPI = {
@@ -485,7 +493,6 @@ const Profile = props => {
             await dispatch(chapNhanLoiMoiKetBan(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    //console.log(response);
                     setRelationship(response.relationship);
                 })
                 .catch(error => {
@@ -497,7 +504,6 @@ const Profile = props => {
         }
     };
 
-    //huyLoiMoiKetBan
     const callSetRelationNguoiLa = async () => {
         try {
             const paramsAPI = {
@@ -506,7 +512,6 @@ const Profile = props => {
             await dispatch(setRelationNguoiLa(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    //console.log(response);
                     setRelationship(response.relationship);
                 })
                 .catch(error => {
@@ -518,7 +523,6 @@ const Profile = props => {
         }
     };
 
-    //huy Ban be
     const callHuyBanBe = async () => {
         try {
             const paramsAPI = {
@@ -527,14 +531,8 @@ const Profile = props => {
             await dispatch(huyBanBe(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    //console.log(response);
-                    //setRelationship(response.relationship);
-
-                    // tắc bottom sheet
                     closeBottomSheet();
-                    // render lại trang để reset lại bạn bè 
-                    callAllProfile(); // Gọi API load dữ liệu
-
+                    callAllProfile();
                 })
                 .catch(error => {
                     console.log('Error2 huyBanBe:', error);
@@ -545,7 +543,6 @@ const Profile = props => {
         }
     };
 
-    //chat
     const getID_groupPrivate = async (user1, user2) => {
         try {
             const paramsAPI = {
@@ -555,8 +552,6 @@ const Profile = props => {
             await dispatch(joinGroupPrivate(paramsAPI))
                 .unwrap()
                 .then(response => {
-                    //console.log(response);
-                    //setID_groupPrivate(response.ID_group);
                     navigation.navigate('Chat', { ID_group: response.ID_group });
                 })
                 .catch(error => {
@@ -567,15 +562,11 @@ const Profile = props => {
         }
     };
 
-    // call api callChangeDestroyPost
     const callChangeDestroyPost = async (ID_post) => {
         try {
-            //console.log('Xóa bài viết với ID:', ID_post);
-
             await dispatch(changeDestroyPost({ _id: ID_post }))
                 .unwrap()
                 .then(response => {
-                    //console.log('Xóa thành công:', response);
                     setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
                 })
                 .catch(error => {
@@ -586,58 +577,45 @@ const Profile = props => {
         }
     };
 
-    // Hàm cập nhật bài post sau khi thả biểu cảm
     const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
         setPosts(prevPosts =>
             prevPosts.map(post => {
-                if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
-
-                // Tìm reaction của user hiện tại
+                if (post._id !== ID_post) return post;
                 const existingReactionIndex = post.post_reactions.findIndex(
                     reaction => reaction.ID_user._id === me._id
                 );
-
                 let updatedReactions = [...post.post_reactions];
-
                 if (existingReactionIndex !== -1) {
-                    // Nếu user đã thả reaction, cập nhật reaction mới
                     updatedReactions[existingReactionIndex] = {
                         ...updatedReactions[existingReactionIndex],
                         ID_reaction: newReaction
                     };
                 } else {
-                    // Nếu user chưa thả reaction, thêm mới
                     updatedReactions.push({
-                        _id: ID_post_reaction, // ID của reaction mới từ server
+                        _id: ID_post_reaction,
                         ID_user: {
                             _id: me._id,
-                            first_name: me.first_name, // Sửa lại đúng key
+                            first_name: me.first_name,
                             last_name: me.last_name,
                             avatar: me.avatar,
                         },
                         ID_reaction: newReaction
                     });
                 }
-
                 return { ...post, post_reactions: updatedReactions };
             })
         );
     };
 
-    // Hàm cập nhật bài post sau khi xóa biểu cảm
     const deletPostReaction = (ID_post, ID_post_reaction) => {
         setPosts(prevPosts =>
             prevPosts.map(post => {
-                if (post._id !== ID_post) return post; // Không phải bài post cần cập nhật
-
-                // 🔥 Gán lại kết quả của filter vào biến
+                if (post._id !== ID_post) return post;
                 const updatedReactions = post.post_reactions.filter(reaction => reaction._id !== ID_post_reaction);
-
                 return { ...post, post_reactions: updatedReactions };
             })
         );
     };
-
 
     const onChat = async () => {
         await getID_groupPrivate(params?._id, me?._id);
@@ -653,15 +631,18 @@ const Profile = props => {
         />
     ), [posts]);
 
-
     const headerFriends = () => {
         if (loading) {
-            return <ProfileLoading />
+            return (
+                <View style={{ backgroundColor: '#FFFFFF' }}>
+                    <ProfileLoading />
+                    <FriendLoading />
+                </View>
+            );
         }
         return (
             <View style={ProfileS.container1}>
                 <View style={ProfileS.boxHeader}>
-                    {/* Hiển thị Snackbar dưới cùng màn hình */}
                     <Snackbar
                         visible={dialogReLoad}
                         onDismiss={() => {
@@ -677,7 +658,6 @@ const Profile = props => {
                                     {user?.background != null ? (
                                         <Image
                                             style={ProfileS.backGroundImage}
-                                            // source={{ uri: user?.background }}
                                             source={{ uri: user?.background }}
                                         />
                                     ) : (
@@ -697,9 +677,7 @@ const Profile = props => {
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                            <Pressable
-                                onPress={openBottomSheetAvatar}
-                            >
+                            <Pressable onPress={openBottomSheetAvatar}>
                                 {user && (
                                     <Image
                                         style={[
@@ -715,7 +693,7 @@ const Profile = props => {
                                 visible={isImageModalVisible}
                                 transparent={true}
                                 animationType="fade"
-                                onRequestClose={{ closeImageModal }}>
+                                onRequestClose={closeImageModal}>
                                 <View style={ProfileS.modalContainer}>
                                     <TouchableWithoutFeedback onPress={closeImageModal}>
                                         <View style={ProfileS.modalBackground} />
@@ -758,113 +736,95 @@ const Profile = props => {
                                     {' '}
                                     người bạn
                                 </Text>
-                                {
-                                    mutualFriendsCount > 0
-                                    && (
-                                        <Text style={ProfileS.friendNumber}> * {mutualFriendsCount}</Text>
-                                    )
-                                }
-                                {
-                                    mutualFriendsCount > 0
-                                    && (
-                                        <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
-                                            {' '}
-                                            bạn chung
-                                        </Text>
-                                    )
-                                }
+                                {mutualFriendsCount > 0 && (
+                                    <Text style={ProfileS.friendNumber}> * {mutualFriendsCount}</Text>
+                                )}
+                                {mutualFriendsCount > 0 && (
+                                    <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
+                                        {' '}
+                                        bạn chung
+                                    </Text>
+                                )}
                             </View>
 
-                            {/* btn me vs friend */}
-                            {user &&
-                                (user._id !== me._id ? (
-                                    <View>
-                                        {relationship?.relation == 'Người lạ' && (
-                                            <TouchableOpacity
-                                                style={ProfileS.btnAddStory}
-                                                onPress={callGuiLoiMoiKetBan}
-                                            >
-                                                <Text style={ProfileS.textAddStory}>+ Thêm bạn bè</Text>
-                                            </TouchableOpacity>
-                                        )}
-                                        {relationship?.relation == 'Bạn bè' && (
-                                            <TouchableOpacity
-                                                style={ProfileS.btnAddStory}
-                                                onPress={openBottomSheetHuyBanBe}
-                                            >
-                                                <Text style={ProfileS.textAddStory}>Bạn bè</Text>
-                                            </TouchableOpacity>
-                                        )}
-                                        {((relationship?.ID_userA == me._id &&
-                                            relationship?.relation == 'A gửi lời kết bạn B') ||
-                                            (relationship?.ID_userB == me._id &&
-                                                relationship?.relation == 'B gửi lời kết bạn A')) && (
-                                                <TouchableOpacity
-                                                    style={ProfileS.btnAddStory}
-                                                    onPress={callSetRelationNguoiLa}>
-                                                    <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
-                                                </TouchableOpacity>
-                                            )}
-                                        {((relationship?.ID_userA == me._id &&
-                                            relationship?.relation == 'B gửi lời kết bạn A') ||
-                                            (relationship?.ID_userB == me._id &&
-                                                relationship?.relation == 'A gửi lời kết bạn B')) && (
-                                                /* Nhấn để mở menu */
-                                                <TouchableOpacity
-                                                    style={ProfileS.btnAddStory}
-                                                    onPress={() => {
-                                                        setMenuVisible(true);
-                                                    }}>
-                                                    <Text style={ProfileS.textAddStory}>+ Phản hồi</Text>
-                                                </TouchableOpacity>
-                                            )}
-
-                                        <View style={ProfileS.boxEdit}>
-                                            <TouchableOpacity
-                                                style={ProfileS.btnEdit}
-                                                onPress={onChat}>
-                                                <Text style={ProfileS.textEdit}>Nhắn tin</Text>
-                                            </TouchableOpacity>
-                                            {/* btn ... */}
-                                            <TouchableOpacity
-                                                disabled={me._id == user?._id}
-                                                style={ProfileS.btnMore}
-                                                onPress={openBottomSheetReportUser}
-                                            >
-                                                <Icon
-                                                    name="ellipsis-horizontal"
-                                                    size={25}
-                                                    color="black"
-                                                />
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                ) : (
-                                    <View>
-                                        <TouchableOpacity style={ProfileS.btnAddStory}>
-                                            <Text style={ProfileS.textAddStory}>+ Thêm vào tin</Text>
+                            {user && (user._id !== me._id ? (
+                                <View>
+                                    {relationship?.relation == 'Người lạ' && (
+                                        <TouchableOpacity
+                                            style={ProfileS.btnAddStory}
+                                            onPress={callGuiLoiMoiKetBan}>
+                                            <Text style={ProfileS.textAddStory}>+ Thêm bạn bè</Text>
                                         </TouchableOpacity>
-                                        <View style={ProfileS.boxEdit}>
-                                            <TouchableOpacity
-                                                style={ProfileS.btnEdit}>
-                                                <Text style={ProfileS.textEdit}>
-                                                    Chỉnh sửa trang cá nhân
-                                                </Text>
-                                            </TouchableOpacity>
-                                            {/* btn ... */}
-                                            <TouchableOpacity
-                                                disabled={me._id == user?._id}
-                                                style={ProfileS.btnMore}
-                                            >
-                                                <Icon
-                                                    name="ellipsis-horizontal"
-                                                    size={25}
-                                                    color="black"
-                                                />
-                                            </TouchableOpacity>
-                                        </View>
+                                    )}
+                                    {relationship?.relation == 'Bạn bè' && (
+                                        <TouchableOpacity
+                                            style={ProfileS.btnAddStory}
+                                            onPress={openBottomSheetHuyBanBe}>
+                                            <Text style={ProfileS.textAddStory}>Bạn bè</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                    {((relationship?.ID_userA == me._id &&
+                                        relationship?.relation == 'A gửi lời kết bạn B') ||
+                                        (relationship?.ID_userB == me._id &&
+                                            relationship?.relation == 'B gửi lời kết bạn A')) && (
+                                        <TouchableOpacity
+                                            style={ProfileS.btnAddStory}
+                                            onPress={callSetRelationNguoiLa}>
+                                            <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                    {((relationship?.ID_userA == me._id &&
+                                        relationship?.relation == 'B gửi lời kết bạn A') ||
+                                        (relationship?.ID_userB == me._id &&
+                                            relationship?.relation == 'A gửi lời kết bạn B')) && (
+                                        <TouchableOpacity
+                                            style={ProfileS.btnAddStory}
+                                            onPress={() => setMenuVisible(true)}>
+                                            <Text style={ProfileS.textAddStory}>+ Phản hồi</Text>
+                                        </TouchableOpacity>
+                                    )}
+
+                                    <View style={ProfileS.boxEdit}>
+                                        <TouchableOpacity
+                                            style={ProfileS.btnEdit}
+                                            onPress={onChat}>
+                                            <Text style={ProfileS.textEdit}>Nhắn tin</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            disabled={me._id == user?._id}
+                                            style={ProfileS.btnMore}
+                                            onPress={openBottomSheetReportUser}>
+                                            <Icon
+                                                name="ellipsis-horizontal"
+                                                size={25}
+                                                color="black"
+                                            />
+                                        </TouchableOpacity>
                                     </View>
-                                ))}
+                                </View>
+                            ) : (
+                                <View>
+                                    <TouchableOpacity style={ProfileS.btnAddStory}>
+                                        <Text style={ProfileS.textAddStory}>+ Thêm vào tin</Text>
+                                    </TouchableOpacity>
+                                    <View style={ProfileS.boxEdit}>
+                                        <TouchableOpacity style={ProfileS.btnEdit}>
+                                            <Text style={ProfileS.textEdit}>
+                                                Chỉnh sửa trang cá nhân
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            disabled={me._id == user?._id}
+                                            style={ProfileS.btnMore}>
+                                            <Icon
+                                                name="ellipsis-horizontal"
+                                                size={25}
+                                                color="black"
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            ))}
                         </View>
                     </View>
                 </View>
@@ -874,15 +834,15 @@ const Profile = props => {
                         <View style={ProfileS.title}>
                             <View>
                                 <Text style={ProfileS.textFriend}>Bạn bè</Text>
-                                {
-                                    mutualFriendsCount > 0
-                                        ? (
-                                            <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} {'('}{mutualFriendsCount} bạn chung{')'}</Text>
-                                        ) : (
-                                            <Text style={ProfileS.textFriendNumber2}>{friendRelationships.length} người bạn</Text>
-                                        )
-                                }
-
+                                {mutualFriendsCount > 0 ? (
+                                    <Text style={ProfileS.textFriendNumber2}>
+                                        {friendRelationships.length} ({mutualFriendsCount} bạn chung)
+                                    </Text>
+                                ) : (
+                                    <Text style={ProfileS.textFriendNumber2}>
+                                        {friendRelationships.length} người bạn
+                                    </Text>
+                                )}
                             </View>
                             <TouchableOpacity onPress={() => navigation.navigate('ListFriend', { _id: params._id })}>
                                 <Text style={ProfileS.textSeeAll}>Xem tất cả bạn bè</Text>
@@ -893,7 +853,6 @@ const Profile = props => {
                             <FlatList
                                 data={(friendRelationships || []).slice(0, 6)}
                                 renderItem={({ item }) => (
-                                    //console.log("friend: " + item.ID_userA._id);
                                     <TouchableOpacity
                                         onPress={() => {
                                             if (item.ID_userA._id == params?._id) {
@@ -919,58 +878,53 @@ const Profile = props => {
                     </View>
                 </View>
 
-                {
-                    user?._id === me?._id && (
-                        <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
-                            <View style={ProfileS.boxLive}>
-                                <View style={ProfileS.title2}>
-                                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
-                                        Bài viết
+                {user?._id === me?._id && (
+                    <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
+                        <View style={ProfileS.boxLive}>
+                            <View style={ProfileS.title2}>
+                                <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
+                                    Bài viết
+                                </Text>
+                                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
+                            </View>
+                            <View style={ProfileS.boxAllThink}>
+                                <View style={ProfileS.boxThink}>
+                                    <Image
+                                        style={ProfileS.avataStatus}
+                                        source={{ uri: user?.avatar }}
+                                    />
+                                    <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
+                                        Bạn đang nghĩ gì?
                                     </Text>
-                                    <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
                                 </View>
-                                <View style={ProfileS.boxAllThink}>
-                                    <View style={ProfileS.boxThink}>
-                                        <Image
-                                            style={ProfileS.avataStatus}
-                                            source={{ uri: user?.avatar }}
-                                        />
-                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
-                                            Bạn đang nghĩ gì?
-                                        </Text>
-                                    </View>
-                                    <Icon name="image" size={30} color="#3FF251" />
-                                </View>
+                                <Icon name="image" size={30} color="#3FF251" />
                             </View>
-                            <View style={ProfileS.boxLivestream}>
-                                <TouchableOpacity style={ProfileS.btnLivestream} onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
-                                    <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                        <Icon name="videocam" size={20} color="red" />
-                                        <Text style={{ marginLeft: 5, color: 'black' }}>
-                                            Phát trực tiếp
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-                            <TouchableOpacity style={ProfileS.btnManage}>
-                                <View style={ProfileS.boxManange}>
-                                    <Icon2 name="comment-text" size={17} color="black" />
-                                    <Text style={{ fontSize: 13, color: 'black' }}>
-                                        Quản lí bài viết
+                        </View>
+                        <View style={ProfileS.boxLivestream}>
+                            <TouchableOpacity
+                                style={ProfileS.btnLivestream}
+                                onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
+                                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                                    <Icon name="videocam" size={20} color="red" />
+                                    <Text style={{ marginLeft: 5, color: 'black' }}>
+                                        Phát trực tiếp
                                     </Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
-                    )
-                }
-
-
-            </View >
+                        <TouchableOpacity style={ProfileS.btnManage}>
+                            <View style={ProfileS.boxManange}>
+                                <Icon2 name="comment-text" size={17} color="black" />
+                                <Text style={{ fontSize: 13, color: 'black' }}>
+                                    Quản lí bài viết
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
         );
     };
-
-
-
 
     return (
         <View style={ProfileS.container}>
@@ -979,27 +933,30 @@ const Profile = props => {
                 <View>
                     <View style={ProfileS.post}>
                         {loading ? (
-                            <>
+                            <View style={{ backgroundColor: '#FFFFFF' }}>
                                 <ProfileLoading />
                                 <FriendLoading />
-                            </>
+                                <PostProfileLoading />
+                            </View>
                         ) : (
-                            <FlatList
+                            <Animated.FlatList
                                 data={posts}
                                 renderItem={renderPosts}
                                 keyExtractor={item => item._id}
                                 showsHorizontalScrollIndicator={false}
                                 ListHeaderComponent={headerFriends}
                                 showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{ paddingBottom: 50 }}
+                                onScroll={Animated.event(
+                                    [{ nativeEvent: { contentOffset: { y: scrollY } } }], // Sửa lại cú pháp, bỏ dấu , thừa
+                                    { useNativeDriver: true }
+                                )}
+                                scrollEventThrottle={16}
                             />
                         )}
                     </View>
-
                 </View>
             </View>
-
-            {/* Menu Phản hồi kết bạn */}
+    
             <Modal
                 visible={menuVisible}
                 transparent

@@ -21,6 +21,7 @@ const HostLive = (props) => {
         userName: userName,
         liveID: liveID,
         avatar: avatar,
+        isHostOnline: true,
       };
 
       const notiData = {
