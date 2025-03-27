@@ -352,7 +352,7 @@ const AppNavigation = () => {
       notification?.type === 'Mời chơi game 3 lá' &&
       notification?.ID_group
     ) {
-      navigate('NguoiDuocMoi', { group: notification.ID_group });
+      navigate('Chat', { ID_group: notification.ID_group._id });
       const { members, isPrivate } = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);

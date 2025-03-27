@@ -243,11 +243,11 @@ import HostLive from '../screens/live/HostLive';
 import AudienceScreen from '../screens/live/AudienceScreen';
 import IncomingCallScreen from '../screens/call/IncomingCallScreen';
 import InGame3La from '../screens/game/3la/InGame3La';
-import NguoiDuocMoi from '../screens/game/3la/NguoiDuocMoi';
-import NguoiMoi from '../screens/game/3la/NguoiMoi';
+import ManHinhCho from '../screens/game/3la/ManHinhCho';
 import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Ringing from '../screens/call/Ringing';
 import Report from '../screens/report/Report';
+import ListTag from '../screens/home/ListTag';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -280,10 +280,10 @@ const oStackHome = {
   AudienceScreen: { name: 'AudienceScreen', component: AudienceScreen },
   IncomingCallScreen: { name: 'IncomingCallScreen', component: IncomingCallScreen },
   InGame3La: { name: 'InGame3La', component: InGame3La },
-  NguoiDuocMoi: { name: 'NguoiDuocMoi', component: NguoiDuocMoi },
-  NguoiMoi: { name: 'NguoiMoi', component: NguoiMoi },
+  ManHinhCho: { name: 'ManHinhCho', component: ManHinhCho },
   Ringing: { name: 'Ringing', component: Ringing },
   Report: { name: 'Report', component: Report },
+  ListTag: { name: 'ListTag', component: ListTag },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#48b9f2', // màu tùy chỉnh
+    backgroundColor: '#0064E0', // màu tùy chỉnh
   },
   iconStyle: {
     zIndex: 1, // icon nằm trên vòng tròn

@@ -359,9 +359,10 @@ const CommentS = StyleSheet.create({
         alignItems: 'center',
     },
     name: {
-        fontSize: width * 0.04, // 4% chiều rộng màn hình
-        fontWeight: 'bold',
-        color: 'black'
+        fontSize: width * 0.045, // 4% chiều rộng màn hình
+        fontWeight: '500',
+        color: 'black',
+        width: width * 0.5
     },
     title: {
         marginHorizontal: width * 0.05,
@@ -565,6 +566,10 @@ const CommentS = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
     },
+    boxInfor1: {
+        marginHorizontal: width * 0.05,
+        marginTop: height * 0.02
+    }
 });
 
 

@@ -60,6 +60,7 @@ const Chat = (props) => {// cần ID_group (param)
     const typingTimeoutRef = useRef(null);
     const [typingUsers, setTypingUsers] = useState([]);
     const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
+    const [validateGame, setValidateGame] = useState(true);
 
     //call API noti call
     const callNotiCall = async (ID_group, ID_user, isCallVideo) => {
@@ -181,7 +182,7 @@ const Chat = (props) => {// cần ID_group (param)
         socket.on('receive_message', (data) => {
             console.log(data);
             setMessages((prevMessages) => [
-                ...prevMessages,
+               
                 {
                     _id: data._id,
                     ID_group: data.ID_group,
@@ -204,7 +205,8 @@ const Chat = (props) => {// cần ID_group (param)
                     updatedAt: data.updatedAt,
                     createdAt: data.createdAt,
                     _destroy: data._destroy
-                }
+                },
+                ...prevMessages,
             ]);
         });
 
@@ -286,12 +288,29 @@ const Chat = (props) => {// cần ID_group (param)
 
         socket.on("user_typing", ({ ID_group, ID_user }) => {
             //console.log("User: " + ID_user + " đang soạn tin nhắn...");
+            if(ID_user == me._id) return;
             setTypingUsers((prev) => [...new Set([...prev, ID_user])]); // Thêm user vào danh sách
+
         });
 
         socket.on("user_stop_typing", ({ ID_group, ID_user }) => {
             //console.log("User: " + ID_user + " đang soạn tin nhắn...");
             setTypingUsers((prev) => prev.filter((id) => id !== ID_user)); // Xóa user khỏi danh sách
+        });
+
+        socket.on("lang-nghe-moi-choi-game-3-la", (data) => {
+            console.log("lang-nghe-moi-choi-game-3-la")
+            if (data.sender == me._id && data.type == 'game3la' && group) {
+                console.log("lang-nghe-moi-choi-game-3-la1")
+                navigation.navigate("ManHinhCho", { group: group, ID_message: data._id });
+            }
+        });
+
+        socket.on("lang-nghe-chap-nhan-choi-game-3-la", () => {
+            console.log("lang-nghe-chap-nhan-choi-game-3-la")
+        });
+        socket.on("lang-nghe-tu-choi-choi-game-3-la", () => {
+            console.log("lang-nghe-tu-choi-choi-game-3-la")
         });
 
         //bàn phím
@@ -313,6 +332,10 @@ const Chat = (props) => {// cần ID_group (param)
             // đang soạn
             socket.off("user_typing");
             socket.off("user_stop_typing");
+            // game
+            socket.off("lang-nghe-moi-choi-game-3-la");
+            socket.off("lang-nghe-chap-nhan-choi-game-3-la");
+            socket.off("lang-nghe-tu-choi-choi-game-3-la");
             // bàn phím
             keyboardDidShowListener.remove();
             keyboardDidHideListener.remove();
@@ -426,7 +449,6 @@ const Chat = (props) => {// cần ID_group (param)
         socket.emit('send_message', payload);
         setMessage('');
         setReply(null); // Xóa tin nhắn trả lời sau khi gửi
-        Keyboard.dismiss();// tắc bàn phím
     };
 
     const goBack = () => {
@@ -444,14 +466,29 @@ const Chat = (props) => {// cần ID_group (param)
             me: me._id,
         };
         socket.emit('moi-choi-game-3-la', payload);
-        navigation.navigate("NguoiMoi", { group: group });
+        //navigation.navigate("ManHinhCho", { group: group });
+    };
+    const onChoiGame3la = (ID_message) => {
+        const payload = {
+            ID_message: ID_message,
+            ID_group: params.ID_group,
+        };
+        socket.emit('chap-nhan-choi-game-3-la', payload);
+        navigation.navigate('InGame3La');
+    };
+    const onHuyGame3la = (ID_message) => {
+        const payload = {
+            ID_message: ID_message,
+            ID_group: params.ID_group,
+        };
+        socket.emit('tu-choi-choi-game-3-la', payload);
+        //navigation.navigate("ManHinhCho", { group: group });
     };
 
-
     useEffect(() => {
-        // Cuộn xuống tin nhắn cuối cùng khi danh sách tin nhắn thay đổi
+        // Cuộn lên đầu danh sách tin nhắn khi danh sách tin nhắn thay đổi
         setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
         }, 200);
     }, [messages]);
 
@@ -515,7 +552,7 @@ const Chat = (props) => {// cần ID_group (param)
             {
                 (groupName != null
                     && groupAvatar != null)
-                && < ChatHeader
+                && <ChatHeader
                     name={groupName}
                     avatar={groupAvatar}
                     onGoBack={goBack}
@@ -526,9 +563,11 @@ const Chat = (props) => {// cần ID_group (param)
                     onToGame3La={onToGame3La}
                 />
             }
+
+
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
-                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10 }}
+                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10,justifyContent: 'flex-end' }}
                 data={messages || []}
                 renderItem={({ item }) => (
                     <Messagecomponent
@@ -537,13 +576,14 @@ const Chat = (props) => {// cần ID_group (param)
                         onReply={() => setReply(item)}
                         onRevoke={revokeMessage}
                         onIcon={iconMessage}
+                        onChoiGame3la={onChoiGame3la}
+                        onHuyGame3la={onHuyGame3la}
                     />
                 )}
                 keyExtractor={(item) => item._id}
-                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-                onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
                 // showsHorizontalScrollIndicator = {false}
                 showsVerticalScrollIndicator={false}
+                inverted
             />
             {/* bàn phím */}
             {

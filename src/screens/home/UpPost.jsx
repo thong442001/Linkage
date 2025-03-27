@@ -123,7 +123,6 @@ const UpPost = (props) => {
                 .then((response) => {
                     //console.log(response.groups)
                     setFriends(response.relationships);
-                    console.log('canhphan',response.relationships);
                 })
                 .catch((error) => {
                     console.log('Error1 getAllFriendOfID_user:', error);

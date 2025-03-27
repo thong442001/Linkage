@@ -38,7 +38,7 @@ const HomeStories = ({ navigation, me, stories, liveSessions }) => {
         />
         <View style={HomeS.icons}>
           <View style={HomeS.iconsPadding2}>
-            <Icon name="image" size={20} color="gray" />
+            <Icon name="image" size={20} color="#0064E0" />
           </View>
         </View>
       </View>

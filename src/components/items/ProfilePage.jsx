@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/EvilIcons';
 import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import Icon4 from 'react-native-vector-icons/FontAwesome5';
+import Icon5 from 'react-native-vector-icons/AntDesign';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 import { useSelector, useDispatch } from 'react-redux';
 const { width, height } = Dimensions.get('window');
@@ -501,7 +502,7 @@ const PostItem = memo(({
                                 onPress={() =>
                                     openBottomSheet(
                                         25,
-                                        <View>
+                                        <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
                                             {
                                                 ID_user != post.ID_user._id
                                                     ? (
@@ -526,14 +527,19 @@ const PostItem = memo(({
                                                                 onDelete()
                                                                 closeBottomSheet()
                                                             }}
-                                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                            <Text style={[styles.deleteText,]}
-                                                            >{
-                                                                    post._destroy ? (
-                                                                        "Phục hồi"
-                                                                    ) : "Xóa bài viết"
-                                                                }
-                                                            </Text>
+                                                            style={[styles.deleteButton]}>
+                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                <View>
+                                                                    <Icon name="trash" size={20} color="black" />
+                                                                </View>
+                                                                <Text style={[styles.deleteText,]}
+                                                                >{
+                                                                        post._destroy ? (
+                                                                            "Phục hồi"
+                                                                        ) : "Xóa bài viết"
+                                                                    }
+                                                                </Text>
+                                                            </View>
                                                         </TouchableOpacity>
                                                     )
                                             }
@@ -589,7 +595,7 @@ const PostItem = memo(({
                                                         {post.ID_post_shared.tags.length > 1 && (
                                                             <>
                                                                 <Text style={{ color: 'gray' }}> và </Text>
-                                                                <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
+                                                                <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })}  style={[styles.name]}>
                                                                     {post.ID_post_shared.tags.length - 1} người khác
                                                                 </Text>
                                                             </>
@@ -609,9 +615,11 @@ const PostItem = memo(({
                                     </View>
                                     :
                                     <View style={styles.userInfo}>
-                                        <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                                        <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
+                                            <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                                        </TouchableOpacity>
                                         <View style={{ marginLeft: width * 0.01 }}>
-                                            <Text style={styles.name}>
+                                            <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
                                                 {post.ID_user.first_name} {post.ID_user.last_name}
                                                 {post.tags.length > 0 && (
                                                     <Text>
@@ -622,7 +630,7 @@ const PostItem = memo(({
                                                         {post.tags.length > 1 && (
                                                             <>
                                                                 <Text style={{ color: 'gray' }}> và </Text>
-                                                                <Text onPress={() => console.log('Xem danh sách tag')} style={[styles.name]}>
+                                                                <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.tags })} style={[styles.name]}>
                                                                     {post.tags.length - 1} người khác
                                                                 </Text>
                                                             </>
@@ -648,7 +656,7 @@ const PostItem = memo(({
                             <TouchableOpacity
                                 onPress={() =>
                                     openBottomSheet(
-                                        17,
+                                        25,
                                         <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
                                             {
                                                 ID_user != post.ID_user._id
@@ -769,6 +777,13 @@ const PostItem = memo(({
                                     {reaction.ID_reaction.icon}
                                 </Text>
                             ))}
+                            <Text style={{ color: 'black', marginLeft: 5 }}>
+                                {post.post_reactions.some(reaction => reaction.ID_user._id === ID_user)
+                                    ? post.post_reactions.length === 1
+                                        ? `${me?.first_name + " " + me?.last_name}`
+                                        : `Bạn và ${post.post_reactions.length - 1} người khác` // Bạn và người khác
+                                    : `${post.post_reactions.length}`} {/* Không có bạn */}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 ) : (
@@ -800,16 +815,17 @@ const PostItem = memo(({
                         }
                     >
                         {/* <Icon2 name="like" size={25} color="black" /> */}
+
                         <Text
                             style={styles.actionText}
                         >
-                            {userReaction ? userReaction.ID_reaction.icon : reactions[0].icon} {/* Nếu đã react, hiển thị icon đó */}
+                            {userReaction ? userReaction.ID_reaction.icon : <Icon5 name="like2" size={20} color="black" />} {/* Nếu đã react, hiển thị icon đó */}
                         </Text>
                         <Text
                             style={[
                                 styles.actionText,
                                 userReaction &&
-                                { color: '#FF9D00' }
+                                { color: '#0064E0' }
                             ]}>
                             {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
                         </Text>
@@ -983,9 +999,12 @@ const styles = StyleSheet.create({
     header1: {
         backgroundColor: 'white',
         borderColor: 'gray',
-        borderWidth: 0.4,
-        borderTopLeftRadius: 7,
-        borderTopRightRadius: 7,
+        borderTopWidth: 0.5,
+        borderRightWidth: 0.5,
+        borderLeftWidth: 0.5,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        marginHorizontal: width * 0.02
         // borderRadius: 7,
         // shadowColor: '#000',
         // shadowOffset: { width: 0, height: 2 },
