@@ -80,7 +80,7 @@ const Setting = props => {
       icon: 'exit-outline',
       color: 'red',
     },
-    {id: '5', title: 'Game', screen: 'MiniGameScreen', icon: 'game-controller'},
+    {id: '5', title: 'Game', screen: 'pokemon', icon: 'game-controller'},
   ];
 
   //tắt thông báo

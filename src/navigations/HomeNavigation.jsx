@@ -248,6 +248,7 @@ import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-nati
 import Ringing from '../screens/call/Ringing';
 import Report from '../screens/report/Report';
 import ListTag from '../screens/home/ListTag';
+import pokemon from '../screens/game/pokemon/pokemon';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -284,6 +285,7 @@ const oStackHome = {
   Ringing: { name: 'Ringing', component: Ringing },
   Report: { name: 'Report', component: Report },
   ListTag: { name: 'ListTag', component: ListTag },
+  pokemon: { name: 'pokemon', component: pokemon },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

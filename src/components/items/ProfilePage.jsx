@@ -595,7 +595,7 @@ const PostItem = memo(({
                                                         {post.ID_post_shared.tags.length > 1 && (
                                                             <>
                                                                 <Text style={{ color: 'gray' }}> và </Text>
-                                                                <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })}  style={[styles.name]}>
+                                                                <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })} style={[styles.name]}>
                                                                     {post.ID_post_shared.tags.length - 1} người khác
                                                                 </Text>
                                                             </>
