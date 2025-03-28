@@ -15,25 +15,41 @@ const ChangeDisplayName = ({ navigation }) => {
 
     const [first_name, setFirstname] = useState('');
     const [last_name, setLastName] = useState('');
-    const [loading, setLoading] = useState(false); 
-    const [successVisible, setSuccessVisible] = useState(false); 
-    const [failed, setfailed] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
+    const [failed, setFailed] = useState(false);
+    const [showErrorFirstName, setShowErrorFirstName] = useState(false);
+    const [showErrorLastName, setShowErrorLastName] = useState(false);
 
-
-
+    // Hàm validate tên: chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
     const validateName = (name) => {
-        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]{1,30}$/;
+        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]+$/; // Chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
         return regex.test(name);
     };
 
     const onChangeNameUser = async () => {
+        // Kiểm tra không để trống
         if (!first_name.trim() || !last_name.trim()) {
+            setShowErrorFirstName(!first_name.trim());
+            setShowErrorLastName(!last_name.trim());
             Alert.alert('Thông báo', "Vui lòng nhập đầy đủ họ và tên mới.");
             return;
         }
 
+        // Kiểm tra ký tự hợp lệ
         if (!validateName(first_name) || !validateName(last_name)) {
-            Alert.alert('Thông báo', "Tên không hợp lệ! Không được chứa số, ký tự đặc biệt và không quá 30 ký tự.");
+            setShowErrorFirstName(!validateName(first_name));
+            setShowErrorLastName(!validateName(last_name));
+            Alert.alert('Thông báo', "Tên không hợp lệ! Chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt.");
+            return;
+        }
+
+        // Kiểm tra tổng độ dài
+        const totalLength = first_name.trim().length + last_name.trim().length;
+        if (totalLength > 30) {
+            setShowErrorFirstName(true);
+            setShowErrorLastName(true);
+            Alert.alert('Thông báo', "Tổng độ dài của họ và tên không được vượt quá 30 ký tự.");
             return;
         }
 
@@ -46,26 +62,26 @@ const ChangeDisplayName = ({ navigation }) => {
                 .unwrap()
                 .then(() => {
                     dispatch(changeName({ first_name, last_name }));
-                    setSuccessVisible(true)
+                    setSuccessVisible(true);
                     setTimeout(() => {
                         setSuccessVisible(false);
-                        navigation.goBack(); 
-                    }, 2000); 
-                    setFirstname('')
-                    setLastName('')
+                        navigation.goBack();
+                    }, 2000);
+                    setFirstname('');
+                    setLastName('');
                 })
                 .catch(error => {
                     console.error(error);
+                    setFailed(true);
                     setTimeout(() => {
-                        setfailed(false);
-                    }, 2000); 
+                        setFailed(false);
+                    }, 2000);
                 })
                 .finally(() => {
                     setLoading(false);
                 });
         }, 2000);
     };
-
 
     return (
         <View style={styles.container}>
@@ -80,9 +96,14 @@ const ChangeDisplayName = ({ navigation }) => {
                 <TextInput
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Nhập tên mới"
-                    style={styles.input}
+                    style={showErrorFirstName ? styles.inputError : styles.input}
                     value={first_name}
-                    onChangeText={setFirstname}
+                    onChangeText={(text) => {
+                        setFirstname(text);
+                        const totalLength = text.trim().length + last_name.trim().length;
+                        setShowErrorFirstName(!text.trim() || !validateName(text) || totalLength > 30);
+                        setShowErrorLastName(!last_name.trim() || !validateName(last_name) || totalLength > 30);
+                    }}
                 />
             </View>
 
@@ -90,9 +111,14 @@ const ChangeDisplayName = ({ navigation }) => {
                 <TextInput
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Nhập họ mới"
-                    style={styles.input}
+                    style={showErrorLastName ? styles.inputError : styles.input}
                     value={last_name}
-                    onChangeText={setLastName}
+                    onChangeText={(text) => {
+                        setLastName(text);
+                        const totalLength = first_name.trim().length + text.trim().length;
+                        setShowErrorFirstName(!first_name.trim() || !validateName(first_name) || totalLength > 30);
+                        setShowErrorLastName(!text.trim() || !validateName(text) || totalLength > 30);
+                    }}
                 />
             </View>
 
@@ -103,10 +129,10 @@ const ChangeDisplayName = ({ navigation }) => {
             <Pressable
                 style={[
                     styles.button,
-                    (loading || !first_name.trim() || !last_name.trim()) && styles.buttonDisabled,
+                    (loading || !first_name.trim() || !last_name.trim() || showErrorFirstName || showErrorLastName) && styles.buttonDisabled,
                 ]}
                 onPress={onChangeNameUser}
-                disabled={loading || !first_name.trim() || !last_name.trim()}
+                disabled={loading || !first_name.trim() || !last_name.trim() || showErrorFirstName || showErrorLastName}
             >
                 {loading ? (
                     <ActivityIndicator size="small" color="#fff" />
@@ -114,9 +140,9 @@ const ChangeDisplayName = ({ navigation }) => {
                     <Text style={styles.buttonText}>Đổi tên</Text>
                 )}
             </Pressable>
-             
-            <SuccessModal visible={successVisible} message="Cập nhật tên thành công"/>
-            <FailedModal visible={failed} message="Cập nhật tên thất bại"/>
+
+            <SuccessModal visible={successVisible} message="Cập nhật tên thành công" />
+            <FailedModal visible={failed} message="Cập nhật tên thất bại" />
         </View>
     );
 };
@@ -150,6 +176,15 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: width * 0.04,
         color: 'black',
+    },
+    inputError: {
+        flex: 1,
+        fontSize: width * 0.04,
+        color: 'black',
+        borderColor: 'red',
+        borderWidth: 1,
+        borderRadius: width * 0.03,
+        paddingHorizontal: width * 0.04,
     },
     passInfoContainer: {
         paddingVertical: width * 0.01,

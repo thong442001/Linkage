@@ -1203,14 +1203,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         flexDirection: "row",
         backgroundColor: "#FFFF",
-        padding: 10,
+        padding: 5,
         borderRadius: 20,
     },
     reactionButton: {
         marginHorizontal: 5,
     },
     reactionText: {
-        fontSize: 15,
+        fontSize: 18,
         color: "#000",
         alignSelf: 'flex-end',
     },

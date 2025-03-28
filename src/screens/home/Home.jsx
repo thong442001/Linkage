@@ -15,6 +15,7 @@ import database from '@react-native-firebase/database';
 import HomeHeader from './HomeHeader';
 import HomeStories from './HomeStories';
 const { height } = Dimensions.get('window');
+const HEADER_HEIGHT = height * 0.1;
 
 const Home = props => {
   const { navigation } = props;
@@ -29,8 +30,9 @@ const Home = props => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-  const HEADER_HEIGHT = height * 0.1;
+
   const previousScrollY = useRef(0);
+
 
   // Animated value
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -48,15 +50,12 @@ const Home = props => {
 
     return () => clearInterval(timer);
   }, [refreshing]); // Thêm refreshing vào dependencies
-
   useEffect(() => {
-    const listenerId = scrollY.addListener(({ value }) => {
-    });
+    const listenerId = scrollY.addListener(({ value }) => { });
     return () => {
       scrollY.removeListener(listenerId);
     };
   }, [scrollY]);
-
 
   useEffect(() => {
     let previousScrollY = 0;
@@ -131,18 +130,11 @@ const Home = props => {
   // Hàm xử lý làm mới khi kéo xuống
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setCurrentTime(Date.now()); // Cập nhật thời gian ngay khi làm mới
+    setCurrentTime(Date.now());
     callGetAllPostsInHome(me._id).finally(() => {
       setRefreshing(false);
     });
   }, [me._id]);
-
-  // Có thể bỏ useFocusEffect nếu bạn chỉ muốn cập nhật khi kéo làm mới
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     callGetAllPostsInHome(me._id);
-  //   }, [])
-  // );
 
   const callChangeDestroyPost = async ID_post => {
     try {
@@ -200,6 +192,8 @@ const Home = props => {
     );
   };
 
+
+
   const renderPosts = useCallback(
     ({ item }) => (
       <ProfilePage
@@ -211,15 +205,15 @@ const Home = props => {
         deletPostReaction={deletPostReaction}
       />
     ),
-    [posts, currentTime, me._id]
+    [me._id, currentTime] // Chỉ phụ thuộc vào me._id và currentTime
   );
 
   return (
-    <View style={HomeS.container}>
+    <>
       {loading && !refreshing ? (
         <HomeLoading />
       ) : (
-        <>
+        <View style={HomeS.container}>
           <HomeHeader navigation={navigation} me={me} headerTranslate={headerTranslate} />
           <Animated.FlatList
             data={posts}
@@ -246,15 +240,12 @@ const Home = props => {
                 useNativeDriver: true,
                 listener: (event) => {
                   const currentScrollY = event.nativeEvent.contentOffset.y;
-                  // Nếu cuộn quá thấp thì hiển thị bottom tab
                   if (currentScrollY < 50) {
                     props.route.params.handleScroll(true);
                   } else {
                     if (currentScrollY - previousScrollY.current > 0) {
-                      // Cuộn xuống => Ẩn bottom tab
                       props.route.params.handleScroll(false);
                     } else if (currentScrollY - previousScrollY.current < 0) {
-                      // Cuộn lên => Hiện bottom tab
                       props.route.params.handleScroll(true);
                     }
                   }
@@ -262,12 +253,11 @@ const Home = props => {
                 },
               }
             )}
-
             scrollEventThrottle={16}
           />
-        </>
+        </View>
       )}
-    </View>
+    </>
   );
 };
 

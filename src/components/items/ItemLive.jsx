@@ -2,20 +2,19 @@ import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'rea
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Fontisto';
-
+import { useSelector } from 'react-redux';
 const { width, height } = Dimensions.get('window');
 
 const ItemLive = ({ user }) => {
   const navigation = useNavigation();
-  
+  const me = useSelector(state => state.app.user)
   return (
     <TouchableOpacity
     style={styles.boxStory}
-      onPress={() => navigation.navigate('HomeLive', { 
-        userID: user.userID, 
-        userName: user.userName, 
+      onPress={() => navigation.navigate('AudienceScreen', { 
+        userID: me._id, 
+        userName:me.first_name + me.last_name, 
         liveID: user.liveID,
-        avatar: user.avatar,
       })}>
 
 

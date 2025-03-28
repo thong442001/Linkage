@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 import { Dimensions } from 'react-native';
-
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -9,7 +8,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#ECF5FA',
     },
     dotContainer: {
         position: 'absolute',

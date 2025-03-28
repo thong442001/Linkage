@@ -1,5 +1,5 @@
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState, useCallback } from 'react'
+import { Text, View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   getPostsUserIdDestroyTrue,
   changeDestroyPost,
@@ -11,6 +11,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
 import { useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native'; // Import Lottie
+
+// Lấy chiều rộng và chiều cao của màn hình
+const { width, height } = Dimensions.get('window');
 
 const Trash = props => {
   const { route, navigation } = props;
@@ -74,12 +77,16 @@ const Trash = props => {
     }
   };
 
+  // Component phân tách giữa các item
+  const ItemSeparator = () => {
+    return <View style={styles.separator} />;
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={width * 0.06} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Thùng rác</Text>
       </View>
@@ -87,19 +94,19 @@ const Trash = props => {
         {posts && posts.length > 0 ? (
           <FlatList
             data={posts}
-            renderItem={({ item }) =>
+            renderItem={({ item }) => (
               <ProfilePage
-
                 post={item}
                 ID_user={me._id}
                 onDelete={() => callChangeDestroyPost(item._id)}
                 onDeleteVinhVien={() => callDeletePost(item._id)}
               />
-            }
+            )}
             keyExtractor={item => item._id}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 3 }}
+            contentContainerStyle={styles.flatListContent} // Điều chỉnh padding tổng thể
+            ItemSeparatorComponent={ItemSeparator} // Thêm phân tách giữa các item
           />
         ) : (
           <View style={styles.emptyContainer}>
@@ -121,44 +128,52 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingHorizontal: 10,
-    paddingTop: 10,
+    paddingHorizontal: width * 0.03, // 3% chiều rộng màn hình
+    paddingTop: height * 0.015, // 1.5% chiều cao màn hình
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
+    paddingVertical: height * 0.02, // 2% chiều cao màn hình
+    paddingHorizontal: width * 0.04, // 4% chiều rộng màn hình
     backgroundColor: '#e6eaec',
-    borderRadius: 10, // Bo góc cho header
+    borderRadius: width * 0.03, // Bo góc dựa trên chiều rộng
     shadowOpacity: 0.2,
-    shadowRadius: 5,
-    marginBottom: 20, // Khoảng cách giữa header và nội dung
+    shadowRadius: width * 0.015, // Bán kính bóng đổ dựa trên chiều rộng
+    marginBottom: height * 0.03, // 3% chiều cao màn hình
   },
   backButton: {
-    marginRight: 10,
+    marginRight: width * 0.03, // 3% chiều rộng màn hình
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: width * 0.055, // Font size 5.5% chiều rộng màn hình
     fontWeight: 'bold',
-    color: 'black', // Màu trắng cho chữ trong header
+    color: 'black',
   },
   post: {
     flex: 1,
+  },
+  flatListContent: {
+    paddingBottom: height * 0.03, // 3% chiều cao màn hình
+    paddingTop: height * 0.01, // 1% chiều cao màn hình
+  },
+  separator: {
+    height: height * 0.02, // 2% chiều cao màn hình
+    backgroundColor: 'transparent', // Màu trong suốt để tạo khoảng cách
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: width * 0.05, // 5% chiều rộng màn hình
   },
   lottieAnimation: {
-    width: 200, // Điều chỉnh kích thước animation
-    height: 200,
+    width: width * 0.5, // 50% chiều rộng màn hình
+    height: width * 0.5, // Tỷ lệ 1:1 với chiều rộng
   },
   emptyText: {
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: width * 0.045, // Font size 4.5% chiều rộng màn hình
     color: 'gray',
   },
 });

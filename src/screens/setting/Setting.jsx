@@ -10,23 +10,23 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {useSelector, useDispatch} from 'react-redux';
-import {logout} from '../../rtk/Reducer';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../rtk/Reducer';
 import QRCode from 'react-native-qrcode-svg';
-import {setNoti_token} from '../../rtk/API';
+import { setNoti_token } from '../../rtk/API';
 import {
   setNotificationPreference,
   getNotificationPreference,
 } from '../../noti/notificationHelper';
-import {FlatList, Switch} from 'react-native-gesture-handler';
+import { FlatList, Switch } from 'react-native-gesture-handler';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const Setting = props => {
-  const {route, navigation} = props;
-  const {params} = route;
+  const { route, navigation } = props;
+  const { params } = route;
 
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
@@ -38,7 +38,7 @@ const Setting = props => {
   const [showNotificationList, setShowNotificationList] = useState(false); // Trạng thái mở/đóng danh sách thông báo
 
   const onLogout = () => {
-    dispatch(setNoti_token({ID_user: me._id, fcmToken: fcmToken}))
+    dispatch(setNoti_token({ ID_user: me._id, fcmToken: fcmToken }))
       .unwrap()
       .then(response => {
         //console.log(response);
@@ -51,12 +51,12 @@ const Setting = props => {
   };
 
   const channels = [
-    {id: 'message-channel', name: 'Tin nhắn'},
-    {id: 'friend-request-channel', name: 'Lời mời kết bạn'},
-    {id: 'call-channel', name: 'Cuộc gọi'},
-    {id: 'livestream-channel', name: 'Livestream'},
-    {id: 'comment-channel', name: 'Bình luận'},
-    {id: 'post-channel', name: 'Bài viết mới'},
+    { id: 'message-channel', name: 'Tin nhắn' },
+    { id: 'friend-request-channel', name: 'Lời mời kết bạn' },
+    { id: 'call-channel', name: 'Cuộc gọi' },
+    { id: 'livestream-channel', name: 'Livestream' },
+    { id: 'comment-channel', name: 'Bình luận' },
+    { id: 'post-channel', name: 'Bài viết mới' },
   ];
 
   const settingsOptions = [
@@ -72,7 +72,7 @@ const Setting = props => {
       screen: 'ChangePassWord',
       icon: 'lock-closed',
     },
-    {id: '3', title: 'Thùng rác', screen: 'Trash', icon: 'trash'},
+    { id: '3', title: 'Thùng rác', screen: 'Trash', icon: 'trash' },
     {
       id: '4',
       title: 'Đăng xuất',
@@ -80,7 +80,7 @@ const Setting = props => {
       icon: 'exit-outline',
       color: 'red',
     },
-    {id: '5', title: 'Game', screen: 'pokemon', icon: 'game-controller'},
+    { id: '5', title: 'Game', screen: 'pokemon', icon: 'game-controller' },
   ];
 
   //tắt thông báo
@@ -97,7 +97,7 @@ const Setting = props => {
 
   const toggleNotification = async channelId => {
     const newStatus = !preferences[channelId];
-    setPreferences({...preferences, [channelId]: newStatus});
+    setPreferences({ ...preferences, [channelId]: newStatus });
     await setNotificationPreference(channelId, newStatus);
   };
 
@@ -105,11 +105,11 @@ const Setting = props => {
     setShowNotificationList(!showNotificationList);
   };
 
-  const Option = ({icon, title, subtitle, color = 'black'}) => (
+  const Option = ({ icon, title, subtitle, color = 'black' }) => (
     <View style={styles.option}>
       <Icon name={icon} size={20} color={color} />
       <View style={styles.optionText}>
-        <Text style={[styles.optionTitle, {color}]}>{title}</Text>
+        <Text style={[styles.optionTitle, { color }]}>{title}</Text>
         {subtitle && <Text style={styles.optionSubtitle}>{subtitle}</Text>}
       </View>
     </View>
@@ -176,7 +176,7 @@ const Setting = props => {
                   <FlatList
                     data={channels}
                     keyExtractor={item => item.id}
-                    renderItem={({item}) => (
+                    renderItem={({ item }) => (
                       <TouchableOpacity style={styles.optionContainer}>
                         {/* Biểu tượng thông báo */}
                         <Text style={styles.icon}>🔔</Text>
@@ -194,6 +194,10 @@ const Setting = props => {
                           style={styles.switch}
                           value={preferences[item.id]}
                           onValueChange={() => toggleNotification(item.id)}
+
+                          trackColor={{ false: '#D9D9D9', true: '#81b0ff' }} // Đường dẫn: xám khi tắt, xanh khi bật
+                          thumbColor={'#0064E0'} // Nút: vàng khi bật, trắng khi tắt
+                          ios_backgroundColor="#3e3e3e" // Nền iOS khi tắt
                         />
                       </TouchableOpacity>
                     )}
@@ -203,7 +207,7 @@ const Setting = props => {
             }
             data={settingsOptions}
             keyExtractor={item => item.id}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() =>
                   item.screen ? navigation.navigate(item.screen) : item.action()
@@ -322,21 +326,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  modalTitle: {fontSize: 18, fontWeight: 'bold', marginBottom: 10},
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   closeButton: {
     marginTop: 10,
     padding: 10,
     backgroundColor: 'blue',
     borderRadius: 5,
   },
-  closeButtonText: {color: 'white', fontSize: 16},
+  closeButtonText: { color: 'white', fontSize: 16 },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
     borderBottomWidth: 1,
   },
-  text: {fontSize: 16},
+  text: { fontSize: 16 },
   optionContainer: {
     backgroundColor: '#ffffff', // Màu nền trắng
     borderRadius: 10, // Bo góc
@@ -346,7 +350,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // Hiển thị ngang
     alignItems: 'center', // Căn giữa theo chiều dọc
     shadowColor: '#000', // Đổ bóng
-    shadowOffset: {width: 0, height: 2}, // Vị trí bóng
+    shadowOffset: { width: 0, height: 2 }, // Vị trí bóng
     shadowOpacity: 0.1, // Độ trong suốt của bóng
     shadowRadius: 4, // Độ mờ của bóng
     elevation: 3, // Bóng cho Android
@@ -370,6 +374,9 @@ const styles = StyleSheet.create({
     marginTop: 2, // Khoảng cách với title
   },
   switch: {
-    transform: [{scaleX: 1.1}, {scaleY: 1.1}], // Tăng kích thước Switch
+    transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }], // Tăng kích thước Switch
   },
+  switchON: {
+    color: 'blue'
+  }
 });

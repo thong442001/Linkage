@@ -49,7 +49,7 @@ const HomeStories = ({ navigation, me, stories, liveSessions }) => {
           data={stories.concat(liveSessions)}
           renderItem={({ item }) => {
             if (item.liveID) {
-              return <ItemLive user={item} />;
+              return <ItemLive user={item} />;a
             } else {
               return <Stories StoryPost={item} />;
             }
