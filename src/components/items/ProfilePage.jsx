@@ -981,7 +981,22 @@ const PostItem = memo(({
             >
                 <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
                     <View style={styles.modalOverlay}>
-                        <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+                        {isVideo(selectedImage) ? (
+                            <Video
+                                source={{ uri: selectedImage }}
+                                style={styles.fullImage}
+                                resizeMode="contain"
+                                controls={true} // Hiển thị nút điều khiển cho video
+                                paused={false} // Tự động phát khi mở modal
+                                onError={(e) => console.log("Video error:", e)} // Xử lý lỗi nếu có
+                            />
+                        ) : (
+                            <Image
+                                source={{ uri: selectedImage }}
+                                style={styles.fullImage}
+                                resizeMode="contain"
+                            />
+                        )}
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
