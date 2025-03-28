@@ -410,6 +410,7 @@ const CommentS = StyleSheet.create({
     mediaContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        justifyContent: 'center'
     },
     singleMedia: {
         width: '100%',

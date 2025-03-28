@@ -284,6 +284,7 @@ const oStackHome = {
   Ringing: { name: 'Ringing', component: Ringing },
   Report: { name: 'Report', component: Report },
   ListTag: { name: 'ListTag', component: ListTag },
+  Profile: { name: 'Profile', component: Profile },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
