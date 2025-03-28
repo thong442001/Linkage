@@ -55,7 +55,7 @@ const Home = props => {
       scrollY.removeListener(listenerId);
     };
   }, [scrollY]);
-
+  
   useEffect(() => {
     let previousScrollY = 0;
   
@@ -179,17 +179,17 @@ const Home = props => {
   
   const renderPosts = useCallback(
     ({ item }) => (
-      <ProfilePage
-        post={item}
-        ID_user={me._id}
-        currentTime={currentTime}
-        onDelete={() => callChangeDestroyPost(item._id)}
-        updatePostReaction={updatePostReaction}
-        deletPostReaction={deletPostReaction}
-      />
+        <ProfilePage
+            post={item}
+            ID_user={me._id}
+            currentTime={currentTime}
+            onDelete={() => callChangeDestroyPost(item._id)}
+            updatePostReaction={updatePostReaction}
+            deletPostReaction={deletPostReaction}
+        />
     ),
-    [posts, currentTime, me._id]
-  );
+    [me._id, currentTime] // Chỉ phụ thuộc vào me._id và currentTime
+);
 
   return (
     <>

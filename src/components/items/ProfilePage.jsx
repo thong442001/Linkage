@@ -259,54 +259,55 @@ const PostItem = memo(({
         updateDiff();
     }, [currentTime]);
 
-    const callAddPost_Reaction = async (ID_reaction, name, icon) => {
-        try {
-            const paramsAPI = {
-                ID_post: post._id,
-                ID_user: ID_user,
-                ID_reaction: ID_reaction,
-            };
-            await dispatch(addPost_Reaction(paramsAPI))
-                .unwrap()
-                .then(response => {
-                    const newReaction = {
-                        _id: ID_reaction,
-                        name: name,
-                        icon: icon,
-                    };
-                    updatePostReaction(
-                        post._id,
-                        newReaction,
-                        response.post_reaction._id,
-                    );
-                })
-                .catch(error => {
-                    console.log('Lỗi call api addPost_Reaction', error);
-                });
-        } catch (error) {
-            console.log('Lỗi trong addPost_Reaction:', error);
-        }
+    const callAddPost_Reaction = (ID_reaction, name, icon) => {
+        // 1. Cập nhật giao diện ngay lập tức (Optimistic Update)
+        const newReaction = {
+            _id: ID_reaction,
+            name: name,
+            icon: icon,
+        };
+        updatePostReaction(post._id, newReaction, `temp-${Date.now()}`); // Tạm thời tạo ID giả
+    
+        // 2. Gọi API ngầm
+        const paramsAPI = {
+            ID_post: post._id,
+            ID_user: ID_user,
+            ID_reaction: ID_reaction,
+        };
+        dispatch(addPost_Reaction(paramsAPI))
+            .unwrap()
+            .then(response => {
+                // Cập nhật lại ID chính xác từ API
+                updatePostReaction(post._id, newReaction, response.post_reaction._id);
+            })
+            .catch(error => {
+                console.log('Lỗi call api addPost_Reaction', error);
+                // Rollback nếu API thất bại
+                deletPostReaction(post._id, `temp-${Date.now()}`);
+            });
     };
 
-    const callDeletePost_reaction = async (ID_post, ID_post_reaction) => {
-        try {
-            const paramsAPI = {
-                _id: ID_post_reaction
-            };
-            await dispatch(deletePost_reaction(paramsAPI))
-                .unwrap()
-                .then(response => {
-                    deletPostReaction(
-                        ID_post,
-                        ID_post_reaction
-                    );
-                })
-                .catch(error => {
-                    console.log('Lỗi call api callDeletePost_reaction', error);
-                });
-        } catch (error) {
-            console.log('Lỗi trong callDeletePost_reaction:', error);
-        }
+    const callDeletePost_reaction = (ID_post, ID_post_reaction) => {
+        // 1. Cập nhật giao diện ngay lập tức (Optimistic Update)
+        deletPostReaction(ID_post, ID_post_reaction);
+        
+        // 2. Gọi API ngầm
+        const paramsAPI = {
+            _id: ID_post_reaction,
+        };
+        dispatch(deletePost_reaction(paramsAPI))
+            .unwrap()
+            .then(response => {
+                // Xóa thành công, không cần làm gì thêm
+            })
+            .catch(error => {
+                console.log('Lỗi call api callDeletePost_reaction', error);
+                // Rollback nếu API thất bại: thêm lại reaction
+                const reaction = post.post_reactions.find(r => r._id === ID_post_reaction);
+                if (reaction) {
+                    updatePostReaction(ID_post, reaction.ID_reaction, ID_post_reaction);
+                }
+            });
     };
 
     const hasCaption = post?.caption?.trim() !== '';
@@ -669,30 +670,32 @@ const PostItem = memo(({
             )}
             {!post._destroy && (
                 <View style={styles.interactions}>
-                    <TouchableOpacity
-                        delayLongPress={200}
-                        delayPressOut={0}
-                        ref={reactionRef}
-                        style={[styles.action, userReaction && { backgroundColor: 'white' }]}
-                        onLongPress={handleLongPress}
-                        onPress={() =>
-                            userReaction
-                                ? callDeletePost_reaction(post._id, userReaction._id)
-                                : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
-                        }
-                    >
-                        <Text style={styles.actionText}>
-                            {userReaction ? userReaction.ID_reaction.icon : <Icon5 name="like2" size={20} color="black" />}
-                        </Text>
-                        <Text
-                            style={[
-                                styles.actionText,
-                                userReaction && { color: '#0064E0' }
-                            ]}
-                        >
-                            {userReaction ? userReaction.ID_reaction.name : reactions[0].name}
-                        </Text>
-                    </TouchableOpacity>
+                  <TouchableOpacity
+    delayLongPress={200}
+    delayPressOut={0}
+    ref={reactionRef}
+    style={[styles.action, userReaction && { backgroundColor: 'white' }]}
+    onLongPress={handleLongPress}
+    onPress={() =>
+        userReaction
+            ? callDeletePost_reaction(post._id, userReaction._id)
+            : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+    }
+>
+    <View style={styles.actionContent}>
+        <Text style={styles.actionText}>
+            {userReaction ? userReaction.ID_reaction.icon : <Icon5 name="like2" size={20} color="black" />}
+        </Text>
+        <Text
+            style={[
+                styles.actionText,
+                userReaction && { color: '#0064E0' }
+            ]}
+        >
+            {userReaction ? userReaction.ID_reaction.name : reactions[0].name}
+        </Text>
+    </View>
+</TouchableOpacity>
                     
                     <TouchableOpacity
                         style={styles.action}
@@ -1002,6 +1005,13 @@ const styles = StyleSheet.create({
     action: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingVertical: 10, 
+        paddingHorizontal: 15, 
+        borderRadius: 8, 
+    },
+    actionContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     actionText: {
         fontSize: width * 0.035,
@@ -1023,14 +1033,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         flexDirection: "row",
         backgroundColor: "#FFFF",
-        padding: 10,
+        padding: 5,
         borderRadius: 20,
     },
     reactionButton: {
         marginHorizontal: 5,
     },
     reactionText: {
-        fontSize: 15,
+        fontSize: 20,
         color: "#000",
         alignSelf: 'flex-end',
     },
