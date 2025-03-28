@@ -1032,7 +1032,7 @@ const styles = StyleSheet.create({
     reactionBar: {
         position: 'absolute',
         flexDirection: "row",
-        backgroundColor: "#FFFF",
+        backgroundColor: "#e3e3e3",
         padding: 5,
         borderRadius: 20,
     },
