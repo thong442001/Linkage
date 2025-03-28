@@ -1,15 +1,15 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Animated, FlatList, View, RefreshControl,Dimensions  } from 'react-native';
+import { Animated, FlatList, View, RefreshControl, Dimensions } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import HomeS from '../../styles/screens/home/HomeS';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';
 import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 import ProfilePage from '../../components/items/ProfilePage';
-import { 
-  getAllPostsInHome, 
+import {
+  getAllPostsInHome,
   changeDestroyPost,
   getAllReason
- } from '../../rtk/API';
+} from '../../rtk/API';
 import database from '@react-native-firebase/database';
 import HomeHeader from './HomeHeader';
 import HomeStories from './HomeStories';
@@ -31,7 +31,7 @@ const Home = props => {
   const previousScrollY = useRef(0);
 
   // Animated value
-  const scrollY = useRef(new Animated.Value(0)).current; 
+  const scrollY = useRef(new Animated.Value(0)).current;
   const clampedScrollY = Animated.diffClamp(scrollY, 0, HEADER_HEIGHT);
   const headerTranslate = clampedScrollY.interpolate({
     inputRange: [0, HEADER_HEIGHT],
@@ -43,12 +43,10 @@ const Home = props => {
     const timer = setInterval(() => {
       setCurrentTime(Date.now());
     }, 60000); // Cập nhật mỗi phút
-  
+
     return () => clearInterval(timer);
   }, [refreshing]); // Thêm refreshing vào dependencies
-  
 
-  
   useEffect(() => {
     const listenerId = scrollY.addListener(({ value }) => {
     });
@@ -60,7 +58,7 @@ const Home = props => {
 
   useEffect(() => {
     let previousScrollY = 0;
-  
+
     const listenerId = scrollY.addListener(({ value }) => {
       if (value - previousScrollY > 0) {
         // Cuộn xuống => Ẩn Bottom Tab
@@ -71,14 +69,14 @@ const Home = props => {
       }
       previousScrollY = value; // Cập nhật vị trí cuộn trước đó
     });
-  
+
     return () => {
       scrollY.removeListener(listenerId);
     };
   }, [scrollY]);
-  
-  
-  
+
+
+
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
     const onValueChange = liveSessionsRef.on('value', snapshot => {
@@ -88,7 +86,7 @@ const Home = props => {
     return () => liveSessionsRef.off('value', onValueChange);
   }, []);
 
-  
+
   const callGetAllPostsInHome = async ID_user => {
     try {
       // Nếu đang làm mới thì không set loading lại để tránh hiển thị skeleton loading
@@ -112,11 +110,10 @@ const Home = props => {
     }
   };
 
-
   useEffect(() => {
     callGetAllPostsInHome(me._id);
   }, [me._id]);
-  
+
   // Hàm xử lý làm mới khi kéo xuống
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -252,7 +249,7 @@ const Home = props => {
                 },
               }
             )}
-            
+
             scrollEventThrottle={16}
           />
         </>
