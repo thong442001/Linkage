@@ -247,6 +247,7 @@ import ManHinhCho from '../screens/game/3la/ManHinhCho';
 import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Ringing from '../screens/call/Ringing';
 import Report from '../screens/report/Report';
+import pokemon from '../screens/game/pokemon/pokemon';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -282,6 +283,7 @@ const oStackHome = {
   ManHinhCho: { name: 'ManHinhCho', component: ManHinhCho },
   Ringing: { name: 'Ringing', component: Ringing },
   Report: { name: 'Report', component: Report },
+  pokemon: { name: 'pokemon', component: pokemon },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
