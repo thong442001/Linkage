@@ -12,6 +12,7 @@ const ItemNotification = ({data}) => {
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const [icon, setIcon] = useState(null);
+  const [background, setbackground] = useState(null);
   // time
   const [timeAgo, setTimeAgo] = useState(data.updatedAt);
 
@@ -52,7 +53,7 @@ const ItemNotification = ({data}) => {
 
     // return () => clearInterval(interval);
   }, []);
-  console.log(data)
+  
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
@@ -63,6 +64,7 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_relationship.ID_userB.avatar);
         setIcon('person-add')
+        setbackground('#007bff')
       } else {
         setName(
           data.ID_relationship.ID_userA.first_name +
@@ -71,6 +73,7 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_relationship.ID_userA.avatar);
         setIcon('person-add')
+        setbackground('#007bff')
       }
     }
     if (data.type == 'Đã đăng story mới') {
@@ -82,6 +85,8 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_post.ID_user.avatar);
         setIcon('book')
+        setbackground('#DA7F00')
+
       } else {
         setName(
           data.ID_post.ID_user.first_name +
@@ -90,6 +95,8 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_post.ID_user.last_name);
         setIcon('book')
+        setbackground('#DA7F00')
+
       }
     }
     if (data.type == "Đã thành bạn bè của bạn") {
@@ -101,6 +108,7 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_relationship.ID_userB.avatar);
         setIcon('people')
+        setbackground('#007bff')
       } else {
         setName(
           data.ID_relationship.ID_userA.first_name +
@@ -109,6 +117,7 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_relationship.ID_userA.avatar);
         setIcon('people')
+        setbackground('#007bff')
       }
     }
     if(data.type == 'Đã đăng bài mới'){
@@ -117,6 +126,8 @@ const ItemNotification = ({data}) => {
      )
      setAvatar(data.ID_post.ID_user.avatar);
      setIcon('reader')
+     setbackground('#E1E111')
+
 
     }
     if(data.type == 'Bạn có 1 cuộc gọi video đến'){
@@ -124,7 +135,8 @@ const ItemNotification = ({data}) => {
         const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
         setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
         setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
-        setIcon('call')
+        setIcon('videocam-outline')
+        setbackground('#FF5733')
 
       } else {
         setName(
@@ -136,6 +148,7 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
         setIcon('call')
+        setbackground('#FF5733')
 
       }
     }
@@ -145,6 +158,7 @@ const ItemNotification = ({data}) => {
         setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
         setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
         setIcon('call')
+        setbackground('#FF5733')
       } else {
         setName(
           data.ID_group.name ||
@@ -155,8 +169,11 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
         setIcon('call')
+        setbackground('#FF5733')
+
       }
     }
+
     if(data.type == 'Bạn đã được mời vào nhóm mới'){
       if (data.ID_group.isPrivate) {
         const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
@@ -173,6 +190,7 @@ const ItemNotification = ({data}) => {
         );
         setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
         setIcon('people-circle')
+        setbackground('green')
       }
     }
     if(data.type == 'Tin nhắn mới'){
@@ -180,6 +198,7 @@ const ItemNotification = ({data}) => {
         + data.ID_message.sender.last_name)
       setAvatar(data.ID_message.sender.avatar)
       setIcon('chatbox-ellipses')
+      setbackground('green')
     }
     if(data.type=='Đang livestream'){
       if (data.ID_relationship.ID_userA._id == me._id) {
@@ -189,7 +208,8 @@ const ItemNotification = ({data}) => {
             data.ID_relationship.ID_userB.last_name,
         );
         setAvatar(data.ID_relationship.ID_userB.avatar);
-        setIcon('logo-rss')        
+        setIcon('logo-rss')
+        setbackground('red')
       } else {
         setName(
           data.ID_relationship.ID_userA.first_name +
@@ -197,23 +217,27 @@ const ItemNotification = ({data}) => {
             data.ID_relationship.ID_userA.last_name,
         );
         setAvatar(data.ID_relationship.ID_userA.avatar);
-        setIcon('logo-rss')        
+        setIcon('logo-rss')    
+        setbackground('red')    
       }
     }
     if(data.type=='Đã thả biểu cảm vào bài viết của bạn'){
       setName(data.ID_post_reaction.ID_user?.first_name + ' ' + data.ID_post_reaction.ID_user?.last_name)
       setAvatar(data.ID_post_reaction.ID_user?.avatar);
       setIcon('happy')
+      setbackground('green')
     }
     if(data.type=='Đã bình luận vào bài viết của bạn'){
       setName(data.ID_comment.ID_user.first_name + ' ' + data.ID_comment.ID_user.last_name)
       setAvatar(data.ID_comment.ID_user.avatar)
       setIcon('chatbubble-ellipses')
+      setbackground('green')
     }    
     if(data.type=='Đã trả lời bình luận của bạn'){
       setName(data.ID_comment.ID_user.first_name + ' ' + data.ID_comment.ID_user.last_name)
       setAvatar(data.ID_comment.ID_user.avatar)
       setIcon('chatbubble-ellipses')
+      setbackground('green')
     }
 
   }, []);
@@ -234,8 +258,8 @@ const ItemNotification = ({data}) => {
       <View style={styles.container}>
         {avatar && 
         <View>
-        <Image source={{uri: avatar}} style={styles.img} />
-        <View style={styles.icon}><Icon name={icon} size={16} color='white' /></View>
+        <Image source={{uri: avatar}} style={[styles.img,]} />
+        <View style={[{backgroundColor:background},styles.icon,]}><Icon name={icon} size={16} color='white' /></View>
         </View>
         }
         <View style={styles.container_content}>
@@ -295,7 +319,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     left: 40,
-    backgroundColor: '#007bff',
+    //backgroundColor: '#007bff',
     borderRadius:50,
     padding:5
   }

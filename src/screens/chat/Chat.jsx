@@ -182,7 +182,6 @@ const Chat = (props) => {// cần ID_group (param)
         socket.on('receive_message', (data) => {
             console.log(data);
             setMessages((prevMessages) => [
-                ...prevMessages,
                 {
                     _id: data._id,
                     ID_group: data.ID_group,
@@ -205,7 +204,8 @@ const Chat = (props) => {// cần ID_group (param)
                     updatedAt: data.updatedAt,
                     createdAt: data.createdAt,
                     _destroy: data._destroy
-                }
+                },
+                ...prevMessages,
             ]);
         });
 
@@ -287,7 +287,9 @@ const Chat = (props) => {// cần ID_group (param)
 
         socket.on("user_typing", ({ ID_group, ID_user }) => {
             //console.log("User: " + ID_user + " đang soạn tin nhắn...");
+            if (ID_user == me._id) return;
             setTypingUsers((prev) => [...new Set([...prev, ID_user])]); // Thêm user vào danh sách
+
         });
 
         socket.on("user_stop_typing", ({ ID_group, ID_user }) => {
@@ -297,8 +299,9 @@ const Chat = (props) => {// cần ID_group (param)
 
         socket.on("lang-nghe-moi-choi-game-3-la", (data) => {
             console.log("lang-nghe-moi-choi-game-3-la")
+            //console.log(data);
             if (data.sender == me._id && data.type == 'game3la' && group) {
-                console.log("lang-nghe-moi-choi-game-3-la1")
+                //console.log("lang-nghe-moi-choi-game-3-la1")
                 navigation.navigate("ManHinhCho", { group: group, ID_message: data._id });
             }
         });
@@ -446,7 +449,6 @@ const Chat = (props) => {// cần ID_group (param)
         socket.emit('send_message', payload);
         setMessage('');
         setReply(null); // Xóa tin nhắn trả lời sau khi gửi
-        Keyboard.dismiss();// tắc bàn phím
     };
 
     const goBack = () => {
@@ -484,9 +486,9 @@ const Chat = (props) => {// cần ID_group (param)
     };
 
     useEffect(() => {
-        // Cuộn xuống tin nhắn cuối cùng khi danh sách tin nhắn thay đổi
+        // Cuộn lên đầu danh sách tin nhắn khi danh sách tin nhắn thay đổi
         setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
         }, 200);
     }, [messages]);
 
@@ -565,7 +567,7 @@ const Chat = (props) => {// cần ID_group (param)
 
             <FlatList
                 ref={flatListRef} // Gán ref cho FlatList
-                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10 }}
+                contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10, paddingVertical: 10, justifyContent: 'flex-end' }}
                 data={messages || []}
                 renderItem={({ item }) => (
                     <Messagecomponent
@@ -579,10 +581,9 @@ const Chat = (props) => {// cần ID_group (param)
                     />
                 )}
                 keyExtractor={(item) => item._id}
-                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-                onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
                 // showsHorizontalScrollIndicator = {false}
                 showsVerticalScrollIndicator={false}
+                inverted
             />
             {/* bàn phím */}
             {
