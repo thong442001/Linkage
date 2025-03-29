@@ -773,21 +773,60 @@ const PostDetail = (props) => {
                 </View>
 
                 <TouchableOpacity
-                  disabled={me._id != post.ID_user._id}
                   onPress={() =>
                     openBottomSheet(
                       25,
-                      <View>
-                        <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet(), navigation.navigate(oStackHome.TabHome) }}
-                          style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                          <Text style={[styles.deleteText,]}
-                          >{
-                              post._destroy ? (
-                                "Phục hồi"
-                              ) : "Xóa bài viết"
-                            }
-                          </Text>
-                        </TouchableOpacity>
+                      <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
+                        {
+                          me._id != post.ID_user._id ? (
+                            <TouchableOpacity
+                              onPress={() => {
+                                closeBottomSheet()
+                                navigation.navigate('Report', { ID_post: post._id, ID_user: null })
+                              }}
+                              style={[styles.deleteButton]}>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                <View>
+                                  <Icon name="alert-circle" size={20} color="black" />
+                                </View>
+                                <Text style={[styles.deleteText,]}
+                                >{
+                                    !post._destroy
+                                    && (
+                                      "Báo cáo"
+                                    )
+                                  }
+                                </Text>
+                              </View>
+
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet(), navigation.navigate(oStackHome.TabHome) }}
+                              style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                {
+                                  post._destroy ?
+                                    <View>
+                                      <Icon name="refresh-sharp" size={20} color="black" />
+                                    </View>
+                                    :
+                                    <View>
+                                      <Icon name="trash" size={20} color="black" />
+                                    </View>
+                                }
+                                <Text style={[styles.deleteText,]}
+                                >{
+                                    post._destroy ? (
+                                      "Phục hồi"
+                                    ) : "Xóa bài viết"
+                                  }
+                                </Text>
+                              </View>
+
+                            </TouchableOpacity>
+                          )
+                        }
+
                         {
                           post._destroy && (
                             <TouchableOpacity
@@ -944,23 +983,61 @@ const PostDetail = (props) => {
               {
                 !post.ID_post_shared &&
                 <View style={{ marginRight: 15 }}>
-
                   <TouchableOpacity
-                    disabled={me._id != post.ID_user._id}
+                    // disabled={me._id != post.ID_user._id}
                     onPress={() =>
                       openBottomSheet(
                         25,
-                        <View>
-                          <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
-                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                            <Text style={[styles.deleteText,]}
-                            >{
-                                post._destroy ? (
-                                  "Phục hồi"
-                                ) : "Xóa bài viết"
-                              }
-                            </Text>
-                          </TouchableOpacity>
+                        <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
+                          {
+                            me._id != post.ID_user._id ? (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  closeBottomSheet()
+                                  navigation.navigate('Report', { ID_post: post._id, ID_user: null })
+                                }}
+                                style={[styles.deleteButton]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                  <View>
+                                    <Icon name="alert-circle" size={20} color="black" />
+                                  </View>
+                                  <Text style={[styles.deleteText,]}
+                                  >{
+                                      !post._destroy
+                                      && (
+                                        "Báo cáo"
+                                      )
+                                    }
+                                  </Text>
+                                </View>
+
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet(), navigation.navigate(oStackHome.TabHome) }}
+                                style={[styles.deleteButton]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                  {
+                                    post._destroy ?
+                                      <View>
+                                        <Icon name="refresh-sharp" size={20} color="black" />
+                                      </View>
+                                      :
+                                      <View>
+                                        <Icon name="trash" size={20} color="black" />
+                                      </View>
+                                  }
+                                  <Text style={[styles.deleteText,]}
+                                  >{
+                                      post._destroy ? (
+                                        "Phục hồi"
+                                      ) : "Xóa bài viết"
+                                    }
+                                  </Text>
+                                </View>
+
+                              </TouchableOpacity>
+                            )
+                          }
                           {
                             post._destroy && (
                               <TouchableOpacity
@@ -995,7 +1072,7 @@ const PostDetail = (props) => {
                 )
             }
           </View>
-        </View>
+        </View >
         {
           typeClick == "image"
             ? (hasMedia && renderMediaSDetail(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
@@ -1268,7 +1345,7 @@ const PostDetail = (props) => {
             </View>
           </TouchableOpacity>
         </View>
-      </View>
+      </View >
     );
   };
 

@@ -531,9 +531,16 @@ const PostItem = memo(({
                                                             }}
                                                             style={[styles.deleteButton]}>
                                                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                <View>
-                                                                    <Icon name="trash" size={20} color="black" />
-                                                                </View>
+                                                                {
+                                                                    post._destroy ?
+                                                                        <View>
+                                                                            <Icon name="refresh-sharp" size={20} color="black" />
+                                                                        </View>
+                                                                        :
+                                                                        <View>
+                                                                            <Icon name="trash" size={20} color="black" />
+                                                                        </View>
+                                                                }
                                                                 <Text style={[styles.deleteText,]}
                                                                 >{
                                                                         post._destroy ? (

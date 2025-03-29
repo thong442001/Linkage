@@ -164,15 +164,14 @@ const CommentS = StyleSheet.create({
     deleteButton: {
         paddingVertical: 10,
         paddingHorizontal: 15,
-        backgroundColor: '#ff4d4d', // Màu nền đỏ
         borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10,
+        // alignItems: 'center',
     },
     deleteText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: 'white', // Màu chữ trắng
+        color: 'black', // Màu chữ trắng
+        marginLeft: 10
     },
     //reaction
     reactionBar: {
