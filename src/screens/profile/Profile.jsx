@@ -767,22 +767,22 @@ const Profile = props => {
                                         relationship?.relation == 'A gửi lời kết bạn B') ||
                                         (relationship?.ID_userB == me._id &&
                                             relationship?.relation == 'B gửi lời kết bạn A')) && (
-                                        <TouchableOpacity
-                                            style={ProfileS.btnAddStory}
-                                            onPress={callSetRelationNguoiLa}>
-                                            <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
-                                        </TouchableOpacity>
-                                    )}
+                                            <TouchableOpacity
+                                                style={ProfileS.btnAddStory}
+                                                onPress={callSetRelationNguoiLa}>
+                                                <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
+                                            </TouchableOpacity>
+                                        )}
                                     {((relationship?.ID_userA == me._id &&
                                         relationship?.relation == 'B gửi lời kết bạn A') ||
                                         (relationship?.ID_userB == me._id &&
                                             relationship?.relation == 'A gửi lời kết bạn B')) && (
-                                        <TouchableOpacity
-                                            style={ProfileS.btnAddStory}
-                                            onPress={() => setMenuVisible(true)}>
-                                            <Text style={ProfileS.textAddStory}>+ Phản hồi</Text>
-                                        </TouchableOpacity>
-                                    )}
+                                            <TouchableOpacity
+                                                style={ProfileS.btnAddStory}
+                                                onPress={() => setMenuVisible(true)}>
+                                                <Text style={ProfileS.textAddStory}>+ Phản hồi</Text>
+                                            </TouchableOpacity>
+                                        )}
 
                                     <View style={ProfileS.boxEdit}>
                                         <TouchableOpacity
@@ -807,22 +807,36 @@ const Profile = props => {
                                     <TouchableOpacity style={ProfileS.btnAddStory}>
                                         <Text style={ProfileS.textAddStory}>+ Thêm vào tin</Text>
                                     </TouchableOpacity>
-                                    <View style={ProfileS.boxEdit}>
-                                        <TouchableOpacity style={ProfileS.btnEdit}>
-                                            <Text style={ProfileS.textEdit}>
-                                                Chỉnh sửa trang cá nhân
-                                            </Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            disabled={me._id == user?._id}
-                                            style={ProfileS.btnMore}>
-                                            <Icon
-                                                name="ellipsis-horizontal"
-                                                size={25}
-                                                color="black"
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
+
+                                    {
+                                        user._id !== me._id
+                                            ? (
+                                                <View style={ProfileS.boxEdit}>
+                                                    <TouchableOpacity style={ProfileS.btnEdit}>
+                                                        <Text style={ProfileS.textEdit}>
+                                                            Chỉnh sửa trang cá nhân
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity
+                                                        disabled={me._id == user?._id}
+                                                        style={ProfileS.btnMore}>
+                                                        <Icon
+                                                            name="ellipsis-horizontal"
+                                                            size={25}
+                                                            color="black"
+                                                        />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            ) : (
+                                                <View style={ProfileS.boxEdit}>
+                                                    <TouchableOpacity style={ProfileS.btnEdit}>
+                                                        <Text style={ProfileS.textEdit}>
+                                                            Chỉnh sửa trang cá nhân
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )
+                                    }
                                 </View>
                             ))}
                         </View>
@@ -885,9 +899,12 @@ const Profile = props => {
                                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
                                     Bài viết
                                 </Text>
-                                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
+                                {/* <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text> */}
                             </View>
-                            <View style={ProfileS.boxAllThink}>
+                            <TouchableOpacity
+                                style={ProfileS.boxAllThink}
+                                onPress={() => navigation.navigate('UpPost')}
+                            >
                                 <View style={ProfileS.boxThink}>
                                     <Image
                                         style={ProfileS.avataStatus}
@@ -898,7 +915,7 @@ const Profile = props => {
                                     </Text>
                                 </View>
                                 <Icon name="image" size={30} color="#3FF251" />
-                            </View>
+                            </TouchableOpacity>
                         </View>
                         <View style={ProfileS.boxLivestream}>
                             <TouchableOpacity
@@ -912,7 +929,10 @@ const Profile = props => {
                                 </View>
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity style={ProfileS.btnManage}>
+                        <TouchableOpacity
+                            style={ProfileS.btnManage}
+                            onPress={() => navigation.navigate('Trash')}
+                        >
                             <View style={ProfileS.boxManange}>
                                 <Icon2 name="comment-text" size={17} color="black" />
                                 <Text style={{ fontSize: 13, color: 'black' }}>
@@ -956,7 +976,7 @@ const Profile = props => {
                     </View>
                 </View>
             </View>
-    
+
             <Modal
                 visible={menuVisible}
                 transparent
