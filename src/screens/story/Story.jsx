@@ -23,6 +23,7 @@ import Video from 'react-native-video';
 import { launchCamera } from "react-native-image-picker";
 import axios from 'axios';
 import { TextInput } from 'react-native-gesture-handler';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
 
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
 const UPLOAD_PRESET = 'ml_default';
@@ -36,7 +37,8 @@ const Story = ({ route }) => {
   const [mediaType, setMediaType] = useState('photo');
   const [uploadedMediaUrl, setUploadedMediaUrl] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isPosted, setIsPosted] = useState(false); // Thêm state để kiểm soát trạng thái đăng
+  const [isPosted, setIsPosted] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // State để hiển thị StoriesModal
 
   const [text, setText] = useState('');
   const [showText, setShowText] = useState(false);
@@ -105,7 +107,7 @@ const Story = ({ route }) => {
     }
 
     if (isPosted) {
-      return; // Ngăn gọi lại nếu đã đăng thành công
+      return;
     }
 
     setLoading(true);
@@ -128,9 +130,17 @@ const Story = ({ route }) => {
       };
 
       await dispatch(addPost(paramsAPI)).unwrap();
-      setIsPosted(true); // Đánh dấu đã đăng thành công
-      Alert.alert("Thành công", "Đã đăng Story thành công!");
-      navigation.replace(oStackHome.TabHome.name);
+      setIsPosted(true);
+      
+      // Hiển thị StoriesModal khi đăng thành công
+      setShowSuccessModal(true);
+      
+      // Tự động ẩn StoriesModal sau 2 giây và điều hướng về TabHome
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigation.replace(oStackHome.TabHome.name);
+      }, 2000);
+
     } catch (error) {
       Alert.alert("Lỗi", "Đăng bài thất bại. Vui lòng thử lại!");
       console.error("Lỗi đăng bài:", error);
@@ -213,7 +223,7 @@ const Story = ({ route }) => {
           <TouchableOpacity
             style={styles.exitButton}
             onPress={() => navigation.navigate(oStackHome.TabHome.name)}>
-        <Icon name="close-outline" size={30} color="white" />
+            <Icon name="close-outline" size={30} color="white" />
           </TouchableOpacity>
         </View>
 
@@ -232,10 +242,10 @@ const Story = ({ route }) => {
         <TouchableOpacity
           style={[
             styles.postButton,
-            (loading || isPosted) && styles.disabledButton, // Thay đổi giao diện khi disabled
+            (loading || isPosted) && styles.disabledButton,
           ]}
           onPress={callAddPost}
-          disabled={loading || isPosted} // Vô hiệu hóa khi đang loading hoặc đã đăng
+          disabled={loading || isPosted}
         >
           <Text style={styles.postText}>
             {loading ? 'Đang đăng...' : isPosted ? 'Đã đăng' : 'Đăng'}
@@ -270,6 +280,12 @@ const Story = ({ route }) => {
             </View>
           </View>
         </Modal>
+
+        {/* Hiển thị StoriesModal khi đăng thành công */}
+        {showSuccessModal && (
+          <SuccessModal message={"Đăng story thành công"} />
+        )}
+
       </View>
     </TouchableWithoutFeedback>
   );
@@ -329,7 +345,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   disabledButton: {
-    backgroundColor: '#A9A9A9', // Màu xám khi bị vô hiệu hóa
+    backgroundColor: '#A9A9A9',
     opacity: 0.7,
   },
   postText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
