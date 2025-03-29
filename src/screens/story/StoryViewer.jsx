@@ -16,7 +16,7 @@ import Video from 'react-native-video';
 import { useDispatch, useSelector } from 'react-redux';
 import { deletePost } from '../../rtk/API';
 import { oStackHome } from '../../navigations/HomeNavigation';
-import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width, height } = Dimensions.get('window');
 const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
@@ -24,20 +24,20 @@ const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
-  console.log('StoryView:', StoryView);
-  console.log('me:', me);
-  const me = useSelector(state => state.app.user)
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const me = useSelector(state => state.app.user);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
   const [videoDuration, setVideoDuration] = useState(5000);
   const [stories, setStories] = useState(StoryView?.stories || []);
+  const [isFirstLoad, setIsFirstLoad] = useState(true); // Trạng thái để kiểm tra lần đầu vào trang
   const emojiScale = useRef(new Animated.Value(1)).current;
   const videoRef = useRef(null);
   const progressBars = useRef([]);
 
-  // Đồng bộ progressBars với stories
+  // Khởi tạo progressBars khi stories thay đổi
   useEffect(() => {
     progressBars.current = stories.map(() => new Animated.Value(0));
   }, [stories]);
@@ -47,8 +47,8 @@ const Story = () => {
   };
 
   const startProgress = (index) => {
-    if (!stories[index] || !progressBars.current[index]) return; // Kiểm tra an toàn
-    progressBars.current[index].setValue(0);
+    if (!stories[index] || !progressBars.current[index]) return;
+    progressBars.current[index].setValue(0); // Reset thanh tiến trình
     const duration = isVideo(stories[index].medias[0]) ? videoDuration : 5000;
 
     Animated.timing(progressBars.current[index], {
@@ -56,17 +56,45 @@ const Story = () => {
       duration: duration,
       useNativeDriver: false,
     }).start(({ finished }) => {
-      if (finished && !isVideo(stories[index].medias[0])) {
+      if (finished && !isVideo(stories[index].medias[0]) && navigation.isFocused()) {
         handleNextStory();
       }
     });
   };
 
+  // Chạy slider dựa trên currentIndex, nhưng tạm dừng nếu là lần đầu vào trang
   useEffect(() => {
     if (currentIndex >= 0 && currentIndex < stories.length) {
+      if (isFirstLoad && currentIndex === 0) {
+        // Tạm dừng cho story đầu tiên khi vừa vào trang
+        return;
+      }
       startProgress(currentIndex);
     }
-  }, [currentIndex, videoDuration, stories]);
+  }, [currentIndex, videoDuration, isFirstLoad]);
+
+  const handlePress = (event) => {
+    const { locationX } = event.nativeEvent;
+    if (isFirstLoad && currentIndex === 0) {
+      // Nếu là lần đầu và ở story đầu tiên, nhấn để chạy slider
+      setIsFirstLoad(false);
+      startProgress(0);
+    } else {
+      // Các trường hợp khác, xử lý chuyển story như bình thường
+      if (locationX < width / 2) {
+        handlePrevStory();
+      } else {
+        handleNextStory();
+      }
+    }
+  };
+
+  const handlePlayButtonPress = () => {
+    if (isFirstLoad && currentIndex === 0) {
+      setIsFirstLoad(false);
+      startProgress(0);
+    }
+  };
 
   const handleNextStory = () => {
     if (currentIndex + 1 < stories.length) {
@@ -74,7 +102,7 @@ const Story = () => {
       setCurrentIndex((prevIndex) => prevIndex + 1);
       setSelectedEmoji(null);
       setVideoDuration(5000);
-    } else {
+    } else if (navigation.isFocused()) {
       navigation.goBack();
     }
   };
@@ -85,15 +113,6 @@ const Story = () => {
       setCurrentIndex((prevIndex) => prevIndex - 1);
       setSelectedEmoji(null);
       setVideoDuration(5000);
-    }
-  };
-
-  const handlePress = (event) => {
-    const { locationX } = event.nativeEvent;
-    if (locationX < width / 2) {
-      handlePrevStory();
-    } else {
-      handleNextStory();
     }
   };
 
@@ -126,27 +145,19 @@ const Story = () => {
 
   const callDeleteStory = async (ID_story) => {
     try {
-      await dispatch(deletePost({ _id: ID_story }))
-        .unwrap()
-        .then(response => {
-          console.log('Xóa story vĩnh viễn thành công:', response);
-          const newStories = stories.filter(story => story._id !== ID_story);
-          setStories(newStories);
-          if (onDeleteStory) {
-            onDeleteStory(ID_story);
-          }
-          // Điều chỉnh currentIndex nếu cần
-          if (currentIndex >= newStories.length && currentIndex > 0) {
-            setCurrentIndex(newStories.length - 1);
-          }
-        })
-        .catch(error => {
-          console.log('Lỗi khi xóa story:', error);
-          throw error;
-        });
+      await dispatch(deletePost({ _id: ID_story })).unwrap();
+      const newStories = stories.filter(story => story._id !== ID_story);
+      setStories(newStories);
+      progressBars.current = newStories.map(() => new Animated.Value(0));
+      if (onDeleteStory) onDeleteStory(ID_story);
+      if (newStories.length === 0) {
+        navigation.goBack();
+      } else if (currentIndex >= newStories.length) {
+        setCurrentIndex(newStories.length - 1);
+      }
+      Alert.alert("Thành công", "Story đã được xóa vĩnh viễn!");
     } catch (error) {
-      console.log('Lỗi trong callDeleteStory:', error);
-      throw error;
+      Alert.alert("Lỗi", "Không thể xóa story. Vui lòng thử lại!");
     }
   };
 
@@ -155,7 +166,6 @@ const Story = () => {
       Alert.alert("Thông báo", "Bạn chỉ có thể xóa story của chính mình!");
       return;
     }
-
     Alert.alert(
       "Xác nhận",
       "Bạn có chắc muốn xóa vĩnh viễn story này?",
@@ -167,12 +177,9 @@ const Story = () => {
             try {
               const storyId = stories[currentIndex]._id;
               await callDeleteStory(storyId);
-              Alert.alert("Thành công", "Story đã được xóa vĩnh viễn!");
               navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: storyId });
-            }
-               catch (error) {
+            } catch (error) {
               Alert.alert("Lỗi", "Không thể xóa story. Vui lòng thử lại!");
-              console.error("Lỗi xóa story:", error);
             }
           },
           style: "destructive",
@@ -235,14 +242,14 @@ const Story = () => {
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-      {me === StoryView.ID_user?._id && (
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
-          <Icon name="trash-outline" size={24} color="white" />
-        </TouchableOpacity>
-      )}
-      <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
-        <Icon name="close-outline" size={30} color="white" />
-      </TouchableOpacity>
+            {me._id === StoryView.user?._id && (
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
+                <Icon name="trash-outline" size={24} color="white" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
+              <Icon name="close-outline" size={30} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -260,6 +267,15 @@ const Story = () => {
           >
             <Text style={styles.selectedEmoji}>{selectedEmoji}</Text>
           </Animated.View>
+        )}
+
+        {/* Lớp overlay và nút Play */}
+        {isFirstLoad && currentIndex === 0 && (
+          <View style={styles.overlay}>
+            <TouchableOpacity onPress={handlePlayButtonPress} style={styles.playButton}>
+              <Icon name="play-circle-outline" size={60} color="white" />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
     </TouchableWithoutFeedback>
@@ -336,14 +352,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
-  exitText: {
-    fontSize: 20,
-    color: 'white',
-  },
-  deleteText: {
-    fontSize: 20,
-    color: 'white',
-  },
   emojiContainer: {
     position: 'absolute',
     bottom: 100,
@@ -366,6 +374,22 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.6)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
+  },
+  // Styles cho overlay và nút Play
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Lớp phủ mờ
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 50,
+    padding: 10,
   },
 });
 
