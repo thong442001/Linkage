@@ -140,7 +140,7 @@ const PostDetail = (props) => {
   //call api chi tiet bai post
   const callAddComment = async (type, content) => {
     try {
-      if ((content == null && type === 'text') || post == null) {
+      if ((content == '' && type === 'text') || post == null) {
         console.log('thiếu ')
         return null;
       }

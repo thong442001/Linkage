@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   reactionBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFF',
-    padding: 5,
+    padding: 10,
     borderRadius: 20,
     marginBottom: 10,
   },
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     borderRadius: 20
   },
   reactionText: {
-    fontSize: 18,
+    fontSize: 10,
     color: '#000',
     alignSelf: 'flex-end',
   },
