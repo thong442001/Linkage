@@ -11,7 +11,7 @@ import {
     View,
     Image,
 } from 'react-native';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { launchImageLibrary } from 'react-native-image-picker';
 
