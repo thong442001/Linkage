@@ -35,13 +35,30 @@ const CallGroup = props => {
     return (
       <View style={styles.container}>
         <ZegoUIKitPrebuiltCall
-          appID={1765636844}
-          appSign={'af8071fe64fe73a7ae9dc9a4abb0787739588c433b2598d10804d983d65f319e'}
+          appID={471819427}
+          appSign={'e2e7c8d2bcaf34b0276a4a2f7d6e2064d82539e7c3c9fc940443f3fbd0ab732b'}
           userID={params?.id_user}
           userName={params?.MyUsername}
           callID={params?.ID_group}
           config={{
-            ...GROUP_VIDEO_CALL_CONFIG,
+            // Bật camera & mic khi vào phòng
+            turnOnCameraWhenJoining: params?.status,
+            turnOnMicrophoneWhenJoining: true,
+            useSpeakerWhenJoining:  params?.status,
+        
+            // Hiển thị avatar khi tắt camera
+            showUserAvatarInAudioMode: true,
+        
+            // Hiển thị tên người dùng trên video
+            showUserNameOnVideo: true,
+        
+            // Cấu hình thanh điều khiển
+            topMenuBarConfig: {
+              isVisible: true, // Hiển thị thanh menu trên
+            },
+            bottomMenuBarConfig: {
+              isVisible: true, // Hiển thị thanh menu dưới
+            },
             onCallEnd: (callID, reason, duration) => {
               navigation.navigate("Chat", { ID_group: params.ID_group })
             },
