@@ -145,74 +145,66 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
 const TabHome = () => {
   const me = useSelector(state => state.app.user);
   const [isTabVisible, setTabVisible] = useState(true);
-  const [shouldHide, setShouldHide] = useState(false); // Quản lý việc ẩn
+  const [shouldHide, setShouldHide] = useState(false);
 
-  // Khai báo Animated.Value cho tabAnimation, mặc định hiển thị (1)
   const tabAnimation = useRef(new Animated.Value(1)).current;
 
-  // Khi isTabVisible thay đổi, chạy animation
   useEffect(() => {
-    Animated.timing(tabAnimation, {
-      toValue: isTabVisible ? 1 : 0,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
+      Animated.timing(tabAnimation, {
+          toValue: isTabVisible ? 1 : 0,
+          duration: 400,
+          useNativeDriver: true,
+      }).start();
   }, [isTabVisible, tabAnimation]);
 
-  // Hàm điều khiển hiển thị Bottom Tab
   const handleScroll = (visible) => {
-    setTabVisible(visible);
+      setTabVisible(visible);
   };
-  //console.log(theme);
-  return (
-    <Tab.Navigator
-      initialRouteName='Home'
-      tabBar={(props) => <CustomTabBar {...props} tabAnimation={tabAnimation} />}
 
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: '#D17842',
-        tabBarActiveBackgroundColor: "white",
-        tabBarInactiveBackgroundColor: "white",
-        tabBarHideOnKeyboard: true,
-      })}
-    >
-      {Object.keys(oTab).map((item, index) => {
-        if (oTab[item].name === 'Profile') {
-          return (
-            <Tab.Screen
-              key={index}
-              name={oTab[item].name}
-              component={oTab[item].component}
-              options={{ title: "" }}
-              listeners={({ navigation }) => ({
-                tabPress: (e) => {
-                  e.preventDefault();
-                  navigation.navigate("Profile", { _id: me._id });
-                },
-              })}
-            />
-          );
-        } else {
-          return (
-            <Tab.Screen
-              key={index}
-              name={oTab[item].name}
-              component={oTab[item].component}
-              options={{ title: "" }}
-              initialParams={{ handleScroll }} // Truyền hàm handleScroll vào Home nếu cần
-            />
-          );
-        }
-      })}
-      {/* <Tab.Screen name="Home" component={Home} options={{ title: '' }} />
-      <Tab.Screen name="Search" component={Search} options={{ title: '' }} />
-      <Tab.Screen name="AddPostNavigation" component={AddPostNavigation} options={{ title: '' }} />
-      <Tab.Screen name="AddFriend" component={Welcome} options={{ title: '' }} />
-      <Tab.Screen name="Profile" component={Profile} options={{ title: '' }} /> */}
-    </Tab.Navigator >
-  )
-}
+  return (
+      <Tab.Navigator
+          initialRouteName="Home"
+          tabBar={(props) => <CustomTabBar {...props} tabAnimation={tabAnimation} />}
+          screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarActiveTintColor: '#D17842',
+              tabBarActiveBackgroundColor: "white",
+              tabBarInactiveBackgroundColor: "white",
+              tabBarHideOnKeyboard: true,
+          })}
+      >
+          {Object.keys(oTab).map((item, index) => {
+              if (oTab[item].name === 'Profile') {
+                  return (
+                      <Tab.Screen
+                          key={index}
+                          name={oTab[item].name}
+                          component={oTab[item].component}
+                          options={{ title: "" }}
+                          initialParams={{ handleScroll }} // Thêm handleScroll vào đây
+                          listeners={({ navigation }) => ({
+                              tabPress: (e) => {
+                                  e.preventDefault();
+                                  navigation.navigate("Profile", { _id: me._id, handleScroll }); // Truyền handleScroll khi điều hướng
+                              },
+                          })}
+                      />
+                  );
+              } else {
+                  return (
+                      <Tab.Screen
+                          key={index}
+                          name={oTab[item].name}
+                          component={oTab[item].component}
+                          options={{ title: "" }}
+                          initialParams={{ handleScroll }}
+                      />
+                  );
+              }
+          })}
+      </Tab.Navigator>
+  );
+};
 
 //stack home
 import Search from '../screens/home/Search';
@@ -248,6 +240,7 @@ import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-nati
 import Ringing from '../screens/call/Ringing';
 import Report from '../screens/report/Report';
 import ListTag from '../screens/home/ListTag';
+import pokemon from '../screens/game/pokemon/pokemon';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -284,7 +277,7 @@ const oStackHome = {
   Ringing: { name: 'Ringing', component: Ringing },
   Report: { name: 'Report', component: Report },
   ListTag: { name: 'ListTag', component: ListTag },
-  Profile: { name: 'Profile', component: Profile },
+  pokemon: { name: 'pokemon', component: pokemon },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

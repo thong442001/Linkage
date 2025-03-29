@@ -161,20 +161,27 @@ const Chat = (props) => {// cần ID_group (param)
         }
     };
 
+    // Lấy thông tin nhóm và tin nhắn cũ khi component mount
     useEffect(() => {
+        const fetchInitialData = async () => {
+            if (params?.ID_group) {
+                await getInforGroup(params.ID_group);
+                await getMessagesOld(params.ID_group);
+            }
+        };
 
-        // lấy name vs avt
-        getInforGroup(params?.ID_group);
-        // lấy messages old
-        getMessagesOld(params?.ID_group);
+        fetchInitialData();
 
         const focusListener = navigation.addListener('focus', () => {
-            // lấy name vs avt
-            getInforGroup(params?.ID_group);
-            // lấy messages old
-            getMessagesOld(params?.ID_group);
-
+            fetchInitialData();
         });
+
+        return () => {
+            focusListener();
+        };
+    }, [navigation, params?.ID_group]);
+
+    useEffect(() => {
 
         socket.emit("joinGroup", params?.ID_group);
 
@@ -300,10 +307,9 @@ const Chat = (props) => {// cần ID_group (param)
         socket.on("lang-nghe-moi-choi-game-3-la", (data) => {
             console.log("lang-nghe-moi-choi-game-3-la")
             //console.log(data);
-            if (data.sender == me._id && data.type == 'game3la' && group) {
-                //console.log("lang-nghe-moi-choi-game-3-la1")
-                navigation.navigate("ManHinhCho", { group: group, ID_message: data._id });
-            }
+            if (data.sender != me._id) return;
+            console.log("lang-nghe-moi-choi-game-3-la1")
+            navigation.navigate("ManHinhCho", { group: group, ID_message: data._id });
         });
 
         socket.on("lang-nghe-chap-nhan-choi-game-3-la", () => {
@@ -339,9 +345,8 @@ const Chat = (props) => {// cần ID_group (param)
             // bàn phím
             keyboardDidShowListener.remove();
             keyboardDidHideListener.remove();
-            focusListener;
         };
-    }, [navigation]);
+    }, [group, params?.ID_group, navigation, socket, me]);
 
     //infor group
     const getInforGroup = async (ID_group) => {
@@ -463,7 +468,7 @@ const Chat = (props) => {// cần ID_group (param)
     const onToGame3La = () => {
         const payload = {
             ID_group: params.ID_group,
-            me: me._id,
+            me: me._id.toString(),
         };
         socket.emit('moi-choi-game-3-la', payload);
         //navigation.navigate("ManHinhCho", { group: group });
@@ -474,7 +479,7 @@ const Chat = (props) => {// cần ID_group (param)
             ID_group: params.ID_group,
         };
         socket.emit('chap-nhan-choi-game-3-la', payload);
-        navigation.navigate('InGame3La');
+        navigation.navigate('InGame3La', { group: group });
     };
     const onHuyGame3la = (ID_message) => {
         const payload = {

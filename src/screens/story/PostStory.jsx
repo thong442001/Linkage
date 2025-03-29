@@ -6,77 +6,56 @@ import {
   ActivityIndicator,
   Alert
 } from "react-native";
+import Video from 'react-native-video'; // Import Video từ react-native-video
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from "axios";
 import { oStackHome } from "../../navigations/HomeNavigation";
+
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
 const UPLOAD_PRESET = 'ml_default';
 
 const PostStory = ({ navigation }) => {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [mediaType, setMediaType] = useState(null); // 'photo' or 'video'
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    onOpenGallery();
+    openMediaPicker();
   }, []);
 
-  // const onOpenGallery = async () => {
-  //   const options = {
-  //     mediaType: 'photo',
-  //     quality: 1,
-  //     selectionLimit: 1,
-  //   };
-
-  //   launchImageLibrary(options, async (response) => {
-  //     if (response.didCancel) {
-  //       console.log("Đã hủy chọn ảnh");
-  //       navigation.goBack(); // Quay lại nếu không chọn ảnh
-  //     } else if (response.errorMessage) {
-  //       Alert.alert("Lỗi", "Không thể mở thư viện ảnh!");
-  //       navigation.goBack();
-  //     } else {
-  //       const selectedFile = response.assets[0];
-  //       setSelectedImage(selectedFile.uri);
-  //       await uploadToCloudinary(selectedFile.uri);
-  //     }
-  //   });
-  // };
-
-  const onOpenGallery = () => {
+  const openMediaPicker = () => {
     const options = {
-      mediaType: "photo",
+      mediaType: 'mixed', // Allows both photos and videos
       quality: 1,
-      includeBase64: true, // Một số thiết bị hiển thị nút chụp ảnh
+      includeBase64: false, // Remove base64 to handle videos better
+      videoQuality: 'high',
+      durationLimit: 30, // Limit video duration to 30 seconds
     };
 
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
-        console.log("Đã hủy chọn ảnh");
+        console.log("Đã hủy chọn media");
+        navigation.goBack();
       } else if (response.errorMessage) {
-        Alert.alert("Lỗi", "Không thể mở thư viện ảnh!");
+        Alert.alert("Lỗi", "Không thể mở thư viện!");
       } else {
         const selectedFile = response.assets[0];
-        setSelectedImage(selectedFile.uri);
-        postStory(selectedFile.uri);
+        // Determine if it's a video or photo based on file type
+        const isVideo = selectedFile.type.includes('video');
+        setMediaType(isVideo ? 'video' : 'photo');
+        setSelectedMedia(selectedFile.uri);
+        uploadToCloudinary(selectedFile.uri, isVideo ? 'video' : 'photo');
       }
     });
   };
 
-
-  const postStory = (imageUrl) => {
-    navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
-  }
-
-
-
-
-  const uploadToCloudinary = async (imageUri) => {
+  const uploadToCloudinary = async (mediaUri, type) => {
     setLoading(true);
     const formData = new FormData();
     formData.append("file", {
-      uri: imageUri,
-      type: "image/jpeg",
-      name: "upload.jpg",
+      uri: mediaUri,
+      type: type === 'photo' ? "image/jpeg" : "video/mp4",
+      name: type === 'photo' ? "upload.jpg" : "upload.mp4",
     });
     formData.append("upload_preset", UPLOAD_PRESET);
 
@@ -84,25 +63,40 @@ const PostStory = ({ navigation }) => {
       const response = await axios.post(CLOUDINARY_URL, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const imageUrl = response.data.secure_url;
-      console.log("Ảnh đã tải lên:", imageUrl);
-      postStory(imageUrl);
+      const mediaUrl = response.data.secure_url;
+      console.log(`${type === 'photo' ? 'Ảnh' : 'Video'} đã tải lên:`, mediaUrl);
+      postStory(mediaUrl, type);
     } catch (error) {
-      Alert.alert("Lỗi", "Không thể tải ảnh lên, vui lòng thử lại!");
+      Alert.alert("Lỗi", `Không thể tải ${type === 'photo' ? 'ảnh' : 'video'} lên, vui lòng thử lại!`);
       console.error("Lỗi upload:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // const postStory = (imageUrl) => {
-  //   navigation.replace(oStackHome.Story.name, { newStory: imageUrl });
-  // };
+  const postStory = (mediaUrl, type) => {
+    navigation.replace(oStackHome.Story.name, { 
+      newStory: mediaUrl,
+      mediaType: type 
+    });
+  };
 
   return (
     <View style={styles.container}>
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
-      {selectedImage && !loading && <Image source={{ uri: selectedImage }} style={styles.image} />}
+      
+      {selectedMedia && !loading && (
+        mediaType === 'photo' ? (
+          <Image source={{ uri: selectedMedia }} style={styles.image} />
+        ) : (
+          <Video
+            source={{ uri: selectedMedia }}
+            style={styles.video}
+            controls={true}
+            resizeMode="contain"
+          />
+        )
+      )}
     </View>
   );
 }
@@ -114,6 +108,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   image: {
+    width: 300,
+    height: 400,
+    marginVertical: 20,
+  },
+  video: {
     width: 300,
     height: 400,
     marginVertical: 20,

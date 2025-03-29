@@ -13,21 +13,20 @@ export default function AudienceScreen(props) {
   const prebuiltRef = useRef();
   const [isHostOnline, setIsHostOnline] = useState(false);
 
+
+  console.log("du lieu nguoi xem:" + "liveID: "+ liveID + "userName" + userName + "userID" + userID)
   useEffect(() => {
     const liveRef = database().ref(`/liveSessions/${liveID}`);
-
     liveRef.on('value', snapshot => {
       const sessionData = snapshot.val();
+      console.log('Firebase data for liveID', liveID, ':', sessionData);
       if (sessionData && sessionData.isHostOnline) {
-        setIsHostOnline(true);  // Host đang online
+        setIsHostOnline(true);
       } else {
-        setIsHostOnline(false);  // Host offline hoặc phiên live đã kết thúc
+        setIsHostOnline(false);
       }
     });
-
-    return () => {
-      liveRef.off();
-    };
+    return () => liveRef.off();
   }, [liveID]);
 
   // Hiển thị dialog xác nhận thoát

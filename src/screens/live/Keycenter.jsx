@@ -1,6 +1,6 @@
 const Keycenter = {
-    appID : 900657744,
-    appSign: '71e43d4e317b788b450bcb97edb6d7b19ad9abc80a7fbcfe1a4e1b9be06d2c3f'
+    appID : 420104675,
+    appSign: '6c721bf85fc5306243afa358e0dbdfb118d493866dbe04eb86cb606433d076ca'
 };
 
 export default Keycenter;

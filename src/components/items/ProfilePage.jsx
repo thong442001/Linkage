@@ -595,7 +595,7 @@ const PostItem = memo(({
                                                         {post.ID_post_shared.tags.length > 1 && (
                                                             <>
                                                                 <Text style={{ color: 'gray' }}> và </Text>
-                                                                <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })}  style={[styles.name]}>
+                                                                <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })} style={[styles.name]}>
                                                                     {post.ID_post_shared.tags.length - 1} người khác
                                                                 </Text>
                                                             </>
@@ -1218,14 +1218,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         flexDirection: "row",
         backgroundColor: "#FFFF",
-        padding: 10,
+        padding: 5,
         borderRadius: 20,
     },
     reactionButton: {
         marginHorizontal: 5,
     },
     reactionText: {
-        fontSize: 15,
+        fontSize: 18,
         color: "#000",
         alignSelf: 'flex-end',
     },

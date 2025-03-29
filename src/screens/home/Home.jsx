@@ -1,22 +1,25 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Animated, FlatList, View, RefreshControl,Dimensions  } from 'react-native';
+import { Animated, FlatList, View, RefreshControl, Dimensions } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import HomeS from '../../styles/screens/home/HomeS';
 import HomeLoading from '../../utils/skeleton_loading/HomeLoading';
 import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 import ProfilePage from '../../components/items/ProfilePage';
-import { 
-  getAllPostsInHome, 
+import { useRoute } from '@react-navigation/native';
+import {
+  getAllPostsInHome,
   changeDestroyPost,
   getAllReason
- } from '../../rtk/API';
+} from '../../rtk/API';
 import database from '@react-native-firebase/database';
 import HomeHeader from './HomeHeader';
 import HomeStories from './HomeStories';
 const { height } = Dimensions.get('window');
+const HEADER_HEIGHT = height * 0.1;
 
 const Home = props => {
   const { navigation } = props;
+  const route = useRoute(); // Thêm useRoute để nhận params
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
@@ -27,11 +30,12 @@ const Home = props => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-  const HEADER_HEIGHT = height * 0.1;
+
   const previousScrollY = useRef(0);
 
+
   // Animated value
-  const scrollY = useRef(new Animated.Value(0)).current; 
+  const scrollY = useRef(new Animated.Value(0)).current;
   const clampedScrollY = Animated.diffClamp(scrollY, 0, HEADER_HEIGHT);
   const headerTranslate = clampedScrollY.interpolate({
     inputRange: [0, HEADER_HEIGHT],
@@ -43,24 +47,19 @@ const Home = props => {
     const timer = setInterval(() => {
       setCurrentTime(Date.now());
     }, 60000); // Cập nhật mỗi phút
-  
+
     return () => clearInterval(timer);
   }, [refreshing]); // Thêm refreshing vào dependencies
-  
-
-  
   useEffect(() => {
-    const listenerId = scrollY.addListener(({ value }) => {
-    });
+    const listenerId = scrollY.addListener(({ value }) => { });
     return () => {
       scrollY.removeListener(listenerId);
     };
   }, [scrollY]);
 
-
   useEffect(() => {
     let previousScrollY = 0;
-  
+
     const listenerId = scrollY.addListener(({ value }) => {
       if (value - previousScrollY > 0) {
         // Cuộn xuống => Ẩn Bottom Tab
@@ -71,14 +70,14 @@ const Home = props => {
       }
       previousScrollY = value; // Cập nhật vị trí cuộn trước đó
     });
-  
+
     return () => {
       scrollY.removeListener(listenerId);
     };
   }, [scrollY]);
-  
-  
-  
+
+
+
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
     const onValueChange = liveSessionsRef.on('value', snapshot => {
@@ -88,22 +87,34 @@ const Home = props => {
     return () => liveSessionsRef.off('value', onValueChange);
   }, []);
 
-  
+  // Gọi lại API khi nhận được isDeleted: true từ StoryViewer
+  useEffect(() => {
+    if (route.params?.isDeleted && me?._id) {
+      console.log('Story deleted, refreshing data...');
+      setTimeout(() => {
+        callGetAllPostsInHome(me._id);
+      }, 1000); // Chờ 1 giây
+      navigation.setParams({ isDeleted: undefined });
+    }
+  }, [route.params?.isDeleted, me?._id]);
+
   const callGetAllPostsInHome = async ID_user => {
     try {
-      // Nếu đang làm mới thì không set loading lại để tránh hiển thị skeleton loading
-      if (!refreshing) {
-        setloading(true);
-      }
-      await dispatch(getAllPostsInHome({ me: ID_user, token }))
+      if (!refreshing) setloading(true);
+      await dispatch(getAllPostsInHome({ me: ID_user, token, timestamp: Date.now() }))
         .unwrap()
         .then(response => {
-          setPosts(response.posts);
-          setStories(response.stories);
+          console.log('Stories sau khi xóa:', response.stories);
+          setPosts(response.posts || []);
+          setStories(response.stories || []);
+          setLiveSessions([]);
           setloading(false);
         })
         .catch(error => {
           console.log('Error getAllPostsInHome:: ', error);
+          setPosts([]);
+          setStories([]);
+          setLiveSessions([]);
           setloading(false);
         });
     } catch (error) {
@@ -112,33 +123,24 @@ const Home = props => {
     }
   };
 
-
   useEffect(() => {
     callGetAllPostsInHome(me._id);
   }, [me._id]);
-  
+
   // Hàm xử lý làm mới khi kéo xuống
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setCurrentTime(Date.now()); // Cập nhật thời gian ngay khi làm mới
+    setCurrentTime(Date.now());
     callGetAllPostsInHome(me._id).finally(() => {
       setRefreshing(false);
     });
   }, [me._id]);
-
-  // Có thể bỏ useFocusEffect nếu bạn chỉ muốn cập nhật khi kéo làm mới
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     callGetAllPostsInHome(me._id);
-  //   }, [])
-  // );
 
   const callChangeDestroyPost = async ID_post => {
     try {
       await dispatch(changeDestroyPost({ _id: ID_post }))
         .unwrap()
         .then(response => {
-          setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
         })
         .catch(error => {
           console.log('Lỗi khi xóa bài viết:', error);
@@ -190,6 +192,8 @@ const Home = props => {
     );
   };
 
+
+
   const renderPosts = useCallback(
     ({ item }) => (
       <ProfilePage
@@ -201,15 +205,15 @@ const Home = props => {
         deletPostReaction={deletPostReaction}
       />
     ),
-    [posts, currentTime, me._id]
+    [me._id, currentTime] // Chỉ phụ thuộc vào me._id và currentTime
   );
 
   return (
-    <View style={HomeS.container}>
+    <>
       {loading && !refreshing ? (
         <HomeLoading />
       ) : (
-        <>
+        <View style={HomeS.container}>
           <HomeHeader navigation={navigation} me={me} headerTranslate={headerTranslate} />
           <Animated.FlatList
             data={posts}
@@ -236,15 +240,12 @@ const Home = props => {
                 useNativeDriver: true,
                 listener: (event) => {
                   const currentScrollY = event.nativeEvent.contentOffset.y;
-                  // Nếu cuộn quá thấp thì hiển thị bottom tab
                   if (currentScrollY < 50) {
                     props.route.params.handleScroll(true);
                   } else {
                     if (currentScrollY - previousScrollY.current > 0) {
-                      // Cuộn xuống => Ẩn bottom tab
                       props.route.params.handleScroll(false);
                     } else if (currentScrollY - previousScrollY.current < 0) {
-                      // Cuộn lên => Hiện bottom tab
                       props.route.params.handleScroll(true);
                     }
                   }
@@ -252,12 +253,11 @@ const Home = props => {
                 },
               }
             )}
-            
             scrollEventThrottle={16}
           />
-        </>
+        </View>
       )}
-    </View>
+    </>
   );
 };
 

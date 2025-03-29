@@ -84,7 +84,7 @@ const ManHinhCho = ({ route, navigation }) => {
       ringtoneRef.current.release();
     }
 
-    navigation.navigate('InGame3La');
+    navigation.navigate('InGame3La',{group: group});
   };
 
   // Xử lý khi chấp nhận cuộc gọi

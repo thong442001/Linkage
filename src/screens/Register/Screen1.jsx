@@ -18,32 +18,52 @@ const Screen1 = (props) => {
     const [showErrorLastName, setShowErrorLastName] = useState(false);
     const [showErrorDate, setShowErrorDate] = useState(false);
 
+    // Hàm validate tên: chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
+    const validateName = (name) => {
+        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]+$/; // Chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
+        return regex.test(name);
+    };
 
     const validateForm = () => {
         let isValid = true;
-        const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/;
 
-        if (!first_name.trim() || !first_name.match(nameRegex)) {
+        // Kiểm tra first_name: không để trống và chỉ chứa ký tự hợp lệ
+        if (!first_name.trim() || !validateName(first_name)) {
             setShowErrorFirstName(true);
             isValid = false;
+            Alert.alert('Thông báo', "Họ không hợp lệ! Chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt.");
         } else {
             setShowErrorFirstName(false);
         }
 
-        if (!last_name.trim() || !last_name.match(nameRegex)) {
+        // Kiểm tra last_name: không để trống và chỉ chứa ký tự hợp lệ
+        if (!last_name.trim() || !validateName(last_name)) {
             setShowErrorLastName(true);
             isValid = false;
+            Alert.alert('Thông báo', "Tên không hợp lệ! Chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt.");
         } else {
             setShowErrorLastName(false);
         }
 
+        // Kiểm tra tổng độ dài của first_name và last_name
+        const totalLength = first_name.trim().length + last_name.trim().length;
+        if (totalLength > 30) {
+            setShowErrorFirstName(true);
+            setShowErrorLastName(true);
+            isValid = false;
+            Alert.alert('Thông báo', "Tổng độ dài của họ và tên không được vượt quá 30 ký tự.");
+        }
+
+        // Kiểm tra ngày sinh
         if (!dateOfBirth.trim()) {
             setShowErrorDate(true);
             isValid = false;
+            Alert.alert('Thông báo', "Vui lòng chọn ngày sinh.");
         } else {
             setShowErrorDate(false);
         }
 
+        // Kiểm tra tuổi
         const today = new Date();
         const birthDate = new Date(date);
         const age = today.getFullYear() - birthDate.getFullYear();
@@ -53,11 +73,10 @@ const Screen1 = (props) => {
         if (age < 12 || (age === 12 && monthDiff < 0) || (age === 12 && monthDiff === 0 && dayDiff < 0)) {
             setShowErrorDate(true);
             isValid = false;
+            Alert.alert('Thông báo', "Bạn phải từ 12 tuổi trở lên để đăng ký.");
         } else {
             setShowErrorDate(false);
         }
-
-
 
         return isValid;
     };
@@ -100,7 +119,10 @@ const Screen1 = (props) => {
                     value={first_name}
                     onChangeText={(text) => {
                         setFirst_name(text);
-                        setShowErrorFirstName(!text.trim().match(/^[A-Za-zÀ-ỹ\s]+$/));
+                        // Kiểm tra ngay lập tức khi người dùng nhập
+                        const totalLength = text.trim().length + last_name.trim().length;
+                        setShowErrorFirstName(!text.trim() || !validateName(text) || totalLength > 30);
+                        setShowErrorLastName(!last_name.trim() || !validateName(last_name) || totalLength > 30);
                     }}
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Họ"
@@ -111,7 +133,10 @@ const Screen1 = (props) => {
                     value={last_name}
                     onChangeText={(text) => {
                         setLast_name(text);
-                        setShowErrorLastName(!text.trim().match(/^[A-Za-zÀ-ỹ\s]+$/));
+                        // Kiểm tra ngay lập tức khi người dùng nhập
+                        const totalLength = first_name.trim().length + text.trim().length;
+                        setShowErrorFirstName(!first_name.trim() || !validateName(first_name) || totalLength > 30);
+                        setShowErrorLastName(!text.trim() || !validateName(text) || totalLength > 30);
                     }}
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Tên"
@@ -154,13 +179,13 @@ const Screen1 = (props) => {
 
                     if (age < 12 || (age === 12 && monthDiff < 0) || (age === 12 && monthDiff === 0 && dayDiff < 0)) {
                         setShowErrorDate(true);
+                        Alert.alert('Thông báo', "Bạn phải từ 12 tuổi trở lên để đăng ký.");
                     } else {
                         setShowErrorDate(false);
                     }
                 }}
                 onCancel={() => setOpen(false)}
             />
-
 
             <Text style={styles.label}>Giới tính của bạn là gì?</Text>
             <View style={styles.radioGroup}>
@@ -210,7 +235,7 @@ const styles = StyleSheet.create({
         borderRadius: width * 0.02,
         padding: width * 0.03,
         backgroundColor: '#fff',
-        color: 'black'
+        color: 'black',
     },
     inputNameUserError: {
         flex: 1,
@@ -228,7 +253,7 @@ const styles = StyleSheet.create({
         padding: width * 0.03,
         backgroundColor: '#fff',
         marginVertical: height * 0.02,
-        color: 'black'
+        color: 'black',
     },
     inputDateError: {
         borderWidth: 1,
@@ -248,7 +273,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 2,
     },
-
     radioContainer: {
         flexDirection: 'row',
         alignItems: 'center',
