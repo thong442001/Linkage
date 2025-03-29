@@ -53,7 +53,7 @@ const ItemNotification = ({data}) => {
 
     // return () => clearInterval(interval);
   }, []);
-  
+  console.log('data', data);
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
@@ -239,6 +239,14 @@ const ItemNotification = ({data}) => {
       setIcon('chatbubble-ellipses')
       setbackground('green')
     }
+    if(data.type=='Mời chơi game 3 lá'){
+      const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
+      setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
+      setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
+      setIcon('game-controller-outline')
+      setbackground('#007bff')
+    }
+
 
   }, []);
 
