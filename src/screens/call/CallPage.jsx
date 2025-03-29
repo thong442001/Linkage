@@ -35,8 +35,8 @@ console.log("avatar",params.MyAvatar);
     return (
       <View style={styles.container}>
         <ZegoUIKitPrebuiltCall
-          appID={1765636844}
-          appSign={'af8071fe64fe73a7ae9dc9a4abb0787739588c433b2598d10804d983d65f319e'}
+          appID={471819427}
+          appSign={'e2e7c8d2bcaf34b0276a4a2f7d6e2064d82539e7c3c9fc940443f3fbd0ab732b'}
           userID={params?.id_user}
           userName={params?.MyUsername}
           callID={params?.ID_group}
