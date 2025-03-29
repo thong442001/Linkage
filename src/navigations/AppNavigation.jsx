@@ -111,6 +111,27 @@ const AppNavigation = () => {
     }
   };
 
+  const onLogoutAndNavigate = () => {
+    dispatch(setNoti_token({ ID_user: user._id, fcmToken: fcmToken }))
+      .unwrap()
+      .then(response => {
+        console.log('✅ Đã gửi token thông báo trước khi logout:', response);
+        dispatch(logout()); // Xóa user trong Redux
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }], // Điều hướng về màn hình Login
+        });
+      })
+      .catch(error => {
+        console.log('❌ Lỗi khi gửi token thông báo:', error);
+        dispatch(logout()); // Vẫn logout dù có lỗi
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }], // Điều hướng về màn hình Login
+        });
+      });
+  };
+
   const onLogout = () => {
     dispatch(setNoti_token({ ID_user: user._id, fcmToken: fcmToken }))
       .unwrap()
@@ -523,24 +544,23 @@ const AppNavigation = () => {
         break;
     }
   };
-
   const showNotification = async (notification) => {
     try {
       const channelId = getChannelId(notification?.type);
       const isEnabled = await getNotificationPreference(channelId);
-
+  
       if (!isEnabled) {
         console.log(`🔕 Thông báo bị tắt cho channel: ${channelId}`);
         return;
       }
-
+  
       const formattedData = {};
       Object.keys(notification).forEach(key => {
         formattedData[key] = typeof notification[key] === 'string'
           ? notification[key]
-          : JSON.stringify(notification[key]); // ✅ Chỉ stringify nếu không phải string
+          : JSON.stringify(notification[key]);
       });
-
+  
       await notifee.displayNotification({
         title: notification?.title || 'Thông báo',
         body: generateNotificationContent(notification, user),
@@ -549,28 +569,12 @@ const AppNavigation = () => {
           channelId: getChannelId(notification?.type),
           smallIcon: 'ic_launcher',
         },
-
       });
-      // QThong
-      if (notification?.type == 'Tài khoản bị khóa') {
-        dispatch(setNoti_token({ ID_user: user._id, fcmToken: fcmToken }))
-          .unwrap()
-          .then(response => {
-            //console.log(response);
-            // xóa user trong redux
-            dispatch(logout());
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      }
-
-
+  
     } catch (error) {
       console.error('❌ Lỗi khi hiển thị thông báo:', error);
     }
   };
-
 
   // tạo token nè
   useEffect(() => {
@@ -591,60 +595,74 @@ const AppNavigation = () => {
   }, []);
 
   useEffect(() => {
-    // Khi app đang mở
-    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+   // Khi app đang mở
+  const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+    try {
+      console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
+
+      if (!remoteMessage?.data?.notification) {
+        console.warn('⚠ Không có dữ liệu notification');
+        return;
+      }
+
+      let notification;
       try {
-        console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
-
-        if (!remoteMessage?.data?.notification) {
-          console.warn('⚠ Không có dữ liệu notification');
-          return;
-        }
-
-        // Kiểm tra JSON hợp lệ trước khi parse
-        let notification;
-        try {
-          notification = JSON.parse(remoteMessage.data.notification);
-          // navigateToScreen(notification);
-        } catch (error) {
-          console.error('❌ Lỗi khi parse JSON notification:', error);
-          return;
-        }
-
-        console.log('✅ Đã parse notification:', notification);
-        console.log('🔍 Loại thông báo:', notification?.type);
-
-        // Gọi hàm hiển thị thông báo
-        await showNotification(notification);
-
+        notification = JSON.parse(remoteMessage.data.notification);
       } catch (error) {
-        console.error('❌ Lỗi khi xử lý thông báo:', error);
+        console.error('❌ Lỗi khi parse JSON notification:', error);
+        return;
       }
-    });
 
-    // Khi app chạy nền và người dùng nhấn vào thông báo
-    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
-      remoteMessage => {
-        console.log(
-          '🔔 Người dùng nhấn vào thông báo khi app chạy nền:',
-          remoteMessage,
-        );
-      },
-    );
+      console.log('✅ Đã parse notification:', notification);
 
-    // Khi app bị kill và mở từ thông báo
-    messaging().getInitialNotification().then(remoteMessage => {
-      if (remoteMessage?.data?.notification) {
-        let notification;
-        try {
-          notification = JSON.parse(remoteMessage.data.notification);
-          console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
-          // navigateToScreen(notification);
-        } catch (error) {
-          console.error('❌ Lỗi khi parse JSON notification:', error);
+      // Nếu thông báo là "Tài khoản bị khóa"
+      if (notification?.type === 'Tài khoản bị khóa') {
+        console.log('🔒 Tài khoản bị khóa - Đăng xuất và chuyển về trang login');
+        onLogoutAndNavigate(); 
+        return; 
+      }
+
+      // Hiển thị thông báo cho các loại khác
+      await showNotification(notification);
+
+    } catch (error) {
+      console.error('❌ Lỗi khi xử lý thông báo:', error);
+    }
+  });
+// Khi app chạy nền và người dùng nhấn vào thông báo
+const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
+  remoteMessage => {
+    console.log('🔔 Người dùng nhấn vào thông báo khi app chạy nền:', remoteMessage);
+    if (remoteMessage?.data?.notification) {
+      let notification;
+      try {
+        notification = JSON.parse(remoteMessage.data.notification);
+        if (notification?.type === 'Tài khoản bị khóa') {
+          console.log('🔒 Tài khoản bị khóa khi nhấn thông báo - Đăng xuất');
+          onLogout();
         }
+      } catch (error) {
+        console.error('❌ Lỗi khi parse JSON notification:', error);
       }
-    });
+    }
+  },
+);
+ // Khi app bị kill và mở từ thông báo
+ messaging().getInitialNotification().then(remoteMessage => {
+  if (remoteMessage?.data?.notification) {
+    let notification;
+    try {
+      notification = JSON.parse(remoteMessage.data.notification);
+      console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
+      if (notification?.type === 'Tài khoản bị khóa') {
+        console.log('🔒 Tài khoản bị khóa khi mở app - Đăng xuất');
+        onLogout();
+      }
+    } catch (error) {
+      console.error('❌ Lỗi khi parse JSON notification:', error);
+    }
+  }
+});
 
     const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
@@ -671,7 +689,7 @@ const AppNavigation = () => {
       unsubscribeForeground();
       // initialNotification();
     };
-  }, []);
+  }, [onLogoutAndNavigate]);
 
   return isSplashVisible ? (
     <Welcome />
