@@ -242,6 +242,7 @@ import Report from '../screens/report/Report';
 import ListTag from '../screens/home/ListTag';
 import pokemon from '../screens/game/pokemon/pokemon';
 import MapScreen from '../screens/map/MapScreen';
+import TetrisGame from '../screens/game/tetris/TetrisGame';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -280,6 +281,7 @@ const oStackHome = {
   ListTag: { name: 'ListTag', component: ListTag },
   pokemon: { name: 'pokemon', component: pokemon },
   MapScreen: { name: 'MapScreen', component: MapScreen },
+  TetrisGame: { name: 'TetrisGame', component: TetrisGame },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
