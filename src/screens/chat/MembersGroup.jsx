@@ -72,7 +72,7 @@ const MembersGroup = (props) => {// cần ID_group (param)
             await dispatch(deleteMember(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    //console.log(ID_user)
+                    console.log(ID_user)
                     // Emit sự kiện "kick_user" để cập nhật danh sách nhóm
                     socket.emit("kick_user", { ID_group: params.ID_group, ID_user: ID_user });
                     // load lại 

@@ -69,7 +69,6 @@ const SettingChat = (props) => { // cần ID_group (param)
             await dispatch(deleteMember(paramsAPI))
                 .unwrap()
                 .then((response) => {
-
                     // bakc HomeChat
                     navigation.navigate("HomeChat");
                 })
