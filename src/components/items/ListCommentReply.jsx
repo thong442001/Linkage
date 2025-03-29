@@ -18,7 +18,7 @@ import {
     deleteComment_reaction, // api delete reaction
 } from '../../rtk/API';
 import Svg, { Path } from 'react-native-svg';
-const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
+const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout }) => {
 
     const dispatch = useDispatch()
     const reactions = useSelector(state => state.app.reactions);
@@ -36,6 +36,42 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
         right: 0,
     }); // Vị trí của menu
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
+
+    const [replyHeights, setReplyHeights] = useState([])
+
+    const handleLayout = (index, event) => {
+        const { height } = event.nativeEvent.layout;
+        setReplyHeights(prev => {
+            const newHeights = [...prev];
+            newHeights[index] = height;
+            return newHeights;
+        });
+    };
+
+
+    // // Tính chiều cao đến reply cuối cùng (không bao gồm chiều cao của reply cuối cùng)
+    // const heightToLastReply = replyHeights
+    //     .slice(0, -1) // Lấy tất cả chiều cao trừ reply cuối cùng
+    //     .reduce((sum, height) => sum + (height || 0), 0);
+
+    // // Cộng thêm khoảng cách đến đường cong của reply cuối cùng (y=30 trong Svg)
+    // const adjustedHeight = replys.length > 0 ? heightToLastReply + 30 : 0;
+
+    const baseHeight = 0; // Chiều cao của đường kẻ cho reply đầu tiên
+    const extraHeight = 110; // Khoảng cách tăng thêm cho mỗi reply sau đó
+    const totalHeight = replyHeights.reduce((sum, height) => sum + (height || 0), 0) + baseHeight ;
+
+    const renderReply = useCallback(({ item, index }) => (
+        <ListCommentReply
+            comment={item}
+            onReply={(e) => onReply(e)}
+            isReply={true}
+            level={2}
+            index={index} // Truyền index vào
+            onLayout={handleLayout} // Truyền handleLayout vào
+        />
+    ), [onReply, handleLayout]);
+
 
     useEffect(() => {
         const updateDiff = () => {
@@ -204,18 +240,15 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
         setComment_reactions(updatedReactions)
     };
 
-    const renderReply = useCallback(({ item }) => (
-        <ListCommentReply comment={item} onReply={(e) => onReply(e)} isReply={true} level={level + 1} />
-    ), [onReply]);
 
-    const baseHeight = 30; // Chiều cao của đường kẻ cho reply đầu tiên
-    const extraHeight = 110; // Khoảng cách tăng thêm cho mỗi reply sau đó
-    const totalHeight = baseHeight + (replys.length - 1) * extraHeight;
 
     return (
-        <View style={[styles.container, level > 0 && styles.replyContainer]}>
-            <View style={{ flexDirection: 'row', marginTop: 10, maxWidth: "78%", paddingLeft: level === 1 ? 20 : level === 2 ? 80 : 130 }}>
-                <View style={{ flexDirection: 'row' }}>
+        <View style={[styles.container, level > 0 && styles.replyContainer]}
+            onLayout={typeof onLayout === 'function' ? (event) => onLayout(index, event) : undefined}
+        >
+            <View style={{ flexDirection: 'row', marginTop: 10, maxWidth: "78%", paddingLeft: level === 1 ? 20 : level === 2 ? 80 : 130 }}
+            >
+                <View style={{ flexDirection: 'row' }}                >
                     {/* Đường kẻ vuông góc dưới bên trái */}
                     {
                         level <= 2 && (
@@ -245,19 +278,10 @@ const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
                         )
                     }
 
-
-                    {/* Avatar */}
                     <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                         <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
                         {/* Kiểm tra nếu có replys thì mới hiển thị đường kẻ */}
-                        {replys.length > 0 && level <= 2 && (
-                            <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
-                                <Svg height={totalHeight} width="20">
-                                    <Path d={`M 2 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
-                                </Svg>
-                            </View>
-                        )}
-                        {replys.length > 0 && level >= 3 && (
+                        {replys.length > 0 && level == 1 && (
                             <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
                                 <Svg height={totalHeight} width="20">
                                     <Path d={`M 2 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
