@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Video from 'react-native-video';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { deletePost } from '../../rtk/API';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
@@ -24,6 +24,9 @@ const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
+  console.log('StoryView:', StoryView);
+  console.log('me:', me);
+  const me = useSelector(state => state.app.user)
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -232,7 +235,7 @@ const Story = () => {
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-      {currentUserId === StoryView.user._id && (
+      {me === StoryView.ID_user?._id && (
         <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
           <Icon name="trash-outline" size={24} color="white" />
         </TouchableOpacity>

@@ -30,7 +30,6 @@ export default function FriendAddGroup({ item, onToggle, selectedUsers }) {
       setAvatar(item.ID_userA.avatar);
     }
 
-
   }, []);
 
 

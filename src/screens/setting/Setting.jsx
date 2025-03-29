@@ -73,14 +73,15 @@ const Setting = props => {
       icon: 'lock-closed',
     },
     { id: '3', title: 'Thùng rác', screen: 'Trash', icon: 'trash' },
+    { id: '4', title: 'Game', screen: 'pokemon', icon: 'game-controller' },
     {
-      id: '4',
+      id: '5',
       title: 'Đăng xuất',
       action: onLogout,
       icon: 'exit-outline',
       color: 'red',
     },
-    { id: '5', title: 'Game', screen: 'pokemon', icon: 'game-controller' },
+   
   ];
 
   //tắt thông báo
