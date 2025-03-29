@@ -10,6 +10,7 @@ import Video from 'react-native-video'; // Import Video từ react-native-video
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from "axios";
 import { oStackHome } from "../../navigations/HomeNavigation";
+import LoadingTron from "../../utils/animation/loadingTron/LoadingTron";
 
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
 const UPLOAD_PRESET = 'ml_default';
@@ -83,7 +84,7 @@ const PostStory = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      {loading && <LoadingTron />}
       
       {selectedMedia && !loading && (
         mediaType === 'photo' ? (

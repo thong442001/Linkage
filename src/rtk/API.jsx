@@ -621,6 +621,20 @@ export const editPasswordOfUser = createAsyncThunk(
   }
 );
 
+// editBioOfUser
+export const editBioOfUser = createAsyncThunk(
+  'user/editBioOfUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/editBioOfUser', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 
 // Qthong

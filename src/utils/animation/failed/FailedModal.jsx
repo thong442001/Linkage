@@ -7,13 +7,15 @@ const FailedModal = ({ visible, message }) => {
   return (
     <Modal transparent={true} animationType="fade" visible={visible}>
       <View style={styles.modalBackground}>
-        <LottieView
-          source={require('./failed.json')} 
-          autoPlay
-          loop={false} 
-          style={styles.successAnimation}
-        />
-        <Text style={styles.successMessage}>{message}</Text>
+        <View style={styles.messageContainer}>
+          <LottieView     
+            source={require('./failed.json')} 
+            autoPlay
+            loop={false} 
+            style={styles.successAnimation}
+          />
+          <Text style={styles.successMessage}>{message}</Text>
+        </View>
       </View>
     </Modal>
   );
