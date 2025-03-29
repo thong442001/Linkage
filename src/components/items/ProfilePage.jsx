@@ -472,7 +472,9 @@ const PostItem = memo(({
         } catch (error) {
             console.log(error)
         }
-    }
+        }
+
+    
 
     return (
         <View style={styles.postContainer}>
@@ -764,7 +766,10 @@ const PostItem = memo(({
                         hasMedia && renderMediaGrid(post.medias)
                     )
             }
-            <View style={styles.footer}>
+
+            
+            {!post._destroy && (
+                <View style={styles.footer}>
                 {/* reactions of post */}
                 {post.post_reactions.length > 0 ? (
                     <View style={styles.footer2}>
@@ -798,6 +803,7 @@ const PostItem = memo(({
                     )}
                 </View>
             </View>
+            )}
 
             {
                 !post._destroy &&

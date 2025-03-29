@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useRef, useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Pressable, BackHandler, Text } from 'react-native';
+import { View, Pressable, BackHandler } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
 const BottomSheetContext = createContext();
@@ -10,27 +10,23 @@ export const BottomSheetProvider = ({ children }) => {
     const [content, setContent] = useState(null);
     const [isVisible, setIsVisible] = useState(false);
 
-    const openBottomSheet = (height, content) => {
+    const openBottomSheet = useCallback((height, content) => {
         setSnapPoints([`${height}%`]);
         setContent(content);
-        setIsVisible(true); // Show overlay
+        setIsVisible(true);
         bottomSheetRef.current?.snapToIndex(0);
-    };
-
-    const closeBottomSheet = useCallback(() => {
-        bottomSheetRef.current?.close();
-        setIsVisible(false); // Cập nhật ngay lập tức
-        setContent(null);
     }, []);
 
+    const closeBottomSheet = useCallback(() => {
+        setIsVisible(false);
+        setContent(null);
+        bottomSheetRef.current?.close();
+    }, []);
 
-    //canh
-    // Sử dụng useEffect để mở BottomSheet sau khi content thay đổi
-    useEffect(() => {
-        if (content) {
-            bottomSheetRef.current?.snapToIndex(0);
-        }
-    }, [content]);
+    const contextValue = useMemo(() => ({
+        openBottomSheet,
+        closeBottomSheet,
+    }), [openBottomSheet, closeBottomSheet]);
 
     useEffect(() => {
         const handleBackPress = () => {
@@ -42,15 +38,12 @@ export const BottomSheetProvider = ({ children }) => {
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-
-
         return () => backHandler.remove();
-    }, [isVisible]);
+    }, [isVisible, closeBottomSheet]);
 
     return (
-        <BottomSheetContext.Provider value={{ openBottomSheet, closeBottomSheet }}>
+        <BottomSheetContext.Provider value={contextValue}>
             {children}
-            {/* Overlay View */}
             {isVisible && (
                 <Pressable
                     style={{
@@ -65,7 +58,6 @@ export const BottomSheetProvider = ({ children }) => {
                     onPress={closeBottomSheet}
                 />
             )}
-            {/* Bottom Sheet */}
             <BottomSheet
                 ref={bottomSheetRef}
                 index={-1}
@@ -76,6 +68,9 @@ export const BottomSheetProvider = ({ children }) => {
                     if (index === -1) setIsVisible(false);
                 }}
                 handleComponent={null}
+                animationConfigs={{
+                    duration: 250, // Tăng tốc animation
+                }}
             >
                 <BottomSheetView style={{ backgroundColor: '#fff', height: '100%', borderTopEndRadius: 20, borderTopStartRadius: 20 }}>
                     <View style={{ flex: 1, padding: 20 }}>
