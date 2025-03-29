@@ -14,7 +14,7 @@ export default function AudienceScreen(props) {
   const [isHostOnline, setIsHostOnline] = useState(false);
 
 
-  console.log("du lieu nguoi xem:" + "liveID: "+ liveID + "userName" + userName + "userID" + userID)
+  console.log("du lieu nguoi xem:" + "liveID: " + liveID + "userName" + userName + "userID" + userID)
   useEffect(() => {
     const liveRef = database().ref(`/liveSessions/${liveID}`);
     liveRef.on('value', snapshot => {
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   liveContainer: {
-    flex: 1, 
+    flex: 1,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

@@ -9,7 +9,7 @@ import { notiLiveStream } from '../../rtk/API';
 const HostLive = (props) => {
   const { route, navigation } = props;
   const { userID, avatar, userName, liveID } = route.params;
-  const dispatch =  useDispatch()
+  const dispatch = useDispatch()
   console.log("Avatar URL:", avatar);
   console.log("User ID:", userID);
 
@@ -30,13 +30,13 @@ const HostLive = (props) => {
       }
 
       dispatch(notiLiveStream(notiData))
-            .unwrap()
-            .then((response) => {
-              console.log(response);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
+        .unwrap()
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
 
       database()
         .ref(`/liveSessions/${liveID}`)
@@ -67,27 +67,27 @@ const HostLive = (props) => {
 
 
   //xử lí sự kiện user dùng nút back trên thiết bị của họ
-    useFocusEffect(
-      React.useCallback(() => {
+  useFocusEffect(
+    React.useCallback(() => {
 
-    const backAction = () => {
-      Alert.alert(
-        'Thoát livestream',
-        'Bạn có chắc chắn muốn rời khỏi phiên live?',
-        [
-          {text: 'Hủy' , style: 'cancel'},
-          {text: 'OK' , onPress: () => handleLeaveLive()}
-        ]
-      )
-      return true; // Ngăn không cho thoát app ngay lập tức
-    }
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-  
-    return () => {
+      const backAction = () => {
+        Alert.alert(
+          'Thoát livestream',
+          'Bạn có chắc chắn muốn rời khỏi phiên live?',
+          [
+            { text: 'Hủy', style: 'cancel' },
+            { text: 'OK', onPress: () => handleLeaveLive() }
+          ]
+        )
+        return true; // Ngăn không cho thoát app ngay lập tức
+      }
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+      return () => {
         backHandler.remove();
-    }
-  }, [])
-);
+      }
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -99,7 +99,7 @@ const HostLive = (props) => {
         userName={userName}
         config={{
           ...HOST_DEFAULT_CONFIG,
-          onStartLiveButtonPressed: handleStartLive, 
+          onStartLiveButtonPressed: handleStartLive,
           onLeaveLiveStreaming: handleLeaveLive
         }}
       />

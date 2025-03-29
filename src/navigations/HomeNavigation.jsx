@@ -241,6 +241,7 @@ import Ringing from '../screens/call/Ringing';
 import Report from '../screens/report/Report';
 import ListTag from '../screens/home/ListTag';
 import pokemon from '../screens/game/pokemon/pokemon';
+import MapScreen from '../screens/map/MapScreen';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -278,6 +279,7 @@ const oStackHome = {
   Report: { name: 'Report', component: Report },
   ListTag: { name: 'ListTag', component: ListTag },
   pokemon: { name: 'pokemon', component: pokemon },
+  MapScreen: { name: 'MapScreen', component: MapScreen },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
