@@ -26,13 +26,14 @@ import {
   deletePost_reaction,// xóa biểu cảm
   addPost, // api share
   addComment, // api tạo comment
+  changeDestroyPost, //xoa post
 } from '../../rtk/API';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import LoadingPostModal from '../../utils/animation/loadingPost/LoadingPostModal';
 import { set } from '@react-native-firebase/database';
-import { oStackHome } from '../../navigations/HomeNavigation';
+import { oStackHome, oTab } from '../../navigations/HomeNavigation';
 const { width, height } = Dimensions.get('window');
 const PostDetail = (props) => {
   const { navigation } = props
@@ -99,6 +100,21 @@ const PostDetail = (props) => {
         });
     } catch (error) {
       console.log('Lỗi khi lấy chi tiết bài viết:', error);
+    }
+  };
+
+  //api delete post
+  const callChangeDestroyPost = async ID_post => {
+    try {
+      await dispatch(changeDestroyPost({ _id: ID_post }))
+        .unwrap()
+        .then(response => {
+        })
+        .catch(error => {
+          console.log('Lỗi khi xóa bài viết:', error);
+        });
+    } catch (error) {
+      console.log('Lỗi trong callChangeDestroyPost:', error);
     }
   };
 
@@ -216,6 +232,11 @@ const PostDetail = (props) => {
       console.log('onOpenGallery -> ', error);
     }
   };
+
+  //xoa post
+  const onDelete = () => {
+    callChangeDestroyPost(ID_post)
+  }
 
   useEffect(() => {
     //console.log("ID_post nhận được:", ID_post); // Kiểm tra ID có đúng không
@@ -725,9 +746,21 @@ const PostDetail = (props) => {
                       <Icon name="arrow-back" size={25} color="black" />
                     </TouchableOpacity>
                   </View>
-                  <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('TabHome', {
+                      screen: 'Profile',
+                      params: { _id: post?.ID_user?._id },
+                    })}
+                  >
+                    <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                  </TouchableOpacity>
                   <View style={{ marginLeft: width * 0.05 }}>
-                    <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                    <Text style={styles.name}
+                      onPress={() => navigation.navigate('TabHome', {
+                        screen: 'Profile',
+                        params: { _id: post?.ID_user?._id },
+                      })}
+                    >{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
                     <View style={styles.boxName}>
                       <Text style={styles.time}>{timeAgo}</Text>
                       {/* <Icon name="earth" size={12} color="gray" /> */}
@@ -745,7 +778,7 @@ const PostDetail = (props) => {
                     openBottomSheet(
                       25,
                       <View>
-                        <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet() }}
+                        <TouchableOpacity onPress={() => { onDelete(), closeBottomSheet(), navigation.navigate(oStackHome.TabHome) }}
                           style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
                           <Text style={[styles.deleteText,]}
                           >{
@@ -805,14 +838,30 @@ const PostDetail = (props) => {
                         </TouchableOpacity>
                       )
                     } */}
-                      <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
+                      <TouchableOpacity onPress={() =>
+                        navigation.navigate('TabHome', {
+                          screen: 'Profile',
+                          params: { _id: post?.ID_post_shared?.ID_user?._id },
+                        })}>
+                        <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
+                      </TouchableOpacity>
                       <View style={{ marginLeft: 15 }}>
-                        <Text style={styles.name}>
+                        <Text style={styles.name}
+                          onPress={() =>
+                            navigation.navigate('TabHome', {
+                              screen: 'Profile',
+                              params: { _id: post?.ID_post_shared?.ID_user?._id },
+                            })}
+                        >
                           {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
                           {post.ID_post_shared.tags.length > 0 && (
                             <Text>
                               <Text style={{ color: 'gray' }}> cùng với </Text>
-                              <Text onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.tags[0]._id })} style={[styles.name]}>
+                              <Text style={[styles.name]}
+                                onPress={() => navigation.navigate('TabHome', {
+                                  screen: "Profile", params: { _id: post.ID_post_shared.tags[0]._id }
+                                })}
+                              >
                                 {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
                               </Text>
                               {post.ID_post_shared.tags.length > 1 && (
@@ -847,14 +896,25 @@ const PostDetail = (props) => {
                           <Icon name="arrow-back" size={25} color="black" />
                         </TouchableOpacity>
                       </View>
-                      <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                      <TouchableOpacity onPress={() =>
+                        navigation.navigate('TabHome', {
+                          screen: 'Profile',
+                          params: { _id: post?.ID_user?._id },
+                        })}>
+                        <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                      </TouchableOpacity>
                       <View style={{ marginLeft: 15 }}>
-                        <Text style={styles.name}>
+                        <Text style={styles.name}
+                          onPress={() =>
+                            navigation.navigate('TabHome', {
+                              screen: 'Profile',
+                              params: { _id: post?.ID_user?._id },
+                            })}>
                           {post.ID_user.first_name} {post.ID_user.last_name}
                           {post.tags.length > 0 && (
                             <Text>
                               <Text style={{ color: 'gray' }}> cùng với </Text>
-                              <Text onPress={() => navigation.navigate('Profile', { _id: post.tags[0]._id })} style={[styles.name]}>
+                              <Text onPress={() => navigation.navigate('TabHome', { screen: "Profile", params: { _id: post.tags[0]._id } })} style={[styles.name]}>
                                 {post.tags[0]?.first_name} {post.tags[0]?.last_name}
                               </Text>
                               {post.tags.length > 1 && (
@@ -1117,32 +1177,32 @@ const PostDetail = (props) => {
 
         {/* Modal hiển thị ảnh */}
         <Modal
-                visible={isImageModalVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setImageModalVisible(false)}
-            >
-                <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        {isVideo(selectedImage) ? (
-                            <Video
-                                source={{ uri: selectedImage }}
-                                style={styles.fullImage}
-                                resizeMode="contain"
-                                controls={true} // Hiển thị nút điều khiển cho video
-                                paused={false} // Tự động phát khi mở modal
-                                onError={(e) => console.log("Video error:", e)} // Xử lý lỗi nếu có
-                            />
-                        ) : (
-                            <Image
-                                source={{ uri: selectedImage }}
-                                style={styles.fullImage}
-                                resizeMode="contain"
-                            />
-                        )}
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
+          visible={isImageModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setImageModalVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
+            <View style={styles.modalOverlay}>
+              {isVideo(selectedImage) ? (
+                <Video
+                  source={{ uri: selectedImage }}
+                  style={styles.fullImage}
+                  resizeMode="contain"
+                  controls={true} // Hiển thị nút điều khiển cho video
+                  paused={false} // Tự động phát khi mở modal
+                  onError={(e) => console.log("Video error:", e)} // Xử lý lỗi nếu có
+                />
+              ) : (
+                <Image
+                  source={{ uri: selectedImage }}
+                  style={styles.fullImage}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         <View style={[styles.line, { marginBottom: 20 }]}></View>
 
