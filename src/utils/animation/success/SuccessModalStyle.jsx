@@ -12,9 +12,9 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Căn giữa theo chiều dọc
     backgroundColor: 'rgba(0, 0, 0, 0.5)', 
     padding: 5, // Khoảng cách bên trong
-    borderRadius: 10, 
-    borderWidth: 2,
-    borderColor: '#E31C15', 
+    borderRadius: 10, // Bo góc
+    borderWidth: 2, // Độ dày border
+    borderColor: '#2BA1EA', 
   },
   successAnimation: {
     width: 90, // Giảm kích thước để vừa với hàng ngang

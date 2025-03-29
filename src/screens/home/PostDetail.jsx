@@ -30,7 +30,7 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
-import LoadingPostModal from '../../utils/animation/loadingPost/LoadingPostModal';
+import LoadingTron from '../../utils/animation/loadingTron/LoadingTron';
 import { set } from '@react-native-firebase/database';
 import { oStackHome } from '../../navigations/HomeNavigation';
 const { width, height } = Dimensions.get('window');
@@ -124,7 +124,7 @@ const PostDetail = (props) => {
   //call api chi tiet bai post
   const callAddComment = async (type, content) => {
     try {
-      if ((content == null && type === 'text') || post == null) {
+      if ((content == '' && type === 'text') || post == null) {
         console.log('thiếu ')
         return null;
       }
@@ -705,7 +705,7 @@ const PostDetail = (props) => {
 
   const header = () => {
     if (!post) {
-      return <LoadingPostModal />
+      return <LoadingTron />
     }
     return (
       <View style={styles.postContainer}>

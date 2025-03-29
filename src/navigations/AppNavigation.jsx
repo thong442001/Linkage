@@ -370,9 +370,12 @@ const AppNavigation = () => {
       notification?.ID_user &&
       notification?.content
     ) {
-      const sender = notification.ID_user;
-      return `${sender.first_name || ''} ${sender.last_name || ''}: ${notification.content || 'Đang phát trực tiếp'
-        }`;
+      const sender = notification.ID_relationship;
+      if(sender.ID_userA._id === user._id) {
+        return `${sender.ID_userB.first_name || ''} ${sender.ID_userB.last_name || ''} ${'đang phát trực tiếp'}`;
+      }else{
+        return `${sender.ID_userA.first_name || ''} ${sender.ID_userA.last_name || ''} ${'đang phát trực tiếp'}`;
+      }      
     }
 
     // 10. Thông báo mời chơi game 3 lá

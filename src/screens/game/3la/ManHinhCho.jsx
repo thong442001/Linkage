@@ -53,29 +53,29 @@ const ManHinhCho = ({ route, navigation }) => {
 
   }, [group, me]);
 
-  // Phát nhạc chuông khi nhận cuộc gọi
-  useEffect(() => {
-    const ringtone = new Sound(
-      'incoming_call',
-      Sound.ANDROID_RESOURCE,
-      (error) => {
-        if (error) {
-          console.log('Lỗi khi tải file nhạc:', error);
-          return;
-        }
-        ringtone.setNumberOfLoops(-1);
-        ringtone.play();
-        ringtoneRef.current = ringtone; // Lưu vào useRef
-      }
-    );
+  // // Phát nhạc chuông khi nhận cuộc gọi
+  // useEffect(() => {
+  //   const ringtone = new Sound(
+  //     'incoming_call',
+  //     Sound.ANDROID_RESOURCE,
+  //     (error) => {
+  //       if (error) {
+  //         console.log('Lỗi khi tải file nhạc:', error);
+  //         return;
+  //       }
+  //       ringtone.setNumberOfLoops(-1);
+  //       ringtone.play();
+  //       ringtoneRef.current = ringtone; // Lưu vào useRef
+  //     }
+  //   );
 
-    return () => {
-      if (ringtoneRef.current) {
-        ringtoneRef.current.stop();
-        ringtoneRef.current.release();
-      }
-    };
-  }, []);
+  //   return () => {
+  //     if (ringtoneRef.current) {
+  //       ringtoneRef.current.stop();
+  //       ringtoneRef.current.release();
+  //     }
+  //   };
+  // }, []);
 
   // Xử lý khi chấp nhận cuộc gọi
   const handleAccept = () => {
