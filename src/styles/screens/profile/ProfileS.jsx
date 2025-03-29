@@ -102,6 +102,10 @@ const ProfileS = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black'
     },
+    bio: {
+        fontSize: height * 0.02,
+        color: 'black'
+    },
     friendNumber: {
         fontSize: height * 0.016,
         fontWeight: 'bold',
@@ -224,7 +228,7 @@ const ProfileS = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
     },
     dialog: {
         borderRadius: width * 0.04,
@@ -232,7 +236,8 @@ const ProfileS = StyleSheet.create({
         height: height * 0.25,
         alignItems: 'center',
         backgroundColor: '#FFFF',
-        justifyContent: 'space-evenly',
+        justifyContent: 'center',
+        alignContent: 'center',
     },
     btnXacNhan: {
         width: width * 0.4,
@@ -260,13 +265,13 @@ const ProfileS = StyleSheet.create({
     },
     modalContainer: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.9)',
+        backgroundColor: 'rgba(0,0,0,0.6)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalBackground: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.6)',
     },
     fullImage: {
         width: '100%',

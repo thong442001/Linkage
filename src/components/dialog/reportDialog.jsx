@@ -4,8 +4,6 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const SelectAvatarDialog = ({ visible, onClose, onCamera, onGallery }) => {
 
-    
-
     const renderReport = useCallback(
         ({ item }) => (
           <ProfilePage
