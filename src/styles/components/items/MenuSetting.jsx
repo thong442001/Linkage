@@ -9,7 +9,7 @@ const MenuSettingS = StyleSheet.create({
     icon: {
         marginRight: 10,
     },
-    textSection:{
+    textSection: {
         fontSize: 15,
     }
 

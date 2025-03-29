@@ -16,6 +16,8 @@ import { useSelector } from 'react-redux';
 import Video from 'react-native-video';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 import Icon4 from 'react-native-vector-icons/FontAwesome';
+import MapView, { Marker } from 'react-native-maps';
+import { useNavigation } from '@react-navigation/native';
 
 export default function MessageComponent({
   currentUserID,
@@ -43,6 +45,8 @@ export default function MessageComponent({
   const { openBottomSheet, closeBottomSheet } = useBottomSheet();
   const [selectedTab, setSelectedTab] = useState('all');
   const [isFirstRender, setIsFirstRender] = useState(true);
+
+  const navigation = useNavigation();
 
 
   // gọi lại buttonsheet khi tab thay đổi
@@ -171,7 +175,18 @@ export default function MessageComponent({
       reactionIcon: reaction.ID_reaction.icon,
       quantity: reaction.quantity,
     }));
+    //check nó là link gg map
+    const isGoogleMapsLink = text => {
+      return /^https:\/\/www\.google\.com\/maps\?q=/.test(text);
+    };
+    const handlePressLocation = text => {
+      const query = text.split('q=')[1];
+      const [lat, lng] = query.split(',').map(Number);
 
+      navigation.navigate('MapScreen', {
+        externalLocation: {latitude: lat, longitude: lng},
+      });
+    };
   return (
     <View>
       {
@@ -220,7 +235,7 @@ export default function MessageComponent({
 
             </View>
 
-          ) : (
+          ) :(
             <View
               style={
                 [
@@ -272,6 +287,40 @@ export default function MessageComponent({
                           Tin nhắn đã được thu hồi
                         </Text>
                       ) : message.type == 'text' ? (
+                         (isGoogleMapsLink(message.content))?(
+                          
+            
+                            <View style={{ alignItems: 'center' }}>
+                            <MapView
+                              style={{ width: 200, height: 120, borderRadius: 10 }}
+                              initialRegion={{
+                                latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
+                                longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                              }}
+                              pointerEvents="none">
+                              <Marker
+                                coordinate={{
+                                  latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
+                                  longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
+                                }}
+                              />
+                            </MapView>
+                            <TouchableOpacity
+                              style={{
+                                marginTop: 5,
+                                backgroundColor: '#2196F3',
+                                paddingHorizontal: 12,
+                                paddingVertical: 6,
+                                borderRadius: 8,
+                              }}
+                              onPress={() => handlePressLocation(message.content)}>
+                              <Text style={{ color: '#fff' }}>Mở Google Maps</Text>
+                            </TouchableOpacity>
+                          </View>
+                          
+                         ):(
                         <Text
                           style={[
                             styles.messageText,
@@ -279,6 +328,8 @@ export default function MessageComponent({
                           ]}>
                           {message.content}
                         </Text>
+                         )
+                        
                       ) : message.type == 'image' ? (
                         <Image
                           style={[

@@ -29,7 +29,6 @@ import { useBottomSheet } from '../../context/BottomSheetContext';
 const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
-
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
@@ -61,7 +60,18 @@ const Chat = (props) => {// cần ID_group (param)
     const [typingUsers, setTypingUsers] = useState([]);
     const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
     const [validateGame, setValidateGame] = useState(true);
-
+    const hasSentLocation = useRef(false); // Biến ref để theo dõi trạng thái gửi
+    // //gửi vị trí
+    useEffect(() => {
+        if (params?.locationMessage && !hasSentLocation.current) {
+          sendLocationMessage(params?.locationMessage);
+          hasSentLocation.current = true; // Đánh dấu đã gửi
+        }
+      }, [params?.locationMessage]);
+    
+      const sendLocationMessage = async (message) => {
+        await sendMessage('text', message);
+      };
     //call API noti call
     const callNotiCall = async (ID_group, ID_user, isCallVideo) => {
         try {
@@ -654,7 +664,17 @@ const Chat = (props) => {// cần ID_group (param)
                     >
                         <Icon name="image" size={25} color="#007bff" />
                     </TouchableOpacity>
-
+                {/* Gửi vị trí */}
+                <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('MapScreen', {
+                    ID_group: params?.ID_group,
+                    isGui: true,
+                  });
+                }}
+                style={styles.menuItem}>
+                    <Icon name="navigate-outline" size={24} color="#007bff" />
+                </TouchableOpacity>
                 </View>
                 <TextInput
                     style={styles.input}
