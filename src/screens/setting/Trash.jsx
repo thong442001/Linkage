@@ -66,11 +66,13 @@ const Trash = props => {
       await dispatch(changeDestroyPost({ _id: ID_post }))
         .unwrap()
         .then(response => {
-          console.log('Xóa thành công:', response);
+          console.log('Phục hồi thành công:', response);
+          const restoredPost = posts.find(post => post._id === ID_post); // Lấy bài viết vừa phục hồi
           setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+          navigation.setParams({ isRestored: true, restoredPost }); // Gửi cả dữ liệu bài viết
         })
         .catch(error => {
-          console.log('Lỗi khi xóa bài viết:', error);
+          console.log('Lỗi khi phục hồi bài viết:', error);
         });
     } catch (error) {
       console.log('Lỗi trong callChangeDestroyPost:', error);
