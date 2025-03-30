@@ -207,11 +207,11 @@ const Story = ({ route }) => {
           </Animated.View>
         )}
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.addTextButton}
           onPress={() => setShowText(true)}>
           <Text style={{ color: 'white' }}>Thêm Text</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
@@ -234,10 +234,10 @@ const Story = ({ route }) => {
           <Text style={styles.privacyText}>{selectedOption.name}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.CameraBtn} onPress={openCamera}>
+        {/* <TouchableOpacity style={styles.CameraBtn} onPress={openCamera}>
           <Icon name="camera" size={24} color="white" />
           <Text style={{ color: 'white', marginLeft: 5 }}>Chụp media</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={[
@@ -299,7 +299,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: StatusBar.currentHeight || 0,
   },
-  image: { width, height, resizeMode: 'cover' },
+  image: {    width: width * 0.8, // Thu nhỏ chiều rộng xuống 80% kích thước màn hình
+    height: height * 0.8,
+    aspectRatio: 1, // Giữ tỷ lệ ảnh (có thể thay đổi tùy theo tỷ lệ thực tế của ảnh)
+    marginTop: 30,
+    resizeMode: 'contain', // Đảm bảo ảnh không bị cắt, thay vì 'cover'
+     },
   headerContainer: {
     position: 'absolute',
     top: 30,
