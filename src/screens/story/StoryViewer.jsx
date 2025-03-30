@@ -9,7 +9,6 @@ import {
   Text,
   TouchableWithoutFeedback,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Video from 'react-native-video';
@@ -109,7 +108,7 @@ const Story = () => {
     }
   };
 
-  
+
 
   const handlePress = (event) => {
     const { locationX } = event.nativeEvent;
@@ -126,7 +125,7 @@ const Story = () => {
       }
     }
   };
-  
+
   const handleSelectEmoji = (emoji) => {
     setSelectedEmoji(emoji);
     emojiScale.setValue(1);
@@ -192,7 +191,7 @@ const Story = () => {
       console.log("Bạn chỉ có thể xóa story của chính mình!");
       return;
     }
-  
+
     try {
       const storyId = stories[currentIndex]._id;
       await callDeleteStory(storyId);
@@ -205,9 +204,9 @@ const Story = () => {
       console.error("Không thể xóa story:", error);
     }
   };
-  
+
   // Trong phần render, giữ nguyên SuccessModal
-  {showSuccessModal && <SuccessModal message="Xóa story thành công" />}
+  { showSuccessModal && <SuccessModal message="Xóa story thành công" /> }
 
   if (!StoryView || !stories || stories.length === 0) {
     return (
@@ -263,7 +262,7 @@ const Story = () => {
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-          {me._id === StoryView.user?._id && (
+            {me._id === StoryView.user?._id && (
               <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
                 <Icon name="trash-outline" size={24} color="white" />
               </TouchableOpacity>
@@ -308,7 +307,7 @@ const styles = StyleSheet.create({
     paddingTop: StatusBar.currentHeight || 0,
   },
   progressBarContainer: {
-   position:'absolute',
+    position: 'absolute',
     top: 10,
     left: 10,
     right: 10,
