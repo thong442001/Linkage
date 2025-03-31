@@ -471,7 +471,7 @@ const AppNavigation = () => {
       case 'Bạn đã được chia sẻ bài viết của bạn':
         return 'post-share-channel';
 
-      case 'Bình luận':
+      case 'Đã bình luận vào bài viết của bạn ':
         return 'comment-channel';
 
       case 'Tài khoản bị khóa':
@@ -570,7 +570,7 @@ const AppNavigation = () => {
         data: formattedData,
         android: {
           channelId: getChannelId(notification?.type),
-          smallIcon: 'ic_launcher',
+          smallIcon: 'logo_linkage',
         },
       });
   

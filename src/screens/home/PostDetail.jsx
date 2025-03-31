@@ -82,6 +82,9 @@ const PostDetail = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
 
+  //loading
+  const [isSending, setIsSending] = useState(false);
+
   //call api chi tiet bai post
   const callGetChiTietPost = async (ID_post) => {
     try {
@@ -123,11 +126,12 @@ const PostDetail = (props) => {
 
   //call api chi tiet bai post
   const callAddComment = async (type, content) => {
-    try {
+    try {addComment
       if ((content == '' && type === 'text') || post == null) {
         console.log('thiếu ')
         return null;
       }
+      setIsSending(true);
       const paramsAPI = {
         ID_user: me._id,
         ID_post: post._id,
@@ -150,9 +154,14 @@ const PostDetail = (props) => {
         })
         .catch((error) => {
           console.log('Error1 addComment:', error);
+        })
+        .finally(() => {
+          // Đặt lại isSending thành false sau khi hoàn tất (thành công hoặc thất bại)
+          setIsSending(false);
         });
     } catch (error) {
       console.log('Lỗi khi callAddComment:', error);
+      setIsSending(false); // Đảm bảo dừng trạng thái gửi nếu có lỗi
     }
   };
 
@@ -1265,6 +1274,7 @@ const PostDetail = (props) => {
                   <TouchableOpacity
                     onPress={() => callAddComment('text', comment)}
                     style={styles.sendButton}
+                    disabled={isSending}
                   >
                     <Icon name="send" size={25} color='#007bff' />
                     {/* <Text style={styles.sendText}>Send</Text> */}
