@@ -143,16 +143,22 @@ const InGame3La = ({ route, navigation }) => {
             }
         });
 
+        socket.on('lang-nghe-thoat-choi-game-3-la', ({ ID_group }) => {
+            navigation.navigate('Chat', { ID_group: ID_group });
+        });
+
         return () => {
             socket.off('lang-nghe-bat-dau-game-3la');
             socket.off('lang-nghe-ss-game-3la');
             socket.off('lang-nghe-xet-game-3la');
+            socket.off('lang-nghe-thoat-choi-game-3-la');
+            handleExit();
         };
     }, [group, me, socket, player1, player2]);
 
     // Xử lý thoát game
     const handleExit = useCallback(() => {
-        navigation.navigate('Chat', { ID_group: group._id });
+        socket.emit('thoat-choi-game-3-la', { ID_group: group._id });
     }, [navigation, group]);
 
     // Xử lý sẵn sàng
@@ -190,7 +196,7 @@ const InGame3La = ({ route, navigation }) => {
     return (
         <View style={styles.container}>
             {/* Tiêu đề */}
-            <Text style={styles.title}>Game Bài Cao</Text>
+            <Text style={styles.title}>Game Bài Cào</Text>
 
             {/* Kết quả */}
             {xet && (

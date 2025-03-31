@@ -9,7 +9,6 @@ import {
   Text,
   TouchableWithoutFeedback,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Video from 'react-native-video';
@@ -25,8 +24,6 @@ const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
-  console.log('StoryView:', StoryView);
-  console.log('me:', me);
   const me = useSelector(state => state.app.user)
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -38,10 +35,13 @@ const Story = () => {
   const emojiScale = useRef(new Animated.Value(1)).current;
   const videoRef = useRef(null);
   const progressBars = useRef([]);
+  const [isFirstLoad, setIsFirstLoad] = useState(true); // Trạng thái để kiểm tra lần đầu vào trang
+
 
   // Đồng bộ progressBars với stories
   useEffect(() => {
     progressBars.current = stories.map(() => new Animated.Value(0));
+    console.log('Initialized progressBars.current:', progressBars.current);
   }, [stories]);
 
   const isVideo = (media) => {
@@ -49,8 +49,8 @@ const Story = () => {
   };
 
   const startProgress = (index) => {
-    if (!stories[index] || !progressBars.current[index]) return; // Kiểm tra an toàn
-    progressBars.current[index].setValue(0);
+    if (!stories[index] || !progressBars.current[index]) return;
+    progressBars.current[index].setValue(0); // Reset thanh tiến trình
     const duration = isVideo(stories[index].medias[0]) ? videoDuration : 5000;
 
     Animated.timing(progressBars.current[index], {
@@ -58,11 +58,12 @@ const Story = () => {
       duration: duration,
       useNativeDriver: false,
     }).start(({ finished }) => {
-      if (finished && !isVideo(stories[index].medias[0])) {
+      if (finished && !isVideo(stories[index].medias[0]) && navigation.isFocused()) {
         handleNextStory();
       }
     });
   };
+
 
   useEffect(() => {
     if (currentIndex >= 0 && currentIndex < stories.length) {
@@ -76,10 +77,27 @@ const Story = () => {
       setCurrentIndex((prevIndex) => prevIndex + 1);
       setSelectedEmoji(null);
       setVideoDuration(5000);
-    } else {
+    } else if (navigation.isFocused()) {
       navigation.goBack();
     }
   };
+
+  useEffect(() => {
+    if (currentIndex >= 0 && currentIndex < stories.length) {
+      if (isFirstLoad && currentIndex === 0) {
+        // Nếu là ảnh, chạy startProgress ngay lập tức
+        if (!isVideo(stories[currentIndex]?.medias[0])) {
+          setIsFirstLoad(false); // Đánh dấu đã load lần đầu
+          startProgress(0); // Chạy tiến trình cho ảnh
+        }
+        // Nếu là video, giữ nguyên logic chờ người dùng nhấn play
+        return;
+      }
+      startProgress(currentIndex); // Chạy tiến trình cho các story khác
+    }
+  }, [currentIndex, videoDuration, isFirstLoad, stories]);
+
+
 
   const handlePrevStory = () => {
     if (currentIndex > 0) {
@@ -90,12 +108,21 @@ const Story = () => {
     }
   };
 
+
+
   const handlePress = (event) => {
     const { locationX } = event.nativeEvent;
-    if (locationX < width / 2) {
-      handlePrevStory();
+    if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) {
+      // Chỉ áp dụng cho video tại index 0: nhấn để chạy slider
+      setIsFirstLoad(false);
+      startProgress(0);
     } else {
-      handleNextStory();
+      // Các trường hợp khác, xử lý chuyển story như bình thường
+      if (locationX < width / 2) {
+        handlePrevStory();
+      } else {
+        handleNextStory();
+      }
     }
   };
 
@@ -159,33 +186,27 @@ const Story = () => {
     }
   };
 
-  const handleDeleteStory = () => {
+  const handleDeleteStory = async () => {
     if (currentUserId !== StoryView.user._id) {
-      Alert.alert("Thông báo", "Bạn chỉ có thể xóa story của chính mình!");
+      console.log("Bạn chỉ có thể xóa story của chính mình!");
       return;
     }
 
-    Alert.alert(
-      "Xác nhận",
-      "Bạn có chắc muốn xóa vĩnh viễn story này?",
-      [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Xóa",
-          onPress: async () => {
-            try {
-              const storyId = stories[currentIndex]._id;
-              await callDeleteStory(storyId);
-            } catch (error) {
-              Alert.alert("Lỗi", "Không thể xóa story. Vui lòng thử lại!");
-              console.error("Lỗi xóa story:", error);
-            }
-          },
-          style: "destructive",
-        },
-      ]
-    );
+    try {
+      const storyId = stories[currentIndex]._id;
+      await callDeleteStory(storyId);
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: storyId });
+      }, 2000);
+    } catch (error) {
+      console.error("Không thể xóa story:", error);
+    }
   };
+
+  // Trong phần render, giữ nguyên SuccessModal
+  { showSuccessModal && <SuccessModal message="Xóa story thành công" /> }
 
   if (!StoryView || !stories || stories.length === 0) {
     return (
@@ -241,7 +262,7 @@ const Story = () => {
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-            {me === StoryView.ID_user?._id && (
+            {me._id === StoryView.user?._id && (
               <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
                 <Icon name="trash-outline" size={24} color="white" />
               </TouchableOpacity>
@@ -287,7 +308,7 @@ const styles = StyleSheet.create({
   },
   progressBarContainer: {
     position: 'absolute',
-    top: 15,
+    top: 10,
     left: 10,
     right: 10,
     flexDirection: 'row',
@@ -306,9 +327,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   image: {
-    width,
-    height,
-    resizeMode: 'cover',
+    width: width * 0.8, // Thu nhỏ chiều rộng xuống 80% kích thước màn hình
+    height: height * 0.8,
+    aspectRatio: 1, // Giữ tỷ lệ ảnh (có thể thay đổi tùy theo tỷ lệ thực tế của ảnh)
+    marginTop: 30,
+    resizeMode: 'contain', // Đảm bảo ảnh không bị cắt, thay vì 'cover'
   },
   headerContainer: {
     position: 'absolute',
