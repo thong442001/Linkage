@@ -143,7 +143,8 @@ const InGame3La = ({ route, navigation }) => {
             }
         });
 
-        socket.on('lang-nghe-thoat-choi-game-3-la', ({ ID_group }) => {
+        socket.on('lang-nghe-thoat-choi-game-3-la', (ID_group) => {
+            console.log('thoat');
             navigation.navigate('Chat', { ID_group: ID_group });
         });
 
@@ -242,29 +243,31 @@ const InGame3La = ({ route, navigation }) => {
 
             {/* Nút điều khiển */}
             <View style={styles.buttonContainer}>
-                {!startGame ? (
+                {(!startGame && !ss2) ? (
                     <TouchableOpacity style={styles.checkButtonSS} onPress={handleSS} activeOpacity={0.8}>
                         <Text style={styles.buttonText}>Sẵn sàng</Text>
                     </TouchableOpacity>
                 ) : (
-                    <>
-                        {allCardsOpened && (
-                            <TouchableOpacity style={styles.checkButtonXet} onPress={handleXet} activeOpacity={0.8}>
-                                <Text style={styles.buttonText}>Xét bài</Text>
-                            </TouchableOpacity>
-                        )}
-                        <View style={styles.actionButtons}>
-                            <TouchableOpacity style={styles.checkButtonMo1} onPress={handleMo1} activeOpacity={0.8}>
-                                <Text style={styles.buttonTextWhite}>Mở 1 lá</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.checkButtonMo3} onPress={handleMo3} activeOpacity={0.8}>
-                                <Text style={styles.buttonTextWhite}>Mở hết</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </>
+                    (startGame) && (
+                        <>
+                            {(allCardsOpened) && (
+                                <TouchableOpacity style={styles.checkButtonXet} onPress={handleXet} activeOpacity={0.8}>
+                                    <Text style={styles.buttonText}>Xét bài</Text>
+                                </TouchableOpacity>
+                            )}
+                            <View style={styles.actionButtons}>
+                                <TouchableOpacity style={styles.checkButtonMo1} onPress={handleMo1} activeOpacity={0.8}>
+                                    <Text style={styles.buttonTextWhite}>Mở 1 lá</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.checkButtonMo3} onPress={handleMo3} activeOpacity={0.8}>
+                                    <Text style={styles.buttonTextWhite}>Mở hết</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    )
                 )}
             </View>
-        </View>
+        </View >
     );
 };
 

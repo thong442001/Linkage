@@ -61,17 +61,21 @@ const Chat = (props) => {// cần ID_group (param)
     const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
     const [validateGame, setValidateGame] = useState(true);
     const hasSentLocation = useRef(false); // Biến ref để theo dõi trạng thái gửi
+
+    //loading
+    const [isGameing, setIsGameing] = useState(false);
+
     // //gửi vị trí
     useEffect(() => {
         if (params?.locationMessage && !hasSentLocation.current) {
-          sendLocationMessage(params?.locationMessage);
-          hasSentLocation.current = true; // Đánh dấu đã gửi
+            sendLocationMessage(params?.locationMessage);
+            hasSentLocation.current = true; // Đánh dấu đã gửi
         }
-      }, [params?.locationMessage]);
-    
-      const sendLocationMessage = async (message) => {
+    }, [params?.locationMessage]);
+
+    const sendLocationMessage = async (message) => {
         await sendMessage('text', message);
-      };
+    };
     //call API noti call
     const callNotiCall = async (ID_group, ID_user, isCallVideo) => {
         try {
@@ -319,6 +323,7 @@ const Chat = (props) => {// cần ID_group (param)
             //console.log(data);
             if (data.sender != me._id) return;
             console.log("lang-nghe-moi-choi-game-3-la1")
+            setIsGameing(false);
             navigation.navigate("ManHinhCho", { group: group, ID_message: data._id });
         });
 
@@ -476,6 +481,7 @@ const Chat = (props) => {// cần ID_group (param)
         navigation.navigate("SettingChat", { ID_group: group._id });
     };
     const onToGame3La = () => {
+        setIsGameing(true);
         const payload = {
             ID_group: params.ID_group,
             me: me._id.toString(),
@@ -576,6 +582,7 @@ const Chat = (props) => {// cần ID_group (param)
                     onCallVideo={onCallvieo}
                     onCallAudio={onCallAudio}
                     onToGame3La={onToGame3La}
+                    isGameing={isGameing}
                 />
             }
 
@@ -664,17 +671,17 @@ const Chat = (props) => {// cần ID_group (param)
                     >
                         <Icon name="image" size={25} color="#007bff" />
                     </TouchableOpacity>
-                {/* Gửi vị trí */}
-                <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate('MapScreen', {
-                    ID_group: params?.ID_group,
-                    isGui: true,
-                  });
-                }}
-                style={styles.menuItem}>
-                    <Icon name="navigate-outline" size={24} color="#007bff" />
-                </TouchableOpacity>
+                    {/* Gửi vị trí */}
+                    <TouchableOpacity
+                        onPress={() => {
+                            navigation.navigate('MapScreen', {
+                                ID_group: params?.ID_group,
+                                isGui: true,
+                            });
+                        }}
+                        style={styles.menuItem}>
+                        <Icon name="navigate-outline" size={24} color="#007bff" />
+                    </TouchableOpacity>
                 </View>
                 <TextInput
                     style={styles.input}

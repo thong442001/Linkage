@@ -12,6 +12,7 @@ export default function ChatHeader({
     onCallVideo,
     onCallAudio,
     onToGame3La = () => { },
+    isGameing,
 }) {
 
     return (
@@ -47,6 +48,7 @@ export default function ChatHeader({
                     >
                         <FontAwesome name="video-camera" size={24} color="#007bff" />
                     </TouchableOpacity>
+                    {/* btn game3la vs setting group */}
                     {
                         isPrivate == false
                             ? (
@@ -58,6 +60,7 @@ export default function ChatHeader({
                             ) : (
                                 <TouchableOpacity
                                     onPress={onToGame3La}
+                                    disabled={isGameing}
                                 >
                                     <Icon name="game-controller" size={24} color="#007bff" />
                                 </TouchableOpacity>
