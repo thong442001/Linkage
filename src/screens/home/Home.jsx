@@ -87,6 +87,7 @@ const Home = props => {
     return () => liveSessionsRef.off('value', onValueChange);
   }, []);
 
+
   // Gọi lại API khi nhận được isDeleted: true từ StoryViewer
   useEffect(() => {
     if (route.params?.isDeleted && me?._id) {
@@ -123,6 +124,14 @@ const Home = props => {
     }
   };
 
+  //cập nhật danh sách bài viết khi có bài viết mới
+  useEffect(() => {
+    if (route.params?.newPost) {
+      setPosts(prevPosts => [route.params.newPost, ...prevPosts]);
+      navigation.setParams({ newPost: undefined }); // Reset param
+    }
+  }, [route.params?.newPost]);
+
   useEffect(() => {
     callGetAllPostsInHome(me._id);
   }, [me._id]);
@@ -141,6 +150,7 @@ const Home = props => {
       await dispatch(changeDestroyPost({ _id: ID_post }))
         .unwrap()
         .then(response => {
+          setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
         })
         .catch(error => {
           console.log('Lỗi khi xóa bài viết:', error);
@@ -149,6 +159,16 @@ const Home = props => {
       console.log('Lỗi trong callChangeDestroyPost:', error);
     }
   };
+
+  useEffect(() => {
+    if (route.params?.isRestored && route.params?.restoredPost && me?._id) {
+      console.log('Post restored, updating list...');
+      setPosts(prevPosts => [route.params.restoredPost, ...prevPosts]); // Thêm bài viết vào đầu danh sách
+      navigation.setParams({ isRestored: undefined, restoredPost: undefined }); // Reset tham số
+    }
+  }, [route.params?.isRestored, route.params?.restoredPost, me?._id]);
+
+  
 
   const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
     setPosts(prevPosts =>

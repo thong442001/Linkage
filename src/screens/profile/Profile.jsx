@@ -57,7 +57,7 @@ const Profile = props => {
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
-    const [relationship, setRelationship] = useState(null);
+    const [relationship, setRelationship] = useState(null);posts
     const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
     const [mutualFriendsCount, setMutualFriendsCount] = useState(0);

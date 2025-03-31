@@ -23,6 +23,7 @@ import {
 import FriendAdd from '../../components/chat/FriendAdd';
 import Video from 'react-native-video';
 import CommentS from '../../styles/components/items/CommentS';
+import { oStackHome } from '../../navigations/HomeNavigation';
 const UpPost = (props) => {
     const { navigation } = props;
 
@@ -331,7 +332,8 @@ const UpPost = (props) => {
                 .unwrap()
                 .then((response) => {
                     console.log(response);
-                    navigation.goBack();
+                    const newPost = response.post;
+                    navigation.navigate(oStackHome.TabHome, {newPost})
                 })
                 .catch((error) => {
                     console.log('Error addPost:', error);
