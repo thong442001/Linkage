@@ -20,7 +20,6 @@ import { navigate } from '../navigations/NavigationService';
 import { getNotificationPreference } from '../noti/notificationHelper';
 import { io } from 'socket.io-client';
 
-
 const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
@@ -392,11 +391,11 @@ const AppNavigation = () => {
       notification?.content
     ) {
       const sender = notification.ID_relationship;
-      if(sender.ID_userA._id === user._id) {
+      if (sender.ID_userA._id === user._id) {
         return `${sender.ID_userB.first_name || ''} ${sender.ID_userB.last_name || ''} ${'đang phát trực tiếp'}`;
-      }else{
+      } else {
         return `${sender.ID_userA.first_name || ''} ${sender.ID_userA.last_name || ''} ${'đang phát trực tiếp'}`;
-      }      
+      }
     }
 
     // 10. Thông báo mời chơi game 3 lá
@@ -551,19 +550,19 @@ const AppNavigation = () => {
     try {
       const channelId = getChannelId(notification?.type);
       const isEnabled = await getNotificationPreference(channelId);
-  
+
       if (!isEnabled) {
         console.log(`🔕 Thông báo bị tắt cho channel: ${channelId}`);
         return;
       }
-  
+
       const formattedData = {};
       Object.keys(notification).forEach(key => {
         formattedData[key] = typeof notification[key] === 'string'
           ? notification[key]
           : JSON.stringify(notification[key]);
       });
-  
+
       await notifee.displayNotification({
         title: notification?.title || 'Thông báo',
         body: generateNotificationContent(notification, user),
@@ -573,7 +572,7 @@ const AppNavigation = () => {
           smallIcon: 'ic_launcher',
         },
       });
-  
+
     } catch (error) {
       console.error('❌ Lỗi khi hiển thị thông báo:', error);
     }
@@ -598,74 +597,74 @@ const AppNavigation = () => {
   }, []);
 
   useEffect(() => {
-   // Khi app đang mở
-  const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
-    try {
-      console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
-
-      if (!remoteMessage?.data?.notification) {
-        console.warn('⚠ Không có dữ liệu notification');
-        return;
-      }
-
-      let notification;
+    // Khi app đang mở
+    const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
       try {
-        notification = JSON.parse(remoteMessage.data.notification);
-      } catch (error) {
-        console.error('❌ Lỗi khi parse JSON notification:', error);
-        return;
-      }
+        console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
 
-      console.log('✅ Đã parse notification:', notification);
-
-      // Nếu thông báo là "Tài khoản bị khóa"
-      if (notification?.type === 'Tài khoản bị khóa') {
-        console.log('🔒 Tài khoản bị khóa - Đăng xuất và chuyển về trang login');
-        onLogoutAndNavigate(); 
-        return; 
-      }
-
-      // Hiển thị thông báo cho các loại khác
-      await showNotification(notification);
-
-    } catch (error) {
-      console.error('❌ Lỗi khi xử lý thông báo:', error);
-    }
-  });
-// Khi app chạy nền và người dùng nhấn vào thông báo
-const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
-  remoteMessage => {
-    console.log('🔔 Người dùng nhấn vào thông báo khi app chạy nền:', remoteMessage);
-    if (remoteMessage?.data?.notification) {
-      let notification;
-      try {
-        notification = JSON.parse(remoteMessage.data.notification);
-        if (notification?.type === 'Tài khoản bị khóa') {
-          console.log('🔒 Tài khoản bị khóa khi nhấn thông báo - Đăng xuất');
-          onLogout();
+        if (!remoteMessage?.data?.notification) {
+          console.warn('⚠ Không có dữ liệu notification');
+          return;
         }
+
+        let notification;
+        try {
+          notification = JSON.parse(remoteMessage.data.notification);
+        } catch (error) {
+          console.error('❌ Lỗi khi parse JSON notification:', error);
+          return;
+        }
+
+        console.log('✅ Đã parse notification:', notification);
+
+        // Nếu thông báo là "Tài khoản bị khóa"
+        if (notification?.type === 'Tài khoản bị khóa') {
+          console.log('🔒 Tài khoản bị khóa - Đăng xuất và chuyển về trang login');
+          onLogoutAndNavigate();
+          return;
+        }
+
+        // Hiển thị thông báo cho các loại khác
+        await showNotification(notification);
+
       } catch (error) {
-        console.error('❌ Lỗi khi parse JSON notification:', error);
+        console.error('❌ Lỗi khi xử lý thông báo:', error);
       }
-    }
-  },
-);
- // Khi app bị kill và mở từ thông báo
- messaging().getInitialNotification().then(remoteMessage => {
-  if (remoteMessage?.data?.notification) {
-    let notification;
-    try {
-      notification = JSON.parse(remoteMessage.data.notification);
-      console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
-      if (notification?.type === 'Tài khoản bị khóa') {
-        console.log('🔒 Tài khoản bị khóa khi mở app - Đăng xuất');
-        onLogout();
+    });
+    // Khi app chạy nền và người dùng nhấn vào thông báo
+    const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
+      remoteMessage => {
+        console.log('🔔 Người dùng nhấn vào thông báo khi app chạy nền:', remoteMessage);
+        if (remoteMessage?.data?.notification) {
+          let notification;
+          try {
+            notification = JSON.parse(remoteMessage.data.notification);
+            if (notification?.type === 'Tài khoản bị khóa') {
+              console.log('🔒 Tài khoản bị khóa khi nhấn thông báo - Đăng xuất');
+              onLogout();
+            }
+          } catch (error) {
+            console.error('❌ Lỗi khi parse JSON notification:', error);
+          }
+        }
+      },
+    );
+    // Khi app bị kill và mở từ thông báo
+    messaging().getInitialNotification().then(remoteMessage => {
+      if (remoteMessage?.data?.notification) {
+        let notification;
+        try {
+          notification = JSON.parse(remoteMessage.data.notification);
+          console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
+          if (notification?.type === 'Tài khoản bị khóa') {
+            console.log('🔒 Tài khoản bị khóa khi mở app - Đăng xuất');
+            onLogout();
+          }
+        } catch (error) {
+          console.error('❌ Lỗi khi parse JSON notification:', error);
+        }
       }
-    } catch (error) {
-      console.error('❌ Lỗi khi parse JSON notification:', error);
-    }
-  }
-});
+    });
 
     const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
