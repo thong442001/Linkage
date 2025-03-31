@@ -51,12 +51,12 @@ const Setting = props => {
   };
 
   const channels = [
-    { id: 'message-channel', name: 'Tin nhắn' },
-    { id: 'friend-request-channel', name: 'Lời mời kết bạn' },
-    { id: 'call-channel', name: 'Cuộc gọi' },
-    { id: 'livestream-channel', name: 'Livestream' },
-    { id: 'comment-channel', name: 'Bình luận' },
-    { id: 'post-channel', name: 'Bài viết mới' },
+    { id: 'message-channel', name: 'Tắt thông báo tin nhắn' },
+    // { id: 'friend-request-channel', name: 'Lời mời kết bạn' },
+    { id: 'call-channel', name: 'Tắt thông báo cuộc gọi' },
+    // { id: 'livestream-channel', name: 'Livestream' },
+    // { id: 'comment-channel', name: 'Đã bình luận vào bài viết của bạn' },
+    { id: 'post-channel', name: 'Tắt thông báo bài viết mới của bạn bè' },
   ];
 
   const settingsOptions = [
@@ -100,6 +100,7 @@ const Setting = props => {
     const newStatus = !preferences[channelId];
     setPreferences({ ...preferences, [channelId]: newStatus });
     await setNotificationPreference(channelId, newStatus);
+    setPreferences({ ...preferences, [channelId]: newStatus }); // Cập nhật state sau khi lưu
   };
 
   const toggleNotificationList = () => {
