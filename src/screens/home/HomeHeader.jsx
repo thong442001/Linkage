@@ -19,7 +19,7 @@ const HomeHeader = ({ navigation, me, headerTranslate }) => {
       ]}>
       {/* Logo, search, chat icons */}
       <View style={HomeS.header}>
-        
+
         <View style={HomeS.logo}>
           <Image
             style={{ width: 15, height: 22 }}
@@ -31,10 +31,10 @@ const HomeHeader = ({ navigation, me, headerTranslate }) => {
           <TouchableOpacity onPress={() => navigation.navigate('QRScannerScreen')} style={HomeS.iconsPadding}>
             <Icon name="scan-outline" size={25} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={HomeS.iconsPadding}>
             <Icon name="add" size={25} color="black" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={HomeS.iconsPadding}
             onPress={() => navigation.navigate(oStackHome.Search.name)}>
@@ -49,7 +49,7 @@ const HomeHeader = ({ navigation, me, headerTranslate }) => {
       </View>
 
     </Animated.View>
-    
+
   );
 };
 

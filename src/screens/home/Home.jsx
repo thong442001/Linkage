@@ -168,7 +168,7 @@ const Home = props => {
     }
   }, [route.params?.isRestored, route.params?.restoredPost, me?._id]);
 
-  
+
 
   const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
     setPosts(prevPosts =>

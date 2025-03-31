@@ -45,9 +45,9 @@ const PlayerSection = memo(({ isMe, group }) => (
             ? `${group?.members[0]?.first_name} ${group?.members[0]?.last_name}`
             : `${group.members[1].first_name} ${group.members[1].last_name}`}
         </Text>
-        {isMe && (
+        {/* {!isMe && (
           <Text style={styles.statusText}>Đang chờ phản hồi</Text>
-        )}
+        )} */}
       </View>
     </View>
     <View style={styles.cardContainer}>

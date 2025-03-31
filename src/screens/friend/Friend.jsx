@@ -12,7 +12,7 @@ import ItemFriend from '../../components/items/ItemFriend';
 import ItemNewFriend from '../../components/items/ItemNewFriend';
 import styles from '../../styles/screens/friend/FriendNoti';
 import FriendRequestItem from '../../components/items/FriendRequestItem';
-
+import { oStackHome } from '../../navigations/HomeNavigation';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getAllLoiMoiKetBan,
@@ -137,12 +137,17 @@ const Friend = props => {
       <View style={styles.HeaderWrap}>
         <Text style={[styles.title, { color: 'black' }]}> Bạn bè</Text>
 
-        <Icon
-          style={styles.findButton}
-          name="search"
-          size={25}
-          color={'black'}
-        />
+        <TouchableOpacity
+          onPress={() => navigation.navigate(oStackHome.Search.name)}
+        >
+          <Icon
+            style={styles.findButton}
+            name="search"
+            size={25}
+            color={'black'}
+          />
+        </TouchableOpacity>
+
       </View>
       <View style={styles.goiYWrap}>
         <Text

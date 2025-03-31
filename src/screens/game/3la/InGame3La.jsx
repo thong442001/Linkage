@@ -143,10 +143,10 @@ const InGame3La = ({ route, navigation }) => {
             }
         });
 
-        socket.on('lang-nghe-thoat-choi-game-3-la', (ID_group) => {
-            console.log('thoat');
-            navigation.navigate('Chat', { ID_group: ID_group });
-        });
+        // socket.on('lang-nghe-thoat-choi-game-3-la', (ID_group) => {
+        //     console.log('thoat');
+        //     navigation.navigate('Chat', { ID_group: ID_group });
+        // });
 
         return () => {
             socket.off('lang-nghe-bat-dau-game-3la');
@@ -159,7 +159,8 @@ const InGame3La = ({ route, navigation }) => {
 
     // Xử lý thoát game
     const handleExit = useCallback(() => {
-        socket.emit('thoat-choi-game-3-la', { ID_group: group._id });
+        //socket.emit('thoat-choi-game-3-la', { ID_group: group._id });
+        navigation.navigate('Chat', { ID_group: group._id });
     }, [navigation, group]);
 
     // Xử lý sẵn sàng
