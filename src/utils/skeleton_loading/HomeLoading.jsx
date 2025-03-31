@@ -152,6 +152,5 @@ const HomeS = StyleSheet.create({
     width: width * 0.1,
     height: width * 0.1,
     borderRadius: 50,
-    borderWidth: 1,
   },
 });
