@@ -456,14 +456,14 @@ const styles = StyleSheet.create({
     },
     boxInteract: {
         flexDirection: 'row',
-        gap: width * 0.025,
+        gap: width * 0.02, // Khoảng cách giữa các phần tử
         marginTop: height * 0.005,
     },
     boxInteract2: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: '100%',
+        width: '110%',
         flexWrap: 'wrap',
     },
     boxContent: {

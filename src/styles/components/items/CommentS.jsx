@@ -10,10 +10,18 @@ const CommentS = StyleSheet.create({
     header1: {
         backgroundColor: 'white',
         borderColor: 'gray',
-        borderWidth: 0.4,
+        borderTopWidth: 0.5,
+        borderRightWidth: 0.5,
+        borderLeftWidth: 0.5,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        marginHorizontal: width * 0.02
         // borderRadius: 7,
-        borderTopLeftRadius: 7,
-        borderTopRightRadius: 7,
+        // shadowColor: '#000',
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 0.25,
+        // shadowRadius: 3.84,
+        // elevation: 5, // Dành cho Android
     },
     header2: {
     },
