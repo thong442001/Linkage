@@ -38,6 +38,10 @@ const ListComment = memo(({ comment, onReply }) => {
     }); // Vị trí của menu
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
+    const [mediaModalVisible, setMediaModalVisible] = useState(false); // State để hiển thị modal ảnh/video
+    const [mediaContent, setMediaContent] = useState(null); // Nội dung media để hiển thị trong modal
+    const [mediaType, setMediaType] = useState(null); // Loại media: 'image' hoặc 'video'
+
     useEffect(() => {
         const updateDiff = () => {
             const now = Date.now();
@@ -93,6 +97,14 @@ const ListComment = memo(({ comment, onReply }) => {
                 setReactionsVisible(true);
             });
         }
+    };
+
+
+    // Hàm mở modal khi nhấn vào ảnh hoặc video
+    const handleMediaPress = (content, type) => {
+        setMediaContent(content);
+        setMediaType(type);
+        setMediaModalVisible(true);
     };
 
     // lọc reactions 
@@ -230,14 +242,14 @@ const ListComment = memo(({ comment, onReply }) => {
                 <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
 
-                    {/* Kiểm tra nếu có replys thì mới hiển thị đường kẻ */}
+                    {/* Kiểm tra nếu có replys thì mới hiển thị đường kẻ
                     {replys.length > 0 && (
                         <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
                             <Svg height={totalHeight} width="20">
                                 <Path d={`M 4 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
                             </Svg>
                         </View>
-                    )}
+                    )} */}
                 </View>
 
 
@@ -245,20 +257,22 @@ const ListComment = memo(({ comment, onReply }) => {
                     <View>
                         <View style={styles.boxContent}>
                             <Text style={styles.name}>{comment.ID_user.first_name} {comment.ID_user.last_name}</Text>
-                            {
-                                comment.type == 'text' ? (
-                                    <Text style={styles.commentText}>{comment.content}</Text>
-                                ) : comment.type == 'image' ? (
+                            {comment.type === 'text' ? (
+                                <Text style={styles.commentText}>{comment.content}</Text>
+                            ) : comment.type === 'image' ? (
+                                <TouchableOpacity onPress={() => handleMediaPress(comment.content, 'image')}>
                                     <Image style={styles.messageImage} source={{ uri: comment.content }} />
-                                ) : comment.type == 'video' && (
+                                </TouchableOpacity>
+                            ) : comment.type === 'video' && (
+                                <TouchableOpacity onPress={() => handleMediaPress(comment.content, 'video')}>
                                     <Video
                                         source={{ uri: comment.content }}
                                         style={styles.messageVideo}
                                         controls={true}
-                                        resizeMode="contain"
+                                        resizeMode="cover"
                                     />
-                                )
-                            }
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
 
@@ -364,6 +378,37 @@ const ListComment = memo(({ comment, onReply }) => {
                 </TouchableWithoutFeedback>
             </Modal >
 
+
+            {/* Modal hiển thị ảnh hoặc video */}
+            <Modal
+                visible={mediaModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setMediaModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setMediaModalVisible(false)}>
+                    <View style={styles.mediaModalOverlay}>
+                        <View style={styles.mediaModalContent}>
+                            {mediaType === 'image' && (
+                                <Image
+                                    source={{ uri: mediaContent }}
+                                    style={styles.fullScreenMedia}
+                                    resizeMode="contain"
+                                />
+                            )}
+                            {mediaType === 'video' && (
+                                <Video
+                                    source={{ uri: mediaContent }}
+                                    style={styles.fullScreenMedia}
+                                    controls={true}
+                                    resizeMode="contain"
+                                    paused={false}
+                                />
+                            )}
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
             {/* Chỉ hiển thị reply cấp 1, không thụt tiếp vào nữa */}
             {/* <FlatList
                 data={replys}
@@ -483,5 +528,21 @@ const styles = StyleSheet.create({
         fontSize: width * 0.04,
         color: "#000",
         alignSelf: 'flex-end',
+    },
+    mediaModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    mediaModalContent: {
+        width: width * 0.9,
+        height: height * 0.7,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullScreenMedia: {
+        width: '100%',
+        height: '100%',
     },
 });

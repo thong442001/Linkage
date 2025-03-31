@@ -18,7 +18,7 @@ import {
     deleteComment_reaction, // api delete reaction
 } from '../../rtk/API';
 import Svg, { Path } from 'react-native-svg';
-const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout }) => {
+const ListCommentReply = memo(({ comment, onReply, level = 0 }) => {
 
     const dispatch = useDispatch()
     const reactions = useSelector(state => state.app.reactions);
@@ -38,6 +38,10 @@ const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout })
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
     const [replyHeights, setReplyHeights] = useState([])
+
+    const [mediaModalVisible, setMediaModalVisible] = useState(false); // State để hiển thị modal ảnh/video
+    const [mediaContent, setMediaContent] = useState(null); // Nội dung media để hiển thị trong modal
+    const [mediaType, setMediaType] = useState(null); // Loại media: 'image' hoặc 'video'
 
     const handleLayout = (index, event) => {
         const { height } = event.nativeEvent.layout;
@@ -59,7 +63,7 @@ const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout })
 
     const baseHeight = 0; // Chiều cao của đường kẻ cho reply đầu tiên
     const extraHeight = 110; // Khoảng cách tăng thêm cho mỗi reply sau đó
-    const totalHeight = replyHeights.reduce((sum, height) => sum + (height || 0), 0) + baseHeight ;
+    const totalHeight = replyHeights.reduce((sum, height) => sum + (height || 0), 0) + baseHeight;
 
     const renderReply = useCallback(({ item, index }) => (
         <ListCommentReply
@@ -67,8 +71,8 @@ const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout })
             onReply={(e) => onReply(e)}
             isReply={true}
             level={2}
-            index={index} // Truyền index vào
-            onLayout={handleLayout} // Truyền handleLayout vào
+        // index={index} // Truyền index vào
+        // onLayout={handleLayout} // Truyền handleLayout vào
         />
     ), [onReply, handleLayout]);
 
@@ -122,6 +126,13 @@ const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout })
                 setReactionsVisible(true);
             });
         }
+    };
+
+    // Hàm mở modal khi nhấn vào ảnh hoặc video
+    const handleMediaPress = (content, type) => {
+        setMediaContent(content);
+        setMediaType(type);
+        setMediaModalVisible(true);
     };
 
     // lọc reactions 
@@ -244,70 +255,47 @@ const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout })
 
     return (
         <View style={[styles.container, level > 0 && styles.replyContainer]}
-            onLayout={typeof onLayout === 'function' ? (event) => onLayout(index, event) : undefined}
+        // onLayout={typeof onLayout === 'function' ? (event) => onLayout(index, event) : undefined}
         >
-            <View style={{ flexDirection: 'row', marginTop: 10, maxWidth: "78%", paddingLeft: level === 1 ? 20 : level === 2 ? 80 : 130 }}
+            <View style={{ flexDirection: 'row', marginTop: 10, maxWidth: "78%", paddingLeft: level === 1 ? 60 : level === 2 ? 60 : 130 }}
             >
                 <View style={{ flexDirection: 'row' }}                >
-                    {/* Đường kẻ vuông góc dưới bên trái */}
-                    {
-                        level <= 2 && (
-                            <Svg height="50" width="50">
-                                {/* Đoạn thẳng đi xuống */}
-                                <Path
-                                    d="M 2 0 V 20"
-                                    stroke="gray"
-                                    strokeWidth="1"
-                                    fill="transparent"
-                                />
-                                {/* Đoạn cong bo góc */}
-                                <Path
-                                    d="M 2 17 Q 2 30 20 30"
-                                    stroke="gray"
-                                    strokeWidth="1"
-                                    fill="transparent"
-                                />
-                                {/* Đoạn thẳng đi ngang */}
-                                <Path
-                                    d="M 20 30 H 45"
-                                    stroke="gray"
-                                    strokeWidth="1"
-                                    fill="transparent"
-                                />
-                            </Svg>
-                        )
-                    }
 
                     <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                         <Image style={styles.avatar} source={{ uri: comment.ID_user.avatar }} />
-                        {/* Kiểm tra nếu có replys thì mới hiển thị đường kẻ */}
+                        {/* Kiểm tra nếu có replys thì mới hiển thị đường kẻ
                         {replys.length > 0 && level == 1 && (
                             <View style={{ position: 'absolute', top: '100%', alignItems: 'center' }}>
                                 <Svg height={totalHeight} width="20">
                                     <Path d={`M 2 0 V ${totalHeight}`} stroke="gray" strokeWidth="2" fill="transparent" />
                                 </Svg>
                             </View>
-                        )}
+                        )} */}
                     </View>
 
                 </View>
 
-                <View >
-                    <View style={styles.boxContent}>
-                        <Text style={styles.name}>{comment.ID_user.first_name} {comment.ID_user.last_name}</Text>
-                        {comment.type === 'text' ? (
-                            <Text style={styles.commentText}>{comment.content}</Text>
-                        ) : comment.type === 'image' ? (
-                            <Image style={styles.messageImage} source={{ uri: comment.content }} />
-                        ) : comment.type === 'video' && (
-                            <Video
-                                source={{ uri: comment.content }}
-                                style={styles.messageVideo}
-                                controls
-                                resizeMode="contain"
-                            />
-                        )}
-
+                <View style = {{Width: "100%"}}>
+                    <View>
+                        <View style={styles.boxContent}>
+                            <Text style={styles.name}>{comment.ID_user.first_name} {comment.ID_user.last_name}</Text>
+                            {comment.type === 'text' ? (
+                                <Text style={styles.commentText}>{comment.content}</Text>
+                            ) : comment.type === 'image' ? (
+                                <TouchableOpacity onPress={() => handleMediaPress(comment.content, 'image')}>
+                                    <Image style={styles.messageImage} source={{ uri: comment.content }} />
+                                </TouchableOpacity>
+                            ) : comment.type === 'video' && (
+                                <TouchableOpacity onPress={() => handleMediaPress(comment.content, 'video')}>
+                                    <Video
+                                        source={{ uri: comment.content }}
+                                        style={styles.messageVideo}
+                                        controls={true}
+                                        resizeMode="cover"
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
                     <View style={styles.boxInteract2}>
                         <View style={styles.boxInteract}>
@@ -409,6 +397,37 @@ const ListCommentReply = memo(({ comment, onReply, level = 0, index, onLayout })
                 </TouchableWithoutFeedback>
             </Modal >
 
+            {/* Modal hiển thị ảnh hoặc video */}
+            <Modal
+                visible={mediaModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setMediaModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setMediaModalVisible(false)}>
+                    <View style={styles.mediaModalOverlay}>
+                        <View style={styles.mediaModalContent}>
+                            {mediaType === 'image' && (
+                                <Image
+                                    source={{ uri: mediaContent }}
+                                    style={styles.fullScreenMedia}
+                                    resizeMode="contain"
+                                />
+                            )}
+                            {mediaType === 'video' && (
+                                <Video
+                                    source={{ uri: mediaContent }}
+                                    style={styles.fullScreenMedia}
+                                    controls={true}
+                                    resizeMode="contain"
+                                    paused={false}
+                                />
+                            )}
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
             {/* Chỉ thụt vào ở cấp 1, cấp cao hơn không thụt thêm */}
             <FlatList
                 data={replys}
@@ -453,7 +472,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#d9d9d990',
         borderRadius: width * 0.05,
         paddingLeft: width * 0.04,
-        maxWidth: '80%',
+        maxWidth: '100%',
         alignSelf: 'flex-start',
     },
     name: {
@@ -472,7 +491,7 @@ const styles = StyleSheet.create({
         borderRadius: width * 0.02,
     },
     messageVideo: {
-        width: width * 0.4,
+        width: width * 0.5,
         height: width * 0.6,
         borderRadius: width * 0.02,
     },
@@ -514,5 +533,21 @@ const styles = StyleSheet.create({
         width: width * 0.08,
         height: width * 0.002,
         backgroundColor: 'gray',
-    }
+    },
+    mediaModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    mediaModalContent: {
+        width: width * 0.9,
+        height: height * 0.7,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullScreenMedia: {
+        width: '100%',
+        height: '100%',
+    },
 });
