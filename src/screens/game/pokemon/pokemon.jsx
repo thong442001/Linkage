@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, StyleSheet, Image, ImageBackground } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ImageBackground,
+} from 'react-native';
+import {oStackHome} from '../../../navigations/HomeNavigation';
+import {navigate} from '../../../navigations/NavigationService';
 
 const images = {
   image1: require('../../../../assets/pokemon_game/0001.jpg'),
@@ -22,17 +32,24 @@ const backgroundImage = require('../../../../assets/pokemon_game/background.jpg'
 const pokeball = require('../../../../assets/pokemon_game/pokeball.jpg');
 
 // Component màn hình chờ
-const WelcomeScreen = ({ onStart }) => {
+const WelcomeScreen = ({onStart, onBack}) => {
+  const navigation = useNavigation();
+
   return (
     <ImageBackground source={backgroundImage} style={styles.welcomeContainer}>
       <View style={styles.overlay}>
-        <Text style={styles.welcomeTitle}>Chào Mừng Đến Với Trò Chơi Ghép Cặp Pokémon!</Text>
+        <Text style={styles.welcomeTitle}>
+          Chào Mừng Đến Với Trò Chơi Ghép Cặp Pokémon!
+        </Text>
         <Text style={styles.welcomeText}>
-          Hãy ghép các cặp Pokémon giống nhau trong thời gian 60 giây. 
-          Điểm +10 khi ghép đúng, -5 khi sai. Chúc bạn chơi vui!
+          Hãy ghép các cặp Pokémon giống nhau. Điểm +10 khi ghép đúng, -5 khi
+          sai. Chúc bạn chơi vui!
         </Text>
         <TouchableOpacity style={styles.startButton} onPress={onStart}>
           <Text style={styles.startButtonText}>Bắt Đầu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={navigation.goBack}>
+          <Text style={styles.backButtonText}>Quay Về</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -40,38 +57,38 @@ const WelcomeScreen = ({ onStart }) => {
 };
 
 // Component trò chơi
-const GameScreen = () => {
+const GameScreen = ({onBack}) => {
   const initialCards = [
-    { id: 1, pairId: 1, image: 'image1', isFlipped: false, isMatched: false },
-    { id: 2, pairId: 1, image: 'image1', isFlipped: false, isMatched: false },
-    { id: 3, pairId: 2, image: 'image2', isFlipped: false, isMatched: false },
-    { id: 4, pairId: 2, image: 'image2', isFlipped: false, isMatched: false },
-    { id: 5, pairId: 3, image: 'image3', isFlipped: false, isMatched: false },
-    { id: 6, pairId: 3, image: 'image3', isFlipped: false, isMatched: false },
-    { id: 7, pairId: 4, image: 'image4', isFlipped: false, isMatched: false },
-    { id: 8, pairId: 4, image: 'image4', isFlipped: false, isMatched: false },
-    { id: 9, pairId: 5, image: 'image5', isFlipped: false, isMatched: false },
-    { id: 10, pairId: 5, image: 'image5', isFlipped: false, isMatched: false },
-    { id: 11, pairId: 6, image: 'image6', isFlipped: false, isMatched: false },
-    { id: 12, pairId: 6, image: 'image6', isFlipped: false, isMatched: false },
-    { id: 13, pairId: 7, image: 'image7', isFlipped: false, isMatched: false },
-    { id: 14, pairId: 7, image: 'image7', isFlipped: false, isMatched: false },
-    { id: 15, pairId: 8, image: 'image8', isFlipped: false, isMatched: false },
-    { id: 16, pairId: 8, image: 'image8', isFlipped: false, isMatched: false },
-    { id: 17, pairId: 9, image: 'image9', isFlipped: false, isMatched: false },
-    { id: 18, pairId: 9, image: 'image9', isFlipped: false, isMatched: false },
-    { id: 19, pairId: 10, image: 'image10', isFlipped: false, isMatched: false },
-    { id: 20, pairId: 10, image: 'image10', isFlipped: false, isMatched: false },
-    { id: 21, pairId: 11, image: 'image11', isFlipped: false, isMatched: false },
-    { id: 22, pairId: 11, image: 'image11', isFlipped: false, isMatched: false },
-    { id: 23, pairId: 12, image: 'image12', isFlipped: false, isMatched: false },
-    { id: 24, pairId: 12, image: 'image12', isFlipped: false, isMatched: false },
-    { id: 25, pairId: 13, image: 'image13', isFlipped: false, isMatched: false },
-    { id: 26, pairId: 13, image: 'image13', isFlipped: false, isMatched: false },
-    { id: 27, pairId: 14, image: 'image14', isFlipped: false, isMatched: false },
-    { id: 28, pairId: 14, image: 'image14', isFlipped: false, isMatched: false },
-    { id: 29, pairId: 15, image: 'image15', isFlipped: false, isMatched: false },
-    { id: 30, pairId: 15, image: 'image15', isFlipped: false, isMatched: false },
+    {id: 1, pairId: 1, image: 'image1', isFlipped: false, isMatched: false},
+    {id: 2, pairId: 1, image: 'image1', isFlipped: false, isMatched: false},
+    {id: 3, pairId: 2, image: 'image2', isFlipped: false, isMatched: false},
+    {id: 4, pairId: 2, image: 'image2', isFlipped: false, isMatched: false},
+    {id: 5, pairId: 3, image: 'image3', isFlipped: false, isMatched: false},
+    {id: 6, pairId: 3, image: 'image3', isFlipped: false, isMatched: false},
+    {id: 7, pairId: 4, image: 'image4', isFlipped: false, isMatched: false},
+    {id: 8, pairId: 4, image: 'image4', isFlipped: false, isMatched: false},
+    {id: 9, pairId: 5, image: 'image5', isFlipped: false, isMatched: false},
+    {id: 10, pairId: 5, image: 'image5', isFlipped: false, isMatched: false},
+    {id: 11, pairId: 6, image: 'image6', isFlipped: false, isMatched: false},
+    {id: 12, pairId: 6, image: 'image6', isFlipped: false, isMatched: false},
+    {id: 13, pairId: 7, image: 'image7', isFlipped: false, isMatched: false},
+    {id: 14, pairId: 7, image: 'image7', isFlipped: false, isMatched: false},
+    {id: 15, pairId: 8, image: 'image8', isFlipped: false, isMatched: false},
+    {id: 16, pairId: 8, image: 'image8', isFlipped: false, isMatched: false},
+    {id: 17, pairId: 9, image: 'image9', isFlipped: false, isMatched: false},
+    {id: 18, pairId: 9, image: 'image9', isFlipped: false, isMatched: false},
+    {id: 19, pairId: 10, image: 'image10', isFlipped: false, isMatched: false},
+    {id: 20, pairId: 10, image: 'image10', isFlipped: false, isMatched: false},
+    {id: 21, pairId: 11, image: 'image11', isFlipped: false, isMatched: false},
+    {id: 22, pairId: 11, image: 'image11', isFlipped: false, isMatched: false},
+    {id: 23, pairId: 12, image: 'image12', isFlipped: false, isMatched: false},
+    {id: 24, pairId: 12, image: 'image12', isFlipped: false, isMatched: false},
+    {id: 25, pairId: 13, image: 'image13', isFlipped: false, isMatched: false},
+    {id: 26, pairId: 13, image: 'image13', isFlipped: false, isMatched: false},
+    {id: 27, pairId: 14, image: 'image14', isFlipped: false, isMatched: false},
+    {id: 28, pairId: 14, image: 'image14', isFlipped: false, isMatched: false},
+    {id: 29, pairId: 15, image: 'image15', isFlipped: false, isMatched: false},
+    {id: 30, pairId: 15, image: 'image15', isFlipped: false, isMatched: false},
   ];
 
   const [cards, setCards] = useState(shuffle(initialCards));
@@ -79,6 +96,14 @@ const GameScreen = () => {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(300);
   const [gameOver, setGameOver] = useState(false);
+  const [isWin, setIsWin] = useState(false);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (cards.every(card => card.isMatched)) {
+      setIsWin(true);
+    }
+  }, [cards]);
 
   function shuffle(array) {
     let currentIndex = array.length,
@@ -102,15 +127,20 @@ const GameScreen = () => {
       return () => clearInterval(timer);
     } else if (timeLeft === 0) {
       setGameOver(true);
-      Alert.alert("Hết giờ!", `Điểm của bạn: ${score}`);
     }
   }, [timeLeft, gameOver]);
 
-  const handleCardClick = (card) => {
-    if (card.isFlipped || card.isMatched || flippedCards.length >= 2 || gameOver) return;
+  const handleCardClick = card => {
+    if (
+      card.isFlipped ||
+      card.isMatched ||
+      flippedCards.length >= 2 ||
+      gameOver
+    )
+      return;
 
     const updatedCards = cards.map(c =>
-      c.id === card.id ? { ...c, isFlipped: true } : c
+      c.id === card.id ? {...c, isFlipped: true} : c,
     );
     setCards(updatedCards);
     setFlippedCards(prev => [...prev, card]);
@@ -129,16 +159,18 @@ const GameScreen = () => {
       setCards(prevCards =>
         prevCards.map(c =>
           c.id === first.id || c.id === second.id
-            ? { ...c, isMatched: true, isFlipped: false }
-            : c
-        )
+            ? {...c, isMatched: true, isFlipped: false}
+            : c,
+        ),
       );
       setScore(prev => prev + 10);
     } else {
       setCards(prevCards =>
         prevCards.map(c =>
-          c.id === first.id || c.id === second.id ? { ...c, isFlipped: false } : c
-        )
+          c.id === first.id || c.id === second.id
+            ? {...c, isFlipped: false}
+            : c,
+        ),
       );
       setScore(prev => Math.max(0, prev - 5));
     }
@@ -146,7 +178,6 @@ const GameScreen = () => {
 
     if (cards.every(c => c.isMatched)) {
       setGameOver(true);
-      Alert.alert("Chúc mừng!", `Bạn đã thắng! Điểm: ${score + 10}`);
     }
   };
 
@@ -158,9 +189,45 @@ const GameScreen = () => {
     setGameOver(false);
   };
 
+  if (isWin) {
+    return (
+      <View style={styles.winContainer}>
+        <Text style={styles.winText}>
+          Chúc mừng! Bạn đã chiến thắng với số điểm là: {score}
+        </Text>
+        <View style={styles.cangiua}>
+          <TouchableOpacity
+            style={styles.restartButton}
+            onPress={() => {
+              setCards(
+                initialCards.map(card => ({
+                  ...card,
+                  isFlipped: false,
+                  isMatched: false,
+                })),
+              );
+              setIsWin(false); // Reset trạng thái chiến thắng
+              resetGame();
+            }}>
+            <Text style={styles.restartButtonText}>Chơi lại</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={navigation.goBack}>
+            <Text style={styles.backButtonText}>Quay về</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <ImageBackground source={backgroundImage} style={styles.welcomeContainer}>
       <View style={styles.overlay}>
+        <TouchableOpacity style={styles.backButtoningame} onPress={onBack}>
+          <Text style={styles.backButtonText}>Quay Về</Text>
+        </TouchableOpacity>
+
         <Text style={styles.title}>Trò Chơi Ghép Cặp</Text>
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>Điểm: {score}</Text>
@@ -169,10 +236,10 @@ const GameScreen = () => {
         <View style={styles.grid}>
           {cards.map(card =>
             card.isMatched ? (
-              <View key={card.id} style={styles.cardPlaceholder} /> // Ô trống giữ vị trí
+              <View key={card.id} style={styles.cardPlaceholder} />
             ) : (
               <Card key={card.id} card={card} handleClick={handleCardClick} />
-            )
+            ),
           )}
         </View>
         {gameOver && (
@@ -186,16 +253,12 @@ const GameScreen = () => {
 };
 
 // Component Card
-const Card = ({ card, handleClick }) => {
+const Card = ({card, handleClick}) => {
   return (
     <TouchableOpacity
-      style={[
-        styles.card,
-        card.isFlipped ? styles.flippedCard : null,
-      ]}
+      style={[styles.card, card.isFlipped ? styles.flippedCard : null]}
       disabled={card.isMatched}
-      onPress={() => handleClick(card)}
-    >
+      onPress={() => handleClick(card)}>
       {card.isFlipped ? (
         <Image source={images[card.image]} style={styles.cardImage} />
       ) : (
@@ -213,9 +276,17 @@ const MemoryGameApp = () => {
     setIsGameStarted(true);
   };
 
+  const handleBackToWelcome = () => {
+    setIsGameStarted(false); // Quay về WelcomeScreen
+  };
+
   return (
     <>
-      {isGameStarted ? <GameScreen /> : <WelcomeScreen onStart={handleStartGame} />}
+      {isGameStarted ? (
+        <GameScreen onBack={handleBackToWelcome} />
+      ) : (
+        <WelcomeScreen onStart={handleStartGame} onBack={handleBackToWelcome} />
+      )}
     </>
   );
 };
@@ -228,14 +299,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   overlay: {
- top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    height: '100%',
+    width: '100%',
     position: 'absolute',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 20,
-    borderRadius: 15,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   welcomeTitle: {
@@ -244,7 +312,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     textShadowColor: '#000',
-    textShadowOffset: { width: 2, height: 2 },
+    textShadowOffset: {width: 2, height: 2},
     textShadowRadius: 5,
     marginBottom: 25,
   },
@@ -254,7 +322,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 3,
     marginBottom: 40,
   },
@@ -264,7 +332,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 35,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.5,
     shadowRadius: 3,
     elevation: 5,
@@ -274,7 +342,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#fff',
     textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 2,
   },
   title: {
@@ -282,7 +350,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#fff',
     textShadowColor: '#000',
-    textShadowOffset: { width: 2, height: 2 },
+    textShadowOffset: {width: 2, height: 2},
     textShadowRadius: 5,
     marginBottom: 25,
   },
@@ -297,7 +365,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
     textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 3,
   },
   grid: {
@@ -310,7 +378,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
@@ -326,7 +394,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'red',
   },
-  cardPlaceholder: { // Style cho ô trống
+  cardPlaceholder: {
+    // Style cho ô trống
     width: 70,
     height: 70,
     margin: 5,
@@ -351,7 +420,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.5,
     shadowRadius: 3,
     elevation: 5,
@@ -361,8 +430,50 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#fff',
     textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 2,
+  },
+  winContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  winText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 20,
+  },
+  restartButton: {
+    backgroundColor: 'green',
+    padding: 15,
+    borderRadius: 10,
+    margin: 10,
+  },
+  restartButtonText: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  backButton: {
+    backgroundColor: 'red',
+    padding: 15,
+    borderRadius: 10,
+    margin: 10,
+  },
+  backButtonText: {color: 'white', fontSize: 18, fontWeight: 'bold'},
+  backButtoningame: {
+    backgroundColor: 'red',
+    padding: 15,
+    borderRadius: 10,
+    margin: 10,
+    position: 'absolute', // Thêm thuộc tính này
+    top: 10,             // Đặt cách đỉnh 10px
+    left: 10,            // Đặt cách trái 10px
+  },
+  cangiua: {
+    flexDirection: 'row',
   },
 });
 

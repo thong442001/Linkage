@@ -474,105 +474,98 @@ const PostItem = memo(({
         }
     }
 
+
+
     return (
         <View style={styles.postContainer}>
             <View>
                 {/* Header share  */}
+                {/* Header share */}
                 {
-                    post.ID_post_shared &&
-                    <View>
-                        <View style={[styles.headerShare]}>
-                            <View style={styles.userInfo}>
-                                <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                                <View style={{ marginLeft: width * 0.01 }}>
-                                    <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
-                                    <View style={styles.boxName}>
-                                        <Text style={styles.time}>{timeAgo}</Text>
-                                        {/* <Icon name="earth" size={12} color="gray" /> */}
-                                        {
-                                            getIcon(post.status)
-                                        }
+                    post.ID_post_shared && (
+                        <View>
+                            <View style={[styles.headerShare]}>
+                                <View style={styles.userInfo}>
+                                    <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                                    <View style={{ marginLeft: width * 0.01 }}>
+                                        <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                                        <View style={styles.boxName}>
+                                            <Text style={styles.time}>{timeAgo}</Text>
+                                            {getIcon(post.status)}
+                                        </View>
                                     </View>
-
                                 </View>
 
-                            </View>
-
-                            <TouchableOpacity
-                                onPress={() =>
-                                    openBottomSheet(
-                                        25,
-                                        <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
-                                            {
-                                                ID_user != post.ID_user._id
-                                                    ? (
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        openBottomSheet(
+                                            25,
+                                            <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
+                                                {/* Nếu không phải tác giả, hiển thị "Báo cáo" */}
+                                                {ID_user !== post.ID_user._id ? (
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            closeBottomSheet();
+                                                            navigation.navigate('Report', { ID_post: post._id, ID_user: null });
+                                                        }}
+                                                        style={styles.deleteButton}
+                                                    >
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                            <Icon name="alert-circle" size={20} color="black" />
+                                                            <Text style={styles.deleteText}>Báo cáo</Text>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    <>
+                                                        {/* Nếu là tác giả, hiển thị tùy chọn dựa trên trạng thái _destroy */}
                                                         <TouchableOpacity
                                                             onPress={() => {
-                                                                closeBottomSheet()
-                                                                navigation.navigate('Report', { ID_post: post._id, ID_user: null })
+                                                                onDelete(); // Phục hồi hoặc Xóa bài viết
+                                                                closeBottomSheet();
                                                             }}
-                                                            style={[styles.deleteButton, post._destroy && { backgroundColor: "blue" }]}>
-                                                            <Text style={[styles.deleteText,]}
-                                                            >{
-                                                                    !post._destroy
-                                                                    && (
-                                                                        "Báo cáo"
-                                                                    )
-                                                                }
-                                                            </Text>
-                                                        </TouchableOpacity>
-                                                    ) : (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                onDelete()
-                                                                closeBottomSheet()
-                                                            }}
-                                                            style={[styles.deleteButton]}>
+                                                            style={styles.deleteButton}
+                                                        >
                                                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                <View>
-                                                                    <Icon name="trash" size={20} color="black" />
-                                                                </View>
-                                                                <Text style={[styles.deleteText,]}
-                                                                >{
-                                                                        post._destroy ? (
-                                                                            "Phục hồi"
-                                                                        ) : "Xóa bài viết"
-                                                                    }
+                                                                <Icon
+                                                                    name={post._destroy ? 'refresh-sharp' : 'trash'}
+                                                                    size={20}
+                                                                    color="black"
+                                                                />
+                                                                <Text style={styles.deleteText}>
+                                                                    {post._destroy ? 'Phục hồi' : 'Xóa bài viết'}
                                                                 </Text>
                                                             </View>
                                                         </TouchableOpacity>
-                                                    )
-                                            }
 
-                                            {
-                                                (post._destroy && ID_user == post.ID_user._id)
-                                                && (
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            onDeleteVinhVien()
-                                                            closeBottomSheet()
-                                                        }}
-                                                        style={styles.deleteButton}>
-                                                        <Text style={styles.deleteText}
-                                                        >Xóa vĩnh viễn
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                )
-                                            }
-                                        </View>,
-                                    )
-                                }
-
-                            >
-                                <Icon name="ellipsis-horizontal" size={22} color="black" />
-                            </TouchableOpacity>
+                                                        {/* Nếu bài viết đã bị xóa, thêm tùy chọn "Xóa vĩnh viễn" */}
+                                                        {post._destroy && (
+                                                            <TouchableOpacity
+                                                                onPress={() => {
+                                                                    onDeleteVinhVien();
+                                                                    closeBottomSheet();
+                                                                }}
+                                                                style={styles.deleteButton}
+                                                            >
+                                                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                    <Icon name="trash" size={20} color="black" />
+                                                                    <Text style={styles.deleteText}>Xóa vĩnh viễn</Text>
+                                                                </View>
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </View>
+                                        )
+                                    }
+                                >
+                                    <Icon name="ellipsis-horizontal" size={22} color="black" />
+                                </TouchableOpacity>
+                            </View>
+                            <View>
+                                {hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>}
+                            </View>
                         </View>
-                        <View>
-                            {
-                                hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>
-                            }
-                        </View>
-                    </View>
+                    )
                 }
                 {/* Header goc  */}
                 <View style={post.ID_post_shared ? styles.header1 : styles.header2} >
@@ -764,40 +757,44 @@ const PostItem = memo(({
                         hasMedia && renderMediaGrid(post.medias)
                     )
             }
-            <View style={styles.footer}>
-                {/* reactions of post */}
-                {post.post_reactions.length > 0 ? (
-                    <View style={styles.footer2}>
-                        <TouchableOpacity
-                            style={{ flexDirection: "row", alignItems: "center" }}
-                            onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
-                        >
-                            {topReactions.map((reaction, index) => (
-                                <Text key={index} style={{ color: 'black' }}>
-                                    {reaction.ID_reaction.icon}
+
+
+            {!post._destroy && (
+                <View style={styles.footer}>
+                    {/* reactions of post */}
+                    {post.post_reactions.length > 0 ? (
+                        <View style={styles.footer2}>
+                            <TouchableOpacity
+                                style={{ flexDirection: "row", alignItems: "center" }}
+                                onPress={() => { openBottomSheet(50, renderBottomSheetContent()), setIsVisible(true) }}
+                            >
+                                {topReactions.map((reaction, index) => (
+                                    <Text key={index} style={{ color: 'black' }}>
+                                        {reaction.ID_reaction.icon}
+                                    </Text>
+                                ))}
+                                <Text style={{ color: 'black', marginLeft: 5 }}>
+                                    {post.post_reactions.some(reaction => reaction.ID_user._id === ID_user)
+                                        ? post.post_reactions.length === 1
+                                            ? `${me?.first_name + " " + me?.last_name}`
+                                            : `Bạn và ${post.post_reactions.length - 1} người khác` // Bạn và người khác
+                                        : `${post.post_reactions.length}`} {/* Không có bạn */}
                                 </Text>
-                            ))}
-                            <Text style={{ color: 'black', marginLeft: 5 }}>
-                                {post.post_reactions.some(reaction => reaction.ID_user._id === ID_user)
-                                    ? post.post_reactions.length === 1
-                                        ? `${me?.first_name + " " + me?.last_name}`
-                                        : `Bạn và ${post.post_reactions.length - 1} người khác` // Bạn và người khác
-                                    : `${post.post_reactions.length}`} {/* Không có bạn */}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <View style={{ flex: 1 }} /> // Thêm View rỗng để giữ khoảng trống
-                )}
-                {/* số lượng bình luận luôn sát bên phải */}
-                <View>
-                    {post?.comments.length > 0 && (
-                        <Text style={styles.slReactionsOfPost}>
-                            {post?.comments.length} bình luận
-                        </Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View style={{ flex: 1 }} /> // Thêm View rỗng để giữ khoảng trống
                     )}
+                    {/* số lượng bình luận luôn sát bên phải */}
+                    <View>
+                        {post?.comments.length > 0 && (
+                            <Text style={styles.slReactionsOfPost}>
+                                {post?.comments.length} bình luận
+                            </Text>
+                        )}
+                    </View>
                 </View>
-            </View>
+            )}
 
             {
                 !post._destroy &&

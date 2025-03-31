@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, ScrollView, Modal } from "react-native";
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -69,7 +68,6 @@ const SettingChat = (props) => { // cần ID_group (param)
             await dispatch(deleteMember(paramsAPI))
                 .unwrap()
                 .then((response) => {
-
                     // bakc HomeChat
                     navigation.navigate("HomeChat");
                 })

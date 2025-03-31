@@ -1,5 +1,4 @@
 import {
-    StyleSheet,
     Text,
     View,
     Image,
@@ -8,9 +7,7 @@ import {
     TouchableWithoutFeedback,
     Modal,
     Pressable,
-    Alert,
-    Dimensions,
-    Animated
+    Animated,
 } from 'react-native';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -22,33 +19,27 @@ import {
     joinGroupPrivate,
     guiLoiMoiKetBan,
     chapNhanLoiMoiKetBan,
-    setRelationNguoiLa,
+    huyLoiMoiKetBan,
     editAvatarOfUser,
     editBackgroundOfUser,
     allProfile, // allProfile
     changeDestroyPost, // changeDestroy
     huyBanBe,// huy friend
+    editBioOfUser, // edit Bio Of User
 } from '../../rtk/API';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
-import HomeS from '../../styles/screens/home/HomeS';
 import ProfileS from '../../styles/screens/profile/ProfileS';
-import SelectAvatarDialog from '../../components/dialog/SelectAvatarDialog';
-import styles from '../../styles/screens/friend/FriendNoti';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { changeAvatar, changeBackground } from '../../rtk/Reducer';
 import axios from 'axios';
-import messaging from '@react-native-firebase/messaging';
 import ProfileLoading from '../../utils/skeleton_loading/ProfileLoading';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import { useFocusEffect } from '@react-navigation/native';
-import database from '@react-native-firebase/database';
-import { sendPushNotification } from '../services/NotificationService';
 import FriendLoading from '../../utils/skeleton_loading/FriendLoading';
 import PostProfileLoading from '../../utils/skeleton_loading/PostProfileLoading';
-const { height } = Dimensions.get('window');
+import EditBioModal from '../../components/dialog/EditBioModal';
 
-const HEADER_HEIGHT = height * 0.1;
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -57,12 +48,12 @@ const Profile = props => {
 
     const dispatch = useDispatch();
     const me = useSelector(state => state.app.user);
-    const token = useSelector(state => state.app.token);
     const [avatar, setavatar] = useState('');
+    const [bio, setBio] = useState(null);
+    const [isEditBio, setIsEditBio] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isImageModalVisible, setImageModalVisible] = useState(false);
     const [liveID, setliveID] = useState('');
-    const FCM_SERVER_KEY = "BOa0rmhBQ7uccvqyUyiwuj-U7e_ljHnHI_jyZhobPyBPNJmP6AadvOuZc8dVd8QKxdFKpBp_RD-vWwEdc0R5o54";
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -70,7 +61,6 @@ const Profile = props => {
     const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
     const [mutualFriendsCount, setMutualFriendsCount] = useState(0);
-    const [menuVisible, setMenuVisible] = useState(false);
     const [dialogReLoad, setDialogreload] = useState(false);
     const [loading, setloading] = useState(true);
     const [isLoading, setisLoading] = useState(false);
@@ -133,6 +123,10 @@ const Profile = props => {
 
     const openBottomSheetHuyBanBe = () => {
         openBottomSheet(25, detail_selection_huy_friend());
+    };
+
+    const openBottomSheetPhanHoi = () => {
+        openBottomSheet(25, detail_selection_phan_hoi());
     };
 
     const uploadFile = async file => {
@@ -426,6 +420,36 @@ const Profile = props => {
         );
     };
 
+    const detail_selection_phan_hoi = () => {
+        return (
+            <View style={ProfileS.containerBottomSheet}>
+                <View style={ProfileS.rectangle}>
+                    <View style={ProfileS.lineBottomSheet}></View>
+                </View>
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={callChapNhanLoiMoiKetBan}
+                >
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="checkmark-circle" size={25} color={'blue'} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Chấp nhận lời mời kết bạn</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={ProfileS.option}
+                    onPress={callSetRelationNguoiLa}
+                >
+                    <View style={ProfileS.anhBia}>
+                        <Icon name="close-circle" size={25} color={'red'} />
+                    </View>
+                    <Text style={ProfileS.optionText}>Từ chối lời mời kết bạn</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
     const callAllProfile = async () => {
         try {
             setloading(true);
@@ -449,6 +473,7 @@ const Profile = props => {
                         },
                         stories: response.stories || []
                     });
+                    setBio(response.user.bio)
                     setMutualFriendsCount(response.mutualFriendsCount);
                     setloading(false);
                 })
@@ -494,6 +519,7 @@ const Profile = props => {
                 .unwrap()
                 .then(response => {
                     setRelationship(response.relationship);
+                    closeBottomSheet();
                 })
                 .catch(error => {
                     console.log('Error2 callChapNhanLoiMoiKetBan:', error);
@@ -509,10 +535,11 @@ const Profile = props => {
             const paramsAPI = {
                 ID_relationship: relationship?._id,
             };
-            await dispatch(setRelationNguoiLa(paramsAPI))
+            await dispatch(huyLoiMoiKetBan(paramsAPI))
                 .unwrap()
                 .then(response => {
                     setRelationship(response.relationship);
+                    closeBottomSheet();
                 })
                 .catch(error => {
                     console.log('Error2 callSetRelationNguoiLa:', error);
@@ -621,6 +648,26 @@ const Profile = props => {
         await getID_groupPrivate(params?._id, me?._id);
     };
 
+    const callEditBioOfUser = async (text) => {
+        try {
+            const paramsAPI = {
+                ID_user: me._id,
+                bio: text
+            };
+            await dispatch(editBioOfUser(paramsAPI))
+                .unwrap()
+                .then(async (response) => {
+                    //console.log(response);
+                    setBio(text);
+                })
+                .catch(error => {
+                    console.log('❌ Lỗi editBioOfUser:', error);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const renderPosts = useCallback(({ item }) => (
         <ProfilePage
             post={item}
@@ -727,9 +774,15 @@ const Profile = props => {
                         </View>
                         <View style={ProfileS.boxBackground}>
                             <Text style={ProfileS.name}>
-                                {' '}
+                                {/* {' '} */}
                                 {user?.first_name} {user?.last_name}
                             </Text>
+                            {/* Bio */}
+                            {bio && (
+                                <Text style={ProfileS.bio}>
+                                    {bio}
+                                </Text>
+                            )}
                             <View style={ProfileS.boxInformation}>
                                 <Text style={ProfileS.friendNumber}>{friendRelationships?.length}</Text>
                                 <Text style={[ProfileS.friendNumber, { color: '#D6D6D6' }]}>
@@ -767,22 +820,22 @@ const Profile = props => {
                                         relationship?.relation == 'A gửi lời kết bạn B') ||
                                         (relationship?.ID_userB == me._id &&
                                             relationship?.relation == 'B gửi lời kết bạn A')) && (
-                                        <TouchableOpacity
-                                            style={ProfileS.btnAddStory}
-                                            onPress={callSetRelationNguoiLa}>
-                                            <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
-                                        </TouchableOpacity>
-                                    )}
+                                            <TouchableOpacity
+                                                style={ProfileS.btnAddStory}
+                                                onPress={callSetRelationNguoiLa}>
+                                                <Text style={ProfileS.textAddStory}>Hủy lời mời</Text>
+                                            </TouchableOpacity>
+                                        )}
                                     {((relationship?.ID_userA == me._id &&
                                         relationship?.relation == 'B gửi lời kết bạn A') ||
                                         (relationship?.ID_userB == me._id &&
                                             relationship?.relation == 'A gửi lời kết bạn B')) && (
-                                        <TouchableOpacity
-                                            style={ProfileS.btnAddStory}
-                                            onPress={() => setMenuVisible(true)}>
-                                            <Text style={ProfileS.textAddStory}>+ Phản hồi</Text>
-                                        </TouchableOpacity>
-                                    )}
+                                            <TouchableOpacity
+                                                style={ProfileS.btnAddStory}
+                                                onPress={openBottomSheetPhanHoi}>
+                                                <Text style={ProfileS.textAddStory}>+ Phản hồi</Text>
+                                            </TouchableOpacity>
+                                        )}
 
                                     <View style={ProfileS.boxEdit}>
                                         <TouchableOpacity
@@ -804,30 +857,76 @@ const Profile = props => {
                                 </View>
                             ) : (
                                 <View>
-                                    <TouchableOpacity style={ProfileS.btnAddStory}>
+                                    <TouchableOpacity
+                                        style={ProfileS.btnAddStory}
+                                        onPress={() => navigation.navigate('PostStory')}
+                                    >
                                         <Text style={ProfileS.textAddStory}>+ Thêm vào tin</Text>
                                     </TouchableOpacity>
                                     <View style={ProfileS.boxEdit}>
-                                        <TouchableOpacity style={ProfileS.btnEdit}>
+                                        <TouchableOpacity
+                                            style={ProfileS.btnEdit}
+                                            onPress={() => setIsEditBio(true)}
+                                        >
                                             <Text style={ProfileS.textEdit}>
                                                 Chỉnh sửa trang cá nhân
                                             </Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity
-                                            disabled={me._id == user?._id}
-                                            style={ProfileS.btnMore}>
-                                            <Icon
-                                                name="ellipsis-horizontal"
-                                                size={25}
-                                                color="black"
-                                            />
-                                        </TouchableOpacity>
                                     </View>
                                 </View>
                             ))}
+
+                            {/* dialog Edit bio 
+                            <Modal
+                                visible={isEditBio}
+                                transparent={true}
+                                animationType="fade"
+                            //onRequestClose={() => setIsEditBio(false)}
+                            >
+                                <View style={ProfileS.modalContainer}>
+                                    <TouchableWithoutFeedback onPress={() => setIsEditBio(false)}>
+                                        <View style={ProfileS.modalBackground} />
+                                    </TouchableWithoutFeedback>
+
+                                    <View style={ProfileS.dialog}>
+                                        <Text style={ProfileS.name}>Miêu tả</Text>
+                                        <TextInput
+                                            value={bio}
+                                            onChangeText={setBio}
+                                            style={{ width: '80%', height: 50, justifyContent: 'center', color: 'black' }}
+                                            placeholderTextColor={"gray"}
+                                            placeholder='Nhập miêu tả...'
+                                        />
+                                        <View
+                                            style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-around' }}
+                                        >
+                                            <TouchableOpacity
+                                                style={ProfileS.btnXacNhan}
+                                                onPress={() => {
+                                                    callEditBioOfUser(bio)
+                                                    setIsEditBio(false)
+                                                }}
+                                            >
+                                                <Text style={ProfileS.text_button}>Lưu</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={ProfileS.btnXoa}
+                                                onPress={() => {
+                                                    setBio(user.bio)
+                                                    setIsEditBio(false)
+
+                                                }}
+                                            >
+                                                <Text style={ProfileS.text_button}>Hủy</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                            </Modal> */}
+
                         </View>
                     </View>
-                </View>
+                </View >
 
                 <View style={[ProfileS.boxHeader, { marginVertical: 7 }]}>
                     <View style={ProfileS.boxFriends}>
@@ -878,51 +977,59 @@ const Profile = props => {
                     </View>
                 </View>
 
-                {user?._id === me?._id && (
-                    <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
-                        <View style={ProfileS.boxLive}>
-                            <View style={ProfileS.title2}>
-                                <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
-                                    Bài viết
-                                </Text>
-                                <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text>
-                            </View>
-                            <View style={ProfileS.boxAllThink}>
-                                <View style={ProfileS.boxThink}>
-                                    <Image
-                                        style={ProfileS.avataStatus}
-                                        source={{ uri: user?.avatar }}
-                                    />
-                                    <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
-                                        Bạn đang nghĩ gì?
+                {
+                    user?._id === me?._id && (
+                        <View style={[ProfileS.boxHeader, { marginBottom: 7 }]}>
+                            <View style={ProfileS.boxLive}>
+                                <View style={ProfileS.title2}>
+                                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black' }}>
+                                        Bài viết
                                     </Text>
+                                    {/* <Text style={{ fontSize: 15, color: '#0064E0' }}>Bộ lọc</Text> */}
                                 </View>
-                                <Icon name="image" size={30} color="#3FF251" />
+                                <TouchableOpacity
+                                    style={ProfileS.boxAllThink}
+                                    onPress={() => navigation.navigate('UpPost')}
+                                >
+                                    <View style={ProfileS.boxThink}>
+                                        <Image
+                                            style={ProfileS.avataStatus}
+                                            source={{ uri: user?.avatar }}
+                                        />
+                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
+                                            Bạn đang nghĩ gì?
+                                        </Text>
+                                    </View>
+                                    <Icon name="image" size={30} color="#3FF251" />
+                                </TouchableOpacity>
                             </View>
-                        </View>
-                        <View style={ProfileS.boxLivestream}>
+                            <View style={ProfileS.boxLivestream}>
+                                <TouchableOpacity
+                                    style={ProfileS.btnLivestream}
+                                    onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
+                                    <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                                        <Icon name="videocam" size={20} color="red" />
+                                        <Text style={{ marginLeft: 5, color: 'black' }}>
+                                            Phát trực tiếp
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
                             <TouchableOpacity
-                                style={ProfileS.btnLivestream}
-                                onPress={() => navigation.navigate('HostLive', { userID: me._id, avatar: me.avatar, userName: me.first_name + ' ' + me.last_name, liveID: liveID })}>
-                                <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                    <Icon name="videocam" size={20} color="red" />
-                                    <Text style={{ marginLeft: 5, color: 'black' }}>
-                                        Phát trực tiếp
+                                style={ProfileS.btnManage}
+                                onPress={() => navigation.navigate('Trash')}
+                            >
+                                <View style={ProfileS.boxManange}>
+                                    <Icon2 name="comment-text" size={17} color="black" />
+                                    <Text style={{ fontSize: 13, color: 'black' }}>
+                                        Quản lí bài viết
                                     </Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity style={ProfileS.btnManage}>
-                            <View style={ProfileS.boxManange}>
-                                <Icon2 name="comment-text" size={17} color="black" />
-                                <Text style={{ fontSize: 13, color: 'black' }}>
-                                    Quản lí bài viết
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
+                    )
+                }
+            </View >
         );
     };
 
@@ -956,35 +1063,18 @@ const Profile = props => {
                     </View>
                 </View>
             </View>
-    
-            <Modal
-                visible={menuVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setMenuVisible(false)}>
-                <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-                    <View style={ProfileS.overlay}>
-                        <View style={ProfileS.dialog}>
-                            <TouchableOpacity
-                                style={ProfileS.btnXacNhan}
-                                onPress={() => {
-                                    setMenuVisible(false);
-                                    callChapNhanLoiMoiKetBan();
-                                }}>
-                                <Text style={ProfileS.text_button}>Xác Nhận</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={ProfileS.btnXoa}
-                                onPress={() => {
-                                    setMenuVisible(false);
-                                    callSetRelationNguoiLa();
-                                }}>
-                                <Text style={ProfileS.text_button}>Xóa</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
+            <EditBioModal
+                visible={isEditBio}
+                bio={bio}
+                onSave={(newBio) => {
+                    callEditBioOfUser(newBio);
+                    setIsEditBio(false);
+                }}
+                onCancel={() => {
+                    setIsEditBio(false);
+                    setBio(user?.bio || '');
+                }}
+            />
         </View>
     );
 };

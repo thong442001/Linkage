@@ -5,7 +5,6 @@ import SearchItem from '../../components/items/SearchItem';
 import {useDispatch, useSelector} from 'react-redux';
 import {getAllUsers} from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../styles/screens/search/SearchStyles'; // Import file styles
 import {addSearch, removeSearch, clearHistory} from '../../rtk/Reducer';
 const Search = props => {

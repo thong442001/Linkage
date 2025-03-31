@@ -13,10 +13,11 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Video from 'react-native-video';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { deletePost } from '../../rtk/API';
 import { oStackHome } from '../../navigations/HomeNavigation';
-import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
+import Icon from 'react-native-vector-icons/Ionicons';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
 
 const { width, height } = Dimensions.get('window');
 const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
@@ -24,12 +25,16 @@ const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
+  console.log('StoryView:', StoryView);
+  console.log('me:', me);
+  const me = useSelector(state => state.app.user)
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
   const [videoDuration, setVideoDuration] = useState(5000);
   const [stories, setStories] = useState(StoryView?.stories || []);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // State để hiển thị SuccessModal
   const emojiScale = useRef(new Animated.Value(1)).current;
   const videoRef = useRef(null);
   const progressBars = useRef([]);
@@ -136,6 +141,13 @@ const Story = () => {
           if (currentIndex >= newStories.length && currentIndex > 0) {
             setCurrentIndex(newStories.length - 1);
           }
+          // Hiển thị SuccessModal khi xóa thành công
+          setShowSuccessModal(true);
+          // Tự động ẩn SuccessModal sau 2 giây và điều hướng về TabHome
+          setTimeout(() => {
+            setShowSuccessModal(false);
+            navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: ID_story });
+          }, 2000);
         })
         .catch(error => {
           console.log('Lỗi khi xóa story:', error);
@@ -164,10 +176,7 @@ const Story = () => {
             try {
               const storyId = stories[currentIndex]._id;
               await callDeleteStory(storyId);
-              Alert.alert("Thành công", "Story đã được xóa vĩnh viễn!");
-              navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: storyId });
-            }
-               catch (error) {
+            } catch (error) {
               Alert.alert("Lỗi", "Không thể xóa story. Vui lòng thử lại!");
               console.error("Lỗi xóa story:", error);
             }
@@ -232,14 +241,14 @@ const Story = () => {
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-      {currentUserId === StoryView.user._id && (
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
-          <Icon name="trash-outline" size={24} color="white" />
-        </TouchableOpacity>
-      )}
-      <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
-        <Icon name="close-outline" size={30} color="white" />
-      </TouchableOpacity>
+            {me === StoryView.ID_user?._id && (
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteStory}>
+                <Icon name="trash-outline" size={24} color="white" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.exitButton} onPress={() => navigation.goBack()}>
+              <Icon name="close-outline" size={30} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -257,6 +266,11 @@ const Story = () => {
           >
             <Text style={styles.selectedEmoji}>{selectedEmoji}</Text>
           </Animated.View>
+        )}
+
+        {/* Hiển thị SuccessModal khi xóa thành công */}
+        {showSuccessModal && (
+          <SuccessModal message="Xóa story thành công" />
         )}
       </View>
     </TouchableWithoutFeedback>
