@@ -13,7 +13,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Video from 'react-native-video';
 import { useDispatch, useSelector } from 'react-redux';
-import { deletePost } from '../../rtk/API';
+import { deletePost, storyViewerOfStory } from '../../rtk/API';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
@@ -43,6 +43,28 @@ const Story = () => {
     progressBars.current = stories.map(() => new Animated.Value(0));
     console.log('Initialized progressBars.current:', progressBars.current);
   }, [stories]);
+
+  // Thong storyViewer 
+  useEffect(() => {
+    callStoryViewerOfStory();
+  }, []);
+  const callStoryViewerOfStory = async () => {
+    try {
+      await dispatch(storyViewerOfStory({ ID_post: stories[currentIndex]._id, ID_user: me._id }))
+        .unwrap()
+        .then(response => {
+          console.log('callStoryViewerOfStory: ', response);
+
+        })
+        .catch(error => {
+          console.log('Lỗi khi callStoryViewerOfStory', error);
+          throw error;
+        });
+    } catch (error) {
+      console.log('Lỗi trong callStoryViewerOfStory:', error);
+      throw error;
+    }
+  };
 
   const isVideo = (media) => {
     return media?.toLowerCase().endsWith('.mp4') || stories[currentIndex]?.type === 'video';
