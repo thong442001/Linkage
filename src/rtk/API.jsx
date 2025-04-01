@@ -980,3 +980,38 @@ export const addStoryViewer_reaction = createAsyncThunk(
     }
   }
 );
+
+
+//******************* OTP phone */
+
+// gửi mã OTP 
+// params : phone
+export const sendOTP_dangKi = createAsyncThunk(
+  'phone_otp/sendOTP_dangKi',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('phone_otp/sendOTP_dangKi', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// xác thực otp có đúng không
+// params : phone, otp
+export const checkOtpDangKi = createAsyncThunk(
+  'phone_otp/checkOtpDangKi',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('phone_otp/checkOtpDangKi', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);

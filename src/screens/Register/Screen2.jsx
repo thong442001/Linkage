@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { checkPhone } from '../../rtk/API';
+import { checkPhone, sendOTP_dangKi } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
 import auth from "@react-native-firebase/auth";
 const { width } = Dimensions.get('window');
@@ -57,6 +57,37 @@ const Screen2 = (props) => {
 
     };
 
+    // Thông
+    const callSendOTP_dangKi = () => {
+        if (!phone.trim()) {
+            setError('Vui lòng nhập số điện thoại.');
+            return;
+        }
+
+        if (!isValidPhone(phone)) {
+            setError('Số điện thoại không hợp lệ.');
+            return;
+        }
+        const paramsAPI = {
+            phone: phone,
+        };
+        dispatch(sendOTP_dangKi(paramsAPI))
+            .unwrap()
+            .then((response) => {
+                console.log("sendOTP_dangKi:", response);
+                if (response.status) {
+                    console.log("sendOTP_dangKi: ", response.status);
+                    console.log("sendOTP_dangKi: ", response.message);
+                } else {
+                    console.log("sendOTP_dangKi: ", response.status);
+                    console.log("sendOTP_dangKi: ", response.message);
+                }
+            })
+            .catch((error) => {
+                console.log('Error callSendOTP_dangKi:', error);
+            });
+    };
+
 
     const handleTiep = () => {
         navigation.navigate('CreatePasswordScreen', {
@@ -85,6 +116,7 @@ const Screen2 = (props) => {
             console.error("Lỗi gửi OTP: " + error.message);
         }
     };
+
     // Xác thực OTP
     const handleVerifyOTP = async () => {
         try {
@@ -130,6 +162,10 @@ const Screen2 = (props) => {
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
+            <Pressable style={styles.button} onPress={callSendOTP_dangKi}>
+                <Text style={styles.buttonText}>Gửi OTP</Text>
+            </Pressable>
+
             <Pressable style={styles.button} onPress={check}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
