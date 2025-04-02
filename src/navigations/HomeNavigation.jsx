@@ -243,7 +243,7 @@ import ListTag from '../screens/home/ListTag';
 import pokemon from '../screens/game/pokemon/pokemon';
 import MapScreen from '../screens/map/MapScreen';
 import man_hinh_chao_pokemon from '../screens/game/pokemon/pokemon';
-
+import OTPScreen from '../screens/register/OTPScreen';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -283,7 +283,8 @@ const oStackHome = {
   pokemon: { name: 'pokemon', component: pokemon },
   MapScreen: { name: 'MapScreen', component: MapScreen },
   man_hinh_chao_pokemon: { name: 'man_hinh_chao_pokemon', component: man_hinh_chao_pokemon },
-  Setting: { name: 'Setting', component: Setting }
+  Setting: { name: 'Setting', component: Setting },
+  OTPScreen: { name: 'OTPScreen', component: OTPScreen },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

@@ -4,30 +4,40 @@ import DatePicker from 'react-native-date-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const { width, height } = Dimensions.get('window');
-
 const Screen1 = (props) => {
     const { route, navigation } = props;
 
-    const [first_name, setFirst_name] = useState('');
-    const [last_name, setLast_name] = useState('');
-    const [dateOfBirth, setDateOfBirth] = useState('');
+    // Hàm chuyển đổi chuỗi "dd/mm/yyyy" sang định dạng ISO "YYYY-MM-DD"
+    const parseDateString = (dateStr) => {
+        if (!dateStr) return null;
+        const [day, month, year] = dateStr.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Chuyển thành ISO
+    };
+
+    // Khởi tạo state
+    const [first_name, setFirst_name] = useState(route.params?.first_name || '');
+    const [last_name, setLast_name] = useState(route.params?.last_name || '');
+    const [dateOfBirth, setDateOfBirth] = useState(route.params?.dateOfBirth || ''); // Giữ nguyên chuỗi "dd/mm/yyyy"
+    const [gender, setGender] = useState(route.params?.sex || 'Nữ');
+    const [date, setDate] = useState(
+        route.params?.dateOfBirth 
+            ? new Date(parseDateString(route.params.dateOfBirth)) 
+            : new Date()
+    );
     const [open, setOpen] = useState(false);
-    const [gender, setGender] = useState('Nữ');
-    const [date, setDate] = useState(new Date());
     const [showErrorFirstName, setShowErrorFirstName] = useState(false);
     const [showErrorLastName, setShowErrorLastName] = useState(false);
     const [showErrorDate, setShowErrorDate] = useState(false);
 
-    // Hàm validate tên: chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
+    // Hàm validate tên
     const validateName = (name) => {
-        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]+$/; // Chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
+        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]+$/;
         return regex.test(name);
     };
 
     const validateForm = () => {
         let isValid = true;
 
-        // Kiểm tra first_name: không để trống và chỉ chứa ký tự hợp lệ
         if (!first_name.trim() || !validateName(first_name)) {
             setShowErrorFirstName(true);
             isValid = false;
@@ -36,7 +46,6 @@ const Screen1 = (props) => {
             setShowErrorFirstName(false);
         }
 
-        // Kiểm tra last_name: không để trống và chỉ chứa ký tự hợp lệ
         if (!last_name.trim() || !validateName(last_name)) {
             setShowErrorLastName(true);
             isValid = false;
@@ -45,7 +54,6 @@ const Screen1 = (props) => {
             setShowErrorLastName(false);
         }
 
-        // Kiểm tra tổng độ dài của first_name và last_name
         const totalLength = first_name.trim().length + last_name.trim().length;
         if (totalLength > 30) {
             setShowErrorFirstName(true);
@@ -54,7 +62,6 @@ const Screen1 = (props) => {
             Alert.alert('Thông báo', "Tổng độ dài của họ và tên không được vượt quá 30 ký tự.");
         }
 
-        // Kiểm tra ngày sinh
         if (!dateOfBirth.trim()) {
             setShowErrorDate(true);
             isValid = false;
@@ -63,7 +70,6 @@ const Screen1 = (props) => {
             setShowErrorDate(false);
         }
 
-        // Kiểm tra tuổi
         const today = new Date();
         const birthDate = new Date(date);
         const age = today.getFullYear() - birthDate.getFullYear();
@@ -86,7 +92,7 @@ const Screen1 = (props) => {
             navigation.navigate('Screen2', {
                 first_name,
                 last_name,
-                dateOfBirth,
+                dateOfBirth, // Truyền chuỗi "dd/mm/yyyy"
                 sex: gender,
             });
         }
@@ -119,7 +125,6 @@ const Screen1 = (props) => {
                     value={first_name}
                     onChangeText={(text) => {
                         setFirst_name(text);
-                        // Kiểm tra ngay lập tức khi người dùng nhập
                         const totalLength = text.trim().length + last_name.trim().length;
                         setShowErrorFirstName(!text.trim() || !validateName(text) || totalLength > 30);
                         setShowErrorLastName(!last_name.trim() || !validateName(last_name) || totalLength > 30);
@@ -128,12 +133,10 @@ const Screen1 = (props) => {
                     placeholder="Họ"
                     style={showErrorFirstName ? styles.inputNameUserError : styles.input}
                 />
-
                 <TextInput
                     value={last_name}
                     onChangeText={(text) => {
                         setLast_name(text);
-                        // Kiểm tra ngay lập tức khi người dùng nhập
                         const totalLength = first_name.trim().length + text.trim().length;
                         setShowErrorFirstName(!first_name.trim() || !validateName(first_name) || totalLength > 30);
                         setShowErrorLastName(!text.trim() || !validateName(text) || totalLength > 30);
@@ -147,7 +150,6 @@ const Screen1 = (props) => {
             <Text style={styles.label}>Ngày sinh của bạn là khi nào?</Text>
             <Text style={styles.label2}>Chọn ngày sinh của bạn</Text>
 
-            {/* TextInput để mở DatePicker */}
             <Pressable onPress={() => setOpen(true)}>
                 <TextInput
                     value={dateOfBirth}
@@ -158,7 +160,6 @@ const Screen1 = (props) => {
                 />
             </Pressable>
 
-            {/* Date Picker */}
             <DatePicker
                 modal
                 open={open}
@@ -170,7 +171,6 @@ const Screen1 = (props) => {
                     const formattedDate = selectDate.toLocaleDateString('vi-VN');
                     setDateOfBirth(formattedDate);
 
-                    // Kiểm tra tuổi ngay sau khi chọn
                     const today = new Date();
                     const birthDate = new Date(selectDate);
                     const age = today.getFullYear() - birthDate.getFullYear();

@@ -139,7 +139,16 @@ const Screen3 = (props) => {
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => navigation.navigate('Screen2')}>
+            <Pressable onPress={() => 
+                navigation.navigate('Screen2',
+                    {
+                        first_name: params.first_name,
+                        last_name: params.last_name,
+                        dateOfBirth: params.dateOfBirth,
+                        sex: params.sex,
+                    }
+                    
+                )}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
