@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Image,
@@ -9,60 +9,65 @@ import {
   Text,
   TouchableWithoutFeedback,
   TouchableOpacity,
+  FlatList,
+  Modal,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Video from 'react-native-video';
 import { useDispatch, useSelector } from 'react-redux';
-import { deletePost, storyViewerOfStory } from '../../rtk/API';
+import { deletePost, storyViewerOfStory, addStoryViewer_reaction } from '../../rtk/API';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
+import { useBottomSheet } from '../../context/BottomSheetContext';
 
 const { width, height } = Dimensions.get('window');
-const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 
 const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
-  const me = useSelector(state => state.app.user)
+  const me = useSelector(state => state.app.user);
+  const reactions = useSelector(state => state.app.reactions);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
   const [videoDuration, setVideoDuration] = useState(5000);
   const [stories, setStories] = useState(StoryView?.stories || []);
-  const [showSuccessModal, setShowSuccessModal] = useState(false); // State để hiển thị SuccessModal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [viewers, setViewers] = useState([]);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [progressValue, setProgressValue] = useState(0);
+  const [reactionsVisible, setReactionsVisible] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const emojiScale = useRef(new Animated.Value(1)).current;
   const videoRef = useRef(null);
+  const reactionRef = useRef(null);
   const progressBars = useRef([]);
-  const [isFirstLoad, setIsFirstLoad] = useState(true); // Trạng thái để kiểm tra lần đầu vào trang
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
+  const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
-  // Đồng bộ progressBars với stories
   useEffect(() => {
     progressBars.current = stories.map(() => new Animated.Value(0));
-    console.log('Initialized progressBars.current:', progressBars.current);
   }, [stories]);
 
-  // Thong storyViewer 
   useEffect(() => {
     callStoryViewerOfStory();
-  }, []);
+  }, [currentIndex]);
+
   const callStoryViewerOfStory = async () => {
     try {
-      await dispatch(storyViewerOfStory({ ID_post: stories[currentIndex]._id, ID_user: me._id }))
-        .unwrap()
-        .then(response => {
-          console.log('callStoryViewerOfStory: ', response);
-
-        })
-        .catch(error => {
-          console.log('Lỗi khi callStoryViewerOfStory', error);
-          throw error;
-        });
+      const response = await dispatch(storyViewerOfStory({ ID_post: stories[currentIndex]._id, ID_user: me._id })).unwrap();
+      console.log('Full response: ', response);
+      if (response && response.storyViewers) {
+        setViewers(response.storyViewers);
+        console.log('Set viewers with: ', response.storyViewers);
+      } else {
+        console.log('No storyViewers found in response');
+      }
     } catch (error) {
-      console.log('Lỗi trong callStoryViewerOfStory:', error);
-      throw error;
+      console.log('Lỗi khi callStoryViewerOfStory:', error);
     }
   };
 
@@ -70,28 +75,41 @@ const Story = () => {
     return media?.toLowerCase().endsWith('.mp4') || stories[currentIndex]?.type === 'video';
   };
 
-  const startProgress = (index) => {
+  const startProgress = (index, fromValue = 0) => {
     if (!stories[index] || !progressBars.current[index]) return;
-    progressBars.current[index].setValue(0); // Reset thanh tiến trình
+    progressBars.current[index].setValue(fromValue);
     const duration = isVideo(stories[index].medias[0]) ? videoDuration : 5000;
+    const remainingDuration = duration * (1 - fromValue);
 
     Animated.timing(progressBars.current[index], {
       toValue: 1,
-      duration: duration,
+      duration: remainingDuration,
       useNativeDriver: false,
     }).start(({ finished }) => {
-      if (finished && !isVideo(stories[index].medias[0]) && navigation.isFocused()) {
+      if (finished && navigation.isFocused() && !isBottomSheetOpen) {
         handleNextStory();
       }
     });
   };
 
-
+  // Chỉ chạy progress cho ảnh, không tự động chạy cho video
   useEffect(() => {
-    if (currentIndex >= 0 && currentIndex < stories.length) {
-      startProgress(currentIndex);
+    if (currentIndex >= 0 && currentIndex < stories.length && !isBottomSheetOpen) {
+      if (!isVideo(stories[currentIndex]?.medias[0])) {
+        startProgress(currentIndex);
+      }
     }
-  }, [currentIndex, videoDuration, stories]);
+  }, [currentIndex, stories, isBottomSheetOpen]);
+
+  // Xử lý lần đầu load cho ảnh
+  useEffect(() => {
+    if (currentIndex >= 0 && currentIndex < stories.length && isFirstLoad && currentIndex === 0) {
+      if (!isVideo(stories[currentIndex]?.medias[0])) {
+        setIsFirstLoad(false);
+        startProgress(0);
+      }
+    }
+  }, [currentIndex, stories, isFirstLoad]);
 
   const handleNextStory = () => {
     if (currentIndex + 1 < stories.length) {
@@ -104,23 +122,6 @@ const Story = () => {
     }
   };
 
-  useEffect(() => {
-    if (currentIndex >= 0 && currentIndex < stories.length) {
-      if (isFirstLoad && currentIndex === 0) {
-        // Nếu là ảnh, chạy startProgress ngay lập tức
-        if (!isVideo(stories[currentIndex]?.medias[0])) {
-          setIsFirstLoad(false); // Đánh dấu đã load lần đầu
-          startProgress(0); // Chạy tiến trình cho ảnh
-        }
-        // Nếu là video, giữ nguyên logic chờ người dùng nhấn play
-        return;
-      }
-      startProgress(currentIndex); // Chạy tiến trình cho các story khác
-    }
-  }, [currentIndex, videoDuration, isFirstLoad, stories]);
-
-
-
   const handlePrevStory = () => {
     if (currentIndex > 0) {
       progressBars.current[currentIndex]?.setValue(0);
@@ -130,16 +131,14 @@ const Story = () => {
     }
   };
 
-
-
   const handlePress = (event) => {
     const { locationX } = event.nativeEvent;
     if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) {
-      // Chỉ áp dụng cho video tại index 0: nhấn để chạy slider
       setIsFirstLoad(false);
-      startProgress(0);
+      if (videoRef.current) {
+        startProgress(0); // Bắt đầu progress khi nhấn vào video lần đầu
+      }
     } else {
-      // Các trường hợp khác, xử lý chuyển story như bình thường
       if (locationX < width / 2) {
         handlePrevStory();
       } else {
@@ -148,8 +147,10 @@ const Story = () => {
     }
   };
 
-  const handleSelectEmoji = (emoji) => {
-    setSelectedEmoji(emoji);
+  const handleSelectReaction = async (ID_reaction, name, icon) => {
+    setSelectedEmoji(icon);
+    setReactionsVisible(false);
+
     emojiScale.setValue(1);
     Animated.sequence([
       Animated.timing(emojiScale, {
@@ -163,11 +164,43 @@ const Story = () => {
         useNativeDriver: true,
       }),
     ]).start();
+
+    try {
+      const data = {
+        ID_post: stories[currentIndex]._id,
+        ID_user: me._id,
+        ID_reaction: ID_reaction,
+      };
+      await dispatch(addStoryViewer_reaction(data))
+        .unwrap()
+        .then(response => {
+          console.log('Thêm biểu cảm thành công:', response);
+        })
+        .catch(error => {
+          console.log('Lỗi khi thêm biểu cảm1:', error);
+        });
+      //await callStoryViewerOfStory();
+    } catch (error) {
+      console.error('Lỗi khi thêm biểu cảm2:', error);
+    }
+  };
+
+  const handleLongPress = () => {
+    if (reactionRef.current) {
+      reactionRef.current.measure((x, y, width, height, pageX, pageY) => {
+        setMenuPosition({ top: pageY - 50, left: pageX - 50 });
+        setReactionsVisible(true);
+      });
+    }
   };
 
   const onVideoLoad = (data) => {
     if (data.duration) {
       setVideoDuration(data.duration * 1000);
+      if (isFirstLoad && currentIndex === 0) {
+        setIsFirstLoad(false);
+      }
+      startProgress(currentIndex); // Bắt đầu thanh slider khi video tải xong
     }
   };
 
@@ -186,25 +219,17 @@ const Story = () => {
           if (onDeleteStory) {
             onDeleteStory(ID_story);
           }
-          // Điều chỉnh currentIndex nếu cần
           if (currentIndex >= newStories.length && currentIndex > 0) {
             setCurrentIndex(newStories.length - 1);
           }
-          // Hiển thị SuccessModal khi xóa thành công
           setShowSuccessModal(true);
-          // Tự động ẩn SuccessModal sau 2 giây và điều hướng về TabHome
           setTimeout(() => {
             setShowSuccessModal(false);
             navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: ID_story });
           }, 2000);
-        })
-        .catch(error => {
-          console.log('Lỗi khi xóa story:', error);
-          throw error;
         });
     } catch (error) {
       console.log('Lỗi trong callDeleteStory:', error);
-      throw error;
     }
   };
 
@@ -213,22 +238,54 @@ const Story = () => {
       console.log("Bạn chỉ có thể xóa story của chính mình!");
       return;
     }
-
     try {
       const storyId = stories[currentIndex]._id;
       await callDeleteStory(storyId);
-      setShowSuccessModal(true);
-      setTimeout(() => {
-        setShowSuccessModal(false);
-        navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: storyId });
-      }, 2000);
     } catch (error) {
       console.error("Không thể xóa story:", error);
     }
   };
 
-  // Trong phần render, giữ nguyên SuccessModal
-  { showSuccessModal && <SuccessModal message="Xóa story thành công" /> }
+  const handleCloseBottomSheet = useCallback(() => {
+    closeBottomSheet();
+    setIsBottomSheetOpen(false);
+    if (!isVideo(stories[currentIndex]?.medias[0])) {
+      startProgress(currentIndex, progressValue);
+    }
+  }, [closeBottomSheet, currentIndex, stories, progressValue]);
+
+  const handleOpenBottomSheet = useCallback(() => {
+    console.log('Opening Bottom Sheet with viewers:', viewers);
+    setIsBottomSheetOpen(true);
+
+    if (progressBars.current[currentIndex]) {
+      progressBars.current[currentIndex].stopAnimation((value) => {
+        setProgressValue(value);
+      });
+    }
+
+    openBottomSheet(50, (
+      <View style={styles.bottomSheetContent}>
+        <Text style={styles.bottomSheetTitle}>Danh sách người xem ({viewers.length})</Text>
+        <FlatList
+          data={viewers}
+          renderItem={renderViewerItem}
+          keyExtractor={(item) => item._id}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    ), handleCloseBottomSheet);
+  }, [viewers, openBottomSheet, handleCloseBottomSheet, currentIndex, stories]);
+
+  const renderViewerItem = ({ item }) => (
+    <View style={styles.viewerItem}>
+      <Image source={{ uri: item.ID_user.avatar }} style={styles.viewerAvatar} />
+      <Text style={styles.viewerName}>
+        {item.ID_user.first_name + ' ' + item.ID_user.last_name}
+        {item.ID_reaction && <Text style={styles.reaction}> {item.ID_reaction.icon}</Text>}
+      </Text>
+    </View>
+  );
 
   if (!StoryView || !stories || stories.length === 0) {
     return (
@@ -268,6 +325,7 @@ const Story = () => {
             onLoad={onVideoLoad}
             onEnd={onVideoEnd}
             repeat={false}
+            paused={isBottomSheetOpen}
           />
         ) : (
           <Image
@@ -295,13 +353,51 @@ const Story = () => {
           </View>
         </View>
 
-        <View style={styles.emojiContainer}>
-          {emojis.map((emoji, index) => (
-            <TouchableOpacity key={index} onPress={() => handleSelectEmoji(emoji)}>
-              <Text style={styles.emoji}>{emoji}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {me._id !== StoryView.user?._id && (
+          <TouchableOpacity
+            ref={reactionRef}
+            style={styles.reactionTrigger}
+            onLongPress={handleLongPress}
+            onPress={() => {
+              if (reactions && reactions.length > 0) {
+                handleSelectReaction(reactions[0]._id, reactions[0].name, reactions[0].icon);
+              }
+            }}
+          >
+            <Text style={styles.reactionText}>
+              {selectedEmoji || '👍'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <Modal
+          visible={reactionsVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setReactionsVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setReactionsVisible(false)}>
+            <View style={styles.overlay}>
+              <View style={{ position: 'absolute', top: menuPosition.top, left: menuPosition.left }}>
+                <View style={styles.reactionBar}>
+                  {reactions && reactions.length > 0 ? (
+                    reactions.map((reaction, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.reactionButton}
+                        onPress={() => handleSelectReaction(reaction._id, reaction.name, reaction.icon)}
+                      >
+                        <Text style={styles.reactionText}>{reaction.icon}</Text>
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={{ color: '#fff' }}>Không có biểu cảm</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         {selectedEmoji && (
           <Animated.View
@@ -311,10 +407,13 @@ const Story = () => {
           </Animated.View>
         )}
 
-        {/* Hiển thị SuccessModal khi xóa thành công */}
-        {showSuccessModal && (
-          <SuccessModal message="Xóa story thành công" />
+        {me._id === StoryView.user?._id && (
+          <TouchableOpacity style={styles.viewersCountContainer} onPress={handleOpenBottomSheet}>
+            <Text style={styles.viewersTitle}>Đã xem ({viewers.length})</Text>
+          </TouchableOpacity>
         )}
+
+        {showSuccessModal && <SuccessModal message="Xóa story thành công" />}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -349,11 +448,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   image: {
-    width: width * 0.8, // Thu nhỏ chiều rộng xuống 80% kích thước màn hình
+    width: width * 0.8,
     height: height * 0.8,
-    aspectRatio: 1, // Giữ tỷ lệ ảnh (có thể thay đổi tùy theo tỷ lệ thực tế của ảnh)
+    aspectRatio: 1,
     marginTop: 30,
-    resizeMode: 'contain', // Đảm bảo ảnh không bị cắt, thay vì 'cover'
+    resizeMode: 'contain',
   },
   headerContainer: {
     position: 'absolute',
@@ -392,26 +491,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
-  exitText: {
-    fontSize: 20,
-    color: 'white',
-  },
-  deleteText: {
-    fontSize: 20,
-    color: 'white',
-  },
-  emojiContainer: {
-    position: 'absolute',
-    bottom: 100,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  emoji: {
-    fontSize: 30,
-    marginHorizontal: 10,
-    color: '#fff',
-  },
   selectedEmojiContainer: {
     position: 'absolute',
     bottom: 30,
@@ -422,6 +501,83 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.6)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 10,
+  },
+  viewersCountContainer: {
+    position: 'absolute',
+    bottom: 10,
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  viewersTitle: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  bottomSheetContent: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  bottomSheetTitle: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  viewerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  viewerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  viewerName: {
+    color: '#000',
+    fontSize: 16,
+  },
+  reaction: {
+    fontSize: 16,
+    marginLeft: 5,
+  },
+  closeButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  reactionTrigger: {
+    position: 'absolute',
+    bottom: 100,
+    padding: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  reactionBar: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 50,
+    left: -75,
+    padding: 5,
+  },
+  reactionButton: {
+    padding: 10,
+  },
+  reactionText: {
+    fontSize: 24,
   },
 });
 
