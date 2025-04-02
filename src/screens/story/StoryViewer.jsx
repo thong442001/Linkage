@@ -10,23 +10,24 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   FlatList,
+  Modal,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Video from 'react-native-video';
 import { useDispatch, useSelector } from 'react-redux';
-import { deletePost, storyViewerOfStory } from '../../rtk/API';
+import { deletePost, storyViewerOfStory, addStoryViewer_reaction } from '../../rtk/API';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 
 const { width, height } = Dimensions.get('window');
-const emojis = ['😍', '😂', '❤️', '🔥', '😮', '😢'];
 
 const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
   const me = useSelector(state => state.app.user);
+  const reactions = useSelector(state => state.app.reactions); // Lấy từ Redux
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,10 +38,13 @@ const Story = () => {
   const [viewers, setViewers] = useState([]);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
+  const [reactionsVisible, setReactionsVisible] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const emojiScale = useRef(new Animated.Value(1)).current;
   const videoRef = useRef(null);
+  const reactionRef = useRef(null);
   const progressBars = useRef([]);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [isFirstLoad, setIsFirstLoad] = useState(true); // Đã khai báo ở đây
 
   const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
@@ -96,7 +100,7 @@ const Story = () => {
 
   useEffect(() => {
     if (currentIndex >= 0 && currentIndex < stories.length) {
-      if (isFirstLoad && currentIndex === 0) {
+      if (isFirstLoad && currentIndex === 0) { // Sử dụng isFirstLoad từ state
         if (!isVideo(stories[currentIndex]?.medias[0])) {
           setIsFirstLoad(false);
           startProgress(0);
@@ -107,7 +111,7 @@ const Story = () => {
         startProgress(currentIndex);
       }
     }
-  }, [currentIndex, videoDuration, isFirstLoad, stories, isBottomSheetOpen]);
+  }, [currentIndex, videoDuration, stories, isBottomSheetOpen, isFirstLoad]); // Thêm isFirstLoad vào dependencies
 
   const handleNextStory = () => {
     if (currentIndex + 1 < stories.length) {
@@ -131,7 +135,7 @@ const Story = () => {
 
   const handlePress = (event) => {
     const { locationX } = event.nativeEvent;
-    if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) {
+    if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) { // Sử dụng isFirstLoad từ state
       setIsFirstLoad(false);
       startProgress(0);
     } else {
@@ -143,8 +147,10 @@ const Story = () => {
     }
   };
 
-  const handleSelectEmoji = (emoji) => {
-    setSelectedEmoji(emoji);
+  const handleSelectReaction = async (ID_reaction, name, icon) => {
+    setSelectedEmoji(icon);
+    setReactionsVisible(false);
+
     emojiScale.setValue(1);
     Animated.sequence([
       Animated.timing(emojiScale, {
@@ -158,6 +164,28 @@ const Story = () => {
         useNativeDriver: true,
       }),
     ]).start();
+
+    try {
+      const data = {
+        ID_post: stories[currentIndex]._id,
+        ID_user: me._id,
+        ID_reaction: ID_reaction,
+      };
+      const response = await dispatch(addStoryViewer_reaction(data)).unwrap();
+      console.log('Thêm biểu cảm thành công:', response);
+      await callStoryViewerOfStory();
+    } catch (error) {
+      console.error('Lỗi khi thêm biểu cảm:', error);
+    }
+  };
+
+  const handleLongPress = () => {
+    if (reactionRef.current) {
+      reactionRef.current.measure((x, y, width, height, pageX, pageY) => {
+        setMenuPosition({ top: pageY - 50, left: pageX - 50 });
+        setReactionsVisible(true);
+      });
+    }
   };
 
   const onVideoLoad = (data) => {
@@ -212,7 +240,7 @@ const Story = () => {
     closeBottomSheet();
     setIsBottomSheetOpen(false);
     if (!isVideo(stories[currentIndex]?.medias[0])) {
-      startProgress(currentIndex, progressValue); // Tiếp tục thanh progress nếu là ảnh
+      startProgress(currentIndex, progressValue);
     }
   }, [closeBottomSheet, currentIndex, stories, progressValue]);
 
@@ -242,7 +270,10 @@ const Story = () => {
   const renderViewerItem = ({ item }) => (
     <View style={styles.viewerItem}>
       <Image source={{ uri: item.ID_user.avatar }} style={styles.viewerAvatar} />
-      <Text style={styles.viewerName}>{item.ID_user.first_name + ' ' + item.ID_user.last_name}</Text>
+      <Text style={styles.viewerName}>
+        {item.ID_user.first_name + ' ' + item.ID_user.last_name}
+        {item.ID_reaction && <Text style={styles.reaction}> {item.ID_reaction.icon}</Text>}
+      </Text>
     </View>
   );
 
@@ -312,13 +343,54 @@ const Story = () => {
           </View>
         </View>
 
-        <View style={styles.emojiContainer}>
-          {emojis.map((emoji, index) => (
-            <TouchableOpacity key={index} onPress={() => handleSelectEmoji(emoji)}>
-              <Text style={styles.emoji}>{emoji}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {/* Nút thả biểu cảm */}
+        {me._id !== StoryView.user?._id && (
+
+        <TouchableOpacity
+          ref={reactionRef}
+          style={styles.reactionTrigger}
+          onLongPress={handleLongPress}
+          onPress={() => {
+            if (reactions && reactions.length > 0) {
+              handleSelectReaction(reactions[0]._id, reactions[0].name, reactions[0].icon);
+            }
+          }}
+        >
+          <Text style={styles.reactionText}>
+            {selectedEmoji || '👍'}
+          </Text>
+        </TouchableOpacity>
+        )}
+
+        {/* Modal biểu cảm */}
+        <Modal
+          visible={reactionsVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setReactionsVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setReactionsVisible(false)}>
+            <View style={styles.overlay}>
+              <View style={{ position: 'absolute', top: menuPosition.top, left: menuPosition.left }}>
+                <View style={styles.reactionBar}>
+                  {reactions && reactions.length > 0 ? (
+                    reactions.map((reaction, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.reactionButton}
+                        onPress={() => handleSelectReaction(reaction._id, reaction.name, reaction.icon)}
+                      >
+                        <Text style={styles.reactionText}>{reaction.icon}</Text>
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={{ color: '#fff' }}>Không có biểu cảm</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         {selectedEmoji && (
           <Animated.View
@@ -412,18 +484,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
   },
-  emojiContainer: {
-    position: 'absolute',
-    bottom: 100,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  emoji: {
-    fontSize: 30,
-    marginHorizontal: 10,
-    color: '#fff',
-  },
   selectedEmojiContainer: {
     position: 'absolute',
     bottom: 30,
@@ -472,6 +532,10 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
   },
+  reaction: {
+    fontSize: 16,
+    marginLeft: 5,
+  },
   closeButton: {
     marginTop: 20,
     padding: 10,
@@ -483,6 +547,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  reactionTrigger: {
+    position: 'absolute',
+    bottom: 100,
+    padding: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  reactionBar: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 5,
+  },
+  reactionButton: {
+    padding: 10,
+  },
+  reactionText: {
+    fontSize: 24,
   },
 });
 
