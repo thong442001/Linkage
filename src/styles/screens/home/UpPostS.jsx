@@ -133,7 +133,7 @@ const UpPostS = StyleSheet.create({
         marginLeft: 10,
         color: 'black'
     },
-    // model
+    // modal
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -147,9 +147,10 @@ const UpPostS = StyleSheet.create({
         padding: 16,
     },
     optionButton: {
-        padding: 12,
+        padding: 15,
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
+        paddingBottom: 10
     },
     optionText: {
         fontSize: 16,
@@ -284,6 +285,8 @@ const UpPostS = StyleSheet.create({
     },
     modalContent: {
         alignItems: "center",
+        backgroundColor: 'white',
+        borderRadius: 10
     },
     avatar: {
         width: width * 0.11, // 11% chiều rộng màn hình

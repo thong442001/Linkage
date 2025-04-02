@@ -9,10 +9,10 @@ const CommentS = StyleSheet.create({
     },
     header1: {
         backgroundColor: 'white',
-        borderColor: 'gray',
-        borderTopWidth: 0.5,
-        borderRightWidth: 0.5,
-        borderLeftWidth: 0.5,
+        borderColor: '#d9d9d9d9',
+        borderTopWidth: 1,
+        borderRightWidth: 1,
+        borderLeftWidth: 1,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         marginHorizontal: width * 0.02
@@ -405,7 +405,7 @@ const CommentS = StyleSheet.create({
     line: {
         height: 0.2,
         width: '100%',
-        backgroundColor: 'gray',
+        backgroundColor: '#d9d9d9d9',
     },
     boxInputText: {
         position: 'absolute',

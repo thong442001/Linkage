@@ -480,7 +480,6 @@ const PostItem = memo(({
         <View style={styles.postContainer}>
             <View>
                 {/* Header share  */}
-                {/* Header share */}
                 {
                     post.ID_post_shared && (
                         <View>
@@ -923,9 +922,9 @@ const PostItem = memo(({
                                         value={captionShare}
                                         onChangeText={setCaptionShare}
                                     />
-                                    <View style={{ backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
+                                    <View style={{ alignItems: 'center' }}>
                                         <TouchableOpacity
-                                            style={{ padding: 10 }}
+                                            style={{ paddingVertical: 15, paddingHorizontal: 60, backgroundColor: "#0064E0", borderRadius: 10 }}
                                             onPress={callAddPostShare}
                                         >
                                             <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
@@ -1012,10 +1011,10 @@ const styles = StyleSheet.create({
     },
     header1: {
         backgroundColor: 'white',
-        borderColor: 'gray',
-        borderTopWidth: 0.5,
-        borderRightWidth: 0.5,
-        borderLeftWidth: 0.5,
+        borderColor: '#d9d9d9d9',
+        borderTopWidth: 1,
+        borderRightWidth: 1,
+        borderLeftWidth: 1,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         marginHorizontal: width * 0.02
