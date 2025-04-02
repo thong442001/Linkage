@@ -27,7 +27,7 @@ const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
   const me = useSelector(state => state.app.user);
-  const reactions = useSelector(state => state.app.reactions); // Lấy từ Redux
+  const reactions = useSelector(state => state.app.reactions);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -44,7 +44,7 @@ const Story = () => {
   const videoRef = useRef(null);
   const reactionRef = useRef(null);
   const progressBars = useRef([]);
-  const [isFirstLoad, setIsFirstLoad] = useState(true); // Đã khai báo ở đây
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
@@ -86,32 +86,30 @@ const Story = () => {
       duration: remainingDuration,
       useNativeDriver: false,
     }).start(({ finished }) => {
-      if (finished && !isVideo(stories[index].medias[0]) && navigation.isFocused() && !isBottomSheetOpen) {
+      if (finished && navigation.isFocused() && !isBottomSheetOpen) {
         handleNextStory();
       }
     });
   };
 
+  // Chỉ chạy progress cho ảnh, không tự động chạy cho video
   useEffect(() => {
     if (currentIndex >= 0 && currentIndex < stories.length && !isBottomSheetOpen) {
-      startProgress(currentIndex);
-    }
-  }, [currentIndex, videoDuration, stories, isBottomSheetOpen]);
-
-  useEffect(() => {
-    if (currentIndex >= 0 && currentIndex < stories.length) {
-      if (isFirstLoad && currentIndex === 0) { // Sử dụng isFirstLoad từ state
-        if (!isVideo(stories[currentIndex]?.medias[0])) {
-          setIsFirstLoad(false);
-          startProgress(0);
-        }
-        return;
-      }
-      if (!isBottomSheetOpen) {
+      if (!isVideo(stories[currentIndex]?.medias[0])) {
         startProgress(currentIndex);
       }
     }
-  }, [currentIndex, videoDuration, stories, isBottomSheetOpen, isFirstLoad]); // Thêm isFirstLoad vào dependencies
+  }, [currentIndex, stories, isBottomSheetOpen]);
+
+  // Xử lý lần đầu load cho ảnh
+  useEffect(() => {
+    if (currentIndex >= 0 && currentIndex < stories.length && isFirstLoad && currentIndex === 0) {
+      if (!isVideo(stories[currentIndex]?.medias[0])) {
+        setIsFirstLoad(false);
+        startProgress(0);
+      }
+    }
+  }, [currentIndex, stories, isFirstLoad]);
 
   const handleNextStory = () => {
     if (currentIndex + 1 < stories.length) {
@@ -135,9 +133,11 @@ const Story = () => {
 
   const handlePress = (event) => {
     const { locationX } = event.nativeEvent;
-    if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) { // Sử dụng isFirstLoad từ state
+    if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) {
       setIsFirstLoad(false);
-      startProgress(0);
+      if (videoRef.current) {
+        startProgress(0); // Bắt đầu progress khi nhấn vào video lần đầu
+      }
     } else {
       if (locationX < width / 2) {
         handlePrevStory();
@@ -191,6 +191,10 @@ const Story = () => {
   const onVideoLoad = (data) => {
     if (data.duration) {
       setVideoDuration(data.duration * 1000);
+      if (isFirstLoad && currentIndex === 0) {
+        setIsFirstLoad(false);
+      }
+      startProgress(currentIndex); // Bắt đầu thanh slider khi video tải xong
     }
   };
 
@@ -343,26 +347,23 @@ const Story = () => {
           </View>
         </View>
 
-        {/* Nút thả biểu cảm */}
         {me._id !== StoryView.user?._id && (
-
-        <TouchableOpacity
-          ref={reactionRef}
-          style={styles.reactionTrigger}
-          onLongPress={handleLongPress}
-          onPress={() => {
-            if (reactions && reactions.length > 0) {
-              handleSelectReaction(reactions[0]._id, reactions[0].name, reactions[0].icon);
-            }
-          }}
-        >
-          <Text style={styles.reactionText}>
-            {selectedEmoji || '👍'}
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            ref={reactionRef}
+            style={styles.reactionTrigger}
+            onLongPress={handleLongPress}
+            onPress={() => {
+              if (reactions && reactions.length > 0) {
+                handleSelectReaction(reactions[0]._id, reactions[0].name, reactions[0].icon);
+              }
+            }}
+          >
+            <Text style={styles.reactionText}>
+              {selectedEmoji || '👍'}
+            </Text>
+          </TouchableOpacity>
         )}
 
-        {/* Modal biểu cảm */}
         <Modal
           visible={reactionsVisible}
           transparent
@@ -562,7 +563,8 @@ const styles = StyleSheet.create({
   reactionBar: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 50,
+    left: -75,
     padding: 5,
   },
   reactionButton: {
