@@ -9,11 +9,13 @@ export const BottomSheetProvider = ({ children }) => {
     const [snapPoints, setSnapPoints] = useState(['100%']);
     const [content, setContent] = useState(null);
     const [isVisible, setIsVisible] = useState(false);
+    const [onCloseCallback, setOnCloseCallback] = useState(null); // Callback khi Bottom Sheet đóng
 
-    const openBottomSheet = useCallback((height, content) => {
+    const openBottomSheet = useCallback((height, content, callback) => {
         setSnapPoints([`${height}%`]);
         setContent(content);
         setIsVisible(true);
+        setOnCloseCallback(() => callback); // Lưu callback để gọi khi đóng
         bottomSheetRef.current?.snapToIndex(0);
     }, []);
 
@@ -21,7 +23,11 @@ export const BottomSheetProvider = ({ children }) => {
         setIsVisible(false);
         setContent(null);
         bottomSheetRef.current?.close();
-    }, []);
+        if (onCloseCallback) {
+            onCloseCallback(); // Gọi callback khi đóng
+            setOnCloseCallback(null); // Reset callback sau khi gọi
+        }
+    }, [onCloseCallback]);
 
     const contextValue = useMemo(() => ({
         openBottomSheet,
@@ -63,13 +69,25 @@ export const BottomSheetProvider = ({ children }) => {
                 index={-1}
                 snapPoints={snapPoints}
                 enablePanDownToClose={true}
-                onClose={() => setIsVisible(false)}
+                onClose={() => {
+                    setIsVisible(false);
+                    if (onCloseCallback) {
+                        onCloseCallback(); // Gọi callback khi vuốt đóng
+                        setOnCloseCallback(null);
+                    }
+                }}
                 onChange={(index) => {
-                    if (index === -1) setIsVisible(false);
+                    if (index === -1) {
+                        setIsVisible(false);
+                        if (onCloseCallback) {
+                            onCloseCallback(); // Gọi callback khi vuốt đóng
+                            setOnCloseCallback(null);
+                        }
+                    }
                 }}
                 handleComponent={null}
                 animationConfigs={{
-                    duration: 250, // Tăng tốc animation
+                    duration: 250,
                 }}
             >
                 <BottomSheetView style={{ backgroundColor: '#fff', height: '100%', borderTopEndRadius: 20, borderTopStartRadius: 20 }}>
