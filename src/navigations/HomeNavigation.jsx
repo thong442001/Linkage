@@ -96,7 +96,7 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
             if (isFocused) {
               Animated.timing(circleAnim, {
                 toValue: 1,
-                duration: 300,
+                duration: 100,
                 easing: Easing.out(Easing.circle),
                 useNativeDriver: true,
               }).start();

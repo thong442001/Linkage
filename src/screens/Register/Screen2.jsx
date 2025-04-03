@@ -85,7 +85,7 @@ const Screen2 = (props) => {
                 keyboardType="phone-pad"
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
+                
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
             <Pressable style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
