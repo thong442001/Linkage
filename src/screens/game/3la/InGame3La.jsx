@@ -143,25 +143,24 @@ const InGame3La = ({ route, navigation }) => {
             }
         });
 
-        // socket.on('lang-nghe-thoat-choi-game-3-la', (ID_group) => {
-        //     console.log('thoat');
-        //     navigation.navigate('Chat', { ID_group: ID_group });
-        // });
+        socket.on('lang-nghe-thoat-choi-game-3-la', (ID_group) => {
+            console.log('thoat');
+            navigation.navigate('Chat', { ID_group: ID_group });
+        });
 
         return () => {
             socket.off('lang-nghe-bat-dau-game-3la');
             socket.off('lang-nghe-ss-game-3la');
             socket.off('lang-nghe-xet-game-3la');
             socket.off('lang-nghe-thoat-choi-game-3-la');
-            handleExit();
         };
     }, [group, me, socket, player1, player2]);
 
     // Xử lý thoát game
-    const handleExit = useCallback(() => {
-        //socket.emit('thoat-choi-game-3-la', { ID_group: group._id });
-        navigation.navigate('Chat', { ID_group: group._id });
-    }, [navigation, group]);
+    const handleExit = () => {
+        socket.emit('thoat-choi-game-3-la', { ID_group: group._id });
+        //navigation.navigate('Chat', { ID_group: group._id });
+    };
 
     // Xử lý sẵn sàng
     const handleSS = useCallback(() => {

@@ -32,7 +32,7 @@ const SIZES = {
 };
 
 // Component PlayerSection
-const PlayerSection = memo(({ isMe, group }) => (
+const PlayerSection = memo(({ isMe, group, player1 }) => (
   <View style={styles.playerSection}>
     <View style={styles.userInfo}>
       <Image
@@ -45,9 +45,9 @@ const PlayerSection = memo(({ isMe, group }) => (
             ? `${group?.members[0]?.first_name} ${group?.members[0]?.last_name}`
             : `${group.members[1].first_name} ${group.members[1].last_name}`}
         </Text>
-        {/* {!isMe && (
+        {player1 && (
           <Text style={styles.statusText}>Đang chờ phản hồi</Text>
-        )} */}
+        )}
       </View>
     </View>
     <View style={styles.cardContainer}>
@@ -120,6 +120,7 @@ const ManHinhCho = ({ route, navigation }) => {
       <PlayerSection
         isMe={group.members[0]._id !== me._id}
         group={group}
+        player1={true}
       />
 
       {/* Nút Thoát */}
@@ -131,6 +132,7 @@ const ManHinhCho = ({ route, navigation }) => {
       <PlayerSection
         isMe={group.members[0]._id === me._id}
         group={group}
+        player1={false}
       />
 
       {/* Thanh phân cách */}
