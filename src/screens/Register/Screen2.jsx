@@ -56,7 +56,7 @@ const Screen2 = (props) => {
                     Alert.alert('Lỗi', otpResponse.message || 'Không thể gửi OTP.');
                 }
             } else {
-                Alert.alert('Lỗi', checkResponse.message || 'Số điện thoại đã tồn tại.');
+                setError(checkResponse.message)
             }
         } catch (error) {
             Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xử lý. Vui lòng thử lại.');

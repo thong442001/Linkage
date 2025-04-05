@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',  // Tạo nền sáng cho giao diện giống story
+    backgroundColor: '#f0f0f0',  
   },
   avatarContainer: {
     alignItems: 'center',

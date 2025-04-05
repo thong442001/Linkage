@@ -40,7 +40,7 @@ const Chat = (props) => {// cần ID_group (param)
     const [myUsername, setmyUsername] = useState(null);
     const [myAvatar, setmyAvatar] = useState(null);
 
-    const { socket } = useSocket();
+    const { socket, onlineUsers } = useSocket();
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [reply, setReply] = useState(null);
@@ -61,7 +61,7 @@ const Chat = (props) => {// cần ID_group (param)
     const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
     const [validateGame, setValidateGame] = useState(true);
     const hasSentLocation = useRef(false); // Biến ref để theo dõi trạng thái gửi
-
+    const [isActive, setIsActive] = useState(false)
     //loading
     const [isGameing, setIsGameing] = useState(false);
 
@@ -369,8 +369,9 @@ const Chat = (props) => {// cần ID_group (param)
             await dispatch(getGroupID({ ID_group: ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
-                    //console.log("thong show data: ", response);
-                    setGroup(response.group)
+                    console.log("thong show data: ", response);
+                    
+                    
                     if (response.group.isPrivate == true) {
                         // lấy tên của mình
                         const myUser = response.group.members.find(user => user._id === me._id);
@@ -388,6 +389,7 @@ const Chat = (props) => {// cần ID_group (param)
 
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
+                            setIsActive(onlineUsers.includes(otherUser._id));
                             //setGroupName(otherUser.displayName);
 
                             setGroupAvatar(otherUser.avatar);
@@ -402,11 +404,12 @@ const Chat = (props) => {// cần ID_group (param)
                             setID_user(myUser._id);
                             setmyUsername((myUser.first_name + " " + myUser.last_name));
                             setmyAvatar(myUser.avatar);
+                            setIsActive(false);
                         } else {
                             console.log("⚠️ Không tìm thấy người dùng");
                         }
                         if (response.group.avatar == null) {
-                            setGroupAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
+                            return;
                         } else {
                             setGroupAvatar(response.group.avatar);
                         }
@@ -583,6 +586,7 @@ const Chat = (props) => {// cần ID_group (param)
                     onCallAudio={onCallAudio}
                     onToGame3La={onToGame3La}
                     isGameing={isGameing}
+                    isActive={isActive}
                 />
             }
 
