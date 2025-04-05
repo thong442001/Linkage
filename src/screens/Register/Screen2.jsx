@@ -90,12 +90,11 @@ const Screen2 = (props) => {
             <Pressable style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
-
+                
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
-                    onPress={() => navigation.navigate('Screen3', params)}
-                >
+                    onPress={() => navigation.navigate('Screen3', params)}>
                     <Text style={styles.buttonTextNextScreen}>Đăng ký bằng email</Text>
                 </Pressable>
             </View>
