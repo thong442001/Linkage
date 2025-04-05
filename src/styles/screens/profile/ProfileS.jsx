@@ -186,7 +186,8 @@ const ProfileS = StyleSheet.create({
         flexDirection: "row",
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: height * 0.01
+        marginTop: height * 0.01,
+        
     },
     boxThink: {
         flexDirection: 'row',
