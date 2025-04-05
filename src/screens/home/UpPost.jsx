@@ -581,7 +581,7 @@ const UpPost = (props) => {
             >
                 <TouchableWithoutFeedback onPress={() => setTagVisible(false)}>
                     <View style={UpPostS.overlay1}>
-                        <View style={UpPostS.modalContainer}>
+                        <View style={UpPostS.modalContainerTag}>
                             <View >
                                 <View style={{ flexDirection: 'column' }}>
                                     {/* <Image source={{ uri: me?.avatar }} style={UpPostS.avatar} /> */}
@@ -615,8 +615,11 @@ const UpPost = (props) => {
                                                 onToggle={toggleSelectUser}
                                                 selectedUsers={selectedUsers}
                                                 membersGroup={membersGroup}
+                                                
                                             />
+                                
                                         )}
+                                        showsVerticalScrollIndicator = {false}
                                     />
                                     {/* </View> */}
                                 </View>

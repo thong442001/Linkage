@@ -94,7 +94,6 @@ const styles = StyleSheet.create({
     fontSize: width * 0.045, // 4.5% chiều rộng màn hình
     fontWeight: 'bold',
     color: "black",
-    width: width * 0.30
     // width: "50"
   },
   vBtn: {

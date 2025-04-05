@@ -130,7 +130,7 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
 
     const toMembersGroup = () => {
         // để load lại trang chat khi thay đổi 
-        navigation.navigate("SettingChat", { ID_group: params.ID_group });
+        navigation.replace("SettingChat", { ID_group: params.ID_group });
     };
 
     return (
