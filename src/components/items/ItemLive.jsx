@@ -35,13 +35,13 @@ const ItemLive = ({ user }) => {
           }}
         />
         <LottieView
-          source={require('../../utils/animation/live/live.json')} 
+          source={require('../../utils/animation/live/live.json')}
           autoPlay
           loop
           style={styles.lottieAnimation}
         />
       </View>
-      
+
       <View style={styles.backGround} />
       <Text style={styles.name}>{user.userName}</Text>
     </TouchableOpacity>
