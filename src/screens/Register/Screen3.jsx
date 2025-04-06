@@ -3,12 +3,13 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
     checkEmail,
-    check_email
+    check_email,
+    sendOTP_dangKi_gmail
 } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
 import auth from '@react-native-firebase/auth';
+
 const { width, height } = Dimensions.get('window');
-//import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Screen3 = (props) => {
     const { route, navigation } = props;
@@ -19,59 +20,27 @@ const Screen3 = (props) => {
     const [emailVerified, setEmailVerified] = useState(false);
     const [error, setError] = useState('');
 
-    // useEffect(() => {
-    //     auth().signOut();
-
-    //     const fetchUserStatus = async () => {
-    //         const user = auth().currentUser;
-    //         if (user) {
-    //             await user.reload(); // Buộc cập nhật trạng thái từ Firebase
-    //             setEmailVerified(!user.emailVerified); // Cập nhật trạng thái email
-    //         }
-    //     };
-
-    //     fetchUserStatus();
-
-    //     const unsubscribe = auth().onAuthStateChanged((user) => {
-    //         if (user) {
-    //             setEmailVerified(!user.emailVerified);
-    //         }
-    //     });
-
-    //     return () => unsubscribe(); // Hủy lắng nghe khi unmount
-    // }, []);
-
     useEffect(() => {
-        const interval = setInterval(async () => {
+        const checkUserEmail = async () => {
             const user = auth().currentUser;
             if (user) {
                 await user.reload(); // Cập nhật trạng thái từ Firebase
-                //setEmailVerified(user.emailVerified);
-                //const uid = user.uid;
-                callcheck_email(user.uid)
+                callcheck_email(user.uid);
             }
-        }, 1000); // Kiểm tra mỗi 1 giây
-
-        return () => clearInterval(interval);
-    }, []);
+        };
+    
+        checkUserEmail();
+    }, []); // Chạy một lần khi component mount
 
     const callcheck_email = (uid) => {
         dispatch(check_email({ uid: uid }))
             .unwrap()
             .then((response) => {
-                setEmailVerified(response.emailVerified)
+                setEmailVerified(response.emailVerified);
             })
             .catch((error) => {
                 console.log('Error callcheck_email:', error);
             });
-    };
-
-    const check = () => {
-        if (validateEmail(email)) {
-            callAPICheckEamil();
-        } else {
-            setError('Email không hợp lệ');
-        }
     };
 
     const validateEmail = (email) => {
@@ -79,76 +48,55 @@ const Screen3 = (props) => {
         return emailPattern.test(email);
     };
 
-    const callAPICheckEamil = () => {
-        dispatch(checkEmail({ email: email }))
-            .unwrap()
-            .then((response) => {
-                if (response.status) {
-                    //handleTiep();
-                    //auth().isSignInWithEmailLink(email);
-                    sendEmailVerification()
-                } else {
-                    console.log("Lỗi: " + response.message);
-                    setError(response.message)
-                }
-            })
-            .catch((error) => {
-                console.log('Error:', error);
-            });
-    };
-
-    const checkEmailVerified = async () => {
-        const user = auth().currentUser;
-        if (user) {
-            await user.reload(); // Cập nhật thông tin user từ Firebase
-            if (user.emailVerified) {
-                setEmailVerified(true); // Cho phép nhấn nút "Tiếp"
-            }
+    const handleTiep = async () => {
+        // Kiểm tra email hợp lệ
+        if (!validateEmail(email)) {
+            setError('Email không hợp lệ');
+            return;
         }
-    };
 
-    const sendEmailVerification = async () => {
-        const actionCodeSettings = {
-            url: 'https://linkage.id.vn/gg/verify-email', // Link app của bạn
-            handleCodeInApp: true,
-        };
+        setError(''); // Xóa lỗi nếu có
 
-        auth()
-            .sendSignInLinkToEmail(email, actionCodeSettings)
-            .then(() => {
-                console.log("Đã gửi link đăng nhập đến:", email);
-            })
-            .catch(error => {
-                console.error("Lỗi gửi link đăng nhập:", error.message);
+        try {
+            // // Gọi API checkEmail (Đã chú thích để test API sendOTP_dangKi_gmail)
+            // const checkEmailResponse = await dispatch(checkEmail({ email: email })).unwrap();
+            // if (!checkEmailResponse.status) {
+            //     setError(checkEmailResponse.message || 'Email không hợp lệ hoặc đã được sử dụng');
+            //     return;
+            // }
+            
+            // Gọi API sendOTP_dangKi_gmail
+            const sendOTPResponse = await dispatch(sendOTP_dangKi_gmail({ gmail: email })).unwrap();
+            if (!sendOTPResponse.status) {
+                setError(sendOTPResponse.message || 'Gửi OTP thất bại');
+                return;
+            }
+
+            // Nếu gửi OTP thành công, chuyển sang màn hình tiếp theo
+            navigation.navigate('OTPGmailScreen', {
+                first_name: params.first_name,
+                last_name: params.last_name,
+                dateOfBirth: params.dateOfBirth,
+                sex: params.sex,
+                phone: null,
+                email: email,
             });
-
-        // checkEmailVerified()
-
-    };
-
-    const handleTiep = () => {
-        navigation.navigate('CreatePasswordScreen', {
-            first_name: params.first_name,
-            last_name: params.last_name,
-            dateOfBirth: params.dateOfBirth,
-            sex: params.sex,
-            phone: null,
-            email: email,
-        });
+        } catch (error) {
+            console.log('Error:', error);
+            setError('Có lỗi xảy ra. Vui lòng thử lại.');
+        }
     };
 
     return (
         <View style={styles.container}>
             <Pressable onPress={() => 
-                navigation.navigate('Screen2',
-                    {
-                        first_name: params.first_name,
-                        last_name: params.last_name,
-                        dateOfBirth: params.dateOfBirth,
-                        sex: params.sex,
-                    }
-                    
-                )}>
+                navigation.navigate('Screen2', {
+                    first_name: params.first_name,
+                    last_name: params.last_name,
+                    dateOfBirth: params.dateOfBirth,
+                    sex: params.sex,
+                })
+            }>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
@@ -157,7 +105,10 @@ const Screen3 = (props) => {
 
             <TextInput
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                    setEmail(text);
+                    setError(''); // Xóa lỗi khi người dùng nhập
+                }}
                 placeholderTextColor={'#8C96A2'}
                 placeholder="Email"
                 style={[styles.inputDate, error && { borderColor: 'red' }]}
@@ -166,16 +117,9 @@ const Screen3 = (props) => {
 
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua email</Text>
 
-            <Pressable style={styles.button} onPress={check}>
-                <Text style={styles.buttonText}>Xác thực</Text>
+            <Pressable style={styles.button} onPress={handleTiep}>
+                <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
-            {
-                emailVerified && (
-                    <Pressable style={styles.button} onPress={handleTiep}>
-                        <Text style={styles.buttonText}>Tiếp</Text>
-                    </Pressable>
-                )
-            }
 
             <View style={styles.containerButton}>
                 <Pressable

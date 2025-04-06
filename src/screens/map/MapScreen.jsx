@@ -48,10 +48,9 @@ export default function MapScreen(props) {
       setLoading(false);
       return;
     }
-
+  
     setLoading(true);
-
-    // Hàm thử lấy vị trí với cấu hình cụ thể
+  
     const tryGetLocation = (highAccuracy, timeout) => {
       return new Promise((resolve, reject) => {
         Geolocation.getCurrentPosition(
@@ -61,33 +60,31 @@ export default function MapScreen(props) {
         );
       });
     };
-
+  
     try {
-      // Thử lấy vị trí bằng Wi-Fi/mạng di động trước (enableHighAccuracy: false)
       console.log('📡 Thử lấy vị trí bằng Wi-Fi/mạng di động...');
-      const position = await tryGetLocation(false, 15000);
-      const { latitude, longitude } = position.coords;
-      console.log('📍 Vị trí lấy được từ Wi-Fi/mạng:', { latitude, longitude });
+      const position = await tryGetLocation(false, 10000); // 10s timeout for Wi-Fi
+      const { latitude, longitude, accuracy } = position.coords;
+      console.log('📍 Vị trí từ Wi-Fi/mạng:', { latitude, longitude, accuracy });
+      if (accuracy > 100) throw new Error('Độ chính xác thấp'); // Fallback if accuracy is poor
       setLocation({ latitude, longitude });
       setLoading(false);
     } catch (wifiError) {
-      console.log('❌ Lỗi khi lấy vị trí bằng Wi-Fi/mạng:', wifiError);
+      console.log('❌ Lỗi Wi-Fi/mạng:', wifiError);
       try {
-        // Thử lại bằng GPS nếu Wi-Fi thất bại (enableHighAccuracy: true)
         console.log('📍 Thử lấy vị trí bằng GPS...');
-        const position = await tryGetLocation(true, 15000);
-        const { latitude, longitude } = position.coords;
-        console.log('📍 Vị trí lấy được từ GPS:', { latitude, longitude });
+        const position = await tryGetLocation(true, 15000); // 15s timeout for GPS
+        const { latitude, longitude, accuracy } = position.coords;
+        console.log('📍 Vị trí từ GPS:', { latitude, longitude, accuracy });
         setLocation({ latitude, longitude });
         setLoading(false);
       } catch (gpsError) {
-        console.log('❌ Lỗi khi lấy vị trí bằng GPS:', gpsError);
+        console.log('❌ Lỗi GPS:', gpsError);
         setError('Không thể lấy vị trí. Vui lòng kiểm tra kết nối hoặc bật GPS.');
         setLoading(false);
       }
     }
   };
-
   // Lấy vị trí khi component mount
   useEffect(() => {
     getCurrentLocation();

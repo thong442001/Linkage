@@ -1004,11 +1004,10 @@ const Profile = props => {
                                             style={ProfileS.avataStatus}
                                             source={{ uri: user?.avatar }}
                                         />
-                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray' }}>
+                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray',}}>
                                             Bạn đang nghĩ gì?
                                         </Text>
                                     </View>
-                                    <Icon name="image" size={30} color="#3FF251" />
                                 </TouchableOpacity>
                             </View>
                             <View style={ProfileS.boxLivestream}>

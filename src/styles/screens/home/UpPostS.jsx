@@ -281,10 +281,17 @@ const UpPostS = StyleSheet.create({
         backgroundColor: "white", // Modal giữ nguyên màu trắng
         borderRadius: 10,
         padding: 20,
-    },
-    modalContent: {
         alignItems: "center",
     },
+    modalContainerTag: {
+        width: width * 0.79,
+        height: height * 0.6,
+        backgroundColor: "white", // Modal giữ nguyên màu trắng
+        borderRadius: 10,
+        padding: 20,
+        alignItems: "center",
+    },
+
     avatar: {
         width: width * 0.11, // 11% chiều rộng màn hình
         height: width * 0.11,
@@ -302,7 +309,7 @@ const UpPostS = StyleSheet.create({
         backgroundColor: "#0064E0",
         borderRadius: 10,
         paddingHorizontal: 20,
-        paddingVertical: 10
+        paddingVertical: 10,
     },
     boxTag: {
         // backgroundColor: '#0064E0',

@@ -984,14 +984,14 @@ export const addStoryViewer_reaction = createAsyncThunk(
 
 //******************* OTP phone */
 
-// gửi mã OTP 
+// gửi mã OTP phone
 // params : phone
-export const sendOTP_dangKi = createAsyncThunk(
-  'phone_otp/sendOTP_dangKi',
+export const sendOTP_dangKi_phone = createAsyncThunk(
+  'phone_otp/sendOTP_dangKi_phone',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
-        .post('phone_otp/sendOTP_dangKi', data);
+        .post('phone_otp/sendOTP_dangKi_phone', data);
       //console.log(response)
       return response;
     } catch (error) {
@@ -1000,14 +1000,82 @@ export const sendOTP_dangKi = createAsyncThunk(
   }
 );
 
-// xác thực otp có đúng không
+// xác thực otp có đúng không phone
 // params : phone, otp
-export const checkOtpDangKi = createAsyncThunk(
-  'phone_otp/checkOtpDangKi',
+export const checkOTP_phone = createAsyncThunk(
+  'phone_otp/checkOTP_phone',
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper()
-        .post('phone_otp/checkOtpDangKi', data);
+        .post('phone_otp/checkOTP_phone', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// gửi mã OTP quên mật khẩu phone
+// params : phone
+export const sendOTP_quenMatKhau_phone = createAsyncThunk(
+  'phone_otp/sendOTP_quenMatKhau_phone',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('phone_otp/sendOTP_quenMatKhau_phone', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+
+//******************* OTP gmail */
+
+// gửi mã OTP gmail
+// params : gmail
+export const sendOTP_dangKi_gmail = createAsyncThunk(
+  'gmail_otp/sendOTP_dangKi_gmail',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('gmail_otp/sendOTP_dangKi_gmail', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// xác thực otp có đúng không gmail
+// params : gmail, otp
+export const checkOTP_gmail = createAsyncThunk(
+  'gmail_otp/checkOTP_gmail',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('gmail_otp/checkOTP_gmail', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// gửi mã OTP quên mật khẩu gmail
+// params : gmail
+export const sendOTP_quenMatKhau_gmail = createAsyncThunk(
+  'gmail_otp/sendOTP_quenMatKhau_gmail',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('gmail_otp/sendOTP_quenMatKhau_gmail', data);
       //console.log(response)
       return response;
     } catch (error) {

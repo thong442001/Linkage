@@ -53,8 +53,8 @@ const UpPost = (props) => {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filtered, setFiltered] = useState([]);
-    
-    
+
+
 
 
     // Mô hình tạo ảnh
@@ -318,9 +318,9 @@ const UpPost = (props) => {
             setTimeout(() => setFailedModalVisible(false), 2000); 
             return;
         }
-        
+
         setIsPosting(true); // Bật trạng thái đăng bài
-        
+
         try {
             const paramsAPI = {
                 ID_user: me._id,
@@ -331,7 +331,7 @@ const UpPost = (props) => {
                 ID_post_shared: null,
                 tags: tags,
             };
-            
+
             console.log("Push", paramsAPI);
             await dispatch(addPost(paramsAPI))
                 .unwrap()
@@ -357,7 +357,7 @@ const UpPost = (props) => {
             setIsPosting(false); 
         }
     };
-    
+
 
     const handleSelectOption = (option) => {
         setSelectedOption(option);
@@ -402,10 +402,10 @@ const UpPost = (props) => {
             const filteredFriends = friends.filter(user => {
                 // Xác định ai là bạn bè của bạn
                 const friend = user.ID_userA._id === me._id ? user.ID_userB : user.ID_userB._id === me._id ? user.ID_userA : null;
-                
+
                 // Nếu không tìm thấy bạn bè (myId không có trong cặp), bỏ qua
                 if (!friend) return false;
-    
+
                 // Lấy tên đầy đủ của bạn bè để lọc
                 const fullName = `${friend.first_name || ''} ${friend.last_name || ''}`.toLowerCase();
                 return normalizeText(fullName).includes(normalizeText(searchQuery).toLowerCase());
@@ -413,7 +413,7 @@ const UpPost = (props) => {
             setFiltered(filteredFriends);
         }
     }, [searchQuery, friends, me]); // Thêm myId vào dependencies nếu nó có thể thay đổi
-    
+
 
     return (
         <View style={UpPostS.Container}>
@@ -601,7 +601,7 @@ const UpPost = (props) => {
             >
                 <TouchableWithoutFeedback onPress={() => setTagVisible(false)}>
                     <View style={UpPostS.overlay1}>
-                        <View style={UpPostS.modalContainer}>
+                        <View style={UpPostS.modalContainerTag}>
                             <View >
                                 <View style={{ flexDirection: 'column' }}>
                                     {/* <Image source={{ uri: me?.avatar }} style={UpPostS.avatar} /> */}
@@ -609,15 +609,15 @@ const UpPost = (props) => {
                                     {/* <Text style={UpPostS.name}>{me?.first_name + " " + me?.last_name}</Text> */}
                                     <View style={UpPostS.boxTag}>
                                         <View style={UpPostS.search}>
-                                        <TouchableOpacity>
-                                            <Icon name="search-outline" size={30} color='black' />
-                                        </TouchableOpacity>
-                                        <TextInput 
-                                        placeholder='Tìm kiếm' 
-                                        placeholderTextColor={'black'} 
-                                        value={searchQuery} 
-                                        onChangeText={setSearchQuery}
-                                        style={{color:'black'}}/>
+                                            <TouchableOpacity>
+                                                <Icon name="search-outline" size={30} color='black' />
+                                            </TouchableOpacity>
+                                            <TextInput
+                                                placeholder='Tìm kiếm'
+                                                placeholderTextColor={'black'}
+                                                value={searchQuery}
+                                                onChangeText={setSearchQuery}
+                                                style={{ color: 'black' }} />
                                         </View>
                                         <TouchableOpacity style={UpPostS.btnTag} onPress={() => handleAddTag()}>
                                             <Text style={UpPostS.tag}>
@@ -635,8 +635,11 @@ const UpPost = (props) => {
                                                 onToggle={toggleSelectUser}
                                                 selectedUsers={selectedUsers}
                                                 membersGroup={membersGroup}
+
                                             />
+
                                         )}
+                                        showsVerticalScrollIndicator={false}
                                     />
                                     {/* </View> */}
                                 </View>
