@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: 'center',
+        marginTop:10,
     },
     buttonText: {
         color: '#fff',
