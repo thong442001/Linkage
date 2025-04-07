@@ -3,25 +3,25 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, Alert } from 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { checkPhone, sendOTP_dangKi } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
-import auth from "@react-native-firebase/auth";
+
 const { width } = Dimensions.get('window');
 
 const Screen2 = (props) => {
     const { route, navigation } = props;
     const { params } = route;
-
     const dispatch = useDispatch();
     const [phone, setPhone] = useState('');
-    const [otp, setOtp] = useState("");
-    const [confirmation, setConfirmation] = useState(null);
-
     const [error, setError] = useState('');
 
+    // Hàm kiểm tra định dạng số điện thoại
     function isValidPhone(phone) {
-        return /^(84|0[3|5|7|8|9])[0-9]{8}$/.test(phone);
+        const cleanedPhone = phone.replace(/\D/g, '');
+        return /^(?:\+84|84|0)(3[2-9]|5[5-9]|7[0|6-9]|8[1-9]|9[0-4|6-9])\d{7}$/.test(cleanedPhone);
     }
 
-    const check = () => {
+    // Hàm xử lý khi nhấn "Tiếp"
+    const handleNext = async () => {
+        // Kiểm tra đầu vào
         if (!phone.trim()) {
             setError('Vui lòng nhập số điện thoại.');
             return;
@@ -33,104 +33,40 @@ const Screen2 = (props) => {
         }
 
         setError('');
-        //handleSendOTP();
-        callAPICheckPhone();
-    };
-
-
-    const callAPICheckPhone = () => {
-        dispatch(checkPhone({ phone }))
-            .unwrap()
-            .then((response) => {
-                console.log("Response từ API:", response);
-                if (response.status) {
-                    handleTiep();
-                    //handleSendOTP();
-                } else {
-                    Alert.alert('Lỗi', response.message);
-                }
-            })
-            .catch((error) => {
-                Alert.alert('Lỗi', 'Đã xảy ra lỗi khi kiểm tra số điện thoại.');
-                console.log('Error:', error);
-            });
-
-    };
-
-    // Thông
-    const callSendOTP_dangKi = () => {
-        if (!phone.trim()) {
-            setError('Vui lòng nhập số điện thoại.');
-            return;
-        }
-
-        if (!isValidPhone(phone)) {
-            setError('Số điện thoại không hợp lệ.');
-            return;
-        }
-        const paramsAPI = {
-            phone: phone,
-        };
-        dispatch(sendOTP_dangKi(paramsAPI))
-            .unwrap()
-            .then((response) => {
-                console.log("sendOTP_dangKi:", response);
-                if (response.status) {
-                    console.log("sendOTP_dangKi: ", response.status);
-                    console.log("sendOTP_dangKi: ", response.message);
-                } else {
-                    console.log("sendOTP_dangKi: ", response.status);
-                    console.log("sendOTP_dangKi: ", response.message);
-                }
-            })
-            .catch((error) => {
-                console.log('Error callSendOTP_dangKi:', error);
-            });
-    };
-
-
-    const handleTiep = () => {
-        navigation.navigate('CreatePasswordScreen', {
-            first_name: params.first_name,
-            last_name: params.last_name,
-            dateOfBirth: params.dateOfBirth,
-            sex: params.sex,
-            phone: phone,
-            email: null,
-        });
-    };
-    const formatPhoneNumber = (phone) => {
-        if (!phone.startsWith("+")) {
-            return "+84" + phone.replace(/^0/, ""); // Thêm +84 nếu thiếu và bỏ số 0 đầu
-        }
-        return phone;
-    };
-
-    // Gửi OTP
-    const handleSendOTP = async () => {
-        let formattedPhone = formatPhoneNumber(phone); // Định dạng lại số điện thoại
         try {
-            const confirm = await auth().signInWithPhoneNumber(formattedPhone);
-            setConfirmation(confirm);
-        } catch (error) {
-            console.error("Lỗi gửi OTP: " + error.message);
-        }
-    };
+            // Gọi API checkPhone để kiểm tra số có tồn tại không
+            const checkResponse = await dispatch(checkPhone({ phone })).unwrap();
+            console.log("Response từ checkPhone:", checkResponse);
 
-    // Xác thực OTP
-    const handleVerifyOTP = async () => {
-        try {
-            const userCredential = await confirmation.confirm(otp);
-            console.log("Đăng nhập thành công!");
-            console.log("User:", userCredential.user);
+            if (checkResponse.status) {
+                // Số chưa tồn tại -> Gửi OTP
+                const otpResponse = await dispatch(sendOTP_dangKi({ phone })).unwrap();
+                console.log("Response từ sendOTP_dangKi:", otpResponse);
+
+                if (otpResponse.status) {
+                    // Chuyển sang OTPScreen với dữ liệu người dùng
+                    navigation.navigate('OTPScreen', {
+                        first_name: params.first_name,
+                        last_name: params.last_name,
+                        dateOfBirth: params.dateOfBirth,
+                        sex: params.sex,
+                        phone: phone,
+                    });
+                } else {
+                    Alert.alert('Lỗi', otpResponse.message || 'Không thể gửi OTP.');
+                }
+            } else {
+                Alert.alert('Lỗi', checkResponse.message || 'Số điện thoại đã tồn tại.');
+            }
         } catch (error) {
-            console.error("OTP không hợp lệ!");
+            Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xử lý. Vui lòng thử lại.');
+            console.log('Error:', error);
         }
     };
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => navigation.navigate('Screen1')}>
+            <Pressable onPress={() => navigation.navigate('Screen1', params)}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
@@ -148,50 +84,17 @@ const Screen2 = (props) => {
                 style={[styles.inputDate, error && { borderColor: 'red' }]}
                 keyboardType="phone-pad"
             />
-            {/* <TextInput
-                value={otp}
-                onChangeText={(text) => {
-                    setOtp(text);
-                    setError('');
-                }}
-                placeholderTextColor={'#8C96A2'}
-                placeholder="OTP"
-                style={[styles.inputDate, error && { borderColor: 'red' }]}
-                keyboardType="phone-pad"
-            /> */}
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
-            <Pressable style={styles.button} onPress={callSendOTP_dangKi}>
-                <Text style={styles.buttonText}>Gửi OTP</Text>
-            </Pressable>
-
-            <Pressable style={styles.button} onPress={check}>
+            <Pressable style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
-            {/* <Pressable style={styles.button} onPress={check}>
-                <Text style={styles.buttonText}>Gửi OTP</Text>
-            </Pressable>
-            <Pressable style={styles.button} onPress={check}>
-                <Text style={styles.buttonText}>Xác thực</Text>
-            </Pressable>
-            {
-                confirmation && (
-                    <Pressable style={styles.button} onPress={handleTiep}>
-                        <Text style={styles.buttonText}>Tiếp</Text>
-                    </Pressable>
-                )
-            } */}
 
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
-                    onPress={() => navigation.navigate('Screen3', {
-                        first_name: params.first_name,
-                        last_name: params.last_name,
-                        dateOfBirth: params.dateOfBirth,
-                        sex: params.sex,
-                    })}
+                    onPress={() => navigation.navigate('Screen3', params)}
                 >
                     <Text style={styles.buttonTextNextScreen}>Đăng ký bằng email</Text>
                 </Pressable>
@@ -212,7 +115,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: 'black'
+        color: 'black',
     },
     label2: {
         fontSize: 16,
@@ -227,7 +130,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         fontSize: 16,
         marginBottom: 5,
-        color: 'black'
+        color: 'black',
     },
     errorText: {
         color: 'red',
