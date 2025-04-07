@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import words from './words.json'; // Danh sách từ
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const { width, height } = Dimensions.get('window'); // Lấy kích thước màn hình
 
@@ -21,7 +22,7 @@ export default function GameScreen() {
   const [message, setMessage] = useState(null); // Thông báo tùy chỉnh
 
   // Hàm trộn chữ cái
-  const scrambleWord = (word) => {
+  const scrambleWord = word => {
     const letters = word.split('');
     for (let i = letters.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -65,12 +66,30 @@ export default function GameScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.backButtonText}>Quay lại</Text>
-      </TouchableOpacity>
+      {/* Header với nút Back và thông báo */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon
+            name="angle-left"
+            size={width * 0.08}
+            color="black"
+            style={styles.iconBack}
+          />
+        </TouchableOpacity>
+        {message && (
+          <View
+            style={[
+              styles.messageContainer,
+              message.type === 'success'
+                ? styles.successMessage
+                : styles.errorMessage,
+            ]}>
+            <Text style={styles.messageText}>{message.text}</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Nội dung chính */}
       <Text style={styles.title}>Vua Tiếng Việt</Text>
       <Text style={styles.score}>Điểm: {score}</Text>
       <Text style={styles.scrambledWord}>Từ trộn: {scrambledWord}</Text>
@@ -84,16 +103,6 @@ export default function GameScreen() {
       <TouchableOpacity style={styles.button} onPress={checkAnswer}>
         <Text style={styles.buttonText}>Kiểm tra</Text>
       </TouchableOpacity>
-      {message && (
-        <View
-          style={[
-            styles.messageContainer,
-            message.type === 'success' ? styles.successMessage : styles.errorMessage,
-          ]}
-        >
-          <Text style={styles.messageText}>{message.text}</Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -102,23 +111,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: width * 0.05,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f0f0f0',
   },
-  backButton: {
-    position: 'absolute',
-    top: height * 0.05,
-    left: width * 0.05,
-    backgroundColor: '#007BFF',
-    paddingVertical: height * 0.015,
-    paddingHorizontal: width * 0.05,
-    borderRadius: 5,
+  header: {
+    flexDirection: 'row', // Xếp nút Back và thông báo ngang nhau
+    alignItems: 'center',
+    justifyContent: 'space-between', // Đẩy nút Back sang trái, thông báo sang phải
+    width: '100%',
+    marginBottom: height * 0.03,
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: width * 0.045,
-    fontWeight: '600',
+  iconBack: {
+    padding: width * 0.02,
   },
   title: {
     fontSize: width * 0.08,
@@ -155,9 +159,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   messageContainer: {
-    position: 'absolute',
-    bottom: height * 0.1, // Đặt thông báo ở dưới cùng cách 10% chiều cao
-    width: width * 0.8,
+    flex: 1, // Để thông báo chiếm không gian còn lại trong header
     padding: width * 0.03,
     borderRadius: 10,
     alignItems: 'center',
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     color: '#fff',
-    fontSize: width * 0.045,
+    fontSize: width * 0.04,
     fontWeight: '600',
     textAlign: 'center',
   },

@@ -1,17 +1,24 @@
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Switch } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native'; // Thêm useNavigation
+import { useNavigation } from '@react-navigation/native';
 import {
   setNotificationPreference,
   getNotificationPreference,
 } from '../../noti/notificationHelper'; // Đảm bảo đường dẫn đúng
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 // Lấy kích thước màn hình
 const { width, height } = Dimensions.get('window');
 
 const SwitchNoti = () => {
-  const navigation = useNavigation(); // Khai báo navigation
+  const navigation = useNavigation();
   const [preferences, setPreferences] = useState({});
 
   // Danh sách các kênh thông báo
@@ -34,7 +41,7 @@ const SwitchNoti = () => {
   }, []);
 
   // Hàm bật/tắt thông báo
-  const toggleNotification = async (channelId) => {
+  const toggleNotification = async channelId => {
     const newStatus = !preferences[channelId];
     setPreferences({ ...preferences, [channelId]: newStatus });
     await setNotificationPreference(channelId, newStatus);
@@ -42,19 +49,28 @@ const SwitchNoti = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.backButtonText}>Quay lại</Text>
-      </TouchableOpacity>
-      <Text style={styles.header}>Cài đặt thông báo</Text>
-      {channels.map((item) => (
+      {/* Header với nút Back và tiêu đề */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon
+            name="angle-left"
+            size={width * 0.08}
+            color="black"
+            style={styles.iconBack}
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Cài đặt thông báo</Text>
+      </View>
+
+      {/* Danh sách tùy chọn thông báo */}
+      {channels.map(item => (
         <TouchableOpacity key={item.id} style={styles.optionContainer}>
           <Text style={styles.icon}>🔔</Text>
           <View style={styles.textContainer}>
             <Text style={styles.title}>{item.name}</Text>
-            <Text style={styles.subtitle}>Bật/tắt thông báo cho {item.name}</Text>
+            <Text style={styles.subtitle}>
+              Bật/tắt thông báo cho {item.name}
+            </Text>
           </View>
           <Switch
             style={styles.switch}
@@ -77,34 +93,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F7FA',
     paddingHorizontal: width * 0.05,
-    paddingTop: height * 0.12,
-  },
-  backButton: {
-    position: 'absolute',
-    top: height * 0.05,
-    left: width * 0.05,
-    backgroundColor: '#007BFF',
-    paddingVertical: height * 0.012,
-    paddingHorizontal: width * 0.05,
-    borderRadius: 10,
-    zIndex: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: width * 0.045,
-    fontWeight: '600',
+    paddingTop: height * 0.03, // Giảm paddingTop để gần trên cùng hơn
   },
   header: {
+    flexDirection: 'row', // Xếp nút Back và tiêu đề ngang nhau
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Căn trái để nút Back sát mép
+    width: '100%',
+    marginBottom: height * 0.04,
+  },
+  iconBack: {
+    padding: width * 0.02,
+  },
+  headerText: {
     fontSize: width * 0.065,
     fontWeight: '700',
     color: '#1E1E1E',
-    marginBottom: height * 0.04,
-    textAlign: 'center',
+    marginLeft: width * 0.03, // Khoảng cách giữa nút Back và tiêu đề
   },
   optionContainer: {
     backgroundColor: '#ffffff',
