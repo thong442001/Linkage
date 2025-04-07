@@ -7,7 +7,7 @@ import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 const { width, height } = Dimensions.get('window');
 
-const CreateNewPassWord = ({ route, navigation }) => {
+const CreatePassWord = ({ route, navigation }) => {
     const { first_name, last_name, dateOfBirth, sex, email, phone } = route.params;
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -162,4 +162,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default CreateNewPassWord;
+export default CreatePassWord;

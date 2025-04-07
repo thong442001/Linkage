@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch } from 'react-redux';
 import { sendOTP_quenMatKhau_gmail } from '../../rtk/API';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -10,6 +11,7 @@ const FindWithEmail = (props) => {
     const { navigation } = props;
     const [gmail, setGmail] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // Thêm state để quản lý loading
     const dispatch = useDispatch();
 
     const handleCheckEmail = async () => {
@@ -25,6 +27,7 @@ const FindWithEmail = (props) => {
         }
 
         setError('');
+        setIsLoading(true); // Bật loading trước khi gửi request
         try {
             console.log("Sending payload:", { gmail });
             const response = await dispatch(sendOTP_quenMatKhau_gmail({ gmail })).unwrap();
@@ -36,7 +39,9 @@ const FindWithEmail = (props) => {
             }
         } catch (error) {
             console.error("Lỗi khi gửi OTP:", error);
-            setError('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            setError(error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+        } finally {
+            setIsLoading(false); // Tắt loading sau khi xử lý xong (dù thành công hay thất bại)
         }
     };
 
@@ -60,17 +65,21 @@ const FindWithEmail = (props) => {
                 style={styles.inputDate}
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            <Pressable style={styles.button} onPress={handleCheckEmail}>
+            <Pressable style={styles.button} onPress={handleCheckEmail} disabled={isLoading}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
                     onPress={() => navigation.navigate('FindWithPhone')}
+                    disabled={isLoading} 
                 >
                     <Text style={styles.buttonTextNextScreen}>Tìm bằng số điện thoại</Text>
                 </Pressable>
             </View>
+
+            
+            <LoadingModal visible={isLoading} />
         </View>
     );
 };
@@ -132,6 +141,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
+        
     },
     buttonTextNextScreen: {
         fontWeight: '500',

@@ -212,7 +212,7 @@ const Home = props => {
     );
   };
 
-  
+
 
   const renderPosts = useCallback(
     ({ item }) => (

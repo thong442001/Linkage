@@ -20,17 +20,17 @@ const Screen3 = (props) => {
     const [emailVerified, setEmailVerified] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        const checkUserEmail = async () => {
-            const user = auth().currentUser;
-            if (user) {
-                await user.reload(); // Cập nhật trạng thái từ Firebase
-                callcheck_email(user.uid);
-            }
-        };
-    
-        checkUserEmail();
-    }, []); // Chạy một lần khi component mount
+   useEffect(() => {
+    const checkUserEmail = async () => {
+        const user = auth().currentUser;
+        if (user) {
+            await user.reload(); // Cập nhật trạng thái từ Firebase
+            callcheck_email(user.uid);
+        }
+    };
+
+    checkUserEmail();
+}, []); // Chạy một lần khi component mount
 
     const callcheck_email = (uid) => {
         dispatch(check_email({ uid: uid }))
@@ -58,13 +58,13 @@ const Screen3 = (props) => {
         setError(''); // Xóa lỗi nếu có
 
         try {
-            // // Gọi API checkEmail (Đã chú thích để test API sendOTP_dangKi_gmail)
-            // const checkEmailResponse = await dispatch(checkEmail({ email: email })).unwrap();
-            // if (!checkEmailResponse.status) {
-            //     setError(checkEmailResponse.message || 'Email không hợp lệ hoặc đã được sử dụng');
-            //     return;
-            // }
-            
+            // Gọi API checkEmail (Đã chú thích để test API sendOTP_dangKi_gmail)
+            const checkEmailResponse = await dispatch(checkEmail({ email: email })).unwrap();
+            if (!checkEmailResponse.status) {
+                setError(checkEmailResponse.message || 'Email không hợp lệ hoặc đã được sử dụng');
+                return;
+            }
+
             // Gọi API sendOTP_dangKi_gmail
             const sendOTPResponse = await dispatch(sendOTP_dangKi_gmail({ gmail: email })).unwrap();
             if (!sendOTPResponse.status) {

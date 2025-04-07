@@ -3,7 +3,8 @@ import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch } from 'react-redux'; 
 import { checkOTP_gmail } from '../../rtk/API'; 
-
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
 const { width, height } = Dimensions.get('window');
 
 const CheckEmail = (props) => {
@@ -11,6 +12,8 @@ const CheckEmail = (props) => {
     const { gmail } = route.params; // Lấy gmail từ params
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); 
+    const [isSuccess, setIsSuccess] = useState(false); 
     const dispatch = useDispatch(); // Khai báo dispatch
 
     const handleCheckOTP = async () => {
@@ -22,16 +25,27 @@ const CheckEmail = (props) => {
         setError('');
         try {
             // Gọi API checkOTP_gmail với gmail và code
+            setIsLoading(true); 
             const response = await dispatch(checkOTP_gmail({ gmail, otp: code })).unwrap();
             console.log("Response từ checkOTP_gmail:", response);
 
             if (response.status) {
                 // Nếu OTP hợp lệ, chuyển sang màn hình tạo mật khẩu mới
-                navigation.navigate('CreateNewPassWord', { gmail });
+                setIsLoading(false);
+                setIsSuccess(true);
+                setTimeout(() => {
+                    setIsSuccess(false); // Đóng modal sau 2 giây
+                    navigation.navigate('CreateNewPassWord', {
+                    gmail: gmail, 
+                });
+                }, 2000)
+                
             } else {
+                setIsLoading(false);
                 setError(response.message || 'Mã OTP không đúng. Vui lòng thử lại.');
             }
         } catch (error) {
+            setIsLoading(false);
             console.log("Lỗi khi kiểm tra OTP:", error);
             setError(error || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
         }
@@ -39,13 +53,15 @@ const CheckEmail = (props) => {
 
     return (
         <View style={styles.container}>
+            <LoadingModal visible={isLoading} />
+            <SuccessModal visible={isSuccess} message="Xác thực OTP thành công!" />
             <Pressable onPress={() => navigation.goBack()}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
             <Text style={styles.label}>Kiểm tra Email</Text>
             <Text style={styles.label2}>
-                Chúng tôi đã gửi mã đến email <Text style={styles.emailText}>{gmail}</Text>. Hãy nhập mã đó để xác nhận tài khoản.
+                Chúng tôi đã gửi mã đến email <Text style={styles.emailText}>{gmail}</Text> Hãy nhập mã đó để xác nhận tài khoản.
             </Text>
 
             <TextInput

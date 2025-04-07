@@ -12,26 +12,7 @@ const PostProfileLoading = () => {
     >
       <View style={HomeS.postBox}>
         <View style={HomeS.postHeader}>
-          <View style={HomeS.postAvatar} />
-          <View style={HomeS.postInfo}>
-            <View style={HomeS.namePlaceholder} />
-            <View style={HomeS.timePlaceholder} />
-          </View>
-        </View>
-
-        <View style={HomeS.imageGrid}>
-          <View style={HomeS.postImage} />
-        </View>
-
-        <View style={HomeS.postHeader}>
-          <View style={HomeS.postAvatar} />
-          <View style={HomeS.postInfo}>
-            <View style={HomeS.namePlaceholder} />
-            <View style={HomeS.timePlaceholder} />
-          </View>
-        </View>
-        <View style={HomeS.imageGrid}>
-          <View style={HomeS.postImage} />
+       
         </View>
       </View>
     </SkeletonPlaceholder>
@@ -52,7 +33,7 @@ const HomeS = StyleSheet.create({
     borderRadius: 8,
   },
   postHeader: {
-    marginVertical: 10,
+    marginVertical: 20,
     flexDirection: 'row',
     alignItems: 'center',
   },
