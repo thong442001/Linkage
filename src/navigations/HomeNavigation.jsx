@@ -150,59 +150,59 @@ const TabHome = () => {
   const tabAnimation = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-      Animated.timing(tabAnimation, {
-          toValue: isTabVisible ? 1 : 0,
-          duration: 400,
-          useNativeDriver: true,
-      }).start();
+    Animated.timing(tabAnimation, {
+      toValue: isTabVisible ? 1 : 0,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
   }, [isTabVisible, tabAnimation]);
 
   const handleScroll = (visible) => {
-      setTabVisible(visible);
+    setTabVisible(visible);
   };
 
   return (
-      <Tab.Navigator
-          initialRouteName="Home"
-          tabBar={(props) => <CustomTabBar {...props} tabAnimation={tabAnimation} />}
-          screenOptions={({ route }) => ({
-              headerShown: false,
-              tabBarActiveTintColor: '#D17842',
-              tabBarActiveBackgroundColor: "white",
-              tabBarInactiveBackgroundColor: "white",
-              tabBarHideOnKeyboard: true,
-          })}
-      >
-          {Object.keys(oTab).map((item, index) => {
-              if (oTab[item].name === 'Profile') {
-                  return (
-                      <Tab.Screen
-                          key={index}
-                          name={oTab[item].name}
-                          component={oTab[item].component}
-                          options={{ title: "" }}
-                          initialParams={{ handleScroll }} // Thêm handleScroll vào đây
-                          listeners={({ navigation }) => ({
-                              tabPress: (e) => {
-                                  e.preventDefault();
-                                  navigation.navigate("Profile", { _id: me._id, handleScroll }); // Truyền handleScroll khi điều hướng
-                              },
-                          })}
-                      />
-                  );
-              } else {
-                  return (
-                      <Tab.Screen
-                          key={index}
-                          name={oTab[item].name}
-                          component={oTab[item].component}
-                          options={{ title: "" }}
-                          initialParams={{ handleScroll }}
-                      />
-                  );
-              }
-          })}
-      </Tab.Navigator>
+    <Tab.Navigator
+      initialRouteName="Home"
+      tabBar={(props) => <CustomTabBar {...props} tabAnimation={tabAnimation} />}
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: '#D17842',
+        tabBarActiveBackgroundColor: "white",
+        tabBarInactiveBackgroundColor: "white",
+        tabBarHideOnKeyboard: true,
+      })}
+    >
+      {Object.keys(oTab).map((item, index) => {
+        if (oTab[item].name === 'Profile') {
+          return (
+            <Tab.Screen
+              key={index}
+              name={oTab[item].name}
+              component={oTab[item].component}
+              options={{ title: "" }}
+              initialParams={{ handleScroll }} // Thêm handleScroll vào đây
+              listeners={({ navigation }) => ({
+                tabPress: (e) => {
+                  e.preventDefault();
+                  navigation.navigate("Profile", { _id: me._id, handleScroll }); // Truyền handleScroll khi điều hướng
+                },
+              })}
+            />
+          );
+        } else {
+          return (
+            <Tab.Screen
+              key={index}
+              name={oTab[item].name}
+              component={oTab[item].component}
+              options={{ title: "" }}
+              initialParams={{ handleScroll }}
+            />
+          );
+        }
+      })}
+    </Tab.Navigator>
   );
 };
 
@@ -242,8 +242,10 @@ import Report from '../screens/report/Report';
 import ListTag from '../screens/home/ListTag';
 import pokemon from '../screens/game/pokemon/pokemon';
 import man_hinh_chao_pokemon from '../screens/game/pokemon/pokemon';
-import OTPScreen from '../screens/register/OTPScreen';
 import MapScreen from '../screens/map/MapScreen';
+import SwitchNoti from '../screens/notification/SwitchNoti';
+import OTPScreen from '../screens/register/OTPScreen';
+
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
@@ -282,8 +284,9 @@ const oStackHome = {
   pokemon: { name: 'pokemon', component: pokemon },
   man_hinh_chao_pokemon: { name: 'man_hinh_chao_pokemon', component: man_hinh_chao_pokemon },
   Setting: { name: 'Setting', component: Setting },
-  OTPScreen: { name: 'OTPScreen', component: OTPScreen },
   MapScreen: { name: 'MapScreen', component: MapScreen },
+  SwitchNoti: { name: 'SwitchNoti', component: SwitchNoti },
+  OTPScreen: { name: 'OTPScreen', component: OTPScreen },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

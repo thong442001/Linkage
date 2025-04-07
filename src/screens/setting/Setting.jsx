@@ -21,6 +21,7 @@ import {
   getNotificationPreference,
 } from '../../noti/notificationHelper';
 import { FlatList, Switch } from 'react-native-gesture-handler';
+import { useBottomSheet } from '../../context/BottomSheetContext'; // Điều chỉnh đường dẫn import
 
 const { width, height } = Dimensions.get('window');
 
@@ -76,12 +77,18 @@ const Setting = props => {
     { id: '4', title: 'Game', screen: 'pokemon', icon: 'game-controller' },
     {
       id: '5',
+      title: 'Thông báo',
+      screen: 'SwitchNoti',
+      icon: 'notifications',
+    },
+    {
+      id: '6',
       title: 'Đăng xuất',
       action: onLogout,
       icon: 'exit-outline',
       color: 'red',
     },
-   
+
   ];
 
   //tắt thông báo
@@ -103,9 +110,39 @@ const Setting = props => {
     setPreferences({ ...preferences, [channelId]: newStatus }); // Cập nhật state sau khi lưu
   };
 
-  const toggleNotificationList = () => {
-    setShowNotificationList(!showNotificationList);
-  };
+  // const toggleNotificationList = () => {
+  //   if (showNotificationList) {
+  //     closeBottomSheet(); // Đóng Bottom Sheet
+  //     setShowNotificationList(false);
+  //   } else {
+  //     openBottomSheet(70, renderNotificationContent(), () => setShowNotificationList(false)); // Mở Bottom Sheet với chiều cao 70%
+  //     setShowNotificationList(true);
+  //   }
+  // };
+
+  // const renderNotificationContent = () => (
+  //   <View>
+  //     {channels.map((item) => (
+  //       <TouchableOpacity key={item.id} style={styles.optionContainer}>
+  //         <Text style={styles.icon}>🔔</Text>
+  //         <View style={styles.textContainer}>
+  //           <Text style={styles.title}>{item.name}</Text>
+  //           <Text style={styles.subtitle}>
+  //             Bật/tắt thông báo cho {item.name}
+  //           </Text>
+  //         </View>
+  //         <Switch
+  //           style={styles.switch}
+  //           value={preferences[item.id]}
+  //           onValueChange={() => toggleNotification(item.id)}
+  //           trackColor={{ false: '#D9D9D9', true: '#81b0ff' }} // Màu đường dẫn: xám khi tắt, xanh khi bật
+  //           thumbColor={'#0064E0'} // Màu nút: xanh khi bật
+  //           ios_backgroundColor="#3e3e3e" // Màu nền trên iOS khi tắt
+  //         />
+  //       </TouchableOpacity>
+  //     ))}
+  //   </View>
+  // );
 
   const Option = ({ icon, title, subtitle, color = 'black' }) => (
     <View style={styles.option}>
@@ -159,73 +196,24 @@ const Setting = props => {
               </View>
             </Modal>
           </View>
-          <FlatList
-            ListHeaderComponent={
-              <>
-                {/* Nút mở/đóng danh sách thông báo */}
-                <TouchableOpacity onPress={toggleNotificationList}>
-                  <Option
-                    icon="notifications" // Icon giống các mục cài đặt
-                    title="Cài đặt thông báo"
-                    subtitle={
-                      showNotificationList ? 'Nhấn để ẩn' : 'Nhấn để hiển thị'
-                    }
-                  />
-                </TouchableOpacity>
+  
 
-                {/* Danh sách thông báo nếu bật */}
-                {showNotificationList && (
-                  <FlatList
-                    data={channels}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity style={styles.optionContainer}>
-                        {/* Biểu tượng thông báo */}
-                        <Text style={styles.icon}>🔔</Text>
-
-                        {/* Nội dung thông báo */}
-                        <View style={styles.textContainer}>
-                          <Text style={styles.title}>{item.name}</Text>
-                          <Text style={styles.subtitle}>
-                            Bật/tắt thông báo cho {item.name}
-                          </Text>
-                        </View>
-
-                        {/* Công tắc bật/tắt */}
-                        <Switch
-                          style={styles.switch}
-                          value={preferences[item.id]}
-                          onValueChange={() => toggleNotification(item.id)}
-
-                          trackColor={{ false: '#D9D9D9', true: '#81b0ff' }} // Đường dẫn: xám khi tắt, xanh khi bật
-                          thumbColor={'#0064E0'} // Nút: vàng khi bật, trắng khi tắt
-                          ios_backgroundColor="#3e3e3e" // Nền iOS khi tắt
-                        />
-                      </TouchableOpacity>
-                    )}
-                  />
-                )}
-              </>
-            }
-            data={settingsOptions}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() =>
-                  item.screen ? navigation.navigate(item.screen) : item.action()
-                }>
-                <Option
-                  icon={item.icon}
-                  title={item.title}
-                  color={item.color}
-                />
-              </TouchableOpacity>
-            )}
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
+      {/* Danh sách các tùy chọn cài đặt khác */}
+      {settingsOptions.map((item) => (
+        <TouchableOpacity
+          key={item.id}
+          onPress={() =>
+            item.screen ? navigation.navigate(item.screen) : item.action()
+          }
+        >
+          <Option
+            icon={item.icon}
+            title={item.title}
+            color={item.color}
           />
-        </View>
-
+        </TouchableOpacity>
+      ))}
+    </View>
         {/* canhphan */}
       </View>
     </View>
