@@ -16,7 +16,7 @@ enableScreens();
 
 // Monkey patch tránh lỗi removeEventListener không tồn tại
 function App(): React.JSX.Element {
-  
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
