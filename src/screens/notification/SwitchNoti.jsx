@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Switch } from 'react-native-gesture-handler';
 import {
   setNotificationPreference,
   getNotificationPreference,
 } from '../../noti/notificationHelper'; // Đảm bảo đường dẫn đúng
-
+const { width, height } = Dimensions.get('window'); // Lấy kích thước màn hình
 const SwitchNoti = () => {
   const [preferences, setPreferences] = useState({});
 
@@ -37,6 +37,12 @@ const SwitchNoti = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.backButtonText}>Quay lại</Text>
+      </TouchableOpacity>
       <Text style={styles.header}>Cài đặt thông báo</Text>
       {channels.map((item) => (
         <TouchableOpacity key={item.id} style={styles.optionContainer}>
@@ -107,5 +113,14 @@ const styles = StyleSheet.create({
   },
   switch: {
     transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }],
+  },
+  backButton: {
+    position: 'absolute',
+    top: height * 0.05,
+    left: width * 0.05,
+    backgroundColor: '#007BFF',
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.05,
+    borderRadius: 5,
   },
 });
