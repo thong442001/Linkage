@@ -8,6 +8,7 @@ import {
     Modal,
     Pressable,
     Animated,
+    RefreshControl,
 } from 'react-native';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -64,10 +65,17 @@ const Profile = props => {
     const [dialogReLoad, setDialogreload] = useState(false);
     const [loading, setloading] = useState(true);
     const [isLoading, setisLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false)
 
     // Animated value for scroll handling
     const scrollY = useRef(new Animated.Value(0)).current;
     const previousScrollY = useRef(0);
+
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        callAllProfile().finally(() => setRefreshing(false));
+      }, [params?._id, me]);
 
     useEffect(() => {
         const listenerId = scrollY.addListener(({ value }) => {
@@ -1032,6 +1040,7 @@ const Profile = props => {
         );
     };
 
+    
     return (
         <View style={ProfileS.container}>
             <LoadingModal visible={isLoading} />
@@ -1057,6 +1066,15 @@ const Profile = props => {
                                     { useNativeDriver: true }
                                 )}
                                 scrollEventThrottle={16}
+                                refreshControl={
+                                    <RefreshControl 
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    colors={['#0064E0']}
+                                    tintColor="#0064E0"
+                                        >
+                                        </RefreshControl>
+                                }
                             />
                         )}
                     </View>

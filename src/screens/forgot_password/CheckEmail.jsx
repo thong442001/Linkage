@@ -1,44 +1,96 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-    
-
+import { useDispatch } from 'react-redux'; 
+import { checkOTP_gmail } from '../../rtk/API'; 
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
 const { width, height } = Dimensions.get('window');
 
 const CheckEmail = (props) => {
-    const { navigation } = props;
+    const { navigation, route } = props; // Thêm route để lấy params
+    const { gmail } = route.params; // Lấy gmail từ params
+    const [code, setCode] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); 
+    const [isSuccess, setIsSuccess] = useState(false); 
+    const dispatch = useDispatch(); // Khai báo dispatch
 
-    const [code, setCode] = useState('')
+    const handleCheckOTP = async () => {
+        if (!code.trim()) {
+            setError('Vui lòng nhập mã OTP.');
+            return;
+        }
+
+        setError('');
+        try {
+            // Gọi API checkOTP_gmail với gmail và code
+            setIsLoading(true); 
+            const response = await dispatch(checkOTP_gmail({ gmail, otp: code })).unwrap();
+            console.log("Response từ checkOTP_gmail:", response);
+
+            if (response.status) {
+                // Nếu OTP hợp lệ, chuyển sang màn hình tạo mật khẩu mới
+                setIsLoading(false);
+                setIsSuccess(true);
+                setTimeout(() => {
+                    setIsSuccess(false); // Đóng modal sau 2 giây
+                    navigation.navigate('CreateNewPassWord', {
+                    gmail: gmail, 
+                });
+                }, 2000)
+                
+            } else {
+                setIsLoading(false);
+                setError(response.message || 'Mã OTP không đúng. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            setIsLoading(false);
+            console.log("Lỗi khi kiểm tra OTP:", error);
+            setError(error || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+        }
+    };
 
     return (
         <View style={styles.container}>
+            <LoadingModal visible={isLoading} />
+            <SuccessModal visible={isSuccess} message="Xác thực OTP thành công!" />
             <Pressable onPress={() => navigation.goBack()}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
             <Text style={styles.label}>Kiểm tra Email</Text>
-            <Text style={styles.label2}>Chúng tôi đã gửi mã đến email của bạn. Hãy nhập
-                mã đó để xác nhận tài khoản.</Text>
+            <Text style={styles.label2}>
+                Chúng tôi đã gửi mã đến email <Text style={styles.emailText}>{gmail}</Text> Hãy nhập mã đó để xác nhận tài khoản.
+            </Text>
 
             <TextInput
-                onChangeText={'black'}
+                onChangeText={(text) => {
+                    setCode(text);
+                    setError(''); // Xóa lỗi khi người dùng nhập
+                }}
                 placeholderTextColor={'#8C96A2'}
                 placeholder="Nhập mã"
-                style={styles.inputDate}
+                value={code}
+                style={[styles.inputDate, error && { borderColor: 'red' }]} // Đổi màu viền nếu có lỗi
+                color={'black'}
+                maxLength={4} // Giới hạn độ dài tối đa của mã OTP
+                keyboardType="numeric" // Chỉ cho phép nhập số
             />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <View>
-                <Text style={styles.infoText}>Có thể bạn cần chờ đợi vài phút để nhận được mã
-                    này. <Text style={styles.newCode} >Lấy mã mới</Text>
+                <Text style={styles.infoText}>
+                    Có thể bạn cần chờ vài phút để nhận được mã này.{' '}
+                    <Text style={styles.newCode} onPress={() => navigation.navigate('FindWithEmail')}>
+                        Lấy mã mới
+                    </Text>
                 </Text>
             </View>
-            <Pressable style={styles.button} onPress={() => navigation.navigate('CreateNewPassWord')}>
+
+            <Pressable style={styles.button} onPress={handleCheckOTP}>
                 <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
-
-
-
-
         </View>
     );
 };
@@ -64,6 +116,10 @@ const styles = StyleSheet.create({
         fontWeight: '450',
         marginBottom: height * 0.02,
     },
+    emailText: {
+        fontWeight: 'bold',
+        color: '#0064E0',
+    },
     inputDate: {
         borderWidth: 1,
         borderColor: '#ccc',
@@ -71,6 +127,11 @@ const styles = StyleSheet.create({
         padding: height * 0.015,
         backgroundColor: '#fff',
         marginVertical: height * 0.02,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: height * 0.018,
+        marginBottom: height * 0.015,
     },
     infoText: {
         fontSize: height * 0.019,
@@ -87,34 +148,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: width * 0.045,
     },
-    containerButton: {
-        width: width * 0.92,
-    },
-    linkText: {
-        color: 'black',
-        fontWeight: '500',
-        fontSize: width * 0.04,
-        marginTop: height * 0.01,
-    },
-    buttonNextSceen: {
-        borderWidth: 1,
-        borderColor: '#CED5DF',
-        height: height * 0.06,
-        width: width * 0.92,
-        paddingVertical: height * 0.01,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    buttonTextNextScreen: {
-        fontWeight: '500',
-        fontSize: height * 0.02,
-        color: 'black'
-    },
     newCode: {
         color: '#0064E0',
         fontWeight: '450',
-    }
+    },
 });
 
 export default CheckEmail;

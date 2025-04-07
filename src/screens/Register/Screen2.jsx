@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { checkPhone, sendOTP_dangKi } from '../../rtk/API';
+import { checkPhone, sendOTP_dangKi_phone } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
 
 const { width } = Dimensions.get('window');
@@ -37,10 +37,10 @@ const Screen2 = (props) => {
             // Gọi API checkPhone để kiểm tra số có tồn tại không
             const checkResponse = await dispatch(checkPhone({ phone })).unwrap();
             console.log("Response từ checkPhone:", checkResponse);
-
+            
             if (checkResponse.status) {
                 // Số chưa tồn tại -> Gửi OTP
-                const otpResponse = await dispatch(sendOTP_dangKi({ phone })).unwrap();
+                const otpResponse = await dispatch(sendOTP_dangKi_phone({ phone })).unwrap();
                 console.log("Response từ sendOTP_dangKi:", otpResponse);
 
                 if (otpResponse.status) {
@@ -56,7 +56,7 @@ const Screen2 = (props) => {
                     Alert.alert('Lỗi', otpResponse.message || 'Không thể gửi OTP.');
                 }
             } else {
-                Alert.alert('Lỗi', checkResponse.message || 'Số điện thoại đã tồn tại.');
+                setError(checkResponse.message)
             }
         } catch (error) {
             Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xử lý. Vui lòng thử lại.');
@@ -85,17 +85,16 @@ const Screen2 = (props) => {
                 keyboardType="phone-pad"
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
+                
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
             <Pressable style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
-
+                
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
-                    onPress={() => navigation.navigate('Screen3', params)}
-                >
+                    onPress={() => navigation.navigate('Screen3', params)}>
                     <Text style={styles.buttonTextNextScreen}>Đăng ký bằng email</Text>
                 </Pressable>
             </View>

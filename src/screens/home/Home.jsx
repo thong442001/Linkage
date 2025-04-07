@@ -245,7 +245,7 @@ const Home = props => {
             }
             showsVerticalScrollIndicator={false}
             extraData={currentTime}
-            contentContainerStyle={{ paddingTop: 42 }}
+            contentContainerStyle={{ paddingTop: 45 }}
             ListEmptyComponent={<NothingHome />}
             refreshControl={
               <RefreshControl

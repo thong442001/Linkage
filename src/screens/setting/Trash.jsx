@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: width * 0.05, // 5% chiều rộng màn hình
+    bottom: height * 0.05, 
   },
   lottieAnimation: {
     width: width * 0.5, // 50% chiều rộng màn hình

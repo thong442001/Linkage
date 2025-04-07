@@ -24,6 +24,7 @@ const HomeS = StyleSheet.create({
         backgroundColor: "#A1A6AD"
     },
     header: {
+        height: 42,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -35,6 +36,7 @@ const HomeS = StyleSheet.create({
         backgroundColor: "#fff",
     },
     box1: {
+        
         backgroundColor: "#fff",
     },
     title: {

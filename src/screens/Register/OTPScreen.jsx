@@ -4,7 +4,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const { width, height } = Dimensions.get('window');
 
-const OTPScreen = ({ navigation }) => { // Thêm navigation prop để Pressable hoạt động
+const OTPScreen = (props) => {
+    const { navigation, route } = props;
+    const { params } = route;
   // State để lưu giá trị của từng ô OTP (4 ô)
   const [otp, setOtp] = useState(['', '', '', '']);
   // Ref để di chuyển focus giữa các ô
@@ -49,7 +51,7 @@ const OTPScreen = ({ navigation }) => { // Thêm navigation prop để Pressable
     <View style={styles.container}>
       <Pressable
         style={styles.backButton}
-        onPress={() => navigation.navigate('Screen2')} 
+        onPress={() => navigation.navigate('Screen2', params)} 
       >
         <Icon name="angle-left" size={width * 0.08} color="black" />
       </Pressable>
