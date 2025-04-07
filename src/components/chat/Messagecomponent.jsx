@@ -10,6 +10,7 @@ import {
   Dimensions,
   Clipboard, //copy
   FlatList,
+  ImageBackground,
 } from 'react-native';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import { useSelector } from 'react-redux';
@@ -26,7 +27,7 @@ export default function MessageComponent({
   onRevoke,
   onIcon,
   onChoiGame3la,
-  onHuyGame3la
+  onHuyGame3la,
 }) {
   const isCurrentUser = message.sender._id === currentUserID; // Kiểm tra tin nhắn có phải của user hiện tại không
 
@@ -48,7 +49,6 @@ export default function MessageComponent({
 
   const navigation = useNavigation();
 
-
   // gọi lại buttonsheet khi tab thay đổi
   useEffect(() => {
     if (isFirstRender) {
@@ -66,7 +66,9 @@ export default function MessageComponent({
     return (
       <View style={styles.container}>
         <View style={styles.headerReaction}>
-          <TouchableOpacity style={styles.backButton} onPress={closeBottomSheet}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={closeBottomSheet}>
             <Icon4 name="angle-left" size={20} color="black" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Người đã bày tỏ cảm xúc</Text>
@@ -79,12 +81,15 @@ export default function MessageComponent({
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[styles.tab, selectedTab === item.id && styles.selectedTab]}
+                style={[
+                  styles.tab,
+                  selectedTab === item.id && styles.selectedTab,
+                ]}
                 onPress={() => setSelectedTab(item.id)}>
                 <Text style={styles.tabIcon}>{item.icon}</Text>
               </TouchableOpacity>
             )}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
           />
         </View>
 
@@ -97,13 +102,17 @@ export default function MessageComponent({
               <View style={styles.container_listReaction}>
                 <Text style={styles.nameItemReaction}>{item.name}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.nameItemReaction}>{item.reactionIcon}</Text>
-                  <Text style={{ marginLeft: 5, color: 'black' }}>{item.quantity}</Text>
+                  <Text style={styles.nameItemReaction}>
+                    {item.reactionIcon}
+                  </Text>
+                  <Text style={{ marginLeft: 5, color: 'black' }}>
+                    {item.quantity}
+                  </Text>
                 </View>
               </View>
             </View>
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
         />
       </View>
     );
@@ -175,128 +184,183 @@ export default function MessageComponent({
       reactionIcon: reaction.ID_reaction.icon,
       quantity: reaction.quantity,
     }));
-    //check nó là link gg map
-    const isGoogleMapsLink = text => {
-      return /^https:\/\/www\.google\.com\/maps\?q=/.test(text);
-    };
-    const handlePressLocation = text => {
-      const query = text.split('q=')[1];
-      const [lat, lng] = query.split(',').map(Number);
+  //check nó là link gg map
+  const isGoogleMapsLink = text => {
+    return /^https:\/\/www\.google\.com\/maps\?q=/.test(text);
+  };
+  const handlePressLocation = text => {
+    const query = text.split('q=')[1];
+    const [lat, lng] = query.split(',').map(Number);
 
-      navigation.navigate('MapScreen', {
-        externalLocation: {latitude: lat, longitude: lng},
-      });
-    };
-
+    navigation.navigate('MapScreen', {
+      externalLocation: { latitude: lat, longitude: lng },
+    });
+  };
   return (
-  <View>
-      {message.type === 'game3la' ? (
-        <View style={styles.gameContainer}>
-          <Text style={styles.gameText}>{message.content}</Text>
-          {message._destroy ? (
-            <Text style={styles.gameText}>Game đã kết thúc</Text>
+    <View>
+      {message.type == 'game3la' ? (
+        <View style={styles.gameInviteContainer}>
+          {message._destroy === true ? (
+            <Text style={styles.inviteText}>Game bài cào</Text>
           ) : (
-            <View style={styles.gameButtons}>
-              <TouchableOpacity style={styles.playButton} onPress={() => onChoiGame3la(message._id)}>
-                <Text style={styles.buttonText}>Chơi</Text>
+            <Text style={styles.inviteText}>Bắt đầu đặt cược nào!</Text>
+          )}
+          {message._destroy === true ? (
+            <Text style={styles.endText}>Trò chơi đã kết thúc</Text>
+          ) : (
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.acceptButton}
+                onPress={() => {
+                  onChoiGame3la(message._id); // Chấp nhận chơi game
+                }}
+              >
+                <Text style={styles.acceptButtonText}>Chơi</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => onHuyGame3la(message._id)}>
-                <Text style={styles.buttonText}>Hủy</Text>
+              <TouchableOpacity
+                style={styles.rejectButton}
+                onPress={() => {
+                  onHuyGame3la(message._id); // Từ chối chơi game
+                }}
+              >
+                <Text style={styles.rejectButtonText}>Hủy</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
       ) : (
-        <View style={[styles.messageContainer, isCurrentUser ? styles.currentUserContainer : styles.otherUserContainer]}>
-          {!isCurrentUser && <Image style={styles.avatar} source={{ uri: message.sender.avatar }} />}
-          <TouchableWithoutFeedback onLongPress={handleLongPress}>
+        <View
+          style={[
+            styles.messageContainer,
+            isCurrentUser
+              ? styles.currentUserContainer
+              : styles.otherUserContainer,
+          ]}>
+          {!isCurrentUser && (
+            <Image
+              style={styles.avatar}
+              source={{ uri: message.sender.avatar }}
+            />
+          )}
+
+          {/* Nhấn giữ tin nhắn để mở menu */}
+          <TouchableWithoutFeedback
+            onLongPress={() => {
+              if (message._destroy != true) {
+                handleLongPress();
+              }
+            }}>
             <View>
-              {!isCurrentUser && (
-                <Text style={styles.username}>
-                  {message.sender?.first_name} {message.sender?.last_name}
-                </Text>
-              )}
-              <View ref={messageRef} style={[styles.messageWrapper, isCurrentUser && styles.currentUserMessage]}>
-                {message.ID_message_reply && !message._destroy && (
-                  <View style={styles.replyContainer}>
-                    <Text style={styles.replyText} numberOfLines={2}>
-                      {message.ID_message_reply.content || 'Tin nhắn không tồn tại'}
-                    </Text>
+              <View>
+                {!isCurrentUser && (
+                  <Text style={styles.username}>
+                    {message.sender?.first_name} {message.sender?.last_name}
+                  </Text>
+                )}
+              </View>
+              <View
+                ref={messageRef} // Gắn ref vào đây
+                style={[
+                  styles.messageWrapper,
+                  isCurrentUser && styles.currentUserMessage,
+                ]}>
+                {/* Hiển thị tin nhắn trả lời nếu có */}
+                {message.ID_message_reply && message._destroy == false && (
+                  <View>
+                    <View style={styles.replyContainer}>
+                      <Text style={styles.replyText} numberOfLines={2}>
+                        {message.ID_message_reply.content ||
+                          'Tin nhắn không tồn tại'}
+                      </Text>
+                    </View>
                   </View>
                 )}
-                {message._destroy ? (
-                  <Text style={styles.messageTextThuHoi}>Tin nhắn đã được thu hồi</Text>
-                ) : message.type === 'text' ? (
-                  isGoogleMapsLink(message.content) ? (
-                    <View style={{ alignItems: 'center' }}>
-                      <MapView
-                        style={{ width: 200, height: 120, borderRadius: 10 }}
-                        initialRegion={{
-                          latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
-                          longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
-                          latitudeDelta: 0.01,
-                          longitudeDelta: 0.01,
-                        }}
-                        pointerEvents="none"
-                      >
-                        <Marker
-                          coordinate={{
-                            latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
-                            longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
-                          }}
-                        />
-                      </MapView>
-                      <TouchableOpacity
-                        style={styles.mapButton}
-                        onPress={() => handlePressLocation(message.content)}
-                      >
-                        <Text style={styles.mapButtonText}>Mở Google Maps</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <Text style={[styles.messageText, isCurrentUser && styles.currentUserText]}>
-                      {message.content}
+                {/* Nội dung tin nhắn chính */}
+                {
+                  // tin nhắn bị thu hồi
+                  message._destroy == true ? (
+                    <Text style={[styles.messageTextThuHoi]}>
+                      Tin nhắn đã được thu hồi
                     </Text>
-                  )
-                ) : message.type === 'image' ? (
-                  message.isLoading ? (
-                    <View style={styles.imageLoadingContainer}>
-                      <LottieView
-                        source={require('../../utils/animation/loadingTron/loadingTron.json')} 
-                        autoPlay
-                        loop
-                        style={styles.lottie}
-                      />
-                    </View>
-                  ) : (
-                    <Image
-                      style={[styles.messageImage, isCurrentUser && styles.currentUserText]}
-                      source={{ uri: message.content }}
-                    />
-                  )
-                ) : (
-                  message.type === 'video' && (
-                    message.isLoading ? (
-                      <View style={styles.videoLoadingContainer}>
-                        <LottieView
-                          source={require('../../utils/animation/loadingPost/loadingPost.json')}
-                          autoPlay
-                          loop
-                          style={styles.lottie}
-                        />
+                  ) : message.type == 'text' ? (
+                    isGoogleMapsLink(message.content) ? (
+                      <View style={{ alignItems: 'center' }}>
+                        <MapView
+                          style={{ width: 200, height: 120, borderRadius: 10 }}
+                          initialRegion={{
+                            latitude: parseFloat(
+                              message.content.split('q=')[1].split(',')[0],
+                            ),
+                            longitude: parseFloat(
+                              message.content.split('q=')[1].split(',')[1],
+                            ),
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                          }}
+                          pointerEvents="none">
+                          <Marker
+                            coordinate={{
+                              latitude: parseFloat(
+                                message.content.split('q=')[1].split(',')[0],
+                              ),
+                              longitude: parseFloat(
+                                message.content.split('q=')[1].split(',')[1],
+                              ),
+                            }}
+                          />
+                        </MapView>
+                        <TouchableOpacity
+                          style={{
+                            marginTop: 5,
+                            backgroundColor: '#2196F3',
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            borderRadius: 8,
+                          }}
+                          onPress={() => handlePressLocation(message.content)}>
+                          <Text style={{ color: '#fff' }}>Mở Google Maps</Text>
+                        </TouchableOpacity>
                       </View>
                     ) : (
+                      <Text
+                        style={[
+                          styles.messageText,
+                          isCurrentUser && styles.currentUserText,
+                        ]}>
+                        {message.content}
+                      </Text>
+                    )
+                  ) : message.type == 'image' ? (
+                    <Image
+                      style={[
+                        styles.messageImage,
+                        isCurrentUser && styles.currentUserText,
+                      ]}
+                      source={{ uri: message.content }}
+                    />
+                  ) : (
+                    message.type == 'video' && (
                       <Video
-                        source={{ uri: message.content }}
-                        style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
-                        controls={true}
-                        resizeMode="contain"
+                        source={{ uri: message.content }} // URL video
+                        style={[
+                          styles.messageVideo,
+                          isCurrentUser && styles.currentUserText,
+                        ]}
+                        controls={true} // Hiển thị điều khiển video
+                        resizeMode="contain" // Cách hiển thị video
                       />
                     )
                   )
-                )}
-                <Text style={styles.messageTime}>{formatTime(message.createdAt)}</Text>
-                <TouchableOpacity onPress={() => openBottomSheet(50, renderBottomSheetContent())}>
+                }
+                {/* thời gian */}
+                <Text style={styles.messageTime}>
+                  {formatTime(message.createdAt)}
+                </Text>
+                {/* butonsheet reaction biểu cảm */}
+                <TouchableOpacity
+                  onPress={() =>
+                    openBottomSheet(50, renderBottomSheetContent())
+                  }>
                   <View style={{ flexDirection: 'row' }}>
                     {message?.message_reactionList.map((reaction, index) => (
                       <View key={index} style={styles.reactionButton}>
@@ -311,24 +375,40 @@ export default function MessageComponent({
             </View>
           </TouchableWithoutFeedback>
 
+          {/* Hiển thị Snackbar dưới cùng màn hình */}
           <Snackbar
             visible={dialogCopyVisible}
             onDismiss={() => setDialogCopyVisible(false)}
-            duration={1000}
-          >
+            duration={1000}>
             Đã sao chép tin nhắn!
           </Snackbar>
 
-          <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
+          {/* Menu tùy chọn khi nhấn giữ */}
+          <Modal
+            visible={menuVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setMenuVisible(false)}>
             <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
               <View style={styles.overlay}>
                 <View
                   style={[
-                    { position: 'absolute', top: menuPosition.top },
-                    isCurrentUser ? { right: 10, alignItems: 'flex-end' } : { left: menuPosition.left },
-                  ]}
+                    {
+                      position: 'absolute',
+                      top: menuPosition.top,
+                    },
+                    isCurrentUser
+                      ? {
+                        right: 10,
+                        alignItems: 'flex-end', // Căn phải
+                      }
+                      : {
+                        left: menuPosition.left,
+                      },
+                  ]} // Cập nhật vị trí menu
                 >
-                  <View style={styles.reactionBar}>
+                  <View style={[styles.reactionBar]}>
+                    {/* reaction biểu cảm */}
                     {reactions.map((reaction, index) => (
                       <TouchableOpacity
                         key={index}
@@ -336,111 +416,110 @@ export default function MessageComponent({
                         onPress={() => {
                           onIcon(message._id, reaction._id);
                           setMenuVisible(false);
-                        }}
-                      >
-                        <Text style={styles.onreactionText}>{reaction.icon}</Text>
+                        }}>
+                        <Text style={styles.onreactionText}>
+                          {reaction.icon}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
 
-                      <View
-                        style={[
-                          styles.messageWrapper,
-                          isCurrentUser && styles.currentUserMessage,
-                        ]}>
-                        {!isCurrentUser && (
-                          <Text style={styles.username}>
-                            {message.sender?.first_name} {message.sender?.last_name}
-                          </Text>
-                        )}
-                        {/* Hiển thị tin nhắn trả lời nếu có */}
-                        {message.ID_message_reply && message._destroy == false && (
-                          <View style={styles.replyContainer}>
-                            <Text style={styles.replyText} numberOfLines={2}>
-                              {message.ID_message_reply.content}
-                            </Text>
-                          </View>
-                        )}
-                        {/* Nội dung tin nhắn chính */}
-                        {
-                          // tin nhắn bị thu hồi
-                          message._destroy == true ? (
-                            <Text style={[styles.messageTextThuHoi]}>
-                              Tin nhắn đã được thu hồi
-                            </Text>
-                          ) : message.type == 'text' ? (
-                            <Text
-                              style={[
-                                styles.messageText,
-                                isCurrentUser && styles.currentUserText,
-                              ]}>
-                              {message.content}
-                            </Text>
-                          ) : message.type == 'image' ? (
-                            <Image
-                              style={[
-                                styles.messageImage,
-                                isCurrentUser && styles.currentUserText,
-                              ]}
-                              source={{ uri: message.content }}
-                            />
-                          ) : (
-                            message.type == 'video' && (
-                              <Video
-                                source={{ uri: message.content }} // URL video
-                                style={[
-                                  styles.messageVideo,
-                                  isCurrentUser && styles.currentUserText,
-                                ]}
-                                controls={true} // Hiển thị điều khiển video
-                                resizeMode="contain" // Cách hiển thị video
-                              />
-                            )
-                          )
-                        }
-                        {/* thời gian */}
-                        <Text style={styles.messageTime}>
-                          {formatTime(message.createdAt)}
+                  <View
+                    style={[
+                      styles.messageWrapper,
+                      isCurrentUser && styles.currentUserMessage,
+                    ]}>
+                    {!isCurrentUser && (
+                      <Text style={styles.username}>
+                        {message.sender?.first_name} {message.sender?.last_name}
+                      </Text>
+                    )}
+                    {/* Hiển thị tin nhắn trả lời nếu có */}
+                    {message.ID_message_reply && message._destroy == false && (
+                      <View style={styles.replyContainer}>
+                        <Text style={styles.replyText} numberOfLines={2}>
+                          {message.ID_message_reply.content}
                         </Text>
                       </View>
-
-                      <View style={[styles.menu]}>
-                        <TouchableOpacity
-                          style={styles.menuItem}
-                          onPress={() => {
-                            onReply(message); // Gửi tin nhắn được chọn về component cha
-                            setMenuVisible(false); // tắc modal
-                          }}>
-                          <Text style={styles.menuText}>Trả lời</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.menuItem}
-                          onPress={() => {
-                            copyToClipboard(message.content); // copy
-                            setMenuVisible(false); // tắc modal
-                          }}>
-                          <Text style={styles.menuText}>Sao chép</Text>
-                        </TouchableOpacity>
-                        {isCurrentUser && (
-                          <TouchableOpacity
-                            style={styles.menuItem}
-                            onPress={() => {
-                              onRevoke(message._id); // Thu hồi tin nhắn
-                              setMenuVisible(false); // tắc modal
-                            }}>
-                            <Text style={styles.menuText}>Thu hồi</Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    </View>
+                    )}
+                    {/* Nội dung tin nhắn chính */}
+                    {
+                      // tin nhắn bị thu hồi
+                      message._destroy == true ? (
+                        <Text style={[styles.messageTextThuHoi]}>
+                          Tin nhắn đã được thu hồi
+                        </Text>
+                      ) : message.type == 'text' ? (
+                        <Text
+                          style={[
+                            styles.messageText,
+                            isCurrentUser && styles.currentUserText,
+                          ]}>
+                          {message.content}
+                        </Text>
+                      ) : message.type == 'image' ? (
+                        <Image
+                          style={[
+                            styles.messageImage,
+                            isCurrentUser && styles.currentUserText,
+                          ]}
+                          source={{ uri: message.content }}
+                        />
+                      ) : (
+                        message.type == 'video' && (
+                          <Video
+                            source={{ uri: message.content }} // URL video
+                            style={[
+                              styles.messageVideo,
+                              isCurrentUser && styles.currentUserText,
+                            ]}
+                            controls={true} // Hiển thị điều khiển video
+                            resizeMode="contain" // Cách hiển thị video
+                          />
+                        )
+                      )
+                    }
+                    {/* thời gian */}
+                    <Text style={styles.messageTime}>
+                      {formatTime(message.createdAt)}
+                    </Text>
                   </View>
-                </TouchableWithoutFeedback>
-              </Modal>
-            </View>
-          )
-      }
-    </View >
 
+                  <View style={[styles.menu]}>
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => {
+                        onReply(message); // Gửi tin nhắn được chọn về component cha
+                        setMenuVisible(false); // tắc modal
+                      }}>
+                      <Text style={styles.menuText}>Trả lời</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => {
+                        copyToClipboard(message.content); // copy
+                        setMenuVisible(false); // tắc modal
+                      }}>
+                      <Text style={styles.menuText}>Sao chép</Text>
+                    </TouchableOpacity>
+                    {isCurrentUser && (
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                          onRevoke(message._id); // Thu hồi tin nhắn
+                          setMenuVisible(false); // tắc modal
+                        }}>
+                        <Text style={styles.menuText}>Thu hồi</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -589,7 +668,7 @@ const styles = StyleSheet.create({
     marginLeft: 3,
     backgroundColor: 'white',
     paddingHorizontal: 3,
-    borderRadius: 20
+    borderRadius: 20,
   },
   reactionText: {
     fontSize: 10,
@@ -669,7 +748,7 @@ const styles = StyleSheet.create({
   tabIcon: {
     marginRight: 4,
     fontSize: 16,
-    color: 'black'
+    color: 'black',
   },
   tabLabel: {
     color: 'black',
@@ -700,5 +779,64 @@ const styles = StyleSheet.create({
   },
   nameItemReaction: {
     color: 'black',
-  }
+  },
+  //game
+  gameInviteContainer: {
+    backgroundColor: '#F0F2F5', // Màu xám nhạt giống Messenger
+    width: '80%',
+    padding: 15, // Thêm padding để nội dung thoáng hơn
+    alignSelf: 'center',
+    borderRadius: 20,
+    marginVertical: 10,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  inviteText: {
+    textAlign: 'center',
+    color: '#050505', // Màu đen đậm giống Messenger
+    fontSize: 16,
+    fontWeight: '400', // Font bình thường
+    marginBottom: 10, // Cách nút phía dưới
+  },
+  endText: {
+    textAlign: 'center',
+    color: '#65676B', // Màu xám đậm cho trạng thái kết thúc
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 15, // Khoảng cách giữa các nút
+  },
+  acceptButton: {
+    backgroundColor: '#0084FF', // Màu xanh dương của Messenger
+    width: 100,
+    height: 36, // Cao hơn một chút để giống Messenger
+    borderRadius: 18, // Bo góc tròn
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  acceptButtonText: {
+    color: '#FFFFFF', // Chữ trắng
+    fontSize: 16,
+    fontWeight: '600', // Chữ đậm nhẹ
+  },
+  rejectButton: {
+    backgroundColor: '#E4E6EB', // Màu xám nhạt của Messenger
+    width: 100,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rejectButtonText: {
+    color: '#050505', // Chữ đen đậm
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
