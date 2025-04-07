@@ -8,7 +8,7 @@ const { width, height } = Dimensions.get('window');
 const FindWithEmail = (props) => {
     const { navigation } = props;
 
-    
+
     return (
         <View style={styles.container}>
             <Pressable onPress={() => navigation.goBack()}>
@@ -29,13 +29,13 @@ const FindWithEmail = (props) => {
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
 
-              <View style={styles.containerButton}>
-                            <Pressable
-                                style={styles.buttonNextSceen}
-                                onPress={() => navigation.navigate('FindWithPhone')}>
-                                <Text style={styles.buttonTextNextScreen}>Tìm bằng số điện thoại</Text>
-                            </Pressable>
-                        </View>
+            <View style={styles.containerButton}>
+                <Pressable
+                    style={styles.buttonNextSceen}
+                    onPress={() => navigation.navigate('FindWithPhone')}>
+                    <Text style={styles.buttonTextNextScreen}>Tìm bằng số điện thoại</Text>
+                </Pressable>
+            </View>
         </View>
     );
 };
