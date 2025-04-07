@@ -52,6 +52,9 @@ const PostDetail = (props) => {
   const [countComments, setCountComments] = useState(0)
 
   const [reply, setReply] = useState(null);
+  const [isReplying, setIsReplying] = useState(false); // Thêm trạng thái trả lời
+  const textInputRef = useRef(null); // Thêm ref cho TextInput
+
   const [post, setPost] = useState(null)
 
   const [timeAgo, setTimeAgo] = useState();
@@ -142,7 +145,8 @@ const PostDetail = (props) => {
 
   //call api chi tiet bai post
   const callAddComment = async (type, content) => {
-    try {addComment
+    try {
+      addComment
       if ((content == '' && type === 'text') || post == null) {
         console.log('thiếu ')
         return null;
@@ -167,6 +171,7 @@ const PostDetail = (props) => {
           setCountComments(countComments + 1);
           setComment('');
           setReply(null);
+          setIsReplying(false); // Reset trạng thái trả lời
         })
         .catch((error) => {
           console.log('Error1 addComment:', error);
@@ -729,9 +734,14 @@ const PostDetail = (props) => {
   const renderComment = useCallback(({ item }) => (
     <ListComment
       comment={item}
-      onReply={(e) => setReply(e)}
+      onReply={(replyData) => {
+        setReply(replyData);
+        setIsReplying(true);
+        setComment(`${replyData.ID_user.first_name} ${replyData.ID_user.last_name} `);
+        textInputRef.current?.focus(); // Tập trung vào TextInput
+      }}
     />
-  ), [setReply]);
+  ), []);
 
   const header = () => {
     if (!post) {
@@ -1374,14 +1384,17 @@ const PostDetail = (props) => {
         {
           reply && (
             <View style={styles.replyPreview}>
-              <View>
-                <Text style={styles.replyTitle}>Đang trả lời: </Text>
-                <Text style={styles.replyContent}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.replyTitle}>Đang phản hồi</Text>
+                <Text style={[styles.replyContent, { fontWeight: 'bold' }]}>
                   {
-                    me._id == reply.ID_user._id
-                      ? ` Bạn: `
-                      : ` ${reply.ID_user.first_name} ${reply.ID_user.last_name}: `
+                    // me._id == reply.ID_user._id && (
+                    ` ${reply.ID_user.first_name} ${reply.ID_user.last_name} `
+                    // )
                   }
+
+                </Text>
+                {/* <Text style={styles.replyContent}>
                   {
                     reply.type === 'text'
                       ? `${reply.content}`
@@ -1389,13 +1402,13 @@ const PostDetail = (props) => {
                         ? 'Ảnh'
                         : 'Video'
                   }
-                </Text>
+                </Text> */}
               </View>
               <TouchableOpacity
                 style={styles.replyRight}
-                onPress={() => setReply(null)}
+                onPress={() => {setReply(null), setIsReplying(false), setComment("")}}
               >
-                <Text style={styles.replyTitle}>✖</Text>
+                <Text style={styles.replyTitle}>Hủy</Text>
               </TouchableOpacity>
             </View>
           )
@@ -1416,8 +1429,9 @@ const PostDetail = (props) => {
 
                 </View>
                 <TextInput
+                  ref={textInputRef} // Gắn ref vào TextInput
                   style={styles.textInput}
-                  placeholder="Viết bình luận "
+                  placeholder={isReplying ? `Trả lời ${reply?.ID_user.first_name} ${reply?.ID_user.last_name}` : "Viết bình luận"}
                   multiline={true}
                   value={comment}
                   onChangeText={setComment}

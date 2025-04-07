@@ -942,20 +942,12 @@ const PostItem = memo(({
                                         value={captionShare}
                                         onChangeText={setCaptionShare}
                                     />
-<<<<<<< HEAD
-                                    <View style={{ alignItems: 'center' }}>
-                                        <TouchableOpacity
-                                            style={{ paddingVertical: 15, paddingHorizontal: 60, backgroundColor: "#0064E0", borderRadius: 10 }}
-                                            onPress={callAddPostShare}
-                                        >
-=======
                                       <TouchableOpacity
                                         onPress={callAddPostShare}
                                         style={{padding: 10, backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
                                        <View >
                                       
                                           
->>>>>>> ec5d10114397a91a155a27aecd6e26210b6daaef
                                             <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
                                       
                                     </View>

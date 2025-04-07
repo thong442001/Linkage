@@ -494,7 +494,9 @@ const CommentS = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         borderTopWidth: 1,
-        borderColor: 'grey',
+        borderColor: '#d9d9d9d9',
+        paddingVertical: height * 0.01,
+        paddingHorizontal: width * 0.02,
     },
     replyTitle: {
         color: 'black',
