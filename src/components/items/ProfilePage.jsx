@@ -505,9 +505,12 @@ const PostItem = memo(({
                         <View>
                             <View style={[styles.headerShare]}>
                                 <View style={styles.userInfo}>
-                                    <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                                    <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
+                                        <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                                    </TouchableOpacity>
+
                                     <View style={{ marginLeft: width * 0.01 }}>
-                                        <Text style={styles.name}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
+                                        <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>{post?.ID_user?.first_name + " " + post?.ID_user?.last_name}</Text>
                                         <View style={styles.boxName}>
                                             <Text style={styles.time}>{timeAgo}</Text>
                                             {getIcon(post.status)}
@@ -809,7 +812,12 @@ const PostItem = memo(({
                     {/* số lượng bình luận luôn sát bên phải */}
                     <View>
                         {post?.comments.length > 0 && (
-                            <Text style={styles.slReactionsOfPost}>
+                            <Text style={styles.slReactionsOfPost}
+                                onPress={() => {
+                                    console.log("ID_post gửi đi:", post._id); // Kiểm tra ID trước khi chuyển trang
+                                    navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "comment" });
+                                }}
+                            >
                                 {post?.comments.length} bình luận
                             </Text>
                         )}
