@@ -93,12 +93,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F7FA',
     paddingHorizontal: width * 0.05,
-    paddingTop: height * 0.03, // Giảm paddingTop để gần trên cùng hơn
+    paddingTop: height * 0.03,
   },
   header: {
-    flexDirection: 'row', // Xếp nút Back và tiêu đề ngang nhau
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start', // Căn trái để nút Back sát mép
+    justifyContent: 'flex-start',
     width: '100%',
     marginBottom: height * 0.04,
   },
@@ -109,40 +109,45 @@ const styles = StyleSheet.create({
     fontSize: width * 0.065,
     fontWeight: '700',
     color: '#1E1E1E',
-    marginLeft: width * 0.03, // Khoảng cách giữa nút Back và tiêu đề
+    marginLeft: width * 0.03,
   },
   optionContainer: {
     backgroundColor: '#ffffff',
-    borderRadius: 15,
+    borderRadius: 20, // Bo góc mềm mại hơn
     marginVertical: height * 0.015,
-    padding: width * 0.04,
+    paddingVertical: height * 0.025, // Tăng padding dọc để nút cao hơn
+    paddingHorizontal: width * 0.05, // Padding ngang rộng hơn
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+    borderWidth: 1, // Thêm viền nhẹ
+    borderColor: '#E8ECEF', // Màu viền nhạt
   },
   icon: {
-    fontSize: width * 0.065,
+    fontSize: width * 0.07, // Tăng kích thước icon
     marginRight: width * 0.04,
-    color: '#007BFF',
+    color: '#007BFF', // Màu xanh nổi bật
+    backgroundColor: '#E6F0FF', // Nền nhạt phía sau icon
+    padding: width * 0.02, // Thêm padding cho icon
+    borderRadius: 10, // Bo tròn nền icon
   },
   textContainer: {
     flex: 1,
+    justifyContent: 'center', // Căn giữa nội dung văn bản
   },
   title: {
     fontSize: width * 0.045,
     fontWeight: '600',
-    color: '#333',
+    color: '#2C3E50', // Màu chữ đậm và hiện đại hơn
   },
   subtitle: {
     fontSize: width * 0.035,
-    color: '#999',
+    color: '#7F8C8D', // Màu xám nhẹ nhàng
     marginTop: height * 0.005,
   },
   switch: {
-    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
+    transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }], // Tăng kích thước switch
+    marginLeft: width * 0.03, // Khoảng cách với văn bản
+    trackColor: { false: '#BDC3C7', true: '#3498DB' }, // Màu track tinh tế hơn
   },
 });
