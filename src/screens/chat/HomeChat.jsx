@@ -214,7 +214,7 @@ const HomeChat = ({ route, navigation }) => {
       {loading ? (
         <ChatHomeLoading />
       ) : (
-        <View>
+        <View style={styles.container}>
           <FlatList
             data={friends}
             renderItem={({ item }) => {

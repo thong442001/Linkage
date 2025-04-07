@@ -432,7 +432,12 @@ const AppNavigation = () => {
       return 'Tài khoản của bạn đã bị khóa';
     }
 
-    // 14. Thông báo mặc định nếu không khớp loại nào
+    // 15. Thông báo tài khoản bị khóa
+    if (notification?.type === 'Tài khoản bị khóa') {
+      return 'Tài khoản của bạn đã bị khóa';
+    }
+
+    // 16. Thông báo mặc định nếu không khớp loại nào
     return 'Bạn có một thông báo mới';
   };
 
