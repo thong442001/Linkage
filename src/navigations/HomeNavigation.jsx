@@ -230,7 +230,6 @@ import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
 import Trash from '../screens/setting/Trash';
 import ChangePassWord from '../screens/changeProfile/ChangePassWord';
 import CallPage from '../screens/call/CallPage';
-import CallGroup from '../screens/call/CallGroup';
 import ChatBot from '../screens/chat/ChatBot';
 import ListFriend from '../screens/friend/ListFriend';
 import HuggingFaceImageGenerator from '../screens/Al/RunwayMLImageGenerator ';
@@ -271,7 +270,6 @@ const oStackHome = {
   Trash: { name: 'Trash', component: Trash },
   ChangePassWord: { name: 'ChangePassWord', component: ChangePassWord },
   CallPage: { name: 'CallPage', component: CallPage },
-  CallGroup: { name: 'CallGroup', component: CallGroup },
   ChatBot: { name: 'ChatBot', component: ChatBot },
   ListFriend: { name: 'ListFriend', component: ListFriend },
   HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },

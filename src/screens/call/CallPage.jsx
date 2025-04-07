@@ -4,6 +4,8 @@ import ZegoUIKitPrebuiltCallService, {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
   ONE_ON_ONE_VOICE_CALL_CONFIG,
+  GROUP_VIDEO_CALL_CONFIG,
+  GROUP_VOICE_CALL_CONFIG,
   ZegoMenuBarButtonName,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import KeyCenter from "./KeyCenter";
@@ -27,20 +29,30 @@ const CallPage = props => {
                 appID={KeyCenter.appID}
                 appSign={KeyCenter.appSign}
                 userID={params?.id_user}
-                userName={params?.ID_group}
+                userName={params?.MyUsername}
                 callID={params?.ID_group}
                 
                 config={{
                     // ...ONE_ON_ONE_VOICE_CALL_CONFIG,
                     ...callConfig,
                     avatarBuilder: ({userInfo}) => {
-                      return <View style={{width: '100%', height: '100%'}}>
-                       <Image
-                        style={{ width: '100%', height: '100%' }}
-                        resizeMode="cover"
-                        source={{ uri: params?.MyAvatar }}
-                        />
-                      </View>
+                      // Chỉ hiển thị avatar cho cuộc gọi 1-1 (video hoặc voice)
+                    if (
+                      callConfig === ONE_ON_ONE_VIDEO_CALL_CONFIG ||
+                      callConfig === ONE_ON_ONE_VOICE_CALL_CONFIG
+                    ) {
+                      return (
+                        <View style={{ width: '100%', height: '100%' }}>
+                          <Image
+                            style={{ width: '100%', height: '100%' }}
+                            resizeMode="cover"
+                            source={{ uri: params?.MyAvatar }}
+                          />
+                        </View>
+                      );
+                    }
+                    // Trả về null nếu không phải cuộc gọi 1-1 (nhóm)
+                    return null;
                     },
                     onCallEnd: (callID, reason, duration) => {
                         console.log('########CallPage onCallEnd');

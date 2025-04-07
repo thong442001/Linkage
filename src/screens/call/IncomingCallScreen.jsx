@@ -79,7 +79,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
     navigation.navigate('CallPage', {
       ID_group: group._id,
       id_user: me._id,
-      MyUsername: me.last_name,
+      MyUsername: me.last_name + ' ' + me.first_name,
       status: type,
       MyAvatar: me.avatar,
       members: group.members,
