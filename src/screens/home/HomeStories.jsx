@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, TouchableOpacity, View, Image, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import HomeS from '../../styles/screens/home/HomeS';
 import Stories from '../../components/items/Stories';
 import ItemLive from '../../components/items/ItemLive';
 import { oStackHome } from '../../navigations/HomeNavigation';
+import { useFocusEffect } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
 
 const HomeStories = ({ navigation, me, stories, liveSessions }) => {
-  const headerComponentStory = () => {
+      const [liveID, setliveID] = useState('');
+      const me_info = useSelector(state => state.app.user);
+      useFocusEffect(
+              React.useCallback(() => {
+                  setliveID(String(Math.floor(Math.random() * 100000000)));
+              }, [])
+          );
+    const headerComponentStory = () => {
     return (
       <TouchableOpacity
         style={HomeS.boxStory}
@@ -36,17 +45,23 @@ const HomeStories = ({ navigation, me, stories, liveSessions }) => {
           placeholder="Bạn đang nghĩ gì ?"
           placeholderTextColor="black"
         />
+        <TouchableOpacity onPress={() => navigation.navigate('HostLive', { 
+           userID: me._id,
+           avatar: me.avatar, 
+           userName: me.first_name + ' ' + me.last_name, 
+           liveID: liveID })}>
         <View style={HomeS.icons}>
           <View style={HomeS.iconsPadding2}>
-            <Icon name="image" size={20} color="#0064E0" />
+            <Icon name="videocam" size={25} color="#df0b0b" />
           </View>
         </View>
+        </TouchableOpacity>
       </View>
 
       {/* Phần danh sách Story */}
       <View style={HomeS.story}>
         <FlatList
-          data={stories.concat(liveSessions)}
+          data={liveSessions.concat(stories)}
           renderItem={({ item }) => {
             if (item.liveID) {
               return <ItemLive user={item} />;a

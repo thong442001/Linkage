@@ -41,7 +41,6 @@ const Screen1 = (props) => {
         if (!first_name.trim() || !validateName(first_name)) {
             setShowErrorFirstName(true);
             isValid = false;
-            Alert.alert('Thông báo', "Họ không hợp lệ! Chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt.");
         } else {
             setShowErrorFirstName(false);
         }
@@ -49,7 +48,6 @@ const Screen1 = (props) => {
         if (!last_name.trim() || !validateName(last_name)) {
             setShowErrorLastName(true);
             isValid = false;
-            Alert.alert('Thông báo', "Tên không hợp lệ! Chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt.");
         } else {
             setShowErrorLastName(false);
         }
@@ -59,13 +57,11 @@ const Screen1 = (props) => {
             setShowErrorFirstName(true);
             setShowErrorLastName(true);
             isValid = false;
-            Alert.alert('Thông báo', "Tổng độ dài của họ và tên không được vượt quá 30 ký tự.");
         }
 
         if (!dateOfBirth.trim()) {
             setShowErrorDate(true);
             isValid = false;
-            Alert.alert('Thông báo', "Vui lòng chọn ngày sinh.");
         } else {
             setShowErrorDate(false);
         }
@@ -79,7 +75,6 @@ const Screen1 = (props) => {
         if (age < 12 || (age === 12 && monthDiff < 0) || (age === 12 && monthDiff === 0 && dayDiff < 0)) {
             setShowErrorDate(true);
             isValid = false;
-            Alert.alert('Thông báo', "Bạn phải từ 12 tuổi trở lên để đăng ký.");
         } else {
             setShowErrorDate(false);
         }
@@ -179,7 +174,6 @@ const Screen1 = (props) => {
 
                     if (age < 12 || (age === 12 && monthDiff < 0) || (age === 12 && monthDiff === 0 && dayDiff < 0)) {
                         setShowErrorDate(true);
-                        Alert.alert('Thông báo', "Bạn phải từ 12 tuổi trở lên để đăng ký.");
                     } else {
                         setShowErrorDate(false);
                     }
@@ -196,9 +190,9 @@ const Screen1 = (props) => {
                 <CustomRadioButton label="Lựa chọn khác" value="Khác" description="Chọn Tùy chọn khác nếu bạn thuộc giới tính khác hoặc không muốn tiết lộ" />
             </View>
 
-            <Pressable style={styles.button} onPress={handleNext}>
+            <TouchableOpacity style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
-            </Pressable>
+            </TouchableOpacity>
         </View>
     );
 };

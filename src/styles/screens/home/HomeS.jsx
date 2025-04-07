@@ -52,7 +52,7 @@ const HomeS = StyleSheet.create({
         paddingLeft: width * 0.05
     },
     iconsPadding2: {
-        paddingLeft: width * 0.04,
+        paddingLeft: width * 0.03,
     },
     line: {
         height: 0.6,

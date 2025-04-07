@@ -27,7 +27,7 @@ const FindWithEmail = (props) => {
         }
 
         setError('');
-        setIsLoading(true); // Bật loading trước khi gửi request
+        setIsLoading(true);
         try {
             console.log("Sending payload:", { gmail });
             const response = await dispatch(sendOTP_quenMatKhau_gmail({ gmail })).unwrap();

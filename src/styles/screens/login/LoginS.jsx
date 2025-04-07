@@ -56,17 +56,19 @@ const styles = StyleSheet.create({
   formSectionLogin: {
     marginBottom: height * 0.25,
   },
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
+  // Style mới cho password container và icon
+  passwordContainer: {
+    flexDirection: 'row', // Sắp xếp ngang
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Nền mờ cho modal
+    width: width * 0.9,
+    marginTop: height * 0.01,
   },
-  loadingAnimation: {
-    width: 150,
-    height: 150,
+  passwordInput: {
+    flex: 1, // Để TextInput chiếm phần lớn không gian
+  },
+  iconContainer: {
+    padding: 10, // Khoảng cách để dễ nhấn
   },
 });
-
 
 export default styles;

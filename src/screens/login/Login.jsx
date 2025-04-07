@@ -19,6 +19,7 @@ import ButtonCreateNewAccount from '../../components/button/ButtonCreateNewAccou
 import { CustomTextInputEmail, CustomTextInputPassword } from '../../components/textinputs/CustomTextInput';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Login = (props) => {
   const { navigation } = props;
@@ -30,8 +31,13 @@ const Login = (props) => {
   const [errorEmailPhone, setErrorEmailPhone] = useState('');
   const [errorPassword, setErrorPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+    useEffect(() => {
     GoogleSignin.configure({
       webClientId: "94150586774-ju0vq4e5o8k1uce1vs9oqk944i00ultn.apps.googleusercontent.com",
     });
@@ -168,6 +174,7 @@ const Login = (props) => {
           />
           {errorEmailPhone ? <Text style={styles.errorText}>{errorEmailPhone}</Text> : null}
 
+          {/* Sử dụng CustomTextInputPassword với icon */}
           <CustomTextInputPassword
             placeholder="Mật khẩu"
             value={password}
@@ -175,6 +182,16 @@ const Login = (props) => {
               setPassword(text);
               setErrorPassword('');
             }}
+            secureTextEntry={!showPassword} // Điều khiển ẩn/hiện mật khẩu
+            icon={
+              <Pressable onPress={toggleShowPassword}>
+                <Icon
+                  name={showPassword ? 'eye-slash' : 'eye'}
+                  size={25}
+                  color="black"
+                />
+              </Pressable>
+            }
           />
           {errorPassword ? <Text style={styles.errorText}>{errorPassword}</Text> : null}
         </View>
@@ -186,11 +203,11 @@ const Login = (props) => {
         <Pressable onPress={() => navigation.navigate('FindWithEmail')}>
           <Text style={styles.forgotPasswordText}>Bạn quên mật khẩu ư?</Text>
         </Pressable>
-        {/* loginGG */}
-        <View style={{alignItems: 'center', justifyContent: 'center'}}>
-            <TouchableOpacity onPress={handleGoogleLogin} style={{padding: 5, borderRadius: 25}}>
+
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <TouchableOpacity onPress={handleGoogleLogin} style={{ padding: 5, borderRadius: 25 }}>
             <Image source={require('../../../assets/images/google.png')} style={styles.socialIcon} />
-            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -198,5 +215,4 @@ const Login = (props) => {
     </View>
   );
 };
-
 export default Login;

@@ -6,6 +6,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
+import { BackHandler } from 'react-native';
 
 //tab tổng
 import Home from '../screens/home/Home';
@@ -23,6 +24,11 @@ const oTab = {
 
 const Tab = createBottomTabNavigator();
 
+if (!BackHandler.removeEventListener) {
+  BackHandler.removeEventListener = () => {
+    // console.warn('BackHandler.removeEventListener is deprecated and patched.');
+  };
+}
 
 
 const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
@@ -224,7 +230,6 @@ import ChangeDisplayName from '../screens/changeProfile/ChangeDisplayName';
 import Trash from '../screens/setting/Trash';
 import ChangePassWord from '../screens/changeProfile/ChangePassWord';
 import CallPage from '../screens/call/CallPage';
-import CallGroup from '../screens/call/CallGroup';
 import ChatBot from '../screens/chat/ChatBot';
 import ListFriend from '../screens/friend/ListFriend';
 import HuggingFaceImageGenerator from '../screens/Al/RunwayMLImageGenerator ';
@@ -245,7 +250,8 @@ import man_hinh_chao_pokemon from '../screens/game/pokemon/pokemon';
 import MapScreen from '../screens/map/MapScreen';
 import SwitchNoti from '../screens/notification/SwitchNoti';
 import OTPScreen from '../screens/register/OTPScreen';
-
+import CheckPhone from '../screens/forgot_password/CheckPhone';
+import CreatePasswordPhone from '../screens/forgot_password/CreatePasswordPhone';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
@@ -266,7 +272,6 @@ const oStackHome = {
   Trash: { name: 'Trash', component: Trash },
   ChangePassWord: { name: 'ChangePassWord', component: ChangePassWord },
   CallPage: { name: 'CallPage', component: CallPage },
-  CallGroup: { name: 'CallGroup', component: CallGroup },
   ChatBot: { name: 'ChatBot', component: ChatBot },
   ListFriend: { name: 'ListFriend', component: ListFriend },
   HuggingFaceImageGenerator: { name: 'HuggingFaceImageGenerator', component: HuggingFaceImageGenerator },
@@ -287,6 +292,8 @@ const oStackHome = {
   MapScreen: { name: 'MapScreen', component: MapScreen },
   SwitchNoti: { name: 'SwitchNoti', component: SwitchNoti },
   OTPScreen: { name: 'OTPScreen', component: OTPScreen },
+  CheckPhone: { name: 'CheckPhone', component: CheckPhone },
+  CreatePasswordPhone: { name: 'CreatePasswordPhone', component: CreatePasswordPhone },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

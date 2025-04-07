@@ -1022,13 +1022,13 @@ const PostItem = memo(({
                 </TouchableWithoutFeedback>
             </Modal>
 
-        
+                        
                 <SuccessModal
                     visible={successModalVisible}
                     message="Chia sẻ bài viết thành công!"
                 />
 
-                
+                      
                 <FailedModal
                     visible={failedModalVisible}
                     message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"
@@ -1056,12 +1056,6 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         marginHorizontal: width * 0.02
-        // borderRadius: 7,
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.25,
-        // shadowRadius: 3.84,
-        // elevation: 5, // Dành cho Android
     },
     header2: {
     },
@@ -1069,7 +1063,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        // marginBottom: height * 0.015,
         marginHorizontal: width * 0.04, // 2.5% chiều rộng 
         marginVertical: height * 0.015, // 1.5% chiều cao 
         // marginTop: height * 0.015,

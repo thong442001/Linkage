@@ -1,13 +1,54 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { checkPhone } from '../../rtk/API';
+import { checkPhone, sendOTP_dangKi_phone } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
-
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 const { width, height } = Dimensions.get('window');
 
 const FindWithPhone = (props) => {
     const { navigation } = props;
+    const [phone, setPhone] = useState('');
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch();
+
+
+     const handleCheckPhone = async () => {
+            if (!phone.trim()) {
+                setError('Vui lòng nhập số điện thoại.');
+                return;
+            }
+    
+            const phoneRegex = /^(?:\+84|84|0)(3[2-9]|5[5-9]|7[0|6-9]|8[1-9]|9[0-4|6-9])\d{7}$/;
+            if (!phoneRegex.test(phone)) {
+                setError('Số điện thoại không hợp lệ.');
+                return;
+            }
+    
+            setError('');
+            setIsLoading(true); // Bật loading trước khi gửi request
+            try {
+                setIsLoading(true); // Bật loading trước khi gửi request
+                console.log("Sending payload:", { phone });
+                const response = await dispatch(sendOTP_dangKi_phone({ phone })).unwrap();
+                console.log("Response từ sendOTP_dangKi_phone:", response);
+                if (response.status) {
+                    setIsLoading(false);
+                    setTimeout(() => {
+                        setIsLoading(false);
+                    }, 2000);
+                    navigation.navigate('CheckPhone', { phone });
+                } else {
+                    setError(response.message || 'Gửi OTP thất bại. Vui lòng thử lại.');
+                }
+            } catch (error) {
+                setError(error);
+            } finally {
+                setIsLoading(false); // Tắt loading sau khi xử lý xong (dù thành công hay thất bại)
+            }
+        };
 
     return (
         <View style={styles.container}>
@@ -19,13 +60,18 @@ const FindWithPhone = (props) => {
             <Text style={styles.label2}>Nhập số di dộng của bạn.</Text>
 
             <TextInput
-                onChangeText={'black'}
+                onChangeText={(text) => {
+                    setPhone(text);
+                    setError('');
+                }}
                 placeholderTextColor={'#8C96A2'}
                 placeholder="Số di động"
                 style={styles.inputDate}
+                color={'#8C96A2'}
             />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            <Pressable style={styles.button} onPress={() => navigation.navigate('CreateNewPassWord')}>
+            <Pressable style={styles.button} onPress={handleCheckPhone}>
                 <Text style={styles.buttonText}>Tiếp tục</Text>
             </Pressable>
 
@@ -41,6 +87,11 @@ const FindWithPhone = (props) => {
 };
 
 const styles = StyleSheet.create({
+    errorText: {
+        color: 'red',
+        fontSize: 14,
+        marginBottom: 10,
+    },
     container: {
         flex: 1,
         padding: width * 0.04,
