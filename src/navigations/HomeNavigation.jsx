@@ -244,6 +244,8 @@ import pokemon from '../screens/game/pokemon/pokemon';
 import man_hinh_chao_pokemon from '../screens/game/pokemon/pokemon';
 import MapScreen from '../screens/map/MapScreen';
 import SwitchNoti from '../screens/notification/SwitchNoti';
+import vua_tieng_viet from '../screens/game/noi_tu/noi_tu';
+import listgame from '../screens/game/listgame';
 
 
 const oStackHome = {
@@ -286,6 +288,8 @@ const oStackHome = {
   Setting: { name: 'Setting', component: Setting },
   MapScreen: { name: 'MapScreen', component: MapScreen },
   SwitchNoti: { name: 'SwitchNoti', component: SwitchNoti },
+  vua_tieng_viet: { name: 'vua_tieng_viet', component: vua_tieng_viet },
+  listgame: { name: 'listgame', component: listgame },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
