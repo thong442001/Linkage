@@ -69,7 +69,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: height * 0.015, // 1.5% chiều cao màn hình
 
-    margin :width * 0.03, 
+    marginLeft :width * 0.03,
+    marginRight :width * 0.03, 
+    marginBottom :width * 0.03,
   },
   avatarContainer: {
     position: 'relative', // Để onlineIndicator có thể định vị tương đối với avatar
