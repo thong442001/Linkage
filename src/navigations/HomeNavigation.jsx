@@ -252,7 +252,8 @@ import SwitchNoti from '../screens/notification/SwitchNoti';
 import OTPScreen from '../screens/register/OTPScreen';
 import vua_tieng_viet from '../screens/game/noi_tu/noi_tu';
 import listgame from '../screens/game/listgame';
-
+import CheckPhone from '../screens/forgot_password/CheckPhone';
+import CreatePasswordPhone from '../screens/forgot_password/CreatePasswordPhone';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -296,6 +297,8 @@ const oStackHome = {
   OTPScreen: { name: 'OTPScreen', component: OTPScreen },
   vua_tieng_viet: { name: 'vua_tieng_viet', component: vua_tieng_viet },
   listgame: { name: 'listgame', component: listgame },
+  CheckPhone: { name: 'CheckPhone', component: CheckPhone },
+  CreatePasswordPhone: { name: 'CreatePasswordPhone', component: CreatePasswordPhone },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

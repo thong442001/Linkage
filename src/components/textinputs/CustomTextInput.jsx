@@ -35,7 +35,7 @@ export const CustomTextInputEmail = ({ placeholder, onChangeText, value }) => {
   );
 };
 
-export const CustomTextInputPassword = ({ placeholder, onChangeText, value }) => {
+export const CustomTextInputPassword = ({ placeholder, onChangeText, value, secureTextEntry, icon, }) => {
   return (
     <View style={inputStyles.inputContainer}>
       <TextInput
@@ -44,8 +44,9 @@ export const CustomTextInputPassword = ({ placeholder, onChangeText, value }) =>
         onChangeText={onChangeText}
         style={inputStyles.input}
         value={value}
-        secureTextEntry
+        secureTextEntry={secureTextEntry}
       />
+      {icon && <View style={inputStyles.iconContainer}>{icon}</View>} 
     </View>
   );
 };

@@ -37,7 +37,7 @@ const Screen2 = (props) => {
             // Gọi API checkPhone để kiểm tra số có tồn tại không
             const checkResponse = await dispatch(checkPhone({ phone })).unwrap();
             console.log("Response từ checkPhone:", checkResponse);
-            
+
             if (checkResponse.status) {
                 // Số chưa tồn tại -> Gửi OTP
                 const otpResponse = await dispatch(sendOTP_dangKi_phone({ phone })).unwrap();
@@ -85,12 +85,12 @@ const Screen2 = (props) => {
                 keyboardType="phone-pad"
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-                
+
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
             <Pressable style={styles.button} onPress={handleNext}>
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
-                
+
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: 'center',
-        marginTop:10,
+        marginTop: 10,
     },
     buttonText: {
         color: '#fff',
