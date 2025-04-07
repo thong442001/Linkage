@@ -19,6 +19,9 @@ import Icon4 from 'react-native-vector-icons/FontAwesome5';
 import Icon5 from 'react-native-vector-icons/AntDesign';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 import { useSelector, useDispatch } from 'react-redux';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
 const { width, height } = Dimensions.get('window');
 import {
     addPost_Reaction, // thả biểu cảm
@@ -33,7 +36,7 @@ const PostItem = memo(({
     onDeleteVinhVien = () => { },
     updatePostReaction = () => { },
     deletPostReaction = () => { },
-    currentTime
+    currentTime,
 }) => {
     const navigation = useNavigation();
     const me = useSelector(state => state.app.user)
@@ -50,7 +53,9 @@ const PostItem = memo(({
     const [reactionsVisible, setReactionsVisible] = useState(false);
     const [shareVisible, setShareVisible] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     // trang thai
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedOption, setSelectedOption] = useState({
@@ -449,30 +454,45 @@ const PostItem = memo(({
     //call api addPost
     const callAddPostShare = async () => {
         try {
+            setIsLoading(true);
             const paramsAPI = {
                 ID_user: ID_user,
                 caption: captionShare,
                 medias: [],
                 status: selectedOption.name,
                 type: 'Share',
-                ID_post_shared: post.ID_post_shared ? post.ID_post_shared._id : post._id,//nếu share bài post share thì share bài gốc 
+                ID_post_shared: post.ID_post_shared ? post.ID_post_shared._id : post._id,
                 tags: [],
-            }
-            //console.log("push", paramsAPI);
+            };
             await dispatch(addPost(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    //console.log(response)
-                    setShareVisible(false)
+                    setIsLoading(false)
+                    setShareVisible(false);
+                    setSuccessModalVisible(true);
+                    setTimeout(() => {
+                        setSuccessModalVisible(false);
+                    }, 1500);
                 })
                 .catch((error) => {
-                    console.log('Error1 callAddPostShare:', error);
+                    setIsLoading(false)
+                    console.log('Lỗi khi share bài viết:', error);
+                    setShareVisible(false);
+                    setFailedModalVisible(true);
+                    setTimeout(() => {
+                        setFailedModalVisible(false);
+                    }, 1500);
                 });
-
         } catch (error) {
-            console.log(error)
+            setIsLoading(false);
+            console.log('Lỗi share bài viết:', error);
+            setShareVisible(false);
+            setFailedModalVisible(true);
+            setTimeout(() => {
+                setFailedModalVisible(false);
+            }, 1500);
         }
-    }
+    };
 
 
 
@@ -922,14 +942,24 @@ const PostItem = memo(({
                                         value={captionShare}
                                         onChangeText={setCaptionShare}
                                     />
+<<<<<<< HEAD
                                     <View style={{ alignItems: 'center' }}>
                                         <TouchableOpacity
                                             style={{ paddingVertical: 15, paddingHorizontal: 60, backgroundColor: "#0064E0", borderRadius: 10 }}
                                             onPress={callAddPostShare}
                                         >
+=======
+                                      <TouchableOpacity
+                                        onPress={callAddPostShare}
+                                        style={{padding: 10, backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
+                                       <View >
+                                      
+                                          
+>>>>>>> ec5d10114397a91a155a27aecd6e26210b6daaef
                                             <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
-                                        </TouchableOpacity>
+                                      
                                     </View>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -999,6 +1029,21 @@ const PostItem = memo(({
                 </TouchableWithoutFeedback>
             </Modal>
 
+        
+                <SuccessModal
+                    visible={successModalVisible}
+                    message="Chia sẻ bài viết thành công!"
+                />
+
+                
+                <FailedModal
+                    visible={failedModalVisible}
+                    message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"
+                />
+
+                <LoadingModal
+                    visible={isLoading}
+                />
         </View >
     );
 });

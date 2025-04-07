@@ -25,7 +25,7 @@ import ChatHeader from '../../components/chat/ChatHeader';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import { useBottomSheet } from '../../context/BottomSheetContext';
-
+import LottieView from 'lottie-react-native';
 const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -40,7 +40,7 @@ const Chat = (props) => {// cần ID_group (param)
     const [myUsername, setmyUsername] = useState(null);
     const [myAvatar, setmyAvatar] = useState(null);
 
-    const { socket } = useSocket();
+    const { socket, onlineUsers } = useSocket();
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [reply, setReply] = useState(null);
@@ -50,7 +50,7 @@ const Chat = (props) => {// cần ID_group (param)
     const [keyboardVisible, setKeyboardVisible] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [status, setstatus] = useState(false);
-
+    const [sendingFiles, setSendingFiles] = useState({});
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
     // Thong
@@ -61,7 +61,7 @@ const Chat = (props) => {// cần ID_group (param)
     const typingUsersInfo = group?.members?.filter(member => typingUsers.includes(member._id));
     const [validateGame, setValidateGame] = useState(true);
     const hasSentLocation = useRef(false); // Biến ref để theo dõi trạng thái gửi
-
+    const [isActive, setIsActive] = useState(false)
     //loading
     const [isGameing, setIsGameing] = useState(false);
 
@@ -116,6 +116,24 @@ const Chat = (props) => {// cần ID_group (param)
 
     //up lên cloudiary
     const uploadFile = async (file) => {
+        const tempId = Date.now().toString(); // ID tạm thời cho tin nhắn
+        setSendingFiles(prev => ({ ...prev, [tempId]: true }));
+
+        // Thêm tin nhắn tạm thời vào danh sách
+        setMessages(prev => [
+        {
+            _id: tempId,
+            ID_group: params.ID_group,
+            sender: { _id: me._id, first_name: me.first_name, last_name: me.last_name, avatar: me.avatar },
+            content: file.uri, // URI tạm thời
+            type: file.type.startsWith('image/') ? 'image' : 'video',
+            isLoading: true, // Đánh dấu tin nhắn đang tải
+            createdAt: new Date().toISOString(),
+            message_reactionList: [],
+            _destroy: false,
+        },
+        ...prev,
+        ]);
         try {
             const data = new FormData();
             data.append('file', {
@@ -143,9 +161,16 @@ const Chat = (props) => {// cần ID_group (param)
                 sendMessage('video', fileUrl)
             }
 
+            setSendingFiles(prev => {
+                const newState = { ...prev };
+                delete newState[tempId];
+                return newState;
+              });
+
         } catch (error) {
             console.log('uploadFile -> ', error.response ? error.response.data : error.message);
             console.log("lỗi khi tải file")
+            setMessages(prev => prev.filter(msg => msg._id !== tempId));
         }
     };
 
@@ -201,34 +226,56 @@ const Chat = (props) => {// cần ID_group (param)
 
         // Lắng nghe tin nhắn từ server
         socket.on('receive_message', (data) => {
-            console.log(data);
-            setMessages((prevMessages) => [
+            setMessages(prevMessages => {
+              // Thay thế tin nhắn tạm thời nếu đã tồn tại
+              const tempIndex = prevMessages.findIndex(msg => msg.isLoading && msg.type === data.type);
+              if (tempIndex !== -1) {
+                const newMessages = [...prevMessages];
+                newMessages[tempIndex] = {
+                  _id: data._id,
+                  ID_group: data.ID_group,
+                  sender: {
+                    _id: data.sender,
+                    first_name: data.first_name,
+                    last_name: data.last_name,
+                    avatar: data.avatar,
+                  },
+                  content: data.content,
+                  type: data.type,
+                  ID_message_reply: data.ID_message_reply
+                    ? { _id: data.ID_message_reply._id, content: data.ID_message_reply.content || 'Tin nhắn không tồn tại' }
+                    : null,
+                  message_reactionList: [],
+                  updatedAt: data.updatedAt,
+                  createdAt: data.createdAt,
+                  _destroy: data._destroy,
+                };
+                return newMessages;
+              }
+              return [
                 {
-                    _id: data._id,
-                    ID_group: data.ID_group,
-                    sender: {
-                        _id: data.sender,
-                        first_name: data.first_name,
-                        last_name: data.last_name,
-                        //displayName: data.displayName, // Lấy tên hiển thị từ sender
-                        avatar: data.avatar            // Lấy avatar từ sender
-                    },
-                    content: data.content,
-                    type: data.type,
-                    ID_message_reply: data.ID_message_reply
-                        ? {
-                            _id: data.ID_message_reply._id,
-                            content: data.ID_message_reply.content || "Tin nhắn không tồn tại",
-                        }
-                        : null,
-                    message_reactionList: [],
-                    updatedAt: data.updatedAt,
-                    createdAt: data.createdAt,
-                    _destroy: data._destroy
+                  _id: data._id,
+                  ID_group: data.ID_group,
+                  sender: {
+                    _id: data.sender,
+                    first_name: data.first_name,
+                    last_name: data.last_name,
+                    avatar: data.avatar,
+                  },
+                  content: data.content,
+                  type: data.type,
+                  ID_message_reply: data.ID_message_reply
+                    ? { _id: data.ID_message_reply._id, content: data.ID_message_reply.content || 'Tin nhắn không tồn tại' }
+                    : null,
+                  message_reactionList: [],
+                  updatedAt: data.updatedAt,
+                  createdAt: data.createdAt,
+                  _destroy: data._destroy,
                 },
                 ...prevMessages,
-            ]);
-        });
+              ];
+            });
+          });
 
         // Lắng nghe tin nhắn từ server bị thu hồi
         socket.on('message_revoked', (data) => {
@@ -369,8 +416,9 @@ const Chat = (props) => {// cần ID_group (param)
             await dispatch(getGroupID({ ID_group: ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
-                    //console.log("thong show data: ", response);
-                    setGroup(response.group)
+                    console.log("thong show data: ", response);
+                    
+                    
                     if (response.group.isPrivate == true) {
                         // lấy tên của mình
                         const myUser = response.group.members.find(user => user._id === me._id);
@@ -388,6 +436,7 @@ const Chat = (props) => {// cần ID_group (param)
 
                         if (otherUser) {
                             setGroupName((otherUser.first_name + " " + otherUser.last_name));
+                            setIsActive(onlineUsers.includes(otherUser._id));
                             //setGroupName(otherUser.displayName);
 
                             setGroupAvatar(otherUser.avatar);
@@ -402,11 +451,12 @@ const Chat = (props) => {// cần ID_group (param)
                             setID_user(myUser._id);
                             setmyUsername((myUser.first_name + " " + myUser.last_name));
                             setmyAvatar(myUser.avatar);
+                            setIsActive(false);
                         } else {
                             console.log("⚠️ Không tìm thấy người dùng");
                         }
                         if (response.group.avatar == null) {
-                            setGroupAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
+                            return;
                         } else {
                             setGroupAvatar(response.group.avatar);
                         }
@@ -470,6 +520,8 @@ const Chat = (props) => {// cần ID_group (param)
         setMessage('');
         setReply(null); // Xóa tin nhắn trả lời sau khi gửi
     };
+
+
 
     const goBack = () => {
         navigation.navigate("HomeChat");
@@ -583,6 +635,7 @@ const Chat = (props) => {// cần ID_group (param)
                     onCallAudio={onCallAudio}
                     onToGame3La={onToGame3La}
                     isGameing={isGameing}
+                    isActive={isActive}
                 />
             }
 

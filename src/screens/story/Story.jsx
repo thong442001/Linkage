@@ -24,6 +24,7 @@ import { launchCamera } from "react-native-image-picker";
 import axios from 'axios';
 import { TextInput } from 'react-native-gesture-handler';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
 const UPLOAD_PRESET = 'ml_default';
@@ -39,7 +40,8 @@ const Story = ({ route }) => {
   const [loading, setLoading] = useState(false);
   const [isPosted, setIsPosted] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false); // State để hiển thị StoriesModal
-
+  const [showFailedModal, setShowFailedModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [text, setText] = useState('');
   const [showText, setShowText] = useState(false);
   const [scale] = useState(new Animated.Value(1));
@@ -59,22 +61,29 @@ const Story = ({ route }) => {
   ];
 
   const openCamera = () => {
-    launchCamera({ 
-      mediaType: 'mixed',
-      quality: 1,
-      videoQuality: 'high',
-      durationLimit: 10
-    }, (response) => {
-      if (response.didCancel) {
-        Alert.alert("Bạn đã hủy chụp");
-      } else if (response.errorCode) {
-        Alert.alert("Lỗi khi mở camera:", response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const asset = response.assets[0];
-        setPreviewMedia(asset.uri);
-        setMediaType(asset.type.includes('video') ? 'video' : 'photo');
+    launchCamera(
+      {
+        mediaType: 'mixed',
+        quality: 1,
+        videoQuality: 'high',
+        durationLimit: 10,
+      },
+      (response) => {
+        if (response.didCancel) {
+          setErrorMessage('Bạn đã hủy chụp');
+          setShowFailedModal(true);
+          setTimeout(() => setShowFailedModal(false), 1500); 
+        } else if (response.errorCode) {
+          setErrorMessage(`Lỗi khi mở camera: ${response.errorMessage}`);
+          setShowFailedModal(true);
+          setTimeout(() => setShowFailedModal(false), 1500);
+        } else if (response.assets && response.assets.length > 0) {
+          const asset = response.assets[0];
+          setPreviewMedia(asset.uri);
+          setMediaType(asset.type.includes('video') ? 'video' : 'photo');
+        }
       }
-    });
+    );
   };
 
   const panResponder = useRef(
@@ -102,7 +111,9 @@ const Story = ({ route }) => {
 
   const callAddPost = async () => {
     if (!previewMedia) {
-      Alert.alert("Lỗi", "Vui lòng chọn media trước khi đăng!");
+      setErrorMessage('Vui lòng chọn media trước khi đăng!');
+     setShowFailedModal(true);
+     setTimeout(() => setShowFailedModal(false), 1500);
       return;
     }
 
@@ -114,7 +125,9 @@ const Story = ({ route }) => {
     try {
       const uploadedUrl = await uploadToCloudinary(previewMedia);
       if (!uploadedUrl) {
-        Alert.alert("Lỗi", "Không thể tải media lên Cloudinary!");
+        setErrorMessage('Không thể tải media!');
+       setShowFailedModal(true);
+       setTimeout(() => setShowFailedModal(false), 2000);
         return;
       }
 
@@ -142,13 +155,15 @@ const Story = ({ route }) => {
       }, 2000);
 
     } catch (error) {
-      Alert.alert("Lỗi", "Đăng bài thất bại. Vui lòng thử lại!");
-      console.error("Lỗi đăng bài:", error);
+     setErrorMessage('Đăng bài thất bại. Vui lòng thử lại!');
+     setShowFailedModal(true);
+     setTimeout(() => setShowFailedModal(false), 2000);
+      console.log("Lỗi đăng bài:", error);
     } finally {
       setLoading(false);
     }
   };
-
+  
   const uploadToCloudinary = async (mediaUri) => {
     const formData = new FormData();
     formData.append('file', {
@@ -167,7 +182,7 @@ const Story = ({ route }) => {
       console.log(`${mediaType === 'photo' ? 'Ảnh' : 'Video'} đã tải lên:`, mediaUrl);
       return mediaUrl;
     } catch (error) {
-      console.error('Lỗi upload:', error);
+      console.log('Lỗi upload:', error);
       return null;
     }
   };
@@ -281,10 +296,11 @@ const Story = ({ route }) => {
           </View>
         </Modal>
 
-        {/* Hiển thị StoriesModal khi đăng thành công */}
-        {showSuccessModal && (
-          <SuccessModal message={"Đăng story thành công"} />
-        )}
+        {/* Success Modal */}
+      {showSuccessModal && <SuccessModal message={'Đăng story thành công'} />}
+
+{/* Failed Modal */}
+{showFailedModal && <FailedModal message={errorMessage} />}
 
       </View>
     </TouchableWithoutFeedback>

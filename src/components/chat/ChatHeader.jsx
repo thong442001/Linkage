@@ -13,6 +13,7 @@ export default function ChatHeader({
     onCallAudio,
     onToGame3La = () => { },
     isGameing,
+    isActive={isActive}
 }) {
 
     return (
@@ -25,7 +26,12 @@ export default function ChatHeader({
 
                 {/* Avatar và Thông tin người dùng */}
                 <View style={styles.userInfo}>
+                    <View>
                     <Image source={{ uri: avatar }} style={styles.avatar} />
+                    {
+                        isActive && <View style={{ position: 'absolute', bottom: 0, right: 0, width: width * 0.03, height: width * 0.03, borderRadius: (width * 0.03) / 2, backgroundColor: 'green' }} />
+                    }
+                    </View>
                     <View>
                         <Text
                             style={styles.userName}

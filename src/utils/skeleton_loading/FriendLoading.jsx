@@ -6,11 +6,8 @@ const { width, height } = Dimensions.get('window');
 
 const FriendLoading = () => {
   return (
-    <SkeletonPlaceholder
-      backgroundColor="#E0E0E0" // Đồng bộ với ProfileLoading
-      highlightColor="#F5F5F5" // Đồng bộ với ProfileLoading
-    >
-      <View style={HomeS.postBox}>
+    <SkeletonPlaceholder backgroundColor="#E0E0E0" highlightColor="#F5F5F5">
+      <View style={[HomeS.postBox, { height: 300, width: '100%' }]}>
         <View style={HomeS.postHeader}>
           <View
             style={{
@@ -30,13 +27,12 @@ const FriendLoading = () => {
             </View>
           </View>
         </View>
-
-        <View style={HomeS.imageGrid}>
+        <View style={[HomeS.imageGrid, { width: '100%' }]}>
           <View style={HomeS.postImage} />
           <View style={HomeS.postImage} />
           <View style={HomeS.postImage} />
         </View>
-        <View style={HomeS.imageGrid}>
+        <View style={[HomeS.imageGrid, { width: '100%' }]}>
           <View style={HomeS.postImage} />
           <View style={HomeS.postImage} />
           <View style={HomeS.postImage} />
@@ -66,7 +62,7 @@ const HomeS = StyleSheet.create({
     width: width * 0.1,
     height: width * 0.1,
     borderRadius: (width * 0.1) / 2,
-    backgroundColor: '#E0E0E0', // Đã khớp với ProfileLoading
+    backgroundColor: '#E0E0E0', 
   },
   postInfo: {
     justifyContent: 'center',
@@ -75,20 +71,20 @@ const HomeS = StyleSheet.create({
     width: width * 0.15,
     height: 15,
     borderRadius: 4,
-    backgroundColor: '#E0E0E0', // Đã khớp với ProfileLoading
+    backgroundColor: '#E0E0E0',
   },
   timePlaceholder1: {
     width: width * 0.30,
     height: 15,
     borderRadius: 4,
-    backgroundColor: '#E0E0E0', // Đã khớp với ProfileLoading
+    backgroundColor: '#E0E0E0', 
     marginTop: 5,
   },
   timePlaceholder: {
     width: width * 0.20,
     height: 15,
     borderRadius: 4,
-    backgroundColor: '#E0E0E0', // Đã khớp với ProfileLoading
+    backgroundColor: '#E0E0E0', 
     marginTop: 5,
   },
   imageGrid: {
@@ -96,13 +92,14 @@ const HomeS = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    width: '100%', 
   },
   postImage: {
     width: 90,
     height: 88,
     margin: 5,
     borderRadius: 8,
-    backgroundColor: '#E0E0E0', // Đã khớp với ProfileLoading
+    backgroundColor: '#E0E0E0',
   },
   story: {
     flexDirection: 'row',

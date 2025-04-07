@@ -18,7 +18,7 @@ import { useBottomSheet } from '../../context/BottomSheetContext';
 import Icon4 from 'react-native-vector-icons/FontAwesome';
 import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
-
+import LottieView from 'lottie-react-native';
 export default function MessageComponent({
   currentUserID,
   message,
@@ -187,239 +187,161 @@ export default function MessageComponent({
         externalLocation: {latitude: lat, longitude: lng},
       });
     };
+
   return (
-    <View>
-      {
-        message.type == 'game3la'
-          ? (
-            <View
-              style={{
-                backgroundColor: 'grey',
-                width: '80%',
-                height: 80,
-                alignSelf: 'center',
-                borderRadius: 20,
-                margin: 10,
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={{ textAlign: 'center', color: 'black', fontSize: 16 }}>
-                {message.content}
-              </Text>
-              {
-                message._destroy == true
-                  ? (
-                    <Text style={{ textAlign: 'center', color: 'black', fontSize: 16 }}>
-                      game đã kết thúc
-                    </Text>
-                  ) : (
-                    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                      <TouchableOpacity
-                        style={{ backgroundColor: 'blue', width: 100, height: 30 }}
-                        onPress={() => {
-                          onChoiGame3la(message._id); // chấp nhận chơi game
-                        }}>
-                        <Text style={{ textAlign: 'center', color: 'white', fontSize: 16 }}>Chơi</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={{ backgroundColor: 'red', width: 100, height: 30 }}
-                        onPress={() => {
-                          onHuyGame3la(message._id); // từ chối chơi game
-                        }}>
-                        <Text style={{ textAlign: 'center', color: 'white', fontSize: 16 }}>Hủy</Text>
-                      </TouchableOpacity>
-
-                    </View>
-                  )
-              }
-
+  <View>
+      {message.type === 'game3la' ? (
+        <View style={styles.gameContainer}>
+          <Text style={styles.gameText}>{message.content}</Text>
+          {message._destroy ? (
+            <Text style={styles.gameText}>Game đã kết thúc</Text>
+          ) : (
+            <View style={styles.gameButtons}>
+              <TouchableOpacity style={styles.playButton} onPress={() => onChoiGame3la(message._id)}>
+                <Text style={styles.buttonText}>Chơi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => onHuyGame3la(message._id)}>
+                <Text style={styles.buttonText}>Hủy</Text>
+              </TouchableOpacity>
             </View>
-
-          ) :(
-            <View
-              style={
-                [
-                  styles.messageContainer,
-                  isCurrentUser ? styles.currentUserContainer : styles.otherUserContainer,
-                ]
-              }>
+          )}
+        </View>
+      ) : (
+        <View style={[styles.messageContainer, isCurrentUser ? styles.currentUserContainer : styles.otherUserContainer]}>
+          {!isCurrentUser && <Image style={styles.avatar} source={{ uri: message.sender.avatar }} />}
+          <TouchableWithoutFeedback onLongPress={handleLongPress}>
+            <View>
               {!isCurrentUser && (
-                <Image style={styles.avatar} source={{ uri: message.sender.avatar }} />
+                <Text style={styles.username}>
+                  {message.sender?.first_name} {message.sender?.last_name}
+                </Text>
               )}
-
-              {/* Nhấn giữ tin nhắn để mở menu */}
-              <TouchableWithoutFeedback
-                onLongPress={() => {
-                  if (message._destroy != true) {
-                    handleLongPress();
-                  }
-                }}>
-                <View>
-                  <View>
-                    {!isCurrentUser && (
-                      <Text style={styles.username}>
-                        {message.sender?.first_name} {message.sender?.last_name}
-                      </Text>
-                    )}
-                  </View>
-                  <View
-                    ref={messageRef} // Gắn ref vào đây
-                    style={[
-                      styles.messageWrapper,
-                      isCurrentUser && styles.currentUserMessage,
-                    ]}>
-                    {/* Hiển thị tin nhắn trả lời nếu có */}
-                    {message.ID_message_reply && message._destroy == false && (
-                      <View>
-                        <View style={styles.replyContainer}>
-                          <Text style={styles.replyText} numberOfLines={2}>
-                            {message.ID_message_reply.content ||
-                              'Tin nhắn không tồn tại'}
-                          </Text>
-                        </View>
-                      </View>
-                    )}
-                    {/* Nội dung tin nhắn chính */}
-                    {
-                      // tin nhắn bị thu hồi
-                      message._destroy == true ? (
-                        <Text style={[styles.messageTextThuHoi]}>
-                          Tin nhắn đã được thu hồi
-                        </Text>
-                      ) : message.type == 'text' ? (
-                         (isGoogleMapsLink(message.content))?(
-                          
-            
-                            <View style={{ alignItems: 'center' }}>
-                            <MapView
-                              style={{ width: 200, height: 120, borderRadius: 10 }}
-                              initialRegion={{
-                                latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
-                                longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
-                                latitudeDelta: 0.01,
-                                longitudeDelta: 0.01,
-                              }}
-                              pointerEvents="none">
-                              <Marker
-                                coordinate={{
-                                  latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
-                                  longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
-                                }}
-                              />
-                            </MapView>
-                            <TouchableOpacity
-                              style={{
-                                marginTop: 5,
-                                backgroundColor: '#2196F3',
-                                paddingHorizontal: 12,
-                                paddingVertical: 6,
-                                borderRadius: 8,
-                              }}
-                              onPress={() => handlePressLocation(message.content)}>
-                              <Text style={{ color: '#fff' }}>Mở Google Maps</Text>
-                            </TouchableOpacity>
-                          </View>
-                          
-                         ):(
-                        <Text
-                          style={[
-                            styles.messageText,
-                            isCurrentUser && styles.currentUserText,
-                          ]}>
-                          {message.content}
-                        </Text>
-                         )
-                        
-                      ) : message.type == 'image' ? (
-                        <Image
-                          style={[
-                            styles.messageImage,
-                            isCurrentUser && styles.currentUserText,
-                          ]}
-                          source={{ uri: message.content }}
-                        />
-                      ) : (
-                        message.type == 'video' && (
-                          <Video
-                            source={{ uri: message.content }} // URL video
-                            style={[
-                              styles.messageVideo,
-                              isCurrentUser && styles.currentUserText,
-                            ]}
-                            controls={true} // Hiển thị điều khiển video
-                            resizeMode="contain" // Cách hiển thị video
-                          />
-                        )
-                      )
-                    }
-                    {/* thời gian */}
-                    <Text style={styles.messageTime}>
-                      {formatTime(message.createdAt)}
+              <View ref={messageRef} style={[styles.messageWrapper, isCurrentUser && styles.currentUserMessage]}>
+                {message.ID_message_reply && !message._destroy && (
+                  <View style={styles.replyContainer}>
+                    <Text style={styles.replyText} numberOfLines={2}>
+                      {message.ID_message_reply.content || 'Tin nhắn không tồn tại'}
                     </Text>
-                    {/* butonsheet reaction biểu cảm */}
-                    <TouchableOpacity
-                      onPress={() => openBottomSheet(50, renderBottomSheetContent())}>
-                      <View style={{ flexDirection: 'row' }}>
-                        {message?.message_reactionList.map((reaction, index) => (
-                          <View key={index} style={styles.reactionButton}>
-                            <Text style={styles.reactionText}>
-                              {reaction.ID_reaction.icon} {reaction.quantity}
-                            </Text>
-                          </View>
-                        ))}
-                      </View>
-
-                    </TouchableOpacity>
                   </View>
-                </View>
-              </TouchableWithoutFeedback>
-
-              {/* Hiển thị Snackbar dưới cùng màn hình */}
-              <Snackbar
-                visible={dialogCopyVisible}
-                onDismiss={() => setDialogCopyVisible(false)}
-                duration={1000}>
-                Đã sao chép tin nhắn!
-              </Snackbar>
-
-              {/* Menu tùy chọn khi nhấn giữ */}
-              <Modal
-                visible={menuVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setMenuVisible(false)}>
-                <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-                  <View style={styles.overlay}>
-                    <View
-                      style={[
-                        {
-                          position: 'absolute',
-                          top: menuPosition.top,
-                        },
-                        isCurrentUser
-                          ? {
-                            right: 10,
-                            alignItems: 'flex-end', // Căn phải
-                          }
-                          : {
-                            left: menuPosition.left,
-                          },
-                      ]} // Cập nhật vị trí menu
-                    >
-                      <View style={[styles.reactionBar]}>
-                        {/* reaction biểu cảm */}
-                        {reactions.map((reaction, index) => (
-                          <TouchableOpacity
-                            key={index}
-                            style={styles.reactionButton}
-                            onPress={() => {
-                              onIcon(message._id, reaction._id);
-                              setMenuVisible(false);
-                            }}>
-                            <Text style={styles.onreactionText}>{reaction.icon}</Text>
-                          </TouchableOpacity>
-                        ))}
+                )}
+                {message._destroy ? (
+                  <Text style={styles.messageTextThuHoi}>Tin nhắn đã được thu hồi</Text>
+                ) : message.type === 'text' ? (
+                  isGoogleMapsLink(message.content) ? (
+                    <View style={{ alignItems: 'center' }}>
+                      <MapView
+                        style={{ width: 200, height: 120, borderRadius: 10 }}
+                        initialRegion={{
+                          latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
+                          longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
+                          latitudeDelta: 0.01,
+                          longitudeDelta: 0.01,
+                        }}
+                        pointerEvents="none"
+                      >
+                        <Marker
+                          coordinate={{
+                            latitude: parseFloat(message.content.split('q=')[1].split(',')[0]),
+                            longitude: parseFloat(message.content.split('q=')[1].split(',')[1]),
+                          }}
+                        />
+                      </MapView>
+                      <TouchableOpacity
+                        style={styles.mapButton}
+                        onPress={() => handlePressLocation(message.content)}
+                      >
+                        <Text style={styles.mapButtonText}>Mở Google Maps</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <Text style={[styles.messageText, isCurrentUser && styles.currentUserText]}>
+                      {message.content}
+                    </Text>
+                  )
+                ) : message.type === 'image' ? (
+                  message.isLoading ? (
+                    <View style={styles.imageLoadingContainer}>
+                      <LottieView
+                        source={require('../../utils/animation/loadingTron/loadingTron.json')} 
+                        autoPlay
+                        loop
+                        style={styles.lottie}
+                      />
+                    </View>
+                  ) : (
+                    <Image
+                      style={[styles.messageImage, isCurrentUser && styles.currentUserText]}
+                      source={{ uri: message.content }}
+                    />
+                  )
+                ) : (
+                  message.type === 'video' && (
+                    message.isLoading ? (
+                      <View style={styles.videoLoadingContainer}>
+                        <LottieView
+                          source={require('../../utils/animation/loadingPost/loadingPost.json')}
+                          autoPlay
+                          loop
+                          style={styles.lottie}
+                        />
                       </View>
+                    ) : (
+                      <Video
+                        source={{ uri: message.content }}
+                        style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
+                        controls={true}
+                        resizeMode="contain"
+                      />
+                    )
+                  )
+                )}
+                <Text style={styles.messageTime}>{formatTime(message.createdAt)}</Text>
+                <TouchableOpacity onPress={() => openBottomSheet(50, renderBottomSheetContent())}>
+                  <View style={{ flexDirection: 'row' }}>
+                    {message?.message_reactionList.map((reaction, index) => (
+                      <View key={index} style={styles.reactionButton}>
+                        <Text style={styles.reactionText}>
+                          {reaction.ID_reaction.icon} {reaction.quantity}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+
+          <Snackbar
+            visible={dialogCopyVisible}
+            onDismiss={() => setDialogCopyVisible(false)}
+            duration={1000}
+          >
+            Đã sao chép tin nhắn!
+          </Snackbar>
+
+          <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
+            <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+              <View style={styles.overlay}>
+                <View
+                  style={[
+                    { position: 'absolute', top: menuPosition.top },
+                    isCurrentUser ? { right: 10, alignItems: 'flex-end' } : { left: menuPosition.left },
+                  ]}
+                >
+                  <View style={styles.reactionBar}>
+                    {reactions.map((reaction, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.reactionButton}
+                        onPress={() => {
+                          onIcon(message._id, reaction._id);
+                          setMenuVisible(false);
+                        }}
+                      >
+                        <Text style={styles.onreactionText}>{reaction.icon}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
 
                       <View
                         style={[
@@ -523,6 +445,71 @@ export default function MessageComponent({
 }
 
 const styles = StyleSheet.create({
+  imageLoadingContainer: {
+    width: 200,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#d9d9d9',
+    borderRadius: 5,
+  },
+  videoLoadingContainer: {
+    width: 250,
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#d9d9d9',
+    borderRadius: 5,
+  },
+  lottie: {
+    width: 120,
+    height: 120,
+  },
+  gameContainer: {
+    backgroundColor: 'grey',
+    width: '80%',
+    height: 80,
+    alignSelf: 'center',
+    borderRadius: 20,
+    margin: 10,
+    justifyContent: 'center',
+  },
+  gameText: {
+    textAlign: 'center',
+    color: 'black',
+    fontSize: 16,
+  },
+  gameButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  playButton: {
+    backgroundColor: 'blue',
+    width: 100,
+    height: 30,
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    backgroundColor: 'red',
+    width: 100,
+    height: 30,
+    justifyContent: 'center',
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 16,
+  },
+  mapButton: {
+    marginTop: 5,
+    backgroundColor: '#2196F3',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  mapButtonText: {
+    color: '#fff',
+  },
   messageContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',

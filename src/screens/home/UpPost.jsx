@@ -24,6 +24,8 @@ import FriendAdd from '../../components/chat/FriendAdd';
 import Video from 'react-native-video';
 import CommentS from '../../styles/components/items/CommentS';
 import { oStackHome } from '../../navigations/HomeNavigation';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 const UpPost = (props) => {
     const { navigation } = props;
 
@@ -44,7 +46,8 @@ const UpPost = (props) => {
     const [loading, setLoading] = useState(false);
     const [modalVisibleAI, setModalVisibleAI] = useState(false);
 
-
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [isPosting, setIsPosting] = useState(false);
 
@@ -310,7 +313,9 @@ const UpPost = (props) => {
     //call api addPost
     const callAddPost = async () => {
         if (caption == '' && medias.length == 0) {
+            setFailedModalVisible(true);
             console.log('Chưa có dữ liệu');
+            setTimeout(() => setFailedModalVisible(false), 2000); 
             return;
         }
 
@@ -333,15 +338,23 @@ const UpPost = (props) => {
                 .then((response) => {
                     console.log(response);
                     const newPost = response.post;
-                    navigation.navigate(oStackHome.TabHome, { newPost })
+                    setSuccessModalVisible(true); // Hiển thị modal thành công
+                    setTimeout(() => {
+                        setSuccessModalVisible(false);
+                        navigation.navigate(oStackHome.TabHome, { newPost });
+                    }, 2000); 
                 })
                 .catch((error) => {
                     console.log('Error addPost:', error);
+                    setFailedModalVisible(true); 
+                    setTimeout(() => setFailedModalVisible(false), 2000);
                 });
         } catch (error) {
             console.log(error);
+            setFailedModalVisible(true); 
+            setTimeout(() => setFailedModalVisible(false), 2000);   
         } finally {
-            setIsPosting(false); // Tắt trạng thái đăng bài sau khi xong
+            setIsPosting(false); 
         }
     };
 
@@ -404,6 +417,13 @@ const UpPost = (props) => {
 
     return (
         <View style={UpPostS.Container}>
+            <SuccessModal 
+                visible={successModalVisible} 
+                message={"Đăng bài thành công"}/>
+            <FailedModal
+                visible={failedModalVisible}
+                message="Đăng bài thất bại. Vui lòng thử lại!"
+            />
             <View style={UpPostS.Header}>
                 <View style={UpPostS.boxBack}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>

@@ -70,18 +70,27 @@ const HomeChat = ({ route, navigation }) => {
     }
   }, [searchText, groups]);
 
-  // Kiểm tra bạn bè online
+  // Sắp xếp bạn bè online lên đầu (chỉ khi dữ liệu thay đổi thực sự)
   useEffect(() => {
-    if (!onlineUsers || onlineUsers.length === 0) {
-      console.log('🚫 Không có user nào online.');
-      return;
+    if (!onlineUsers || onlineUsers.length === 0 || friends.length === 0) {
+      return; // Không làm gì nếu không có dữ liệu
     }
-    const onlineFriends = friends.filter(
-      friend =>
-        onlineUsers.includes(friend.ID_userA._id) ||
-        onlineUsers.includes(friend.ID_userB._id),
-    );
-    console.log('✅ Danh sách bạn bè đang online:', onlineFriends);
+
+    // Tạo danh sách bạn bè đã sắp xếp
+    const sortedFriends = [...friends].sort((a, b) => {
+      const friendA_ID = a.ID_userA._id === me._id ? a.ID_userB._id : a.ID_userA._id;
+      const friendB_ID = b.ID_userA._id === me._id ? b.ID_userB._id : b.ID_userA._id;
+      const isOnlineA = onlineUsers.includes(friendA_ID);
+      const isOnlineB = onlineUsers.includes(friendB_ID);
+
+      return isOnlineB - isOnlineA; // Online lên đầu
+    });
+
+    // Chỉ cập nhật state nếu danh sách thay đổi
+    if (JSON.stringify(sortedFriends) !== JSON.stringify(friends)) {
+      setFriends(sortedFriends);
+      console.log('✅ Danh sách bạn bè đã sắp xếp:', sortedFriends); 
+    }
   }, [onlineUsers, friends]);
 
   // Gọi API và xử lý Socket.IO
@@ -93,7 +102,6 @@ const HomeChat = ({ route, navigation }) => {
       callGetAllGroupOfUser(me._id);
     });
 
-    // Socket.IO events
     socket.on('new_group', ({ group }) => {
       setGroups(prevGroups => {
         if (!prevGroups) return [group];
@@ -229,7 +237,6 @@ const HomeChat = ({ route, navigation }) => {
             showsHorizontalScrollIndicator={false}
           />
 
-                
           <FlatList
             data={filteredGroups}
             keyExtractor={item => item._id}
@@ -250,68 +257,68 @@ const HomeChat = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        paddingHorizontal: width * 0.05,
-      },
-      header: {
-        fontSize: width * 0.06,
-        fontWeight: 'bold',
-        color: 'black',
-        textAlign: 'center',
-        flex: 1,
-      },
-      headerIcons: {
-        flexDirection: 'row',
-        gap: width * 0.04,
-      },
-      vHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginVertical: height * 0.025,
-      },
-      inputSearch: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F7F7FC',
-        borderRadius: width * 0.08,
-        paddingVertical: height * 0.008,
-        paddingHorizontal: width * 0.04,
-        marginBottom: height * 0.025,
-      },
-      search: {
-        flex: 1,
-        color: 'black',
-        fontSize: width * 0.04,
-      },
-      container_item: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: height * 0.02,
-        paddingHorizontal: width * 0.03,
-        backgroundColor: '#F0F0F5',
-        borderRadius: width * 0.03,
-        marginBottom: height * 0.02,
-      },
-      text_name_AI: {
-        fontSize: width * 0.045,
-        fontWeight: '500',
-        marginLeft: width * 0.04,
-        color: 'black',
-      },
-      img: {
-        width: width * 0.12,
-        height: width * 0.12,
-        borderRadius: width * 0.06,
-      },
-      emptyText: {
-        textAlign: 'center',
-        color: 'gray',
-        marginTop: height * 0.03,
-        fontSize: width * 0.04,
-      },
-    });
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: width * 0.05,
+  },
+  header: {
+    fontSize: width * 0.06,
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
+    flex: 1,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    gap: width * 0.04,
+  },
+  vHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: height * 0.025,
+  },
+  inputSearch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F7F7FC',
+    borderRadius: width * 0.08,
+    paddingVertical: height * 0.008,
+    paddingHorizontal: width * 0.04,
+    marginBottom: height * 0.025,
+  },
+  search: {
+    flex: 1,
+    color: 'black',
+    fontSize: width * 0.04,
+  },
+  container_item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: height * 0.02,
+    paddingHorizontal: width * 0.03,
+    backgroundColor: '#F0F0F5',
+    borderRadius: width * 0.03,
+    marginBottom: height * 0.02,
+  },
+  text_name_AI: {
+    fontSize: width * 0.045,
+    fontWeight: '500',
+    marginLeft: width * 0.04,
+    color: 'black',
+  },
+  img: {
+    width: width * 0.12,
+    height: width * 0.12,
+    borderRadius: width * 0.06,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: 'gray',
+    marginTop: height * 0.03,
+    fontSize: width * 0.04,
+  },
+});
 
 export default HomeChat;
