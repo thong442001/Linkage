@@ -105,7 +105,9 @@ const Chat = (props) => {// cần ID_group (param)
     };
     // call audio
     const onCallAudio = () => {
+        console.log('1234')
         if (!group) return;
+        console.log('123')
         callNotiCall(group._id, me._id, false);
         //navigation.navigate("Ringing",{ID_group:params?.ID_group,status:false});
         navigation.navigate('Ringing', {
@@ -121,18 +123,18 @@ const Chat = (props) => {// cần ID_group (param)
 
         // Thêm tin nhắn tạm thời vào danh sách
         setMessages(prev => [
-        {
-            _id: tempId,
-            ID_group: params.ID_group,
-            sender: { _id: me._id, first_name: me.first_name, last_name: me.last_name, avatar: me.avatar },
-            content: file.uri, // URI tạm thời
-            type: file.type.startsWith('image/') ? 'image' : 'video',
-            isLoading: true, // Đánh dấu tin nhắn đang tải
-            createdAt: new Date().toISOString(),
-            message_reactionList: [],
-            _destroy: false,
-        },
-        ...prev,
+            {
+                _id: tempId,
+                ID_group: params.ID_group,
+                sender: { _id: me._id, first_name: me.first_name, last_name: me.last_name, avatar: me.avatar },
+                content: file.uri, // URI tạm thời
+                type: file.type.startsWith('image/') ? 'image' : 'video',
+                isLoading: true, // Đánh dấu tin nhắn đang tải
+                createdAt: new Date().toISOString(),
+                message_reactionList: [],
+                _destroy: false,
+            },
+            ...prev,
         ]);
         try {
             const data = new FormData();
@@ -165,7 +167,7 @@ const Chat = (props) => {// cần ID_group (param)
                 const newState = { ...prev };
                 delete newState[tempId];
                 return newState;
-              });
+            });
 
         } catch (error) {
             console.log('uploadFile -> ', error.response ? error.response.data : error.message);
@@ -227,55 +229,55 @@ const Chat = (props) => {// cần ID_group (param)
         // Lắng nghe tin nhắn từ server
         socket.on('receive_message', (data) => {
             setMessages(prevMessages => {
-              // Thay thế tin nhắn tạm thời nếu đã tồn tại
-              const tempIndex = prevMessages.findIndex(msg => msg.isLoading && msg.type === data.type);
-              if (tempIndex !== -1) {
-                const newMessages = [...prevMessages];
-                newMessages[tempIndex] = {
-                  _id: data._id,
-                  ID_group: data.ID_group,
-                  sender: {
-                    _id: data.sender,
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    avatar: data.avatar,
-                  },
-                  content: data.content,
-                  type: data.type,
-                  ID_message_reply: data.ID_message_reply
-                    ? { _id: data.ID_message_reply._id, content: data.ID_message_reply.content || 'Tin nhắn không tồn tại' }
-                    : null,
-                  message_reactionList: [],
-                  updatedAt: data.updatedAt,
-                  createdAt: data.createdAt,
-                  _destroy: data._destroy,
-                };
-                return newMessages;
-              }
-              return [
-                {
-                  _id: data._id,
-                  ID_group: data.ID_group,
-                  sender: {
-                    _id: data.sender,
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    avatar: data.avatar,
-                  },
-                  content: data.content,
-                  type: data.type,
-                  ID_message_reply: data.ID_message_reply
-                    ? { _id: data.ID_message_reply._id, content: data.ID_message_reply.content || 'Tin nhắn không tồn tại' }
-                    : null,
-                  message_reactionList: [],
-                  updatedAt: data.updatedAt,
-                  createdAt: data.createdAt,
-                  _destroy: data._destroy,
-                },
-                ...prevMessages,
-              ];
+                // Thay thế tin nhắn tạm thời nếu đã tồn tại
+                const tempIndex = prevMessages.findIndex(msg => msg.isLoading && msg.type === data.type);
+                if (tempIndex !== -1) {
+                    const newMessages = [...prevMessages];
+                    newMessages[tempIndex] = {
+                        _id: data._id,
+                        ID_group: data.ID_group,
+                        sender: {
+                            _id: data.sender,
+                            first_name: data.first_name,
+                            last_name: data.last_name,
+                            avatar: data.avatar,
+                        },
+                        content: data.content,
+                        type: data.type,
+                        ID_message_reply: data.ID_message_reply
+                            ? { _id: data.ID_message_reply._id, content: data.ID_message_reply.content || 'Tin nhắn không tồn tại' }
+                            : null,
+                        message_reactionList: [],
+                        updatedAt: data.updatedAt,
+                        createdAt: data.createdAt,
+                        _destroy: data._destroy,
+                    };
+                    return newMessages;
+                }
+                return [
+                    {
+                        _id: data._id,
+                        ID_group: data.ID_group,
+                        sender: {
+                            _id: data.sender,
+                            first_name: data.first_name,
+                            last_name: data.last_name,
+                            avatar: data.avatar,
+                        },
+                        content: data.content,
+                        type: data.type,
+                        ID_message_reply: data.ID_message_reply
+                            ? { _id: data.ID_message_reply._id, content: data.ID_message_reply.content || 'Tin nhắn không tồn tại' }
+                            : null,
+                        message_reactionList: [],
+                        updatedAt: data.updatedAt,
+                        createdAt: data.createdAt,
+                        _destroy: data._destroy,
+                    },
+                    ...prevMessages,
+                ];
             });
-          });
+        });
 
         // Lắng nghe tin nhắn từ server bị thu hồi
         socket.on('message_revoked', (data) => {
@@ -417,8 +419,8 @@ const Chat = (props) => {// cần ID_group (param)
                 .unwrap()
                 .then((response) => {
                     console.log("thong show data: ", response);
-                    
-                    
+                    setGroup(response.group)
+
                     if (response.group.isPrivate == true) {
                         // lấy tên của mình
                         const myUser = response.group.members.find(user => user._id === me._id);

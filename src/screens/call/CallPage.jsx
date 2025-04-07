@@ -1,93 +1,93 @@
-import {StyleSheet, Text, View,Image} from 'react-native';
-import React, { useEffect,useState } from 'react';
-import {
+import { StyleSheet, Text, View, Image } from 'react-native';
+import React, { useEffect, useState,useRef } from 'react';
+import ZegoUIKitPrebuiltCallService, {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
+  ONE_ON_ONE_VOICE_CALL_CONFIG,
+  GROUP_VIDEO_CALL_CONFIG,
+  GROUP_VOICE_CALL_CONFIG,
+  ZegoMenuBarButtonName,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import { request, PERMISSIONS } from 'react-native-permissions';
-
+import KeyCenter from "./KeyCenter";
 const CallPage = props => {
-  const {route, navigation} = props;
-  const {params} = route;
-console.log("avatar",params.MyAvatar);
-  useEffect(() => {
-    const requestPermissions = async () => {
-      try {
-        const [cameraPermission, microphonePermission] = await Promise.all([
-          request(PERMISSIONS.ANDROID.CAMERA),
-          request(PERMISSIONS.ANDROID.RECORD_AUDIO)
-        ]);
-        
-        if (cameraPermission === 'granted' && microphonePermission === 'granted') {
-          console.log("Permissions granted");
-        } else {
-          console.error("Permissions not granted");
-        }
-      } catch (error) {
-        console.error("Error requesting permissions: ", error);
-      }
-    };
+  const { route, navigation } = props;
+  const { params } = route;
+  const prebuiltRef = useRef();
 
-    requestPermissions();
-  }, []);
-
-  try {
+  const callConfig =
+    params?.members?.length > 2
+      ? params.status === true
+        ? GROUP_VIDEO_CALL_CONFIG
+        : GROUP_VOICE_CALL_CONFIG
+      : params.status === true
+      ? ONE_ON_ONE_VIDEO_CALL_CONFIG
+      : ONE_ON_ONE_VOICE_CALL_CONFIG;
     return (
       <View style={styles.container}>
         <ZegoUIKitPrebuiltCall
-          appID={471819427}
-          appSign={'e2e7c8d2bcaf34b0276a4a2f7d6e2064d82539e7c3c9fc940443f3fbd0ab732b'}
-          userID={params?.id_user}
-          userName={params?.MyUsername}
-          callID={params?.ID_group}
-          config={{
-            // Bật camera & mic khi vào phòng
-            turnOnCameraWhenJoining: params?.status,
-            turnOnMicrophoneWhenJoining: true,
-            useSpeakerWhenJoining:  params?.status,
-        
-            // Hiển thị avatar khi tắt camera
-            showUserAvatarInAudioMode: true,
-        
-            // Hiển thị tên người dùng trên video
-            showUserNameOnVideo: true,
-        
-            // Cấu hình thanh điều khiển
-            topMenuBarConfig: {
-              isVisible: true, // Hiển thị thanh menu trên
-            },
-            bottomMenuBarConfig: {
-              isVisible: true, // Hiển thị thanh menu dưới
-            },
-            avatarBuilder: ({ userInfo }) => {
-              // Kiểm tra nếu userID khớp với người dùng hiện tại
-              if (userInfo.userID === params?.id_user) {
-                return (
-                  <View style={{ width: '100%', height: '100%' }}>
-                    <Image
-                      style={{ width: '100%', height: '100%' }}
-                      resizeMode="cover"
-                      source={{ uri: params?.MyAvatar }}
-                    />
-                  </View>
-                );
-              }
-              // Trả về null nếu không có avatar tùy chỉnh
-              return null;
-            },
-        
-            // Khi cuộc gọi kết thúc, quay về màn hình chat
-            onCallEnd: (callID, reason, duration) => {
-              navigation.navigate("Chat", { ID_group: params.ID_group });
-            },
-          }}
-        />
+                ref={prebuiltRef}
+                appID={KeyCenter.appID}
+                appSign={KeyCenter.appSign}
+                userID={params?.id_user}
+                userName={params?.MyUsername}
+                callID={params?.ID_group}
+                
+                config={{
+                    // ...ONE_ON_ONE_VOICE_CALL_CONFIG,
+                    ...callConfig,
+                    avatarBuilder: ({userInfo}) => {
+                      // Chỉ hiển thị avatar cho cuộc gọi 1-1 (video hoặc voice)
+                    if (
+                      callConfig === ONE_ON_ONE_VIDEO_CALL_CONFIG ||
+                      callConfig === ONE_ON_ONE_VOICE_CALL_CONFIG
+                    ) {
+                      return (
+                        <View style={{ width: '100%', height: '100%' }}>
+                          <Image
+                            style={{ width: '100%', height: '100%' }}
+                            resizeMode="cover"
+                            source={{ uri: params?.MyAvatar }}
+                          />
+                        </View>
+                      );
+                    }
+                    // Trả về null nếu không phải cuộc gọi 1-1 (nhóm)
+                    return null;
+                    },
+                    onCallEnd: (callID, reason, duration) => {
+                        console.log('########CallPage onCallEnd');
+                        navigation.navigate('TabHome', { screen: 'Home' });
+                    },
+                    timingConfig: {
+                      isDurationVisible: true,
+                      onDurationUpdate: (duration) => {
+                        console.log('########CallWithInvitation onDurationUpdate', duration);
+                        if (duration === 10 * 60) {
+                          ZegoUIKitPrebuiltCallService.hangUp();
+                        }
+                      }
+                    },
+                    topMenuBarConfig: {
+                        buttons: [
+                            ZegoMenuBarButtonName.minimizingButton,
+                        ],
+                    },
+                    onWindowMinimized: () => {
+                        console.log('[Demo]CallPage onWindowMinimized');
+                        navigation.navigate('TabHome', { screen: 'Home' });
+                    },
+                    onWindowMaximized: () => {
+                        console.log('[Demo]CallPage onWindowMaximized');
+                        props.navigation.navigate('CallPage', {
+                            userID: userID,
+                            userName: userName,
+                            callID: 'rn12345678',
+                        });
+                    },
+                }}
+            />
       </View>
     );
-  } catch (error) {
-    console.error('Error initializing ZegoUIKitPrebuiltCall: ', error);
-    return null;
-  }
 };
 
 export default CallPage;
