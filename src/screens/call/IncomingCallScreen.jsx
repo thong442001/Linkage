@@ -76,23 +76,14 @@ const IncomingCallScreen = ({ route, navigation }) => {
       ringtoneRef.current.release();
     }
     socket.emit('chap-nhan-call', { ID_group: group._id });
-    if (group.isPrivate == true) {
-      navigation.navigate('CallPage', {
-        ID_group: group._id,
-        id_user: me._id,
-        MyUsername: me.last_name,
-        status: type,
-        MyAvatar: me.avatar,
-      });
-    } else {
-      navigation.navigate('CallGroup', {
-        ID_group: group._id,
-        id_user: me._id,
-        MyUsername: me.last_name,
-        status: type,
-        MyAvatar: me.avatar,
-      });
-    }
+    navigation.navigate('CallPage', {
+      ID_group: group._id,
+      id_user: me._id,
+      MyUsername: me.last_name,
+      status: type,
+      MyAvatar: me.avatar,
+      members: group.members,
+    });
   };
 
   // Xử lý khi chấp nhận cuộc gọi
@@ -110,11 +101,11 @@ const IncomingCallScreen = ({ route, navigation }) => {
           <Text style={styles.callingText}>Đang gọi...</Text>
         </View>
         <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={() => handlCancelCall()} style={styles.declineButton}>
+            <Ionicons name="call" size={40} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
             <Ionicons name="call" size={40} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handlCancelCall()} style={styles.declineButton}>
-            <Ionicons name="call" size={40} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
           </TouchableOpacity>
         </View>
       </View>

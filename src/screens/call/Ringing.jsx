@@ -12,7 +12,7 @@ const Ringing = ({ route, navigation }) => {
   const me = useSelector((state) => state.app.user);
   const { socket } = useSocket();
   const ringtoneRef = useRef(null); // Thêm useRef
-
+  console.log('canhphan', group);
   useEffect(() => {
     if (!group || !me) return;
 
@@ -36,23 +36,14 @@ const Ringing = ({ route, navigation }) => {
     socket.on("lang-nghe-chap-nhan-call", () => {
       console.log('lang-nghe-chap-nhan-call');
       // onCall();
-      if (group.isPrivate == true) {
-        navigation.navigate('CallPage', {
-          ID_group: group._id,
-          id_user: me._id,
-          MyUsername: me.last_name,
-          status: type,
-          MyAvatar: me.avatar,
-        });
-      } else {
-        navigation.navigate('CallGroup', {
-          ID_group: group._id,
-          id_user: me._id,
-          MyUsername: me.last_name,
-          status: type,
-          MyAvatar: me.avatar,
-        });
-      }
+      navigation.navigate('CallPage', {
+        ID_group: group._id,
+        id_user: me._id,
+        MyUsername: me.last_name,
+        status: type,
+        MyAvatar: me.avatar,
+        members: group.members,
+      });
     });
 
     socket.on("lang-nghe-tu-choi-call", () => {

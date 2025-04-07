@@ -246,7 +246,12 @@ const ItemNotification = ({data}) => {
       setIcon('game-controller-outline')
       setbackground('#007bff')
     }
-
+    if(data.type=='Đã thả biểu cảm vào story của bạn'){
+      setName(data.ID_post.ID_user?.first_name + ' ' + data.ID_post.ID_user?.last_name)
+      setAvatar(data.ID_post.ID_user?.avatar);
+      setIcon('happy')
+      setbackground('green')
+    }
 
   }, []);
 

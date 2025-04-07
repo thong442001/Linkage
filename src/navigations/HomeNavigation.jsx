@@ -6,6 +6,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector } from 'react-redux';
+import { BackHandler } from 'react-native';
 
 //tab tổng
 import Home from '../screens/home/Home';
@@ -23,6 +24,11 @@ const oTab = {
 
 const Tab = createBottomTabNavigator();
 
+if (!BackHandler.removeEventListener) {
+  BackHandler.removeEventListener = () => {
+    // console.warn('BackHandler.removeEventListener is deprecated and patched.');
+  };
+}
 
 
 const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
@@ -283,7 +289,7 @@ const oStackHome = {
   pokemon: { name: 'pokemon', component: pokemon },
   MapScreen: { name: 'MapScreen', component: MapScreen },
   man_hinh_chao_pokemon: { name: 'man_hinh_chao_pokemon', component: man_hinh_chao_pokemon },
-  Setting: { name: 'Setting', component: Setting }
+  Setting: { name: 'Setting', component: Setting },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
