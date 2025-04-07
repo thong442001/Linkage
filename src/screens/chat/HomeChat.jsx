@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingHorizontal: width * 0.05,
+    paddingHorizontal: width * 0.01,
   },
   header: {
     fontSize: width * 0.06,

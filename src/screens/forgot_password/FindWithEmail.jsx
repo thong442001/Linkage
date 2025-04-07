@@ -77,8 +77,8 @@ const FindWithEmail = (props) => {
                     <Text style={styles.buttonTextNextScreen}>Tìm bằng số điện thoại</Text>
                 </Pressable>
             </View>
-
-            
+                
+                
             <LoadingModal visible={isLoading} />
         </View>
     );
