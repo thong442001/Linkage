@@ -942,15 +942,15 @@ const PostItem = memo(({
                                         value={captionShare}
                                         onChangeText={setCaptionShare}
                                     />
-                                      <TouchableOpacity
+                                    <TouchableOpacity
                                         onPress={callAddPostShare}
-                                        style={{padding: 10, backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
-                                       <View >
-                                      
-                                          
+                                        style={{ padding: 10, backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
+                                        <View >
+
+
                                             <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
-                                      
-                                    </View>
+
+                                        </View>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -1021,21 +1021,21 @@ const PostItem = memo(({
                 </TouchableWithoutFeedback>
             </Modal>
 
-        
-                <SuccessModal
-                    visible={successModalVisible}
-                    message="Chia sẻ bài viết thành công!"
-                />
 
-                
-                <FailedModal
-                    visible={failedModalVisible}
-                    message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"
-                />
+            <SuccessModal
+                visible={successModalVisible}
+                message="Chia sẻ bài viết thành công!"
+            />
 
-                <LoadingModal
-                    visible={isLoading}
-                />
+
+            <FailedModal
+                visible={failedModalVisible}
+                message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"
+            />
+
+            <LoadingModal
+                visible={isLoading}
+            />
         </View >
     );
 });

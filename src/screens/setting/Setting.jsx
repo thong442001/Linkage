@@ -74,7 +74,7 @@ const Setting = props => {
       icon: 'lock-closed',
     },
     { id: '3', title: 'Thùng rác', screen: 'Trash', icon: 'trash' },
-    { id: '4', title: 'Game', screen: 'pokemon', icon: 'game-controller' },
+    { id: '4', title: 'Game', screen: 'listgame', icon: 'game-controller' },
     {
       id: '5',
       title: 'Thông báo',

@@ -403,8 +403,7 @@ const AppNavigation = () => {
       notification?.type === 'Mời chơi game 3 lá' &&
       notification?.ID_group
     ) {
-      navigate('Chat', { ID_group: notification.ID_group._id });
-      const { members, isPrivate } = notification.ID_group;
+            const { members, isPrivate } = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
         return `${sender.first_name || ''} ${sender.last_name || ''
@@ -530,9 +529,9 @@ const AppNavigation = () => {
         navigation.navigate('HomeChat');
         break;
 
-      // case 'Đã đăng story mới':
-      //   navigation.navigate('StoryScreen', { storyId: notification?.ID_post?._id });
-      //   break;
+      case 'Mời chơi game 3 lá':
+        navigation.navigate('Chat', { ID_group: notification?.ID_group?._id });
+        break;
 
       // case 'Đã đăng bài mới':
       //   navigation.navigate('PostDetailScreen', { postId: notification?.ID_post?._id });

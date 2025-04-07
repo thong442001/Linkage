@@ -126,7 +126,7 @@ const Login = (props) => {
 
       if (!idToken) {
         console.log("Không lấy được ID Token!");
-        setLoading(false); 
+        setLoading(false);
         return;
       }
 
@@ -141,7 +141,7 @@ const Login = (props) => {
       console.log("Lỗi đăng nhập:", error.message);
     }
     finally {
-      setLoading(false);  
+      setLoading(false);
     }
   };
 
@@ -187,10 +187,10 @@ const Login = (props) => {
           <Text style={styles.forgotPasswordText}>Bạn quên mật khẩu ư?</Text>
         </Pressable>
         {/* loginGG */}
-        <View style={{alignItems: 'center', justifyContent: 'center'}}>
-            <TouchableOpacity onPress={handleGoogleLogin} style={{padding: 5, borderRadius: 25}}>
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <TouchableOpacity onPress={handleGoogleLogin} style={{ padding: 5, borderRadius: 25 }}>
             <Image source={require('../../../assets/images/google.png')} style={styles.socialIcon} />
-            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       </View>
 
