@@ -150,11 +150,11 @@ const Friend = props => {
 
       </View>
       <View style={styles.goiYWrap}>
-        <Text
+        {/* <Text
           style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
           {' '}
           Gợi ý
-        </Text>
+        </Text> */}
         <TouchableOpacity onPress={() => navigation.navigate('ListFriend', { _id: me._id })}>
           <Text
             style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>

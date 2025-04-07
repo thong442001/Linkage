@@ -13,6 +13,7 @@ const ListFriend = (props) => {
   const [friends, setFriends] = useState([]);
   const dispatch = useDispatch();
   const token = useSelector(state => state.app.token);
+  const me = useSelector(state => state.app.user);
 
   useEffect(() => {
     callGetAllFriendOfID_user();
@@ -43,20 +44,27 @@ const ListFriend = (props) => {
           <Icon name="chevron-back" size={25} color={'black'} />
         </TouchableOpacity>
         <Text style={styles.TextHeader}>Bạn bè</Text>
-        <Icon name="add" size={25} color={'black'} />
+        <View></View>
+        {/* <Icon name="add" size={25} color={'black'} /> */}
       </View>
-      <View style={styles.containerInput}>
+      {/* <View style={styles.containerInput}>
         <Icon name="search" size={25} color={'black'} />
         <TextInput
           placeholder="Tìm kiếm bạn bè"
         />
-      </View>
-      <Text style={styles.title}>Bạn bè</Text>
+      </View> */}
+      {/* <Text style={styles.title}>Bạn bè</Text> */}
       <Text>{friends.length} người bạn</Text>
       <View>
         <FlatList
           data={friends}
-          renderItem={({ item }) => <ItemListFriend item={item} _id={params._id} />}
+          renderItem={({ item }) =>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Profile', { _id: item.ID_userA._id == me._id ? item.ID_userB._id : item.ID_userA._id })}
+            >
+              <ItemListFriend item={item} _id={params._id} />
+            </TouchableOpacity>
+          }
           keyExtractor={(item) => item._id}
         />
       </View>
