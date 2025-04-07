@@ -1,12 +1,17 @@
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Switch } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native'; // Thêm useNavigation
 import {
   setNotificationPreference,
   getNotificationPreference,
 } from '../../noti/notificationHelper'; // Đảm bảo đường dẫn đúng
-const { width, height } = Dimensions.get('window'); // Lấy kích thước màn hình
+
+// Lấy kích thước màn hình
+const { width, height } = Dimensions.get('window');
+
 const SwitchNoti = () => {
+  const navigation = useNavigation(); // Khai báo navigation
   const [preferences, setPreferences] = useState({});
 
   // Danh sách các kênh thông báo
@@ -55,9 +60,9 @@ const SwitchNoti = () => {
             style={styles.switch}
             value={preferences[item.id]}
             onValueChange={() => toggleNotification(item.id)}
-            trackColor={{ false: '#D9D9D9', true: '#81b0ff' }} // Đường dẫn: xám khi tắt, xanh khi bật
-            thumbColor={'#0064E0'} // Nút: xanh khi bật
-            ios_backgroundColor="#3e3e3e" // Nền iOS khi tắt
+            trackColor={{ false: '#D9D9D9', true: '#81b0ff' }}
+            thumbColor={'#0064E0'}
+            ios_backgroundColor="#3e3e3e"
           />
         </TouchableOpacity>
       ))}
@@ -70,57 +75,69 @@ export default SwitchNoti;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E4E4E4',
-    padding: 20,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  optionContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    marginVertical: 6,
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  icon: {
-    fontSize: 24,
-    marginRight: 12,
-    color: '#3498db',
-  },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#777',
-    marginTop: 2,
-  },
-  switch: {
-    transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }],
+    backgroundColor: '#F5F7FA',
+    paddingHorizontal: width * 0.05,
+    paddingTop: height * 0.12,
   },
   backButton: {
     position: 'absolute',
     top: height * 0.05,
     left: width * 0.05,
     backgroundColor: '#007BFF',
-    paddingVertical: height * 0.015,
+    paddingVertical: height * 0.012,
     paddingHorizontal: width * 0.05,
-    borderRadius: 5,
+    borderRadius: 10,
+    zIndex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: width * 0.045,
+    fontWeight: '600',
+  },
+  header: {
+    fontSize: width * 0.065,
+    fontWeight: '700',
+    color: '#1E1E1E',
+    marginBottom: height * 0.04,
+    textAlign: 'center',
+  },
+  optionContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 15,
+    marginVertical: height * 0.015,
+    padding: width * 0.04,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  icon: {
+    fontSize: width * 0.065,
+    marginRight: width * 0.04,
+    color: '#007BFF',
+  },
+  textContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: width * 0.045,
+    fontWeight: '600',
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: width * 0.035,
+    color: '#999',
+    marginTop: height * 0.005,
+  },
+  switch: {
+    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
   },
 });
