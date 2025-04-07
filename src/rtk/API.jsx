@@ -1083,3 +1083,41 @@ export const sendOTP_quenMatKhau_gmail = createAsyncThunk(
     }
   }
 );
+
+//******************* Quên mật khẩu */
+
+// "status": true, message: "Đổi password thành công"
+// "status": false, message: "User không tồn tại"
+// nhớ khi call check "status"
+// params :  phone, passwordNew
+export const quenMatKhau_phone = createAsyncThunk(
+  'user/quenMatKhau_phone',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/quenMatKhau_phone', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// "status": true, message: "Đổi password thành công"
+// "status": false, message: "User không tồn tại"
+// nhớ khi call check "status"
+// params :  gmail, passwordNew
+export const quenMatKhau_gmail = createAsyncThunk(
+  'user/quenMatKhau_gmail',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper()
+        .post('user/quenMatKhau_gmail', data);
+      //console.log(response)
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
