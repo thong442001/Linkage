@@ -37,7 +37,7 @@ const Login = (props) => {
     setShowPassword(!showPassword);
   };
 
-    useEffect(() => {
+  useEffect(() => {
     GoogleSignin.configure({
       webClientId: "94150586774-ju0vq4e5o8k1uce1vs9oqk944i00ultn.apps.googleusercontent.com",
     });
