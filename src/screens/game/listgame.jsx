@@ -54,7 +54,6 @@ const ListGame = () => {
         activeOpacity={0.7}
       >
         <Icon name="arrow-back" size={width * 0.06} color="#fff" />
-        <Text style={styles.backButtonText}>Quay lại</Text>
       </TouchableOpacity>
       <Text style={styles.header}>Danh Sách Trò Chơi</Text>
       <FlatList
