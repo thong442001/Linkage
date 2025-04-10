@@ -18,6 +18,7 @@ const { height } = Dimensions.get('window');
 const HEADER_HEIGHT = height * 0.1;
 
 const Home = props => {
+
   const { navigation } = props;
   const route = useRoute(); // Thêm useRoute để nhận params
   const dispatch = useDispatch();
@@ -241,7 +242,12 @@ const Home = props => {
             keyExtractor={(item) => item._id}
             showsHorizontalScrollIndicator={false}
             ListHeaderComponent={
-              <HomeStories navigation={navigation} me={me} stories={stories} liveSessions={liveSessions} />
+              <HomeStories
+                navigation={navigation}
+                me={me}
+                stories={stories}
+                liveSessions={liveSessions}
+              />
             }
             showsVerticalScrollIndicator={false}
             extraData={currentTime}

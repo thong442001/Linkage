@@ -150,11 +150,14 @@ const Friend = props => {
 
       </View>
       <View style={styles.goiYWrap}>
-        {/* <Text
-          style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
-          {' '}
-          Gợi ý
-        </Text> */}
+        <TouchableOpacity onPress={() => navigation.navigate('ListGoiY', { _id: me._id })}
+        >
+          <Text
+            style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
+            {' '}
+            Gợi ý
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('ListFriend', { _id: me._id })}>
           <Text
             style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
@@ -187,7 +190,7 @@ const Friend = props => {
           showsVerticalScrollIndicator={false}
         />
       </View>
-    </View>
+    </View >
   );
 };
 

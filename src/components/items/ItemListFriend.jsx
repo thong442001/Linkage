@@ -2,6 +2,7 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 import React, { useState, useEffect } from 'react'
 
 const ItemListFriend = (props) => {
+  
   const { item, _id } = props;
   const [ID_friend, setID_friend] = useState(null);
   const [name, setName] = useState(null);

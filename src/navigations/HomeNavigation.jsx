@@ -254,6 +254,7 @@ import vua_tieng_viet from '../screens/game/noi_tu/noi_tu';
 import listgame from '../screens/game/listgame';
 import CheckPhone from '../screens/forgot_password/CheckPhone';
 import CreatePasswordPhone from '../screens/forgot_password/CreatePasswordPhone';
+import ListGoiY from '../screens/friend/ListGoiY';
 
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
@@ -299,6 +300,7 @@ const oStackHome = {
   listgame: { name: 'listgame', component: listgame },
   CheckPhone: { name: 'CheckPhone', component: CheckPhone },
   CreatePasswordPhone: { name: 'CreatePasswordPhone', component: CreatePasswordPhone },
+  ListGoiY: { name: 'ListGoiY', component: ListGoiY },
 }
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {

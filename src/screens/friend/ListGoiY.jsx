@@ -2,16 +2,18 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View, Dimensions } from '
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { TextInput } from 'react-native-gesture-handler';
-import ItemListFriend from '../../components/items/ItemListFriend';
+import ItemListGoiY from '../../components/items/ItemListGoiY';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  getAllFriendOfID_user,
+  getGoiYBanBe,
+  getRelationshipAvsB,
+  guiLoiMoiKetBan,
 } from '../../rtk/API';
 const { width, height } = Dimensions.get('window');
-const ListFriend = (props) => {
+const ListGoiY = (props) => {
   const { navigation, route } = props;
   const { params } = route;
-  const [friends, setFriends] = useState([]);
+  const [listGoiY, setListGoiY] = useState([]);
   const dispatch = useDispatch();
   const token = useSelector(state => state.app.token);
   const me = useSelector(state => state.app.user);
@@ -24,11 +26,11 @@ const ListFriend = (props) => {
   const callGetAllFriendOfID_user = async () => {
     try {
 
-      await dispatch(getAllFriendOfID_user({ me: params._id, token: token }))
+      await dispatch(getGoiYBanBe({ me: params._id, token: token }))
         .unwrap()
         .then((response) => {
           //console.log(response.groups)
-          setFriends(response.relationships);
+          setListGoiY(response.data);
         })
         .catch((error) => {
           console.log('Error1 getAllFriendOfID_user:', error);
@@ -38,13 +40,59 @@ const ListFriend = (props) => {
       console.log(error)
     }
   }
+
+  const callGetRelationshipAvsB = async (ID_user) => {
+    try {
+      const paramsAPI = {
+        ID_user: ID_user,
+        me: me._id,
+      };
+
+      await dispatch(getRelationshipAvsB(paramsAPI))
+        .unwrap()
+        .then(async (response) => {
+          //console.log(response.relationship);
+          callGuiLoiMoiKetBan(response.relationship._id, ID_user)
+        })
+        .catch(error => {
+          console.log('❌ Lỗi khi callGetRelationshipAvsB:', error);
+          // setDialogreload(true);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const callGuiLoiMoiKetBan = async (ID_relationship, ID_user) => {
+    try {
+      const paramsAPI = {
+        ID_relationship: ID_relationship,
+        me: me._id,
+      };
+
+      await dispatch(guiLoiMoiKetBan(paramsAPI))
+        .unwrap()
+        .then(async (response) => {
+          console.log(response);
+          // setRelationship(response.relationship);
+          setListGoiY(prevPosts => prevPosts.filter(item => item.user._id !== ID_user));
+        })
+        .catch(error => {
+          console.log('❌ Lỗi khi callGuiLoiMoiKetBan:', error);
+          // setDialogreload(true);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.containerHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="chevron-back" size={25} color={'black'} />
         </TouchableOpacity>
-        <Text style={styles.TextHeader}>Bạn bè</Text>
+        <Text style={styles.TextHeader}>Gợi ý</Text>
         <View></View>
         {/* <Icon name="add" size={25} color={'black'} /> */}
       </View>
@@ -55,29 +103,34 @@ const ListFriend = (props) => {
         />
       </View> */}
       {/* <Text style={styles.title}>Bạn bè</Text> */}
-      <Text>{friends.length} người bạn</Text>
+      {/* <Text>{friends.length} người bạn</Text> */}
       <View>
         <View
           style={{ paddingBottom: width * 0.1 }}
         >
           <FlatList
-            data={friends}
+            data={listGoiY}
             renderItem={({ item }) =>
               <TouchableOpacity
-                onPress={() => navigation.navigate('Profile', { _id: item.ID_userA._id == me._id ? item.ID_userB._id : item.ID_userA._id })}
+                onPress={() => navigation.navigate('Profile', { _id: item.user._id })}
               >
-                <ItemListFriend item={item} _id={params._id} />
+                <ItemListGoiY
+                  item={item}
+                  _id={params._id}
+                  onThemBanBe={callGetRelationshipAvsB}
+                />
               </TouchableOpacity>
             }
-            keyExtractor={(item) => item._id}
+            keyExtractor={(item) => item.userId}
           />
         </View>
+
       </View>
     </View>
   );
 };
 
-export default ListFriend;
+export default ListGoiY;
 
 const styles = StyleSheet.create({
   container: {
@@ -110,12 +163,3 @@ const styles = StyleSheet.create({
     fontWeight: 'medium',
   }
 });
-
-
-const data = [
-  {
-    id: 1,
-    img: 'https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    name: 'canhphan'
-  }
-]
