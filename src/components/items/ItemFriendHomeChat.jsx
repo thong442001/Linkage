@@ -67,11 +67,8 @@ export default ItemFriendHomeChat;
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: height * 0.015, // 1.5% chiều cao màn hình
-
-    marginLeft :width * 0.03,
-    marginRight :width * 0.03, 
-    marginBottom :width * 0.03,
+    paddingVertical: height * 0.01, 
+    marginHorizontal: width * 0.01
   },
   avatarContainer: {
     position: 'relative', // Để onlineIndicator có thể định vị tương đối với avatar

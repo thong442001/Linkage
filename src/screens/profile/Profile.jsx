@@ -1051,7 +1051,7 @@ const Profile = props => {
                             <View style={{ backgroundColor: '#FFFFFF' }}>
                                 <ProfileLoading />
                                 <FriendLoading />
-                                <PostProfileLoading />
+                                <FriendLoading/>
                             </View>
                         ) : (
                             <Animated.FlatList

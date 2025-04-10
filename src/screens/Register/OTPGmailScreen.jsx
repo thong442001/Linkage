@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Pressable, Dimensions } from 'react-native';
 import React, { useState, useRef } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { checkOTP_gmail } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
 
@@ -63,6 +64,7 @@ const OTPGmailScreen = (props) => {
                     phone: params.phone,
                     email: params.email,
                 });
+                setOtp(['', '', '', '']); // Reset giá trị OTP sau khi xác nhận thành công
             } else {
                 // Nếu OTP không hợp lệ, hiển thị thông báo lỗi
                 setError(response.message || 'Mã OTP không đúng');
@@ -84,8 +86,7 @@ const OTPGmailScreen = (props) => {
         <View style={styles.container}>
             <Pressable
                 style={styles.backButton}
-                onPress={() => navigation.navigate('Screen3', params)}
-            >
+                onPress={() => navigation.navigate('Screen3', params)}>
                 <Icon name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
             <Text style={styles.title}>Nhập mã OTP</Text>
@@ -99,20 +100,21 @@ const OTPGmailScreen = (props) => {
                         keyboardType="numeric"
                         maxLength={1}
                         ref={(ref) => (inputRefs.current[index] = ref)}
-                        color="#333"
-                    />
+                        color="#333"/>
                 ))}
+                <TouchableOpacity onPress={handleClear} style={{ left: width * 0.02 }}>
+                <MaterialIcons name={"backspace"} size={width * 0.08} color="black" />
+                </TouchableOpacity>
             </View>
+            <View>
             <Text style={styles.instruction}>
-                Vui lòng nhập mã OTP gồm 4 số được gửi đến email của bạn.
-            </Text>
+                Vui lòng nhập mã OTP gồm 4 số được gửi đến</Text>
+            <Text style={styles.nameMail}>{params.email}</Text>
+            </View>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Xác nhận</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-                    <Text style={styles.buttonText}>Xóa</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -122,7 +124,7 @@ const OTPGmailScreen = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#f0f4ff',
     },
     backButton: {
         position: 'absolute',
@@ -142,6 +144,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         width: width * 0.6,
         alignSelf: 'center',
+        alignItems: 'center'
     },
     otpInput: {
         width: width * 0.12,
@@ -161,6 +164,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingHorizontal: width * 0.05,
     },
+    nameMail:{
+        fontWeight: 'bold',
+        fontSize: width * 0.04,
+        color: '#666',
+        textAlign: 'center',
+        paddingHorizontal: width * 0.05,
+    },
     errorText: {
         color: 'red',
         fontSize: width * 0.04,
@@ -170,9 +180,9 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        width: width * 0.6,
         marginTop: height * 0.03,
         alignSelf: 'center',
+        alignItems: 'center',
     },
     submitButton: {
         backgroundColor: '#0064E0',
