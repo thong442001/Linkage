@@ -1,49 +1,70 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
+import { View, Dimensions } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
-
-// Lấy kích thước màn hình
 const { width } = Dimensions.get('window');
 
 const ChatHomeLoading = () => {
   return (
-    <SkeletonPlaceholder>
-      {[...Array(8)].map((_, index) => (
-        <SkeletonPlaceholder.Item
-          key={index}
-          flexDirection="row"
-          alignItems="center"
-          paddingVertical={10}
-          borderBottomWidth={1}
-          borderBottomColor={'#ddd'}
-          width={width * 0.9} // Chiều rộng item = 90% màn hình
-          alignSelf="center" // Căn giữa trên màn hình
-        >
-          {/* Avatar Skeleton */}
-          <SkeletonPlaceholder.Item
-            width={width * 0.12} // Avatar = 12% chiều rộng màn hình
-            height={width * 0.12} // Avatar hình vuông
-            borderRadius={width * 0.06} // Bo tròn theo avatar
-            marginRight={10}
-          />
+    <SkeletonPlaceholder borderRadius={4}>
+      <View style={{ padding: 10 }}>
+        {/* Story Bar */}
+        <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+          {Array(5)
+            .fill(0)
+            .map((_, index) => (
+              <View
+                key={index}
+                style={{
+                  width: 80,
+                  height: 100,
+                  borderRadius: 50,
+                  marginRight: 10,
+                }}
+              />
+            ))}
+        </View>
 
-          {/* Thông tin Skeleton */}
-          <SkeletonPlaceholder.Item marginLeft={10} width={width * 0.6}>
-            <SkeletonPlaceholder.Item
-              width={width * 0.4} // Tên user = 40% chiều rộng
-              height={20}
-              borderRadius={4}
-            />
-            <SkeletonPlaceholder.Item
-              marginTop={6}
-              width={width * 0.3} // Tin nhắn preview = 30% chiều rộng
-              height={20}
-              borderRadius={4}
-            />
-          </SkeletonPlaceholder.Item>
-        </SkeletonPlaceholder.Item>
-      ))}
+        {/* Chat Items */}
+        {Array(9)
+          .fill(0)
+          .map((_, index) => (
+            <View
+              key={index}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: 5,
+                bottom: 20,
+              }}
+            >
+              {/* Avatar */}
+              
+
+              <View
+                style={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: 25,
+                  marginRight: 10,
+                }}
+              />
+              {/* Chat content */}
+              <View style={{ flex: 1 }}>
+                <View
+                  style={{
+                    width: width * 0.8,
+                    height: 50,
+                    borderRadius: 20,
+              
+                  }}
+                />
+              </View>
+        
+             
+            </View>
+          ))}
+      </View>
     </SkeletonPlaceholder>
   );
 };

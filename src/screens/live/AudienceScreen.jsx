@@ -6,6 +6,29 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+// Tắt thông báo từ Zego
+const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+
+console.log = (...args) => {
+  const message = args.join(' ');
+  if (message.includes('[ZegoUIKit]')) return;
+  originalConsoleLog(...args);
+};
+
+console.warn = (...args) => {
+  const message = args.join(' ');
+  if (message.includes('[ZegoUIKit]')) return;
+  originalConsoleWarn(...args);
+};
+
+console.error = (...args) => {
+  const message = args.join(' ');
+  if (message.includes('[ZegoUIKit]')) return;
+  originalConsoleError(...args);
+}
+
 export default function AudienceScreen(props) {
   const { route } = props;
   const { liveID, userName, userID } = route.params;
@@ -84,11 +107,16 @@ export default function AudienceScreen(props) {
             appSign={Keycenter.appSign}
             userName={userName}
             liveID={liveID}
-            config={AUDIENCE_DEFAULT_CONFIG}
+            config={{
+              ...AUDIENCE_DEFAULT_CONFIG,
+              onLeaveLiveStreaming: () => {
+                props.navigation.navigate('TabHome', { screen: 'Home' });
+              },
+            }}
           />
         ) : (
           <View style={styles.overlay}>
-            <Text style={styles.liveEndedText}>Host chưa online hoặc phiên live đã kết thúc</Text>
+            <Text style={styles.liveEndedText}>Phiên live không tồn tại</Text>
           </View>
         )}
       </View>
@@ -127,7 +155,7 @@ const styles = StyleSheet.create({
   },
   liveEndedText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 18,    
     fontWeight: 'bold',
   },
 });

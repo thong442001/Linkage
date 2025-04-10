@@ -13,30 +13,71 @@ const CreatePasswordPhone = (props) => {
     const { phone } = route.params;
     const [passwordNew, setPasswordNew] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({ passwordNew: '', confirmPassword: '' }); // Tách lỗi cho từng trường
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [showPasswordNew, setShowPasswordNew] = useState(false); // State cho ẩn/hiện mật khẩu mới
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State cho ẩn/hiện xác nhận mật khẩu
+    const [showPasswordNew, setShowPasswordNew] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const dispatch = useDispatch();
 
-    const handleCreatePassword = async () => {
+    // Hàm validate mật khẩu mới
+    const validatePasswordNew = (password) => {
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+        if (!password.trim()) {
+            return 'Vui lòng nhập mật khẩu mới.';
+        }
+        if (password.length < 6) {
+            return 'Mật khẩu phải có ít nhất 6 ký tự.';
+        }
+        if (!/[A-Za-z]/.test(password)) {
+            return 'Mật khẩu phải chứa ít nhất một chữ cái.';
+        }
+        if (!/\d/.test(password)) {
+            return 'Mật khẩu phải chứa ít nhất một số.';
+        }
+        if (/[^A-Za-z\d]/.test(password)) {
+            return 'Mật khẩu không được chứa ký tự đặc biệt.';
+        }
+        return '';
+    };
 
-        if (!passwordNew.trim()) {
-            setError('Vui lòng nhập mật khẩu mới.');
-            return;
+    // Hàm validate xác nhận mật khẩu
+    const validateConfirmPassword = (confirm, password) => {
+        if (!confirm.trim()) {
+            return 'Vui lòng nhập xác nhận mật khẩu.';
         }
-        if (!passwordRegex.test(passwordNew)) {
-            setError('Mật khẩu phải có ít nhất 6 ký tự, gồm chữ cái và số, không chứa ký tự đặc biệt.');
-            return;
+        if (confirm !== password) {
+            return 'Mật khẩu xác nhận không khớp.';
         }
-        if (passwordNew !== confirmPassword) {
-            setError('Mật khẩu xác nhận không khớp.');
+        return '';
+    };
+
+    // Validate khi người dùng nhập
+    const handlePasswordNewChange = (text) => {
+        setPasswordNew(text);
+        const error = validatePasswordNew(text);
+        setErrors((prev) => ({ ...prev, passwordNew: error }));
+    };
+
+    const handleConfirmPasswordChange = (text) => {
+        setConfirmPassword(text);
+        const error = validateConfirmPassword(text, passwordNew);
+        setErrors((prev) => ({ ...prev, confirmPassword: error }));
+    };
+
+    const handleCreatePassword = async () => {
+        const passwordNewError = validatePasswordNew(passwordNew);
+        const confirmPasswordError = validateConfirmPassword(confirmPassword, passwordNew);
+
+        if (passwordNewError || confirmPasswordError) {
+            setErrors({
+                passwordNew: passwordNewError,
+                confirmPassword: confirmPasswordError,
+            });
             return;
         }
 
-        setError('');
+        setErrors({ passwordNew: '', confirmPassword: '' });
         setIsLoading(true);
         try {
             console.log("Sending payload:", { phone, passwordNew });
@@ -52,12 +93,12 @@ const CreatePasswordPhone = (props) => {
                 }, 2000);
             } else {
                 setIsLoading(false);
-                setError(response.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại.');
+                setErrors({ passwordNew: '', confirmPassword: response.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại.' });
             }
         } catch (error) {
             setIsLoading(false);
             console.log("Lỗi khi đổi mật khẩu:", error);
-            setError(error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+            setErrors({ passwordNew: '', confirmPassword: error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.' });
         }
     };
 
@@ -75,21 +116,20 @@ const CreatePasswordPhone = (props) => {
                 Mật khẩu phải có ít nhất 6 ký tự, gồm chữ cái và số, không chứa ký tự đặc biệt.
             </Text>
 
-           
+            {/* Trường nhập mật khẩu mới */}
             <View style={styles.inputContainer}>
                 <TextInput
-                    onChangeText={(text) => {
-                        setPasswordNew(text);
-                        setError('');
-                    }}
+                    onChangeText={handlePasswordNewChange}
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Mật khẩu mới"
                     value={passwordNew}
-                    style={[styles.inputDate, error && { borderColor: 'red' }]}
-                    secureTextEntry={!showPasswordNew} // Ẩn/hiện dựa trên state
+                    style={[styles.inputDate, errors.passwordNew && { borderColor: 'red' }]}
+                    secureTextEntry={!showPasswordNew}
                     autoCapitalize="none"
                     color={'#8C96A2'}
                     autoCompleteType="password"
+                    maxLength={20} // Giới hạn độ dài tối đa của mật khẩu
+                    minLength={6} // Giới hạn độ dài tối thiểu của mật khẩu
                 />
                 <Pressable
                     onPress={() => setShowPasswordNew(!showPasswordNew)}
@@ -102,19 +142,22 @@ const CreatePasswordPhone = (props) => {
                     />
                 </Pressable>
             </View>
+            {errors.passwordNew ? (
+                <View style={styles.errorContainer}>
+                    <Icon name="exclamation-circle" size={width * 0.04} color="red" style={styles.errorIcon} />
+                    <Text style={styles.errorText}>{errors.passwordNew}</Text>
+                </View>
+            ) : null}
 
-           
+            {/* Trường nhập xác nhận mật khẩu */}
             <View style={styles.inputContainer}>
                 <TextInput
-                    onChangeText={(text) => {
-                        setConfirmPassword(text);
-                        setError('');
-                    }}
+                    onChangeText={handleConfirmPasswordChange}
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Xác nhận mật khẩu"
                     value={confirmPassword}
-                    style={[styles.inputDate, error && { borderColor: 'red' }]}
-                    secureTextEntry={!showConfirmPassword} // Ẩn/hiện dựa trên state
+                    style={[styles.inputDate, errors.confirmPassword && { borderColor: 'red' }]}
+                    secureTextEntry={!showConfirmPassword}
                     autoCapitalize="none"
                     color={'#8C96A2'}
                     autoCompleteType="password"
@@ -130,8 +173,12 @@ const CreatePasswordPhone = (props) => {
                     />
                 </Pressable>
             </View>
-
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {errors.confirmPassword ? (
+                <View style={styles.errorContainer}>
+                    <Icon name="exclamation-circle" size={width * 0.04} color="red" style={styles.errorIcon} />
+                    <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                </View>
+            ) : null}
 
             <Pressable
                 style={[styles.button, { opacity: isLoading ? 0.6 : 1 }]}
@@ -171,7 +218,7 @@ const styles = StyleSheet.create({
         marginVertical: height * 0.01,
     },
     inputDate: {
-        flex: 1, // Để TextInput chiếm toàn bộ chiều ngang còn lại
+        flex: 1,
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: width * 0.03,
@@ -182,10 +229,18 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: width * 0.03,
     },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: height * 0.005,
+        marginBottom: height * 0.01,
+    },
+    errorIcon: {
+        marginRight: width * 0.02,
+    },
     errorText: {
         color: 'red',
         fontSize: height * 0.018,
-        marginBottom: height * 0.015,
     },
     button: {
         marginVertical: height * 0.02,

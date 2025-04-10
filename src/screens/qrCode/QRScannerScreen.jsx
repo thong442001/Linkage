@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ const QRScannerScreen = props => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false); // ✅ Cờ tránh quét trùng
   const devices = useCameraDevices();
-  const {navigation} = props;
+  const { navigation } = props;
   // const auth = getAuth();
   const [barcodeReady, setBarcodeReady] = useState(false);
 
@@ -60,7 +60,7 @@ const QRScannerScreen = props => {
         Alert.alert(
           'Quyền bị từ chối',
           'Bạn cần cấp quyền camera để quét QR.',
-          [{text: 'OK', onPress: () => navigation.goBack()}],
+          [{ text: 'OK', onPress: () => navigation.goBack() }],
         );
       }
     };
@@ -71,9 +71,14 @@ const QRScannerScreen = props => {
   const handleUserPress = _id => {
     navigation.navigate('TabHome', {
       screen: 'Profile',
-      params: {_id: _id},
+      params: { _id: _id },
     });
   };
+
+  const handleLoginPress = token => {
+    console.log('QR Token:', token);
+  };
+
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: codes => {
@@ -103,6 +108,27 @@ const QRScannerScreen = props => {
             Alert.alert('Lỗi', 'Mã QR không hợp lệ!');
             setIsProcessing(false);
           }
+        } else if (scannedData.startsWith('chatapp://login/')) {
+          try {
+            // Tách `userId` từ URL
+            const parts = scannedData.split('/login/');
+            if (parts.length < 2) {
+              throw new Error('URL không hợp lệ!');
+            }
+            const qrToken = parts[1].split('?')[0]; // Chỉ lấy `userId`, bỏ qua query params
+
+            console.log('UserID:', qrToken);
+
+            // ✅ Gọi hàm xử lý với chỉ userId
+            handleLoginPress(qrToken);
+
+            // ✅ Đợi 2 giây trước khi quét tiếp
+            setTimeout(() => setIsProcessing(false), 2000);
+          } catch (error) {
+            console.error('Lỗi khi xử lý mã QR:', error);
+            Alert.alert('Lỗi', 'Mã QR không hợp lệ!');
+            setIsProcessing(false);
+          }
         } else {
           Alert.alert('Lỗi', 'Mã QR không hợp lệ!');
           setIsProcessing(false);
@@ -117,14 +143,14 @@ const QRScannerScreen = props => {
 
   if (!hasPermission) {
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{fontSize: 16, color: 'red', textAlign: 'center'}}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 16, color: 'red', textAlign: 'center' }}>
           Không có quyền truy cập camera
         </Text>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{marginTop: 10}}>
-          <Text style={{color: 'blue'}}>Quay lại</Text>
+          style={{ marginTop: 10 }}>
+          <Text style={{ color: 'blue' }}>Quay lại</Text>
         </TouchableOpacity>
       </View>
     );
@@ -135,7 +161,7 @@ const QRScannerScreen = props => {
   }
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       {/* Nút quay lại đặt trên cùng */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
@@ -158,7 +184,7 @@ const QRScannerScreen = props => {
           aspectRatio: 1,
           alignSelf: 'center',
           top: '40%',
-          transform: [{translateY: -50}], // 🔹 Dịch lên để căn giữa
+          transform: [{ translateY: -50 }], // 🔹 Dịch lên để căn giữa
           borderRadius: 20,
           borderWidth: 5,
           borderColor: 'rgba(255, 255, 255, 0.3)', // 🔹 Viền đỏ để dễ thấy
@@ -169,7 +195,7 @@ const QRScannerScreen = props => {
       {/* Camera */}
       {barcodeReady && selectedDevice && (
         <Camera
-          style={{flex: 1}}
+          style={{ flex: 1 }}
           device={selectedDevice}
           isActive={true}
           codeScanner={codeScanner}
