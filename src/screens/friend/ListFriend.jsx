@@ -16,9 +16,42 @@ const ListFriend = (props) => {
   const token = useSelector(state => state.app.token);
   const me = useSelector(state => state.app.user);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredFriends, setFilteredFriends] = useState([]);
+
   useEffect(() => {
     callGetAllFriendOfID_user();
   }, [])
+
+  // Lọc danh sách bạn bè khi searchQuery hoặc friends thay đổi
+  //tách dấu
+  const normalizeText = (text) => {
+    return text
+      .toLowerCase()
+      .normalize('NFD') // Tách dấu ra khỏi chữ
+      .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
+  };
+  //search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredFriends(friends || []);
+    } else {
+      const filteredFriends = friends.filter(user => {
+        // Xác định ai là bạn bè của bạn
+        const friend = user.ID_userA._id === me._id ? user.ID_userB : user.ID_userB._id === me._id ? user.ID_userA : null;
+
+        // Nếu không tìm thấy bạn bè (myId không có trong cặp), bỏ qua
+        if (!friend) return false;
+
+        // Lấy tên đầy đủ của bạn bè để lọc
+        const fullName = `${friend.first_name || ''} ${friend.last_name || ''}`.toLowerCase();
+        return normalizeText(fullName).includes(normalizeText(searchQuery).toLowerCase());
+      });
+      setFilteredFriends(filteredFriends);
+    }
+  }, [searchQuery, friends]); // Thêm myId vào dependencies nếu nó có thể thay đổi
 
   //call api getAllFriendOfID_user
   const callGetAllFriendOfID_user = async () => {
@@ -29,6 +62,7 @@ const ListFriend = (props) => {
         .then((response) => {
           //console.log(response.groups)
           setFriends(response.relationships);
+          setFilteredFriends(response.relationships); // Khởi tạo danh sách lọc ban đầu
         })
         .catch((error) => {
           console.log('Error1 getAllFriendOfID_user:', error);
@@ -38,6 +72,7 @@ const ListFriend = (props) => {
       console.log(error)
     }
   }
+
   return (
     <View style={styles.container}>
       <View style={styles.containerHeader}>
@@ -48,12 +83,15 @@ const ListFriend = (props) => {
         <View></View>
         {/* <Icon name="add" size={25} color={'black'} /> */}
       </View>
-      {/* <View style={styles.containerInput}>
+      <View style={styles.containerInput}>
         <Icon name="search" size={25} color={'black'} />
         <TextInput
-          placeholder="Tìm kiếm bạn bè"
+          placeholder='Tìm kiếm bạn bè'
+          placeholderTextColor={'black'}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
-      </View> */}
+      </View>
       {/* <Text style={styles.title}>Bạn bè</Text> */}
       <Text>{friends.length} người bạn</Text>
       <View>
@@ -61,7 +99,7 @@ const ListFriend = (props) => {
           style={{ paddingBottom: width * 0.1 }}
         >
           <FlatList
-            data={friends}
+            data={filteredFriends}
             renderItem={({ item }) =>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Profile', { _id: item.ID_userA._id == me._id ? item.ID_userB._id : item.ID_userA._id })}
