@@ -506,10 +506,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   image: {
-    width: width * 0.4,
-    height: height * 0.8,
-    aspectRatio: 1,
-    marginTop: 30,
+    width:width * 0.8,
+    height: height * 0.8 ,
+    aspectRatio: 0.8, 
+    margin: 30,
         resizeMode: 'contain', // Đảm bảo ảnh không bị méo
     alignSelf: 'center', // Căn giữa theo chiều ngang
   },
