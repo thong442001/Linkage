@@ -74,6 +74,9 @@ const QRScannerScreen = props => {
       params: {_id: _id},
     });
   };
+  const handleLoginPress = token => {
+      console.log('QR Token:', token);
+  };
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: codes => {
@@ -95,6 +98,27 @@ const QRScannerScreen = props => {
 
             // ✅ Gọi hàm xử lý với chỉ userId
             handleUserPress(_id);
+
+            // ✅ Đợi 2 giây trước khi quét tiếp
+            setTimeout(() => setIsProcessing(false), 2000);
+          } catch (error) {
+            console.error('Lỗi khi xử lý mã QR:', error);
+            Alert.alert('Lỗi', 'Mã QR không hợp lệ!');
+            setIsProcessing(false);
+          }
+        } else if(scannedData.startsWith('chatapp://login/')){
+          try {
+            // Tách `userId` từ URL
+            const parts = scannedData.split('/login/');
+            if (parts.length < 2) {
+              throw new Error('URL không hợp lệ!');
+            }
+            const qrToken = parts[1].split('?')[0]; // Chỉ lấy `userId`, bỏ qua query params
+
+            console.log('UserID:', qrToken);
+
+            // ✅ Gọi hàm xử lý với chỉ userId
+            handleLoginPress(qrToken);
 
             // ✅ Đợi 2 giây trước khi quét tiếp
             setTimeout(() => setIsProcessing(false), 2000);
