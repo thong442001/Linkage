@@ -14,6 +14,7 @@ import {
   getAllFriendOfID_user,
   getAllGroupOfUser,
 } from '../../rtk/API';
+import HomeS from '../../styles/screens/home/HomeS';
 import Groupcomponent from '../../components/chat/Groupcomponent';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
@@ -70,26 +71,21 @@ const HomeChat = ({ route, navigation }) => {
     }
   }, [searchText, groups]);
 
-  // Sắp xếp bạn bè online lên đầu (chỉ khi dữ liệu thay đổi thực sự)
+  // Sắp xếp bạn bè online lên đầu
   useEffect(() => {
-    if (!onlineUsers || onlineUsers.length === 0 || friends.length === 0) {
-      return; // Không làm gì nếu không có dữ liệu
-    }
+    if (!onlineUsers || onlineUsers.length === 0 || friends.length === 0) return;
 
-    // Tạo danh sách bạn bè đã sắp xếp
     const sortedFriends = [...friends].sort((a, b) => {
       const friendA_ID = a.ID_userA._id === me._id ? a.ID_userB._id : a.ID_userA._id;
       const friendB_ID = b.ID_userA._id === me._id ? b.ID_userB._id : b.ID_userA._id;
       const isOnlineA = onlineUsers.includes(friendA_ID);
       const isOnlineB = onlineUsers.includes(friendB_ID);
-
-      return isOnlineB - isOnlineA; // Online lên đầu
+      return isOnlineB - isOnlineA;
     });
 
-    // Chỉ cập nhật state nếu danh sách thay đổi
     if (JSON.stringify(sortedFriends) !== JSON.stringify(friends)) {
       setFriends(sortedFriends);
-      console.log('✅ Danh sách bạn bè đã sắp xếp:', sortedFriends); 
+      console.log('✅ Danh sách bạn bè đã sắp xếp:', sortedFriends);
     }
   }, [onlineUsers, friends]);
 
@@ -188,22 +184,61 @@ const HomeChat = ({ route, navigation }) => {
     ID_group ? navigation.navigate('Chat', { ID_group }) : console.log('ID_group: ' + ID_group);
   };
 
+
+  const headerOnline = () => {
+    return (
+      <View style={{ }}>
+        <FlatList
+          contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+          data={friends}
+          renderItem={({ item }) => {
+            const friendID = item.ID_userA._id === me._id ? item.ID_userB._id : item.ID_userA._id;
+            const isOnline = onlineUsers.includes(friendID);
+            return (
+              <ItemFriendHomeChat item={item} navigation={navigation} isOnline={isOnline} />
+            );
+          }}
+          keyExtractor={item => item._id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.vHeader}>
-        <TouchableOpacity onPress={() => navigation.navigate('TabHome')}>
-          <MaterialIcons name="arrow-back-ios-new" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.header}>Đoạn chat</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <TouchableOpacity onPress={() => navigation.navigate('TabHome')} style={{ marginRight: width * 0.03 }}>
+            <Icon name="chevron-back-outline" size={25} color="black" />
+          </TouchableOpacity>
+          <View style={styles.logo}>
+            <Image
+              style={{ width: 15, height: 22 }}
+              source={require('../../../assets/images/LK.png')}
+            />
+            <Text style={styles.title}>inkageChat</Text>
+          </View>
+        </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
-            <Icon name="chatbubbles-outline" size={25} color="black" />
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={() => navigation.navigate('ChatBot')}
+          >
+            <Icon name="chatbubbles-outline" size={25} color="#333" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('QRSannerAddGroup')}>
-            <Icon name="scan-circle-outline" size={25} color="black" />
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={() => navigation.navigate('QRSannerAddGroup')}
+          >
+            <Icon name="scan-circle-outline" size={25} color="#333" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('CreateGroup')}>
-            <MaterialIcons name="group-add" size={24} color="black" />
+          <TouchableOpacity 
+            style={styles.iconButton} 
+            onPress={() => navigation.navigate('CreateGroup')}
+          >
+            <Icon name="create-outline" size={24} color="#333" />
           </TouchableOpacity>
         </View>
       </View>
@@ -223,21 +258,11 @@ const HomeChat = ({ route, navigation }) => {
         <ChatHomeLoading />
       ) : (
         <View style={styles.container}>
-          <FlatList
-            data={friends}
-            renderItem={({ item }) => {
-              const friendID = item.ID_userA._id === me._id ? item.ID_userB._id : item.ID_userA._id;
-              const isOnline = onlineUsers.includes(friendID);
-              return (
-                <ItemFriendHomeChat item={item} navigation={navigation} isOnline={isOnline} />
-              );
-            }}
-            keyExtractor={item => item._id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          />
+        
 
           <FlatList
+            contentContainerStyle={{ paddingBottom: height * 0.02 }}
+            ListHeaderComponent={headerOnline}
             data={filteredGroups}
             keyExtractor={item => item._id}
             renderItem={({ item }) => (
@@ -250,6 +275,9 @@ const HomeChat = ({ route, navigation }) => {
             }
             showsVerticalScrollIndicator={false}
           />
+
+
+
         </View>
       )}
     </View>
@@ -257,61 +285,56 @@ const HomeChat = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  logo:{
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  title: {
+    top: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: width * 0.05, // Thay đổi kích thước chữ theo chiều rộng
+    color: "#0064E0",
+    fontWeight: "bold",
+},
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingHorizontal: width * 0.01,
-  },
-  header: {
-    fontSize: width * 0.06,
-    fontWeight: 'bold',
-    color: 'black',
-    textAlign: 'center',
-    flex: 1,
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    gap: width * 0.04,
+    paddingHorizontal:  width * 0.01,
   },
   vHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: height * 0.025,
+    margin: width * 0.025,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    gap: width * 0.02, 
+  },
+  iconButton: {
+    width: width * 0.1,
+    height: width * 0.1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: width * 0.05, 
+    backgroundColor: '#dbf3f7', 
+
   },
   inputSearch: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F7F7FC',
+    backgroundColor: '#f0f4ff',
     borderRadius: width * 0.08,
-    paddingVertical: height * 0.008,
+    paddingVertical: height * 0.002,
     paddingHorizontal: width * 0.04,
     marginBottom: height * 0.025,
+    marginHorizontal: width * 0.015,
   },
   search: {
     flex: 1,
     color: 'black',
     fontSize: width * 0.04,
-  },
-  container_item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: height * 0.02,
-    paddingHorizontal: width * 0.03,
-    backgroundColor: '#F0F0F5',
-    borderRadius: width * 0.03,
-    marginBottom: height * 0.02,
-  },
-  text_name_AI: {
-    fontSize: width * 0.045,
-    fontWeight: '500',
-    marginLeft: width * 0.04,
-    color: 'black',
-  },
-  img: {
-    width: width * 0.12,
-    height: width * 0.12,
-    borderRadius: width * 0.06,
   },
   emptyText: {
     textAlign: 'center',

@@ -249,12 +249,11 @@ import pokemon from '../screens/game/pokemon/pokemon';
 import man_hinh_chao_pokemon from '../screens/game/pokemon/pokemon';
 import MapScreen from '../screens/map/MapScreen';
 import SwitchNoti from '../screens/notification/SwitchNoti';
-import OTPScreen from '../screens/register/OTPScreen';
 import vua_tieng_viet from '../screens/game/noi_tu/noi_tu';
 import listgame from '../screens/game/listgame';
 import CheckPhone from '../screens/forgot_password/CheckPhone';
 import CreatePasswordPhone from '../screens/forgot_password/CreatePasswordPhone';
-
+import OTPScreen from '../screens/register/OTPScreen';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },
@@ -300,6 +299,8 @@ const oStackHome = {
   CheckPhone: { name: 'CheckPhone', component: CheckPhone },
   CreatePasswordPhone: { name: 'CreatePasswordPhone', component: CreatePasswordPhone },
 }
+
+
 const StackHome = createNativeStackNavigator();
 const HomeNavigation = () => {
   return (

@@ -28,7 +28,7 @@ const Screen1 = (props) => {
     const [showErrorFirstName, setShowErrorFirstName] = useState(false);
     const [showErrorLastName, setShowErrorLastName] = useState(false);
     const [showErrorDate, setShowErrorDate] = useState(false);
-
+    
     // Hàm validate tên
     const validateName = (name) => {
         const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]+$/;
@@ -114,7 +114,7 @@ const Screen1 = (props) => {
 
             <Text style={styles.label}>Bạn tên gì?</Text>
             <Text style={styles.label2}>Nhập tên bạn sử dụng trong đời thực</Text>
-
+        
             <View style={styles.nameContainer}>
                 <TextInput
                     value={first_name}
@@ -139,12 +139,19 @@ const Screen1 = (props) => {
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Tên"
                     style={showErrorLastName ? styles.inputNameUserError : styles.input}
+                    color={'black'}
                 />
             </View>
 
             <Text style={styles.label}>Ngày sinh của bạn là khi nào?</Text>
             <Text style={styles.label2}>Chọn ngày sinh của bạn</Text>
-
+            {showErrorDate && (
+                    <Text style={styles.errorText}>
+                        {dateOfBirth.trim() === '' 
+                            ? 'Vui lòng chọn ngày sinh' 
+                            : 'Bạn phải từ 12 tuổi trở lên'}
+                    </Text>
+                )}
             <Pressable onPress={() => setOpen(true)}>
                 <TextInput
                     value={dateOfBirth}
@@ -152,6 +159,7 @@ const Screen1 = (props) => {
                     placeholder="Ngày sinh"
                     style={showErrorDate ? styles.inputDateError : styles.inputDate}
                     editable={false}
+                    color={'black'}
                 />
             </Pressable>
 
@@ -198,6 +206,12 @@ const Screen1 = (props) => {
 };
 
 const styles = StyleSheet.create({
+    errorText: {
+        color: 'red',
+        fontSize: width * 0.035,
+        top: height * 0.02,
+        fontWeight: 'bold',
+    },
     container: {
         flex: 1,
         padding: width * 0.04,
