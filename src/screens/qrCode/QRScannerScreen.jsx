@@ -13,6 +13,8 @@ import {
   useCodeScanner,
 } from 'react-native-vision-camera';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSocket } from '../../context/socketContext';
+import { useSelector } from 'react-redux';
 
 const QRScannerScreen = props => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -22,6 +24,8 @@ const QRScannerScreen = props => {
   const { navigation } = props;
   // const auth = getAuth();
   const [barcodeReady, setBarcodeReady] = useState(false);
+  const { socket } = useSocket();
+  const me = useSelector(state => state.app.user);
 
   // Barcode scanner ready check
   useEffect(() => {
@@ -77,6 +81,12 @@ const QRScannerScreen = props => {
 
   const handleLoginPress = token => {
     console.log('QR Token:', token);
+    const payload = {//qrToken, ID_user
+      qrToken: token,
+      ID_user: me._id,
+    };
+    socket.emit('login_QR', payload);
+    navigation.goBack();
   };
 
   const codeScanner = useCodeScanner({
