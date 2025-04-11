@@ -157,14 +157,11 @@ const Profile = props => {
                 },
             );
 
-            console.log('📂 Response từ Cloudinary:', response.data);
-
             if (!response.data.secure_url) {
                 throw new Error('Không nhận được secure_url từ Cloudinary!');
             }
 
             const fileUrl = response.data.secure_url;
-            console.log('🌍 Link file Cloudinary:', fileUrl);
             setavatar(fileUrl);
             return fileUrl;
         } catch (error) {

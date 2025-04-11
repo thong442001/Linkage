@@ -277,7 +277,7 @@ const onVideoProgress = (data) => {
           setTimeout(() => {
             setShowSuccessModal(false);
             navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: ID_story });
-          }, 2000);
+          },);
         });
     } catch (error) {
       console.log('Lỗi trong callDeleteStory:', error);
