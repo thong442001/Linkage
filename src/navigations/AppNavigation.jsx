@@ -642,7 +642,15 @@ const AppNavigation = () => {
         console.log(`🔕 Thông báo bị tắt cho channel: ${channelId}`);
         return;
       }
-
+      // Kiểm tra nếu sender._id trùng với user._id thì bỏ qua
+    if (
+      notification?.ID_message?.sender?._id === user?._id  || 
+      notification?.ID_post?.ID_user?._id === user?._id 
+    ) {
+      console.log(`🔇 Bỏ qua thông báo từ chính người dùng: ${notification.type}`);
+      return;
+    }
+    /////
       const formattedData = {};
       Object.keys(notification).forEach(key => {
         formattedData[key] = typeof notification[key] === 'string'

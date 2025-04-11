@@ -62,6 +62,7 @@ const Chat = (props) => {// cần ID_group (param)
     const [validateGame, setValidateGame] = useState(true);
     const hasSentLocation = useRef(false); // Biến ref để theo dõi trạng thái gửi
     const [isActive, setIsActive] = useState(false)
+    const [isMessNew, setIsMessNew] = useState(false)
     //loading
     const [isGameing, setIsGameing] = useState(false);
 
@@ -228,6 +229,7 @@ const Chat = (props) => {// cần ID_group (param)
 
         // Lắng nghe tin nhắn từ server
         socket.on('receive_message', (data) => {
+            setIsMessNew(true);
             setMessages(prevMessages => {
                 // Thay thế tin nhắn tạm thời nếu đã tồn tại
                 const tempIndex = prevMessages.findIndex(msg => msg.isLoading && msg.type === data.type);
@@ -562,10 +564,13 @@ const Chat = (props) => {// cần ID_group (param)
 
     useEffect(() => {
         // Cuộn lên đầu danh sách tin nhắn khi danh sách tin nhắn thay đổi
-        setTimeout(() => {
-            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-        }, 200);
-    }, [messages]);
+        if (isMessNew) {
+            setTimeout(() => {
+                flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+            }, 200);
+            setIsMessNew(false)
+        }
+    }, [isMessNew]);
 
     // Xử lý thu hồi tin nhắn
     const revokeMessage = (ID_message) => {

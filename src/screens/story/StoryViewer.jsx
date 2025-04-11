@@ -32,7 +32,7 @@ const Story = () => {
   const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedEmoji, setSelectedEmoji] = useState(null);
-  const [videoDuration, setVideoDuration] = useState(5000);
+  const [videoDuration, setVideoDuration] = useState(0);
   const [stories, setStories] = useState(StoryView?.stories || []);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [viewers, setViewers] = useState([]);
@@ -45,6 +45,10 @@ const Story = () => {
   const reactionRef = useRef(null);
   const progressBars = useRef([]);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [isPaused, setIsPaused] = useState(true);
+  const [isLongPress, setIsLongPress] = useState(false); // Cờ để xác định giữ lâu
+  const longPressTimer = useRef(null); // Timer để kiểm tra giữ lâu 
+  
 
   const { openBottomSheet, closeBottomSheet } = useBottomSheet();
 
@@ -111,42 +115,80 @@ const Story = () => {
     }
   }, [currentIndex, stories, isFirstLoad]);
 
-  const handleNextStory = () => {
-    if (currentIndex + 1 < stories.length) {
-      progressBars.current[currentIndex]?.setValue(1);
-      setCurrentIndex((prevIndex) => prevIndex + 1);
-      setSelectedEmoji(null);
-      setVideoDuration(5000);
-    } else if (navigation.isFocused()) {
-      navigation.goBack();
+// Khi giữ màn hình
+const handlePressIn = () => {
+  // Đặt timer để xác định giữ lâu (300ms)
+  longPressTimer.current = setTimeout(() => {
+    setIsLongPress(true);
+    setIsPaused(true);
+    if (progressBars.current[currentIndex]) {
+      progressBars.current[currentIndex].stopAnimation((value) => {
+        setProgressValue(value);
+      });
     }
-  };
+  }, 300); // Ngưỡng 300ms để coi là giữ lâu
+};
 
-  const handlePrevStory = () => {
-    if (currentIndex > 0) {
-      progressBars.current[currentIndex]?.setValue(0);
-      setCurrentIndex((prevIndex) => prevIndex - 1);
-      setSelectedEmoji(null);
-      setVideoDuration(5000);
+// Khi thả ra
+const handlePressOut = () => {
+  clearTimeout(longPressTimer.current); // Hủy timer khi thả tay
+  if (isLongPress) {
+    // Nếu là giữ lâu, tiếp tục progress
+    setIsPaused(false);
+    if (!isVideo(stories[currentIndex]?.medias[0])) {
+      startProgress(currentIndex, progressValue);
+    } else if (videoRef.current) {
+      startProgress(currentIndex, progressValue);
+      videoRef.current.seek(progressValue * videoDuration / 1000);
     }
-  };
+    setIsLongPress(false); // Reset trạng thái giữ lâu
+  }
+};
+  
+// Chuyển qua story tiếp theo
+const handleNextStory = () => {
+  if (currentIndex + 1 < stories.length) {
+    progressBars.current[currentIndex]?.setValue(1); // Đặt progress của story hiện tại thành 100%
+    setCurrentIndex((prevIndex) => prevIndex + 1);
+    setSelectedEmoji(null);
+    setVideoDuration(0); // Reset videoDuration, sẽ được cập nhật lại trong onVideoLoad
+    setProgressValue(0); // Reset progress để bắt đầu từ đầu cho story mới
+    setIsPaused(true); // Tạm dừng để chờ video mới tải (nếu là video)
+  } else if (navigation.isFocused()) {
+    navigation.goBack();
+  }
+};
 
-  const handlePress = (event) => {
-    const { locationX } = event.nativeEvent;
-    if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) {
-      setIsFirstLoad(false);
-      if (videoRef.current) {
-        startProgress(0); // Bắt đầu progress khi nhấn vào video lần đầu
-      }
+// Quay lại story trước
+const handlePrevStory = () => {
+  if (currentIndex > 0) {
+    progressBars.current[currentIndex]?.setValue(0); // Đặt progress của story hiện tại thành 0%
+    setCurrentIndex((prevIndex) => prevIndex - 1);
+    setSelectedEmoji(null);
+    setVideoDuration(0); // Reset videoDuration, sẽ được cập nhật lại trong onVideoLoad
+    setProgressValue(0); // Reset progress để bắt đầu từ đầu cho story trước
+    setIsPaused(true); // Tạm dừng để chờ video mới tải (nếu là video)
+  }
+};
+
+// Xử lý nhấn để chuyển trang
+const handlePress = (event) => {
+  if (isLongPress) return; // Nếu đang giữ lâu, không chuyển trang
+
+  const { locationX } = event.nativeEvent;
+  if (isFirstLoad && currentIndex === 0 && isVideo(stories[currentIndex]?.medias[0])) {
+    setIsFirstLoad(false);
+    if (videoRef.current) {
+      startProgress(0);
+    }
+  } else {
+    if (locationX < width / 2) {
+      handlePrevStory();
     } else {
-      if (locationX < width / 2) {
-        handlePrevStory();
-      } else {
-        handleNextStory();
-      }
+      handleNextStory();
     }
-  };
-
+  }
+};
   const handleSelectReaction = async (ID_reaction, name, icon) => {
     setSelectedEmoji(icon);
     setReactionsVisible(false);
@@ -196,17 +238,26 @@ const Story = () => {
 
   const onVideoLoad = (data) => {
     if (data.duration) {
-      setVideoDuration(data.duration * 1000);
+      setVideoDuration(data.duration * 1000); // Cập nhật thời lượng video
       if (isFirstLoad && currentIndex === 0) {
         setIsFirstLoad(false);
       }
-      startProgress(currentIndex); // Bắt đầu thanh slider khi video tải xong
+      setIsPaused(false); // Bắt đầu phát video sau khi tải
     }
   };
 
   const onVideoEnd = () => {
     handleNextStory();
   };
+
+//theo dỗi tiến trình video
+const onVideoProgress = (data) => {
+  if (videoDuration > 0 && progressBars.current[currentIndex]) {
+    const progress = data.currentTime / (videoDuration / 1000); // Tính tỷ lệ tiến trình
+    progressBars.current[currentIndex].setValue(progress); // Cập nhật thanh progress
+    setProgressValue(progress); // Lưu giá trị tiến trình
+  }
+};
 
   const callDeleteStory = async (ID_story) => {
     try {
@@ -226,7 +277,7 @@ const Story = () => {
           setTimeout(() => {
             setShowSuccessModal(false);
             navigation.replace(oStackHome.TabHome.name, { isDeleted: true, deletedStoryId: ID_story });
-          }, 2000);
+          },);
         });
     } catch (error) {
       console.log('Lỗi trong callDeleteStory:', error);
@@ -251,6 +302,8 @@ const Story = () => {
     setIsBottomSheetOpen(false);
     if (!isVideo(stories[currentIndex]?.medias[0])) {
       startProgress(currentIndex, progressValue);
+    } else {
+      setIsPaused(false); // Tiếp tục video
     }
   }, [closeBottomSheet, currentIndex, stories, progressValue]);
 
@@ -296,7 +349,11 @@ const Story = () => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={handlePress}>
+    <TouchableWithoutFeedback 
+    onPress={handlePress}
+    onPressIn={handlePressIn} // Khi giữ màn hình
+    onPressOut={handlePressOut} // Khi thả màn hình
+    >
       <View style={styles.container}>
         <View style={styles.progressBarContainer}>
           {stories.map((_, index) => (
@@ -324,9 +381,10 @@ const Story = () => {
             resizeMode="cover"
             onLoad={onVideoLoad}
             onEnd={onVideoEnd}
+            onProgress={onVideoProgress} // Theo dõi tiến trình video
             repeat={false}
-            paused={isBottomSheetOpen}
-          />
+            paused={isPaused || isBottomSheetOpen}
+                 />
         ) : (
           <Image
             source={{ uri: stories[currentIndex]?.medias[0] }}
@@ -423,8 +481,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    justifyContent: 'center', // Căn giữa theo chiều dọc
+    alignItems: 'center', // Căn giữa theo chiều ngang
     paddingTop: StatusBar.currentHeight || 0,
   },
   progressBarContainer: {
@@ -448,11 +506,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   image: {
-    width: width * 0.8,
+    width: width * 0.4,
     height: height * 0.8,
     aspectRatio: 1,
     marginTop: 30,
-    resizeMode: 'contain',
+        resizeMode: 'contain', // Đảm bảo ảnh không bị méo
+    alignSelf: 'center', // Căn giữa theo chiều ngang
   },
   headerContainer: {
     position: 'absolute',

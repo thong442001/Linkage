@@ -166,14 +166,11 @@ const Profile = props => {
                 },
             );
 
-            console.log('📂 Response từ Cloudinary:', response.data);
-
             if (!response.data.secure_url) {
                 throw new Error('Không nhận được secure_url từ Cloudinary!');
             }
 
             const fileUrl = response.data.secure_url;
-            console.log('🌍 Link file Cloudinary:', fileUrl);
             setavatar(fileUrl);
             return fileUrl;
         } catch (error) {
@@ -189,7 +186,7 @@ const Profile = props => {
         try {
             setisLoading(true);
             closeBottomSheet();
-            const options = { mediaType: 'image', quality: 1 };
+            const options = { mediaType: 'photo', quality: 1 ,includeBase64: false, };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
@@ -246,62 +243,75 @@ const Profile = props => {
 
     const onOpenGalleryChangeBackground = async () => {
         try {
-            setisLoading(true);
-            closeBottomSheet();
-            const options = { mediaType: 'image', quality: 1 };
-
-            launchImageLibrary(options, async response => {
-                if (response.didCancel) {
-                    setisLoading(false);
-                    console.log('Đã hủy chọn ảnh');
-                    return;
+          setisLoading(true);
+          closeBottomSheet();
+      
+          // Cấu hình chỉ cho phép chọn ảnh
+          const options = {
+            mediaType: 'photo', // Chỉ chọn ảnh, không phải video
+            quality: 1, // Chất lượng ảnh cao nhất
+            includeBase64: false, // Không cần base64 để tối ưu
+          };
+      
+          launchImageLibrary(options, async response => {
+            if (response.didCancel) {
+              setisLoading(false);
+              console.log('Đã hủy chọn ảnh');
+              return;
+            }
+      
+            if (response.errorCode || response.errorMessage) {
+              setisLoading(false);
+              console.log('Lỗi khi mở thư viện:', response.errorCode, response.errorMessage);
+              return;
+            }
+      
+            const selectedFile = response.assets?.[0];
+            if (!selectedFile) {
+              setisLoading(false);
+              console.log('Không có ảnh nào được chọn!');
+              return;
+            }
+      
+            // Kiểm tra loại file để chắc chắn là ảnh
+            if (!selectedFile.type?.startsWith('image/')) {
+              setisLoading(false);
+              console.log('❌ File không phải ảnh:', selectedFile.type);
+              return;
+            }
+      
+            console.log('📂 File ảnh đã chọn:', selectedFile.uri);
+      
+            const fileUrl = await uploadFile(selectedFile);
+            if (!fileUrl) {
+              setisLoading(false);
+              console.log('❌ Upload ảnh thất bại!');
+              return;
+            }
+      
+            const data = { ID_user: me._id, background: fileUrl };
+            dispatch(editBackgroundOfUser(data))
+              .unwrap()
+              .then(res => {
+                console.log('🔥 Cập nhật background response:', res);
+                if (res.status) {
+                  dispatch(changeBackground(fileUrl));
+                  console.log('✅ Đổi background thành công');
+                } else {
+                  console.log('❌ Đổi background thất bại');
                 }
-
-                if (response.errorMessage) {
-                    setisLoading(false);
-                    console.log('Lỗi khi mở thư viện:', response.errorMessage);
-                    return;
-                }
-
-                const selectedFile = response.assets?.[0];
-                if (!selectedFile) {
-                    setisLoading(false);
-                    console.log('Không có ảnh nào được chọn!');
-                    return;
-                }
-
-                console.log('📂 File đã chọn:', selectedFile.uri);
-
-                const fileUrl = await uploadFile(selectedFile);
-                if (!fileUrl) {
-                    setisLoading(false);
-                    console.log('❌ Upload ảnh thất bại!');
-                    return;
-                }
-
-                const data = { ID_user: me._id, background: fileUrl };
-                dispatch(editBackgroundOfUser(data))
-                    .unwrap()
-                    .then(res => {
-                        console.log('🔥 Cập nhật background response:', res);
-                        if (res.status) {
-                            dispatch(changeBackground(fileUrl));
-                            console.log('✅ Đổi background thành công');
-                        } else {
-                            setisLoading(false);
-                            console.log('❌ Đổi background thất bại');
-                        }
-                        setisLoading(false);
-                    })
-                    .catch(err => {
-                        setisLoading(false);
-                        console.log('❌ Lỗi khi gửi API đổi background:', err);
-                    });
-            });
+                setisLoading(false);
+              })
+              .catch(err => {
+                setisLoading(false);
+                console.log('❌ Lỗi khi gửi API đổi background:', err);
+              });
+          });
         } catch (error) {
-            console.log('Lỗi onOpenGallery:', error);
+          setisLoading(false);
+          console.log('Lỗi onOpenGallery:', error);
         }
-    };
+      };
 
     useFocusEffect(
         useCallback(() => {
