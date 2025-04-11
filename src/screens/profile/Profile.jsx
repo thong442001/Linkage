@@ -40,7 +40,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import FriendLoading from '../../utils/skeleton_loading/FriendLoading';
 import PostProfileLoading from '../../utils/skeleton_loading/PostProfileLoading';
 import EditBioModal from '../../components/dialog/EditBioModal';
+import SendRequestFriendModal from '../../utils/animation/success/SuccessModal';
+import FailedRequestFriendModal from '../../utils/animation/failed/FailedModal';
+import RecallSuccessFriendRequestModal from '../../utils/animation/success/SuccessModal';
+import RecallFailedFriendRequestModal from '../../utils/animation/failed/FailedModal';
+import AcceptFriendRequestModal from '../../utils/animation/success/SuccessModal';
+import CancelFriendRequestModal from '../../utils/animation/failed/FailedModal';
 
+import { set } from '@react-native-firebase/database';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -67,6 +74,13 @@ const Profile = props => {
     const [isLoading, setisLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false)
 
+    //state quản lý thông báo gửi lời mời kết bạn, hủy lời mời, phản hồi lời mời 
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
+    const [recallSuccessModalVisible, setRecallSuccessModalVisible] = useState(false);
+    const [recallFailedModalVisible, setRecallFailedModalVisible] = useState(false);
+    const [acceptFriendRequestModalVisible, setAcceptFriendRequestModalVisible] = useState(false);
+    const [cancelFriendRequestModalVisible, setCancelFriendRequestModalVisible] = useState(false);
     // Animated value for scroll handling
     const scrollY = useRef(new Animated.Value(0)).current;
     const previousScrollY = useRef(0);
@@ -134,7 +148,7 @@ const Profile = props => {
     };
 
     const openBottomSheetPhanHoi = () => {
-        openBottomSheet(25, detail_selection_phan_hoi());
+        openBottomSheet(30, detail_selection_phan_hoi());
     };
 
     const uploadFile = async file => {
@@ -508,12 +522,17 @@ const Profile = props => {
                 .then(async (response) => {
                     console.log(response);
                     setRelationship(response.relationship);
+                    setSuccessModalVisible(true);
+                    setTimeout(() => setSuccessModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setFailedModalVisible(true);
+                    setTimeout(() => setFailedModalVisible(false), 2000);
                     console.log('❌ Lỗi khi gửi lời mời:', error);
-                    setDialogreload(true);
                 });
         } catch (error) {
+            setFailedModalVisible(true);
+            setTimeout(() => setFailedModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -528,12 +547,17 @@ const Profile = props => {
                 .then(response => {
                     setRelationship(response.relationship);
                     closeBottomSheet();
+                    setAcceptFriendRequestModalVisible(true);
+                    setTimeout(() => setAcceptFriendRequestModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setCancelFriendRequestModalVisible(true);
+                    setTimeout(() => setCancelFriendRequestModalVisible(false), 2000);
                     console.log('Error2 callChapNhanLoiMoiKetBan:', error);
-                    setDialogreload(true);
                 });
         } catch (error) {
+            setAcceptFriendRequestModalVisible(true);
+            setTimeout(() => setAcceptFriendRequestModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -548,12 +572,17 @@ const Profile = props => {
                 .then(response => {
                     setRelationship(response.relationship);
                     closeBottomSheet();
+                    setRecallSuccessModalVisible(true);
+                    setTimeout(() => setRecallSuccessModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setRecallFailedModalVisible(true);
+                    setTimeout(() => setRecallFailedModalVisible(false), 2000);
                     console.log('Error2 callSetRelationNguoiLa:', error);
-                    setDialogreload(true);
                 });
         } catch (error) {
+            setRecallFailedModalVisible(true);
+            setTimeout(() => setRecallFailedModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -697,6 +726,11 @@ const Profile = props => {
         }
         return (
             <View style={ProfileS.container1}>
+                <SendRequestFriendModal visible={successModalVisible} message={'Lời mời đã được gửi'}/>
+                <FailedRequestFriendModal visible={failedModalVisible} message={'Đã hủy lời mời kết bạn'}/>
+                <RecallSuccessFriendRequestModal visible={recallSuccessModalVisible} message={'Đã hủy lời mời kết bạn'}/>
+                <RecallFailedFriendRequestModal visible={recallFailedModalVisible} message={'Đã hủy lời mời kết bạn'}/>
+                <AcceptFriendRequestModal visible={acceptFriendRequestModalVisible} message={'Đã chấp nhận lời mời kết bạn'}/>
                 <View style={ProfileS.boxHeader}>
                     <Snackbar
                         visible={dialogReLoad}

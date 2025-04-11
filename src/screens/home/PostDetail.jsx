@@ -35,6 +35,7 @@ import LoadingTron from '../../utils/animation/loadingTron/LoadingTron';
 import { set } from '@react-native-firebase/database';
 import { oStackHome, oTab } from '../../navigations/HomeNavigation';
 const { width, height } = Dimensions.get('window');
+import NoAccessModal from '../../utils/animation/no_access/NoAccessModal';
 const PostDetail = (props) => {
   const { navigation } = props
   const route = useRoute();
@@ -91,10 +92,12 @@ const PostDetail = (props) => {
 
   //có quyền xem bài post hay ko
   const [isPermission, setIsPermission] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   //call api chi tiet bai post
   const callGetChiTietPost = async (ID_post) => {
     try {
+      setIsLoading(true);
       //console.log("ID_post:", ID_post);
       await dispatch(getChiTietPost({ ID_post, ID_user: me._id, token }))
         .unwrap()
@@ -113,6 +116,9 @@ const PostDetail = (props) => {
         });
     } catch (error) {
       console.log('Lỗi khi lấy chi tiết bài viết:', error);
+    }
+    finally {
+      setIsLoading(false);
     }
   };
 
@@ -751,11 +757,14 @@ const PostDetail = (props) => {
   ), []);
 
   const header = () => {
-    if (!post && isPermission) {
-      return <LoadingTron />
+    if (isLoading) {
+      return <LoadingTron />;
     }
     if (!isPermission) {
-      return <Text style={{ color: "black" }}>Bạn không có quyền truy cập bài viết!</Text>
+      return <NoAccessModal message="Bạn không có quyền xem bài viết này." />;
+    }
+    if (!post) {
+      return null;
     }
     return (
       <View style={styles.postContainer}>

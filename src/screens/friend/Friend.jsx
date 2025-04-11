@@ -8,8 +8,6 @@ import {
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import ItemFriend from '../../components/items/ItemFriend';
-import ItemNewFriend from '../../components/items/ItemNewFriend';
 import styles from '../../styles/screens/friend/FriendNoti';
 import FriendRequestItem from '../../components/items/FriendRequestItem';
 import { oStackHome } from '../../navigations/HomeNavigation';
@@ -17,44 +15,32 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getAllLoiMoiKetBan,
   chapNhanLoiMoiKetBan,
-  setRelationNguoiLa,
+  huyLoiMoiKetBan,
 } from '../../rtk/API';
-import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
+import { Snackbar } from 'react-native-paper';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
+import { useFocusEffect } from '@react-navigation/native'; // Thêm import này
 
-const Friend = props => {
-  const { route, navigation } = props;
+const Friend = ({ route, navigation }) => {
   const { params } = route;
-
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
 
   const [relationships, setRelationships] = useState([]);
-  // dialog reLoad
   const [dialogReLoad, setDialogreload] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [failedModalVisible, setFailedModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    // Call API khi lần đầu vào trang
-    callGetAllLoiMoiKetBan();
-
-    // Thêm listener để gọi lại API khi quay lại trang
-    const focusListener = navigation.addListener('focus', () => {
-      callGetAllLoiMoiKetBan();
-    });
-
-    // Cleanup listener khi component bị unmount
-    return () => {
-      focusListener();
-    };
-  }, [navigation]);
-
-  //getAllLoiMoiKetBan
   const callGetAllLoiMoiKetBan = async () => {
     try {
-      await dispatch(getAllLoiMoiKetBan({ me: me._id, token: token }))
+      setRefreshing(true);
+      await dispatch(getAllLoiMoiKetBan({ me: me._id, token }))
         .unwrap()
         .then(response => {
-          //console.log(response);
           setRelationships(response.relationships);
           console.log(response.relationships);
         })
@@ -63,53 +49,76 @@ const Friend = props => {
         });
     } catch (error) {
       console.log(error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
-  //chapNhanLoiMoiKetBan
+  // Sử dụng useFocusEffect để gọi API khi màn hình được focus
+  useFocusEffect(
+    React.useCallback(() => {
+      callGetAllLoiMoiKetBan();
+      // Cleanup (nếu cần) khi màn hình mất focus
+      return () => {
+        // Có thể thêm logic cleanup nếu cần
+      };
+    }, [me._id, token]) // Dependency để đảm bảo gọi lại nếu me._id hoặc token thay đổi
+  );
+
   const callChapNhanLoiMoiKetBan = async ID_relationship => {
     try {
-      const paramsAPI = {
-        ID_relationship: ID_relationship,
-      };
+      const paramsAPI = { ID_relationship };
       await dispatch(chapNhanLoiMoiKetBan(paramsAPI))
         .unwrap()
         .then(response => {
           console.log(response?.message);
           callGetAllLoiMoiKetBan();
+          setModalMessage('Đã chấp nhận lời mời kết bạn!');
+          setSuccessModalVisible(true);
+          setTimeout(() => setSuccessModalVisible(false), 2000);
         })
         .catch(error => {
           console.log('Error2 callChapNhanLoiMoiKetBan:', error);
-          setDialogreload(true);
+          setModalMessage('Chấp nhận lời mời thất bại!');
+          setFailedModalVisible(true);
+          setTimeout(() => setFailedModalVisible(false), 2000);
         });
     } catch (error) {
       console.log(error);
+      setModalMessage('Có lỗi xảy ra. Vui lòng thử lại!');
+      setFailedModalVisible(true);
+      setTimeout(() => setFailedModalVisible(false), 2000);
     }
   };
 
-  //huyLoiMoiKetBan
-  const callSetRelationNguoiLa = async ID_relationship => {
+  const callHuyLoiMoiKetBan = async ID_relationship => {
     try {
-      const paramsAPI = {
-        ID_relationship: ID_relationship,
-      };
-      await dispatch(setRelationNguoiLa(paramsAPI))
+      const paramsAPI = { ID_relationship };
+      await dispatch(huyLoiMoiKetBan(paramsAPI))
         .unwrap()
         .then(response => {
           console.log(response?.message);
           callGetAllLoiMoiKetBan();
+          setModalMessage('Đã xóa lời mời kết bạn!');
+          setSuccessModalVisible(true);
+          setTimeout(() => setSuccessModalVisible(false), 2000);
         })
         .catch(error => {
-          console.log('Error2 callSetRelationNguoiLa:', error);
-          setDialogreload(true);
+          console.log('Error2 callHuyLoiMoiKetBan:', error);
+          setModalMessage('Xóa lời mời thất bại!');
+          setFailedModalVisible(true);
+          setTimeout(() => setFailedModalVisible(false), 2000);
         });
     } catch (error) {
       console.log(error);
+      setModalMessage('Có lỗi xảy ra. Vui lòng thử lại!');
+      setFailedModalVisible(true);
+      setTimeout(() => setFailedModalVisible(false), 2000);
     }
   };
-  //chuyển trang profile
-  const onProfile = (item) => {
-    if (item.ID_userA._id == me._id) {
+
+  const onProfile = item => {
+    if (item.ID_userA._id === me._id) {
       navigation.navigate('TabHome', {
         screen: 'Profile',
         params: { _id: item.ID_userB._id },
@@ -120,11 +129,14 @@ const Friend = props => {
         params: { _id: item.ID_userA._id },
       });
     }
-
   };
+
+  const onRefresh = () => {
+    callGetAllLoiMoiKetBan();
+  };
+
   return (
     <View style={styles.container}>
-      {/* Hiển thị Snackbar dưới cùng màn hình */}
       <Snackbar
         visible={dialogReLoad}
         onDismiss={() => {
@@ -132,163 +144,51 @@ const Friend = props => {
           setDialogreload(false);
         }}
         duration={1000}>
-        làm mới!
+        Làm mới!
       </Snackbar>
       <View style={styles.HeaderWrap}>
-        <Text style={[styles.title, { color: 'black' }]}> Bạn bè</Text>
-
-        <TouchableOpacity
-          onPress={() => navigation.navigate(oStackHome.Search.name)}
-        >
-          <Icon
-            style={styles.findButton}
-            name="search"
-            size={25}
-            color={'black'}
-          />
+        <Text style={[styles.title, { color: 'black' }]}>Bạn bè</Text>
+        <TouchableOpacity onPress={() => navigation.navigate(oStackHome.Search.name)}>
+          <Icon style={styles.findButton} name="search" size={25} color={'black'} />
         </TouchableOpacity>
-
       </View>
       <View style={styles.goiYWrap}>
-        <TouchableOpacity onPress={() => navigation.navigate('ListGoiY', { _id: me._id })}
-        >
-          <Text
-            style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
-            {' '}
+        <TouchableOpacity onPress={() => navigation.navigate('ListGoiY', { _id: me._id })}>
+          <Text style={[styles.goiY, { color: 'black', backgroundColor: '#e2e5ec' }]}>
             Gợi ý
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('ListFriend', { _id: me._id })}>
-          <Text
-            style={[styles.goiY, { color: 'black' }, { backgroundColor: '#e2e5ec' }]}>
-            {' '}
+          <Text style={[styles.goiY, { color: 'black', backgroundColor: '#e2e5ec' }]}>
             Bạn bè
           </Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.titleWrap}>
-        <Text style={[styles.title2, { color: 'black' }]}> Lời mời kết bạn</Text>
+        <Text style={[styles.title2, { color: 'black' }]}>Lời mời kết bạn</Text>
       </View>
+      <FlatList
+        data={relationships}
+        keyExtractor={item => item._id}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => onProfile(item)}>
+            <FriendRequestItem
+              data={item}
+              me={me._id}
+              onXacNhan={callChapNhanLoiMoiKetBan}
+              onXoa={callHuyLoiMoiKetBan}
+            />
+          </TouchableOpacity>
+        )}
+        showsVerticalScrollIndicator={false}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
 
-      {/* ALl Lời mời kết bạn */}
-      <View>
-        <FlatList
-          data={relationships}
-          keyExtractor={item => item._id}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => { onProfile(item) }}>
-              <FriendRequestItem
-                data={item}
-                me={me._id}
-                onXacNhan={callChapNhanLoiMoiKetBan}
-                onXoa={callSetRelationNguoiLa}
-              />
-            </TouchableOpacity>
-
-          )}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-    </View >
+      <SuccessModal visible={successModalVisible} message={modalMessage} />
+      <FailedModal visible={failedModalVisible} message={modalMessage} />
+    </View>
   );
 };
 
 export default Friend;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     flexDirection: 'column',
-//     paddingHorizontal: 20,
-//     marginTop: 20,
-//     backgroundColor: 'white',
-//   },
-//   title: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//   },
-//   text_titel: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     color: 'black',
-//   },
-//   text_menu: {
-//     fontSize: 16,
-//     fontWeight: '600',
-//     color: 'black',
-//   },
-//   button_menu: {
-//     borderColor: '#9C9C9C',
-//     borderWidth: 1,
-//     borderRadius: 28,
-//     width: 75,
-//     height: 42,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     marginRight: 11,
-//   },
-//   container_menu: {
-//     marginTop: 16,
-//     flexDirection: 'row',
-//   },
-//   search: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     borderWidth: 1,
-//     borderRadius: 28,
-//     borderColor: '#9C9C9C',
-//     paddingHorizontal: 10,
-//     marginTop: 13,
-//   },
-//   list_friend: {
-//     marginTop: 16,
-//   },
-//   all_friend: {
-//     width: '100%',
-//     backgroundColor: '#A6A6A6',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     borderRadius: 10,
-//     height: 34,
-//   },
-//   text_all_friend: {
-//     fontSize: 14,
-//     color: 'white',
-//     fontWeight: '600',
-//   },
-//   text_tile_newFriend: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     color: 'black',
-//     marginVertical: 20,
-//   },
-// });
-
-const data = [
-  {
-    id: 1,
-    name: 'Jonathan',
-    img: 'https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 2,
-    name: 'Jonathan',
-    img: 'https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 3,
-    name: 'Jonathan',
-    img: 'https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 4,
-    name: 'Jonathan',
-    img: 'https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-  {
-    id: 5,
-    name: 'Jonathan',
-    img: 'https://plus.unsplash.com/premium_photo-1671656349322-41de944d259b?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
-];

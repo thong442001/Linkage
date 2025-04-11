@@ -1,7 +1,6 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { TextInput } from 'react-native-gesture-handler';
 import ItemListFriend from '../../components/items/ItemListFriend';
 import { useDispatch, useSelector } from 'react-redux';
 import {
