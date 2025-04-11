@@ -15,6 +15,8 @@ import {
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
 import { useSocket } from '../../context/socketContext';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 const { width, height } = Dimensions.get('window');
 
 const CreateGroup = (props) => {// cần param
@@ -29,7 +31,8 @@ const CreateGroup = (props) => {// cần param
     const [nameGroup, setNameGroup] = useState(null);
     const [friends, setFriends] = useState(null);
     const [selectedUsers, setSelectedUsers] = useState([me._id]);// me phải trong nhóm 
-
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
     const toggleSelectUser = (id) => {
         setSelectedUsers((prev) =>
             prev.includes(id)
@@ -59,14 +62,17 @@ const CreateGroup = (props) => {// cần param
             await dispatch(getAllFriendOfID_user({ me: me._id, token: token }))
                 .unwrap()
                 .then((response) => {
+                   
                     //console.log(response.groups)
                     setFriends(response.relationships);
                 })
                 .catch((error) => {
+                  
                     console.log('Error1 getAllFriendOfID_user:', error);
                 });
 
         } catch (error) {
+         
             console.log(error)
         }
     }
@@ -81,6 +87,8 @@ const CreateGroup = (props) => {// cần param
             await dispatch(addGroup(paramsAPI))
                 .unwrap()
                 .then((response) => {
+                    setSuccessModalVisible(true);
+                    setTimeout(() => setSuccessModalVisible(false), 2000);
                     console.log("ID_group: " + response.group._id)
                     // Emit sự kiện "new_group" để cập nhật danh sách nhóm
                     socket.emit("new_group", { group: response.group, members: members });
@@ -90,10 +98,14 @@ const CreateGroup = (props) => {// cần param
                     navigation.navigate("Chat", { ID_group: response.group._id })
                 })
                 .catch((error) => {
+                    setFailedModalVisible(true);
+                    setTimeout(() => setFailedModalVisible(false), 2000);
                     console.log('Error1 addGroup:', error);
                 });
 
         } catch (error) {
+            setFailedModalVisible(true);
+            setTimeout(() => setFailedModalVisible(false), 2000);
             console.log(error)
         }
     }
@@ -109,6 +121,8 @@ const CreateGroup = (props) => {// cần param
 
     return (
         <View style={styles.containerAll}>
+            <SuccessModal visible={successModalVisible} message={'Tạo nhóm thành công'}/>
+            <FailedModal visible={failedModalVisible} message={'Tạo nhóm thất bại'}/>
             <View style={styles.headerContainer}>
                 <TouchableOpacity onPress={() => navigation.navigate("HomeChat")}>
                     <Text style={styles.cancelText}>Hủy</Text>

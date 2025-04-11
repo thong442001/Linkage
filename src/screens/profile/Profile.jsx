@@ -41,7 +41,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import FriendLoading from '../../utils/skeleton_loading/FriendLoading';
 import PostProfileLoading from '../../utils/skeleton_loading/PostProfileLoading';
 import EditBioModal from '../../components/dialog/EditBioModal';
+import SendRequestFriendModal from '../../utils/animation/success/SuccessModal';
+import FailedRequestFriendModal from '../../utils/animation/failed/FailedModal';
+import RecallSuccessFriendRequestModal from '../../utils/animation/success/SuccessModal';
+import RecallFailedFriendRequestModal from '../../utils/animation/failed/FailedModal';
+import AcceptFriendRequestModal from '../../utils/animation/success/SuccessModal';
+import CancelFriendRequestModal from '../../utils/animation/failed/FailedModal';
 
+import { set } from '@react-native-firebase/database';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -68,6 +75,13 @@ const Profile = props => {
     const [isLoading, setisLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false)
 
+    //state quản lý thông báo gửi lời mời kết bạn, hủy lời mời, phản hồi lời mời 
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
+    const [recallSuccessModalVisible, setRecallSuccessModalVisible] = useState(false);
+    const [recallFailedModalVisible, setRecallFailedModalVisible] = useState(false);
+    const [acceptFriendRequestModalVisible, setAcceptFriendRequestModalVisible] = useState(false);
+    const [cancelFriendRequestModalVisible, setCancelFriendRequestModalVisible] = useState(false);
     // Animated value for scroll handling
     const scrollY = useRef(new Animated.Value(0)).current;
     const previousScrollY = useRef(0);
@@ -143,7 +157,7 @@ const Profile = props => {
     };
 
     const openBottomSheetPhanHoi = () => {
-        openBottomSheet(25, detail_selection_phan_hoi());
+        openBottomSheet(30, detail_selection_phan_hoi());
     };
 
     const uploadFile = async file => {
@@ -186,7 +200,7 @@ const Profile = props => {
         try {
             setisLoading(true);
             closeBottomSheet();
-            const options = { mediaType: 'photo', quality: 1 ,includeBase64: false, };
+            const options = { mediaType: 'photo', quality: 1, includeBase64: false, };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
@@ -243,75 +257,75 @@ const Profile = props => {
 
     const onOpenGalleryChangeBackground = async () => {
         try {
-          setisLoading(true);
-          closeBottomSheet();
-      
-          // Cấu hình chỉ cho phép chọn ảnh
-          const options = {
-            mediaType: 'photo', // Chỉ chọn ảnh, không phải video
-            quality: 1, // Chất lượng ảnh cao nhất
-            includeBase64: false, // Không cần base64 để tối ưu
-          };
-      
-          launchImageLibrary(options, async response => {
-            if (response.didCancel) {
-              setisLoading(false);
-              console.log('Đã hủy chọn ảnh');
-              return;
-            }
-      
-            if (response.errorCode || response.errorMessage) {
-              setisLoading(false);
-              console.log('Lỗi khi mở thư viện:', response.errorCode, response.errorMessage);
-              return;
-            }
-      
-            const selectedFile = response.assets?.[0];
-            if (!selectedFile) {
-              setisLoading(false);
-              console.log('Không có ảnh nào được chọn!');
-              return;
-            }
-      
-            // Kiểm tra loại file để chắc chắn là ảnh
-            if (!selectedFile.type?.startsWith('image/')) {
-              setisLoading(false);
-              console.log('❌ File không phải ảnh:', selectedFile.type);
-              return;
-            }
-      
-            console.log('📂 File ảnh đã chọn:', selectedFile.uri);
-      
-            const fileUrl = await uploadFile(selectedFile);
-            if (!fileUrl) {
-              setisLoading(false);
-              console.log('❌ Upload ảnh thất bại!');
-              return;
-            }
-      
-            const data = { ID_user: me._id, background: fileUrl };
-            dispatch(editBackgroundOfUser(data))
-              .unwrap()
-              .then(res => {
-                console.log('🔥 Cập nhật background response:', res);
-                if (res.status) {
-                  dispatch(changeBackground(fileUrl));
-                  console.log('✅ Đổi background thành công');
-                } else {
-                  console.log('❌ Đổi background thất bại');
+            setisLoading(true);
+            closeBottomSheet();
+
+            // Cấu hình chỉ cho phép chọn ảnh
+            const options = {
+                mediaType: 'photo', // Chỉ chọn ảnh, không phải video
+                quality: 1, // Chất lượng ảnh cao nhất
+                includeBase64: false, // Không cần base64 để tối ưu
+            };
+
+            launchImageLibrary(options, async response => {
+                if (response.didCancel) {
+                    setisLoading(false);
+                    console.log('Đã hủy chọn ảnh');
+                    return;
                 }
-                setisLoading(false);
-              })
-              .catch(err => {
-                setisLoading(false);
-                console.log('❌ Lỗi khi gửi API đổi background:', err);
-              });
-          });
+
+                if (response.errorCode || response.errorMessage) {
+                    setisLoading(false);
+                    console.log('Lỗi khi mở thư viện:', response.errorCode, response.errorMessage);
+                    return;
+                }
+
+                const selectedFile = response.assets?.[0];
+                if (!selectedFile) {
+                    setisLoading(false);
+                    console.log('Không có ảnh nào được chọn!');
+                    return;
+                }
+
+                // Kiểm tra loại file để chắc chắn là ảnh
+                if (!selectedFile.type?.startsWith('image/')) {
+                    setisLoading(false);
+                    console.log('❌ File không phải ảnh:', selectedFile.type);
+                    return;
+                }
+
+                console.log('📂 File ảnh đã chọn:', selectedFile.uri);
+
+                const fileUrl = await uploadFile(selectedFile);
+                if (!fileUrl) {
+                    setisLoading(false);
+                    console.log('❌ Upload ảnh thất bại!');
+                    return;
+                }
+
+                const data = { ID_user: me._id, background: fileUrl };
+                dispatch(editBackgroundOfUser(data))
+                    .unwrap()
+                    .then(res => {
+                        console.log('🔥 Cập nhật background response:', res);
+                        if (res.status) {
+                            dispatch(changeBackground(fileUrl));
+                            console.log('✅ Đổi background thành công');
+                        } else {
+                            console.log('❌ Đổi background thất bại');
+                        }
+                        setisLoading(false);
+                    })
+                    .catch(err => {
+                        setisLoading(false);
+                        console.log('❌ Lỗi khi gửi API đổi background:', err);
+                    });
+            });
         } catch (error) {
-          setisLoading(false);
-          console.log('Lỗi onOpenGallery:', error);
+            setisLoading(false);
+            console.log('Lỗi onOpenGallery:', error);
         }
-      };
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -543,12 +557,20 @@ const Profile = props => {
                 .then(async (response) => {
                     console.log(response);
                     setRelationship(response.relationship);
+                    setSuccessModalVisible(true);
+                    setTimeout(() => setSuccessModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setFailedModalVisible(true);
+                    setTimeout(() => {
+                        setFailedModalVisible(false)
+                        callAllProfile()
+                    }, 2000);
                     console.log('❌ Lỗi khi gửi lời mời:', error);
-                    setDialogreload(true);
                 });
         } catch (error) {
+            setFailedModalVisible(true);
+            setTimeout(() => setFailedModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -563,12 +585,19 @@ const Profile = props => {
                 .then(response => {
                     setRelationship(response.relationship);
                     closeBottomSheet();
+                    setAcceptFriendRequestModalVisible(true);
+                    setTimeout(() => setAcceptFriendRequestModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setCancelFriendRequestModalVisible(true);
+                    setTimeout(() => setCancelFriendRequestModalVisible(false), 2000);
                     console.log('Error2 callChapNhanLoiMoiKetBan:', error);
-                    setDialogreload(true);
+                    closeBottomSheet();
+                    callAllProfile()
                 });
         } catch (error) {
+            setAcceptFriendRequestModalVisible(true);
+            setTimeout(() => setAcceptFriendRequestModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -583,12 +612,19 @@ const Profile = props => {
                 .then(response => {
                     setRelationship(response.relationship);
                     closeBottomSheet();
+                    setRecallSuccessModalVisible(true);
+                    setTimeout(() => setRecallSuccessModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setRecallFailedModalVisible(true);
+                    setTimeout(() => setRecallFailedModalVisible(false), 2000);
                     console.log('Error2 callSetRelationNguoiLa:', error);
-                    setDialogreload(true);
+                    closeBottomSheet();
+                    callAllProfile()
                 });
         } catch (error) {
+            setRecallFailedModalVisible(true);
+            setTimeout(() => setRecallFailedModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -601,12 +637,18 @@ const Profile = props => {
             await dispatch(huyBanBe(paramsAPI))
                 .unwrap()
                 .then(response => {
+                    setRelationship(response.relationship);
                     closeBottomSheet();
+                    setRecallSuccessModalVisible(true);
+                    setTimeout(() => setRecallSuccessModalVisible(false), 2000);
                     callAllProfile();
                 })
                 .catch(error => {
-                    console.log('Error2 huyBanBe:', error);
-                    setDialogreload(true);
+                    setRecallFailedModalVisible(true);
+                    setTimeout(() => setRecallFailedModalVisible(false), 2000);
+                    console.log('Error2 callSetRelationNguoiLa:', error);
+                    closeBottomSheet();
+                    callAllProfile()
                 });
         } catch (error) {
             console.log(error);
@@ -732,15 +774,20 @@ const Profile = props => {
         }
         return (
             <View style={ProfileS.container1}>
+                <SendRequestFriendModal visible={successModalVisible} message={'Lời mời đã được gửi'} />
+                <FailedRequestFriendModal visible={failedModalVisible} message={'Đã hủy lời mời kết bạn'} />
+                <RecallSuccessFriendRequestModal visible={recallSuccessModalVisible} message={'Đã hủy lời mời kết bạn'} />
+                <RecallFailedFriendRequestModal visible={recallFailedModalVisible} message={'Đã hủy lời mời kết bạn'} />
+                <AcceptFriendRequestModal visible={acceptFriendRequestModalVisible} message={'Đã chấp nhận lời mời kết bạn'} />
                 <View style={ProfileS.boxHeader}>
-                    <Snackbar
+                    {/* <Snackbar
                         visible={dialogReLoad}
                         onDismiss={() => {
                             setDialogreload(false);
                         }}
                         duration={1000}>
                         làm mới!
-                    </Snackbar>
+                    </Snackbar> */}
                     <View>
                         <View>
                             <View>

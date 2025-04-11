@@ -1,88 +1,71 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { TextInput } from 'react-native-gesture-handler';
-import ItemListGoiY from '../../components/items/ItemListGoiY';
+import FriendGoiYLoading from '../../utils/skeleton_loading/FriendGoiYLoading';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  getGoiYBanBe,
-  getRelationshipAvsB,
-  guiLoiMoiKetBan,
-} from '../../rtk/API';
+import { getGoiYBanBe, getRelationshipAvsB, guiLoiMoiKetBan } from '../../rtk/API';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
+import ItemListGoiY from '../../components/items/ItemListGoiY';
+
 const { width, height } = Dimensions.get('window');
-const ListGoiY = (props) => {
-  const { navigation, route } = props;
+
+const ListGoiY = ({ navigation, route }) => {
   const { params } = route;
   const [listGoiY, setListGoiY] = useState([]);
   const dispatch = useDispatch();
   const token = useSelector(state => state.app.token);
+  const [loading, setLoading] = useState(false);
   const me = useSelector(state => state.app.user);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [failedModalVisible, setFailedModalVisible] = useState(false);
 
   useEffect(() => {
     callGetAllFriendOfID_user();
-  }, [])
+  }, []);
 
-  //call api getAllFriendOfID_user
   const callGetAllFriendOfID_user = async () => {
     try {
-
-      await dispatch(getGoiYBanBe({ me: params._id, token: token }))
+      setLoading(true);
+      await dispatch(getGoiYBanBe({ me: params._id, token }))
         .unwrap()
-        .then((response) => {
-          //console.log(response.groups)
+        .then(response => {
           setListGoiY(response.data);
         })
-        .catch((error) => {
-          console.log('Error1 getAllFriendOfID_user:', error);
-        });
-
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const callGetRelationshipAvsB = async (ID_user) => {
-    try {
-      const paramsAPI = {
-        ID_user: ID_user,
-        me: me._id,
-      };
-
-      await dispatch(getRelationshipAvsB(paramsAPI))
-        .unwrap()
-        .then(async (response) => {
-          //console.log(response.relationship);
-          callGuiLoiMoiKetBan(response.relationship._id, ID_user)
-        })
         .catch(error => {
-          console.log('❌ Lỗi khi callGetRelationshipAvsB:', error);
-          // setDialogreload(true);
+          console.log('Error1 getAllFriendOfID_user:', error);
         });
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const callGuiLoiMoiKetBan = async (ID_relationship, ID_user) => {
-    try {
-      const paramsAPI = {
-        ID_relationship: ID_relationship,
-        me: me._id,
-      };
+  const handleThemBanBe = async (ID_user) => {
+    // Optimistic update: Ẩn user khỏi danh sách ngay lập tức
+    const userToRemove = listGoiY.find(item => item.user._id === ID_user);
+    setListGoiY(prev => prev.filter(item => item.user._id !== ID_user));
 
-      await dispatch(guiLoiMoiKetBan(paramsAPI))
-        .unwrap()
-        .then(async (response) => {
-          console.log(response);
-          // setRelationship(response.relationship);
-          setListGoiY(prevPosts => prevPosts.filter(item => item.user._id !== ID_user));
-        })
-        .catch(error => {
-          console.log('❌ Lỗi khi callGuiLoiMoiKetBan:', error);
-          // setDialogreload(true);
-        });
+    try {
+      // Gọi hai API tuần tự (vì guiLoiMoiKetBan cần ID_relationship)
+      const relationshipResponse = await dispatch(getRelationshipAvsB({ ID_user, me: me._id })).unwrap();
+      const ID_relationship = relationshipResponse.relationship._id;
+      await dispatch(guiLoiMoiKetBan({ ID_relationship, me: me._id })).unwrap();
+      
+      console.log('Gửi lời mời kết bạn thành công:', ID_user);
+      // Hiển thị modal thành công
+      setSuccessModalVisible(true);
+      setTimeout(() => setSuccessModalVisible(false), 2000); // Ẩn sau 2 giây
     } catch (error) {
-      console.log(error);
+      // Nếu lỗi, thêm lại user vào danh sách
+      console.log('❌ Lỗi khi gửi lời mời kết bạn:', error);
+      setListGoiY(prev =>
+        [...prev, userToRemove].sort((a, b) => a.user._id.localeCompare(b.user._id))
+      );
+      // Hiển thị modal thất bại
+      setFailedModalVisible(true);
+      setTimeout(() => setFailedModalVisible(false), 2000); // Ẩn sau 2 giây
     }
   };
 
@@ -94,38 +77,31 @@ const ListGoiY = (props) => {
         </TouchableOpacity>
         <Text style={styles.TextHeader}>Gợi ý</Text>
         <View></View>
-        {/* <Icon name="add" size={25} color={'black'} /> */}
       </View>
-      {/* <View style={styles.containerInput}>
-        <Icon name="search" size={25} color={'black'} />
-        <TextInput
-          placeholder="Tìm kiếm bạn bè"
-        />
-      </View> */}
-      {/* <Text style={styles.title}>Bạn bè</Text> */}
-      {/* <Text>{friends.length} người bạn</Text> */}
-      <View>
-        <View
-          style={{ paddingBottom: width * 0.1 }}
-        >
+      {loading ? (
+        <FriendGoiYLoading />
+      ) : (
+        <View style={{ paddingBottom: width * 0.1 }}>
           <FlatList
             data={listGoiY}
-            renderItem={({ item }) =>
+            renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => navigation.navigate('Profile', { _id: item.user._id })}
               >
                 <ItemListGoiY
                   item={item}
                   _id={params._id}
-                  onThemBanBe={callGetRelationshipAvsB}
+                  onThemBanBe={handleThemBanBe}
                 />
               </TouchableOpacity>
-            }
-            keyExtractor={(item) => item.userId}
+            )}
+            keyExtractor={item => item.user._id}
           />
         </View>
-
-      </View>
+      )}
+      {/* Modal thông báo */}
+      <SuccessModal visible={successModalVisible} message="Gửi lời mời kết bạn thành công!" />
+      <FailedModal visible={failedModalVisible} message="Gửi lời mời thất bại. Vui lòng thử lại!" />
     </View>
   );
 };
@@ -148,18 +124,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
   },
-  containerInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    borderRadius: 28,
-    borderColor: '#D6D6D6',
-    marginVertical: 10,
-  },
-  title: {
-    fontSize: 16,
-    color: 'black',
-    fontWeight: 'medium',
-  }
 });

@@ -34,7 +34,6 @@ const Home = props => {
 
   const previousScrollY = useRef(0);
 
-
   // Animated value
   const scrollY = useRef(new Animated.Value(0)).current;
   const clampedScrollY = Animated.diffClamp(scrollY, 0, HEADER_HEIGHT);
@@ -44,13 +43,14 @@ const Home = props => {
     extrapolate: 'clamp',
   });
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 60000); // Cập nhật mỗi phút
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setCurrentTime(Date.now());
+  //   }, 60000); // Cập nhật mỗi phút
 
-    return () => clearInterval(timer);
-  }, [refreshing]); // Thêm refreshing vào dependencies
+  //   return () => clearInterval(timer);
+  // }, [refreshing]); // Thêm refreshing vào dependencies
+
   useEffect(() => {
     const listenerId = scrollY.addListener(({ value }) => { });
     return () => {
