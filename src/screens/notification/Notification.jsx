@@ -54,7 +54,10 @@ const Notification = (props) => {
       <View style={styles.categoryContainer}>
         <FlatList
           data={isExpanded ? notifications : notifications.slice(0, 7)} // 👈 Toggle số lượng hiển thị
-          renderItem={({item}) => <ItemNotification data={item} />}
+          renderItem={({item}) => 
+            <TouchableOpacity>
+              <ItemNotification data={item} />
+            </TouchableOpacity>}
           keyExtractor={(item, index) => index.toString()}
           scrollEnabled={false}
         />
