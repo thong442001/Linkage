@@ -11,6 +11,7 @@ import {
   Clipboard, //copy
   FlatList,
   ImageBackground,
+  Linking,// link
 } from 'react-native';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import { useSelector } from 'react-redux';
@@ -149,12 +150,17 @@ export default function MessageComponent({
       hour12: false, // Hiển thị 24h (Bỏ dòng này nếu muốn 12h)
     });
   };
-
   const handleLongPress = () => {
-    if (messageRef.current) {
+    if (messageRef.current && message._destroy !== true) {
       messageRef.current.measure((x, y, width, height, pageX, pageY) => {
+        const windowHeight = Dimensions.get('window').height;
+        const halfScreen = windowHeight / 2; // Ranh giới giữa nửa trên và nửa dưới
+  
+        // Kiểm tra vị trí Y của tin nhắn
+        const menuTop = pageY > halfScreen ? pageY - 200 : pageY - 63;
+  
         setMenuPosition({
-          top: pageY - 57,
+          top: menuTop,
           left: pageX,
           right: pageX,
         });
@@ -162,7 +168,6 @@ export default function MessageComponent({
       });
     }
   };
-
   // Hàm copy tin nhắn
   const copyToClipboard = text => {
     Clipboard.setString(text);
@@ -188,6 +193,18 @@ export default function MessageComponent({
   const isGoogleMapsLink = text => {
     return /^https:\/\/www\.google\.com\/maps\?q=/.test(text);
   };
+
+  //check nó là link 
+  const isLink = (text) => {
+    // Loại bỏ khoảng trắng đầu cuối
+    const trimmedText = text.trim();
+
+    // Biểu thức chính quy cho URL, hỗ trợ query string lồng nhau
+    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=:+]*)*$|^[\w-]+:\/\/[\w-./?%&=:+]*$/i;
+
+    return urlPattern.test(trimmedText);
+  };
+
   const handlePressLocation = text => {
     const query = text.split('q=')[1];
     const [lat, lng] = query.split(',').map(Number);
@@ -196,6 +213,26 @@ export default function MessageComponent({
       externalLocation: { latitude: lat, longitude: lng },
     });
   };
+//tách link và non link
+const renderStyledMessage = (text) => {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g); // Tách link và non-link
+
+  return parts.map((part, index) => {
+    if (isLink(part)) {
+      return (
+        <Text
+          key={index}
+          style={[styles.linkStyle, isCurrentUser && styles.currentUserTextLink]}
+          onPress={() => Linking.openURL(part)}>
+          {part}
+        </Text>
+      );
+    }
+    return <Text key={index}>{part}</Text>;
+  });
+};
+
+
   return (
     <View>
       {message.type == 'game3la' ? (
@@ -322,13 +359,28 @@ export default function MessageComponent({
                         </TouchableOpacity>
                       </View>
                     ) : (
-                      <Text
-                        style={[
-                          styles.messageText,
-                          isCurrentUser && styles.currentUserText,
-                        ]}>
-                        {message.content}
-                      </Text>
+                      (isLink(message.content)
+                        ? (
+                          <Text
+                            onPress={() => Linking.openURL(message.content)}
+                            style={[
+                              styles.messageTextIsLink,
+                              isCurrentUser && styles.currentUserTextLink,
+                            ]}>
+                            {message.content}
+                          </Text>
+                        ) : (
+                          <Text
+                            style={
+                              [
+                                styles.messageText,
+                                isCurrentUser && styles.currentUserText,
+                              ]
+                            }>
+                            {renderStyledMessage(message.content)}
+                          </Text>
+                        )
+                      )
                     )
                   ) : message.type == 'image' ? (
                     <Image
@@ -455,7 +507,7 @@ export default function MessageComponent({
                             styles.messageText,
                             isCurrentUser && styles.currentUserText,
                           ]}>
-                          {message.content}
+                          {renderStyledMessage(message.content)}
                         </Text>
                       ) : message.type == 'image' ? (
                         <Image
@@ -517,9 +569,10 @@ export default function MessageComponent({
               </View>
             </TouchableWithoutFeedback>
           </Modal>
-        </View>
-      )}
-    </View>
+        </View >
+      )
+      }
+    </View >
   );
 }
 
@@ -613,7 +666,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d9d9d9', // Màu tin nhắn của người khác
   },
   currentUserMessage: {
-    backgroundColor: '#3A6DF0', // Màu tin nhắn của người dùng hiện tại
+    backgroundColor: '#D7E9FF', // Màu tin nhắn của người dùng hiện tại
   },
   username: {
     fontSize: 12,
@@ -625,16 +678,27 @@ const styles = StyleSheet.create({
     color: '#000000', // Màu chữ cho tin nhắn của người khác
     fontSize: 16,
   },
+  messageTextIsLink: {
+    color: '#4EA1FF', // Màu chữ cho tin nhắn của người khác
+    fontSize: 16,
+  },
+  linkStyle: {
+    color: '#4EA1FF', // Màu xanh cho link
+    textDecorationLine: 'underline', // Gạch chân để rõ ràng là link
+  },
   messageTextThuHoi: {
     color: 'grey',
     fontSize: 16,
   },
   currentUserText: {
-    color: '#fff', // Màu chữ trắng cho tin nhắn của bạn
+    color: '#000000', // Màu chữ trắng cho tin nhắn của bạn
+  },
+  currentUserTextLink: {
+    color: '#4EA1FF', // Màu chữ trắng cho tin nhắn của bạn
   },
   messageTime: {
     fontSize: 10,
-    color: '#aaa',
+    color: '#3B5268',
     marginVertical: 5,
     marginLeft: 5,
     alignSelf: 'flex-start',
