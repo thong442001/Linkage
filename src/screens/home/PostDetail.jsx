@@ -89,17 +89,24 @@ const PostDetail = (props) => {
   //loading
   const [isSending, setIsSending] = useState(false);
 
+  //có quyền xem bài post hay ko
+  const [isPermission, setIsPermission] = useState(true);
+
   //call api chi tiet bai post
   const callGetChiTietPost = async (ID_post) => {
     try {
       //console.log("ID_post:", ID_post);
-      await dispatch(getChiTietPost({ ID_post, token }))
+      await dispatch(getChiTietPost({ ID_post, ID_user: me._id, token }))
         .unwrap()
         .then((response) => {
-          setPost(response.post);
-          setComments(response.post.comments)
-          setReactionsOfPost(response.post.post_reactions)
-          setCountComments(response.post.countComments);
+          if (response.post) {
+            setPost(response.post);
+            setComments(response.post.comments)
+            setReactionsOfPost(response.post.post_reactions)
+            setCountComments(response.post.countComments);
+          } else {
+            setIsPermission(false)
+          }
         })
         .catch((error) => {
           console.log('API không trả về bài viết: ' + error.message);
@@ -744,8 +751,11 @@ const PostDetail = (props) => {
   ), []);
 
   const header = () => {
-    if (!post) {
+    if (!post && isPermission) {
       return <LoadingTron />
+    }
+    if (!isPermission) {
+      return <Text style={{ color: "black" }}>Bạn không có quyền truy cập bài viết!</Text>
     }
     return (
       <View style={styles.postContainer}>
@@ -1368,6 +1378,7 @@ const PostDetail = (props) => {
     );
   };
 
+  //comments
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <FlatList
@@ -1406,7 +1417,7 @@ const PostDetail = (props) => {
               </View>
               <TouchableOpacity
                 style={styles.replyRight}
-                onPress={() => {setReply(null), setIsReplying(false), setComment("")}}
+                onPress={() => { setReply(null), setIsReplying(false), setComment("") }}
               >
                 <Text style={styles.replyTitle}>Hủy</Text>
               </TouchableOpacity>

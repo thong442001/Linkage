@@ -11,6 +11,7 @@ import {
   Clipboard, //copy
   FlatList,
   ImageBackground,
+  Linking,// link
 } from 'react-native';
 import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import { useSelector } from 'react-redux';
@@ -188,6 +189,18 @@ export default function MessageComponent({
   const isGoogleMapsLink = text => {
     return /^https:\/\/www\.google\.com\/maps\?q=/.test(text);
   };
+
+  //check nó là link 
+  const isLink = (text) => {
+    // Loại bỏ khoảng trắng đầu cuối
+    const trimmedText = text.trim();
+
+    // Biểu thức chính quy cho URL, hỗ trợ query string lồng nhau
+    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=:+]*)*$|^[\w-]+:\/\/[\w-./?%&=:+]*$/i;
+
+    return urlPattern.test(trimmedText);
+  };
+
   const handlePressLocation = text => {
     const query = text.split('q=')[1];
     const [lat, lng] = query.split(',').map(Number);
@@ -322,13 +335,28 @@ export default function MessageComponent({
                         </TouchableOpacity>
                       </View>
                     ) : (
-                      <Text
-                        style={[
-                          styles.messageText,
-                          isCurrentUser && styles.currentUserText,
-                        ]}>
-                        {message.content}
-                      </Text>
+                      (isLink(message.content)
+                        ? (
+                          <Text
+                            onPress={() => Linking.openURL(message.content)}
+                            style={[
+                              styles.messageText,
+                              isCurrentUser && styles.currentUserText,
+                            ]}>
+                            {message.content}
+                          </Text>
+                        ) : (
+                          <Text
+                            style={
+                              [
+                                styles.messageText,
+                                isCurrentUser && styles.currentUserText,
+                              ]
+                            }>
+                            {message.content}
+                          </Text>
+                        )
+                      )
                     )
                   ) : message.type == 'image' ? (
                     <Image
@@ -517,9 +545,10 @@ export default function MessageComponent({
               </View>
             </TouchableWithoutFeedback>
           </Modal>
-        </View>
-      )}
-    </View>
+        </View >
+      )
+      }
+    </View >
   );
 }
 

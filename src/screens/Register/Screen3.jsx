@@ -115,7 +115,7 @@ const Screen3 = (props) => {
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => 
+            <Pressable onPress={() =>
                 navigation.navigate('Screen2', {
                     first_name: params.first_name,
                     last_name: params.last_name,
@@ -144,8 +144,8 @@ const Screen3 = (props) => {
 
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua email</Text>
 
-            <Pressable 
-                style={[styles.button, isLoading && styles.buttonDisabled]} 
+            <Pressable
+                style={[styles.button, isLoading && styles.buttonDisabled]}
                 onPress={handleTiep}
                 disabled={isLoading} // Vô hiệu hóa nút khi đang loading
             >

@@ -10,6 +10,7 @@ import {
     TouchableWithoutFeedback,
     TextInput,
     FlatList,
+    Clipboard, //copy
 } from 'react-native';
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -29,6 +30,8 @@ import {
     deletePost_reaction,//xóa post_reaction
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
+import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
+
 const PostItem = memo(({
     post,
     ID_user,
@@ -67,6 +70,7 @@ const PostItem = memo(({
 
     //share 
     const [captionShare, setCaptionShare] = useState('');
+    const [dialogCopyVisible, setDialogCopyVisible] = useState(false); // dialog copy
 
     // Cảnh
     // post_reactions: list của reaction của post
@@ -89,6 +93,12 @@ const PostItem = memo(({
             openBottomSheet(50, renderBottomSheetContent());
         }
     }, [selectedTab]);
+
+    // Hàm copy tin nhắn
+    const copyToClipboard = text => {
+        Clipboard.setString(text);
+        setDialogCopyVisible(true); // hiện dialog copy
+    };
 
     const renderBottomSheetContent = () => {
         return (
@@ -950,14 +960,22 @@ const PostItem = memo(({
                                         value={captionShare}
                                         onChangeText={setCaptionShare}
                                     />
+                                    {/* //deeplink */}
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            copyToClipboard(`https://linkage.id.vn/deeplink?url=linkage://post-chi-tiet?ID_post=${post._id.toString()}`); // copy
+                                        }}
+                                        style={{ padding: 10, backgroundColor: "grey", borderRadius: 10, alignItems: 'center', marginVertical: 10 }}>
+                                        <View >
+                                            <Text style={{ color: 'white' }}>Sao chép liên kết</Text>
+                                        </View>
+                                    </TouchableOpacity>
+
                                     <TouchableOpacity
                                         onPress={callAddPostShare}
                                         style={{ padding: 10, backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
                                         <View >
-
-
                                             <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
-
                                         </View>
                                     </TouchableOpacity>
                                 </View>
@@ -1029,6 +1047,13 @@ const PostItem = memo(({
                 </TouchableWithoutFeedback>
             </Modal>
 
+            {/* Hiển thị Snackbar dưới cùng màn hình */}
+            <Snackbar
+                visible={dialogCopyVisible}
+                onDismiss={() => setDialogCopyVisible(false)}
+                duration={1000}>
+                Đã sao chép tin nhắn!
+            </Snackbar>
 
             <SuccessModal
                 visible={successModalVisible}
