@@ -1,5 +1,5 @@
-import { Image, StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useState, useEffect } from 'react';
+import { Image, StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { joinGroupPrivate } from '../../rtk/API';
 
@@ -26,10 +26,7 @@ const ItemFriendHomeChat = ({ item, navigation, isOnline }) => {
 
   const getID_groupPrivate = async (user1, user2) => {
     try {
-      const paramsAPI = {
-        user1: user1,
-        user2: user2,
-      };
+      const paramsAPI = { user1, user2 };
       await dispatch(joinGroupPrivate(paramsAPI))
         .unwrap()
         .then(response => {
@@ -54,49 +51,56 @@ const ItemFriendHomeChat = ({ item, navigation, isOnline }) => {
   return (
     <TouchableOpacity onPress={onChat} style={styles.container}>
       <View style={styles.avatarContainer}>
-        {avatar && <Image style={styles.img} source={{ uri: avatar }} />}
-        {isOnline && <View style={styles.onlineIndicator} />}
+        {avatar ? (
+          <Image style={styles.img} source={{ uri: avatar }} />
+        ) : (
+          <View style={styles.placeholderAvatar} /> // Placeholder nếu avatar chưa sẵn sàng
+        )}
+        {isOnline && avatar && <View style={styles.onlineIndicator} />}
       </View>
-      <Text style={styles.text}>{lastName}</Text>
+      <Text style={styles.text}>{lastName || 'Đang tải...'}</Text>
     </TouchableOpacity>
   );
 };
 
-export default ItemFriendHomeChat;
-
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: height * 0.015, // 1.5% chiều cao màn hình
-
-    marginLeft :width * 0.03,
-    marginRight :width * 0.03, 
-    marginBottom :width * 0.03,
+    paddingVertical: height * 0.01,
+    marginHorizontal: width * 0.01,
   },
   avatarContainer: {
-    position: 'relative', // Để onlineIndicator có thể định vị tương đối với avatar
+    position: 'relative',
   },
   img: {
-    width: width * 0.15, // 15% chiều rộng màn hình
-    height: width * 0.15, // Đảm bảo avatar là hình tròn
-    borderRadius: width * 0.075, // Bán kính bằng 1/2 chiều rộng để tạo hình tròn
+    width: width * 0.15,
+    height: width * 0.15,
+    borderRadius: width * 0.075,
+  },
+  placeholderAvatar: {
+    width: width * 0.15,
+    height: width * 0.15,
+    borderRadius: width * 0.075,
+    backgroundColor: '#ddd',
   },
   text: {
-    fontSize: width * 0.035, // 3.5% chiều rộng màn hình
+    fontSize: width * 0.035,
     fontWeight: 'bold',
     color: 'black',
-    marginTop: height * 0.01, // 1% chiều cao màn hình
+    marginTop: height * 0.01,
     textAlign: 'center',
   },
   onlineIndicator: {
-    width: width * 0.05, // 5% chiều rộng màn hình
-    height: width * 0.05, // Đảm bảo hình tròn
-    backgroundColor: 'green', // Màu xanh lá giống Messenger
-    borderRadius: width * 0.025, // Bán kính bằng 1/2 chiều rộng để tạo hình tròn
+    width: width * 0.05,
+    height: width * 0.05,
+    backgroundColor: 'green',
+    borderRadius: width * 0.025,
     position: 'absolute',
-    bottom: 0, // Đặt ở dưới cùng của avatar
-    right: 0, // Đặt ở bên phải của avatar
+    bottom: 0,
+    right: 0,
     borderColor: '#e3e3e3',
-    borderWidth: width * 0.006, // Viền trắng, 0.8% chiều rộng màn hình
+    borderWidth: width * 0.006,
   },
 });
+
+export default ItemFriendHomeChat;

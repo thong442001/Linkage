@@ -101,6 +101,7 @@ const HostLive = (props) => {
           ...HOST_DEFAULT_CONFIG,
           onStartLiveButtonPressed: handleStartLive,
           onLeaveLiveStreaming: handleLeaveLive,
+          
         }}
       />
     </SafeAreaView>

@@ -18,6 +18,7 @@ const { height } = Dimensions.get('window');
 const HEADER_HEIGHT = height * 0.1;
 
 const Home = props => {
+
   const { navigation } = props;
   const route = useRoute(); // Thêm useRoute để nhận params
   const dispatch = useDispatch();
@@ -33,7 +34,6 @@ const Home = props => {
 
   const previousScrollY = useRef(0);
 
-
   // Animated value
   const scrollY = useRef(new Animated.Value(0)).current;
   const clampedScrollY = Animated.diffClamp(scrollY, 0, HEADER_HEIGHT);
@@ -43,13 +43,14 @@ const Home = props => {
     extrapolate: 'clamp',
   });
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 60000); // Cập nhật mỗi phút
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setCurrentTime(Date.now());
+  //   }, 60000); // Cập nhật mỗi phút
 
-    return () => clearInterval(timer);
-  }, [refreshing]); // Thêm refreshing vào dependencies
+  //   return () => clearInterval(timer);
+  // }, [refreshing]); // Thêm refreshing vào dependencies
+
   useEffect(() => {
     const listenerId = scrollY.addListener(({ value }) => { });
     return () => {
@@ -241,7 +242,12 @@ const Home = props => {
             keyExtractor={(item) => item._id}
             showsHorizontalScrollIndicator={false}
             ListHeaderComponent={
-              <HomeStories navigation={navigation} me={me} stories={stories} liveSessions={liveSessions} />
+              <HomeStories
+                navigation={navigation}
+                me={me}
+                stories={stories}
+                liveSessions={liveSessions}
+              />
             }
             showsVerticalScrollIndicator={false}
             extraData={currentTime}

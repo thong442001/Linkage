@@ -19,7 +19,7 @@ import ButtonCreateNewAccount from '../../components/button/ButtonCreateNewAccou
 import { CustomTextInputEmail, CustomTextInputPassword } from '../../components/textinputs/CustomTextInput';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Login = (props) => {
   const { navigation } = props;
@@ -186,9 +186,9 @@ const Login = (props) => {
             icon={
               <Pressable onPress={toggleShowPassword}>
                 <Icon
-                  name={showPassword ? 'eye-slash' : 'eye'}
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={25}
-                  color="black"
+                  color="gray"
                 />
               </Pressable>
             }

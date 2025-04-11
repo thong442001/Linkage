@@ -19,6 +19,8 @@ import { useNavigation } from '@react-navigation/native';
 import { navigate } from '../navigations/NavigationService';
 import { getNotificationPreference } from '../noti/notificationHelper';
 import { io } from 'socket.io-client';
+import { Linking } from 'react-native';
+import { parseQueryString } from '../utils/deeplink/queryParser';
 
 const AppNavigation = () => {
   const dispatch = useDispatch();
@@ -46,6 +48,87 @@ const AppNavigation = () => {
     return () => {
       clearTimeout(timeout);
     };
+  }, []);
+
+  // deeplink
+  useEffect(() => {
+    const handleDeepLink = async () => {
+      // const url = await Linking.getInitialURL();
+      // console.log("link1: " + url)
+      // if (url) {
+      //   const params = new URLSearchParams(url.split('?')[1]);
+      //   const ID_post = params.get('ID_post');
+      //   if (ID_post) {
+      //     console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
+      //   }
+      // }
+      try {
+        const url = await Linking.getInitialURL();
+        if (url) {
+          //console.log('🌐 Deeplink:', url);
+          // Parse deeplink: linkage://post-chi-tiet?ID_post=124
+          const [path, queryString] = url.split('?');
+          // share post
+          if (path.includes('post-chi-tiet')) {
+            const params = parseQueryString(queryString);
+            const ID_post = params.ID_post;
+            if (ID_post) {
+              //console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
+              // Navigate to PostScreen
+              navigation.navigate("PostDetail", { ID_post: ID_post, typeClick: "comment" });
+            } else {
+              console.error('❌ Thiếu ID_post trong deeplink');
+            }
+          }
+          // share profile
+          if (path.includes('profile')) {
+            const params = parseQueryString(queryString);
+            const ID_user = params.ID_user;
+            if (ID_user) {
+              //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
+              // Navigate to PostScreen
+              navigation.navigate("Profile", { _id: ID_user });
+            } else {
+              console.error('❌ Thiếu ID_post trong deeplink');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ Lỗi khi xử lý deeplink:', error);
+      }
+    };
+
+    handleDeepLink();
+    // Lắng nghe deeplink khi ứng dụng đang chạy
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      //console.log('🌐 Nhận deeplink:', url);
+      const [path, queryString] = url.split('?');
+      // share post
+      if (path.includes('post-chi-tiet')) {
+        const params = parseQueryString(queryString);
+        const ID_post = params.ID_post;
+        if (ID_post) {
+          //console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
+          navigation.navigate("PostDetail", { ID_post: ID_post, typeClick: "comment" });
+        } else {
+          console.error('❌ Thiếu ID_post trong deeplink');
+        }
+      }
+      // share profile
+      if (path.includes('profile')) {
+        const params = parseQueryString(queryString);
+        const ID_user = params.ID_user;
+        if (ID_user) {
+          //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
+          // Navigate to PostScreen
+          navigation.navigate("Profile", { _id: ID_user });
+        } else {
+          console.error('❌ Thiếu ID_post trong deeplink');
+        }
+      }
+    });
+    return () => subscription.remove();
+
   }, []);
 
 
@@ -403,7 +486,7 @@ const AppNavigation = () => {
       notification?.type === 'Mời chơi game 3 lá' &&
       notification?.ID_group
     ) {
-            const { members, isPrivate } = notification.ID_group;
+      const { members, isPrivate } = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
         return `${sender.first_name || ''} ${sender.last_name || ''
@@ -559,7 +642,15 @@ const AppNavigation = () => {
         console.log(`🔕 Thông báo bị tắt cho channel: ${channelId}`);
         return;
       }
-
+      // Kiểm tra nếu sender._id trùng với user._id thì bỏ qua
+    if (
+      notification?.ID_message?.sender?._id === user?._id  || 
+      notification?.ID_post?.ID_user?._id === user?._id 
+    ) {
+      console.log(`🔇 Bỏ qua thông báo từ chính người dùng: ${notification.type}`);
+      return;
+    }
+    /////
       const formattedData = {};
       Object.keys(notification).forEach(key => {
         formattedData[key] = typeof notification[key] === 'string'

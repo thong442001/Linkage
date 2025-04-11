@@ -9,6 +9,7 @@ import {
     Pressable,
     Animated,
     RefreshControl,
+    Clipboard//copy
 } from 'react-native';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -40,7 +41,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import FriendLoading from '../../utils/skeleton_loading/FriendLoading';
 import PostProfileLoading from '../../utils/skeleton_loading/PostProfileLoading';
 import EditBioModal from '../../components/dialog/EditBioModal';
+import SendRequestFriendModal from '../../utils/animation/success/SuccessModal';
+import FailedRequestFriendModal from '../../utils/animation/failed/FailedModal';
+import RecallSuccessFriendRequestModal from '../../utils/animation/success/SuccessModal';
+import RecallFailedFriendRequestModal from '../../utils/animation/failed/FailedModal';
+import AcceptFriendRequestModal from '../../utils/animation/success/SuccessModal';
+import CancelFriendRequestModal from '../../utils/animation/failed/FailedModal';
 
+import { set } from '@react-native-firebase/database';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -58,7 +66,7 @@ const Profile = props => {
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
-    const [relationship, setRelationship] = useState(null);posts
+    const [relationship, setRelationship] = useState(null); posts
     const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
     const [mutualFriendsCount, setMutualFriendsCount] = useState(0);
@@ -67,15 +75,30 @@ const Profile = props => {
     const [isLoading, setisLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false)
 
+    //state quản lý thông báo gửi lời mời kết bạn, hủy lời mời, phản hồi lời mời 
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
+    const [recallSuccessModalVisible, setRecallSuccessModalVisible] = useState(false);
+    const [recallFailedModalVisible, setRecallFailedModalVisible] = useState(false);
+    const [acceptFriendRequestModalVisible, setAcceptFriendRequestModalVisible] = useState(false);
+    const [cancelFriendRequestModalVisible, setCancelFriendRequestModalVisible] = useState(false);
     // Animated value for scroll handling
     const scrollY = useRef(new Animated.Value(0)).current;
     const previousScrollY = useRef(0);
+
+    //Deeplink 
+    const [dialogCopyVisible, setDialogCopyVisible] = useState(false); // dialog copy
+    // Hàm copy tin nhắn
+    const copyToClipboard = text => {
+        Clipboard.setString(text);
+        setDialogCopyVisible(true); // hiện dialog copy
+    };
 
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         callAllProfile().finally(() => setRefreshing(false));
-      }, [params?._id, me]);
+    }, [params?._id, me]);
 
     useEffect(() => {
         const listenerId = scrollY.addListener(({ value }) => {
@@ -134,7 +157,7 @@ const Profile = props => {
     };
 
     const openBottomSheetPhanHoi = () => {
-        openBottomSheet(25, detail_selection_phan_hoi());
+        openBottomSheet(30, detail_selection_phan_hoi());
     };
 
     const uploadFile = async file => {
@@ -157,14 +180,11 @@ const Profile = props => {
                 },
             );
 
-            console.log('📂 Response từ Cloudinary:', response.data);
-
             if (!response.data.secure_url) {
                 throw new Error('Không nhận được secure_url từ Cloudinary!');
             }
 
             const fileUrl = response.data.secure_url;
-            console.log('🌍 Link file Cloudinary:', fileUrl);
             setavatar(fileUrl);
             return fileUrl;
         } catch (error) {
@@ -180,7 +200,7 @@ const Profile = props => {
         try {
             setisLoading(true);
             closeBottomSheet();
-            const options = { mediaType: 'image', quality: 1 };
+            const options = { mediaType: 'photo', quality: 1, includeBase64: false, };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
@@ -239,7 +259,13 @@ const Profile = props => {
         try {
             setisLoading(true);
             closeBottomSheet();
-            const options = { mediaType: 'image', quality: 1 };
+
+            // Cấu hình chỉ cho phép chọn ảnh
+            const options = {
+                mediaType: 'photo', // Chỉ chọn ảnh, không phải video
+                quality: 1, // Chất lượng ảnh cao nhất
+                includeBase64: false, // Không cần base64 để tối ưu
+            };
 
             launchImageLibrary(options, async response => {
                 if (response.didCancel) {
@@ -248,9 +274,9 @@ const Profile = props => {
                     return;
                 }
 
-                if (response.errorMessage) {
+                if (response.errorCode || response.errorMessage) {
                     setisLoading(false);
-                    console.log('Lỗi khi mở thư viện:', response.errorMessage);
+                    console.log('Lỗi khi mở thư viện:', response.errorCode, response.errorMessage);
                     return;
                 }
 
@@ -261,7 +287,14 @@ const Profile = props => {
                     return;
                 }
 
-                console.log('📂 File đã chọn:', selectedFile.uri);
+                // Kiểm tra loại file để chắc chắn là ảnh
+                if (!selectedFile.type?.startsWith('image/')) {
+                    setisLoading(false);
+                    console.log('❌ File không phải ảnh:', selectedFile.type);
+                    return;
+                }
+
+                console.log('📂 File ảnh đã chọn:', selectedFile.uri);
 
                 const fileUrl = await uploadFile(selectedFile);
                 if (!fileUrl) {
@@ -279,7 +312,6 @@ const Profile = props => {
                             dispatch(changeBackground(fileUrl));
                             console.log('✅ Đổi background thành công');
                         } else {
-                            setisLoading(false);
                             console.log('❌ Đổi background thất bại');
                         }
                         setisLoading(false);
@@ -290,6 +322,7 @@ const Profile = props => {
                     });
             });
         } catch (error) {
+            setisLoading(false);
             console.log('Lỗi onOpenGallery:', error);
         }
     };
@@ -391,18 +424,34 @@ const Profile = props => {
                 <View style={ProfileS.rectangle}>
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
-
+                {
+                    (me._id != user?._id)
+                    && (
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={() => {
+                                closeBottomSheet();
+                                navigation.navigate('Report', { ID_post: null, ID_user: user._id });
+                            }}
+                        >
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="ban" size={25} />
+                            </View>
+                            <Text style={ProfileS.optionText}>Báo cáo</Text>
+                        </TouchableOpacity>
+                    )
+                }
                 <TouchableOpacity
                     style={ProfileS.option}
                     onPress={() => {
                         closeBottomSheet();
-                        navigation.navigate('Report', { ID_post: null, ID_user: user._id });
+                        copyToClipboard(`https://linkage.id.vn/deeplink?url=linkage://profile?ID_user=${user?._id.toString()}`); // copy
                     }}
                 >
                     <View style={ProfileS.anhBia}>
-                        <Icon name="ban" size={25} />
+                        <Icon name="unlink" size={25} />
                     </View>
-                    <Text style={ProfileS.optionText}>Báo cáo</Text>
+                    <Text style={ProfileS.optionText}>Sao chép liên kết</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -508,12 +557,20 @@ const Profile = props => {
                 .then(async (response) => {
                     console.log(response);
                     setRelationship(response.relationship);
+                    setSuccessModalVisible(true);
+                    setTimeout(() => setSuccessModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setFailedModalVisible(true);
+                    setTimeout(() => {
+                        setFailedModalVisible(false)
+                        callAllProfile()
+                    }, 2000);
                     console.log('❌ Lỗi khi gửi lời mời:', error);
-                    setDialogreload(true);
                 });
         } catch (error) {
+            setFailedModalVisible(true);
+            setTimeout(() => setFailedModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -528,12 +585,19 @@ const Profile = props => {
                 .then(response => {
                     setRelationship(response.relationship);
                     closeBottomSheet();
+                    setAcceptFriendRequestModalVisible(true);
+                    setTimeout(() => setAcceptFriendRequestModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setCancelFriendRequestModalVisible(true);
+                    setTimeout(() => setCancelFriendRequestModalVisible(false), 2000);
                     console.log('Error2 callChapNhanLoiMoiKetBan:', error);
-                    setDialogreload(true);
+                    closeBottomSheet();
+                    callAllProfile()
                 });
         } catch (error) {
+            setAcceptFriendRequestModalVisible(true);
+            setTimeout(() => setAcceptFriendRequestModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -548,12 +612,19 @@ const Profile = props => {
                 .then(response => {
                     setRelationship(response.relationship);
                     closeBottomSheet();
+                    setRecallSuccessModalVisible(true);
+                    setTimeout(() => setRecallSuccessModalVisible(false), 2000);
                 })
                 .catch(error => {
+                    setRecallFailedModalVisible(true);
+                    setTimeout(() => setRecallFailedModalVisible(false), 2000);
                     console.log('Error2 callSetRelationNguoiLa:', error);
-                    setDialogreload(true);
+                    closeBottomSheet();
+                    callAllProfile()
                 });
         } catch (error) {
+            setRecallFailedModalVisible(true);
+            setTimeout(() => setRecallFailedModalVisible(false), 2000);
             console.log(error);
         }
     };
@@ -566,12 +637,18 @@ const Profile = props => {
             await dispatch(huyBanBe(paramsAPI))
                 .unwrap()
                 .then(response => {
+                    setRelationship(response.relationship);
                     closeBottomSheet();
+                    setRecallSuccessModalVisible(true);
+                    setTimeout(() => setRecallSuccessModalVisible(false), 2000);
                     callAllProfile();
                 })
                 .catch(error => {
-                    console.log('Error2 huyBanBe:', error);
-                    setDialogreload(true);
+                    setRecallFailedModalVisible(true);
+                    setTimeout(() => setRecallFailedModalVisible(false), 2000);
+                    console.log('Error2 callSetRelationNguoiLa:', error);
+                    closeBottomSheet();
+                    callAllProfile()
                 });
         } catch (error) {
             console.log(error);
@@ -697,15 +774,20 @@ const Profile = props => {
         }
         return (
             <View style={ProfileS.container1}>
+                <SendRequestFriendModal visible={successModalVisible} message={'Lời mời đã được gửi'} />
+                <FailedRequestFriendModal visible={failedModalVisible} message={'Đã hủy lời mời kết bạn'} />
+                <RecallSuccessFriendRequestModal visible={recallSuccessModalVisible} message={'Đã hủy lời mời kết bạn'} />
+                <RecallFailedFriendRequestModal visible={recallFailedModalVisible} message={'Đã hủy lời mời kết bạn'} />
+                <AcceptFriendRequestModal visible={acceptFriendRequestModalVisible} message={'Đã chấp nhận lời mời kết bạn'} />
                 <View style={ProfileS.boxHeader}>
-                    <Snackbar
+                    {/* <Snackbar
                         visible={dialogReLoad}
                         onDismiss={() => {
                             setDialogreload(false);
                         }}
                         duration={1000}>
                         làm mới!
-                    </Snackbar>
+                    </Snackbar> */}
                     <View>
                         <View>
                             <View>
@@ -852,7 +934,7 @@ const Profile = props => {
                                             <Text style={ProfileS.textEdit}>Nhắn tin</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            disabled={me._id == user?._id}
+                                            //disabled={me._id == user?._id}
                                             style={ProfileS.btnMore}
                                             onPress={openBottomSheetReportUser}>
                                             <Icon
@@ -879,6 +961,16 @@ const Profile = props => {
                                             <Text style={ProfileS.textEdit}>
                                                 Chỉnh sửa trang cá nhân
                                             </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            //disabled={me._id == user?._id}
+                                            style={ProfileS.btnMore}
+                                            onPress={openBottomSheetReportUser}>
+                                            <Icon
+                                                name="ellipsis-horizontal"
+                                                size={25}
+                                                color="black"
+                                            />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -1004,7 +1096,7 @@ const Profile = props => {
                                             style={ProfileS.avataStatus}
                                             source={{ uri: user?.avatar }}
                                         />
-                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray',}}>
+                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray', }}>
                                             Bạn đang nghĩ gì?
                                         </Text>
                                     </View>
@@ -1036,11 +1128,18 @@ const Profile = props => {
                         </View>
                     )
                 }
+                {/* Hiển thị Snackbar dưới cùng màn hình */}
+                <Snackbar
+                    visible={dialogCopyVisible}
+                    onDismiss={() => setDialogCopyVisible(false)}
+                    duration={1000}>
+                    Đã sao chép tin nhắn!
+                </Snackbar>
             </View >
         );
     };
 
-    
+
     return (
         <View style={ProfileS.container}>
             <LoadingModal visible={isLoading} />
@@ -1051,7 +1150,7 @@ const Profile = props => {
                             <View style={{ backgroundColor: '#FFFFFF' }}>
                                 <ProfileLoading />
                                 <FriendLoading />
-                                <PostProfileLoading />
+                                <FriendLoading />
                             </View>
                         ) : (
                             <Animated.FlatList
@@ -1067,13 +1166,13 @@ const Profile = props => {
                                 )}
                                 scrollEventThrottle={16}
                                 refreshControl={
-                                    <RefreshControl 
-                                    refreshing={refreshing}
-                                    onRefresh={onRefresh}
-                                    colors={['#0064E0']}
-                                    tintColor="#0064E0"
-                                        >
-                                        </RefreshControl>
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['#0064E0']}
+                                        tintColor="#0064E0"
+                                    >
+                                    </RefreshControl>
                                 }
                             />
                         )}

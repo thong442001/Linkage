@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     marginVertical: 5,
@@ -13,10 +13,11 @@ const styles = StyleSheet.create({
     width: '70%',
   },
   image: {
-    width: 100,
-    height: 100,
+    width: "90%",
+    height: "90%",
     borderRadius: 500,
-    marginLeft: 5,
+    alignSelf: 'center'
+    //marginLeft: 5,
   },
   info: {
     flexDirection: 'row',

@@ -110,13 +110,16 @@ export default function Groupcomponent({ item }) {
     </View >
   );
 }
-
 const styles = StyleSheet.create({
   chatItem: {
+    top: 10,
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    marginBottom: 5
+    marginBottom: 5,
+    borderRadius: 30, 
+    paddingHorizontal: 10,  
+    borderColor: '#d8dce0', 
   },
   avatar: {
     width: 50,
@@ -124,15 +127,14 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 10,
   },
-
   chatInfo: {
     flex: 1,
   },
   name: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: "black",
-    width: "70%"
+    color: 'black',
+    width: '70%',
   },
   time: {
     fontSize: 12,
@@ -140,12 +142,10 @@ const styles = StyleSheet.create({
   },
   vTxt: {
     flexDirection: 'column',
-    //backgroundColor: 'blue',
     flex: 1,
   },
   vMessageNew: {
     flexDirection: 'row',
-
   },
   messageName: {
     fontSize: 14,
@@ -157,9 +157,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messageNewTime: {
-    fontSize: 10,
-    color: "#aaa",
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#aaa',
     marginTop: 3,
-    alignItems: "flex-end",
+    alignItems: 'flex-end',
   },
 });

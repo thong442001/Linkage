@@ -1,7 +1,7 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState, useEffect} from 'react';
-import {useSelector} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 import { set } from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/Ionicons'
 import { oStackHome } from '../../navigations/HomeNavigation';
@@ -53,14 +53,14 @@ const ItemNotification = ({data}) => {
 
     // return () => clearInterval(interval);
   }, []);
-  console.log('data', data);
+  //console.log('data', data);
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
         setName(
           data.ID_relationship.ID_userB.first_name +
-            ' ' +
-            data.ID_relationship.ID_userB.last_name,
+          ' ' +
+          data.ID_relationship.ID_userB.last_name,
         );
         setAvatar(data.ID_relationship.ID_userB.avatar);
         setIcon('person-add')
@@ -68,8 +68,8 @@ const ItemNotification = ({data}) => {
       } else {
         setName(
           data.ID_relationship.ID_userA.first_name +
-            ' ' +
-            data.ID_relationship.ID_userA.last_name,
+          ' ' +
+          data.ID_relationship.ID_userA.last_name,
         );
         setAvatar(data.ID_relationship.ID_userA.avatar);
         setIcon('person-add')
@@ -80,8 +80,8 @@ const ItemNotification = ({data}) => {
       if (data.ID_post.ID_user._id) {
         setName(
           data.ID_post.ID_user.first_name +
-            ' ' +
-            data.ID_post.ID_user.last_name,
+          ' ' +
+          data.ID_post.ID_user.last_name,
         );
         setAvatar(data.ID_post.ID_user.avatar);
         setIcon('book')
@@ -90,8 +90,8 @@ const ItemNotification = ({data}) => {
       } else {
         setName(
           data.ID_post.ID_user.first_name +
-            ' ' +
-            data.ID_post.ID_user.last_name,
+          ' ' +
+          data.ID_post.ID_user.last_name,
         );
         setAvatar(data.ID_post.ID_user.last_name);
         setIcon('book')
@@ -103,8 +103,8 @@ const ItemNotification = ({data}) => {
       if (data.ID_relationship.ID_userA._id == me._id) {
         setName(
           data.ID_relationship.ID_userB.first_name +
-            ' ' +
-            data.ID_relationship.ID_userB.last_name,
+          ' ' +
+          data.ID_relationship.ID_userB.last_name,
         );
         setAvatar(data.ID_relationship.ID_userB.avatar);
         setIcon('people')
@@ -112,25 +112,25 @@ const ItemNotification = ({data}) => {
       } else {
         setName(
           data.ID_relationship.ID_userA.first_name +
-            ' ' +
-            data.ID_relationship.ID_userA.last_name,
+          ' ' +
+          data.ID_relationship.ID_userA.last_name,
         );
         setAvatar(data.ID_relationship.ID_userA.avatar);
         setIcon('people')
         setbackground('#007bff')
       }
     }
-    if(data.type == 'Đã đăng bài mới'){
-     setName(data.ID_post.ID_user.first_name + 
-      ' ' + data.ID_post.ID_user.last_name
-     )
-     setAvatar(data.ID_post.ID_user.avatar);
-     setIcon('reader')
-     setbackground('#E1E111')
+    if (data.type == 'Đã đăng bài mới') {
+      setName(data.ID_post.ID_user.first_name +
+        ' ' + data.ID_post.ID_user.last_name
+      )
+      setAvatar(data.ID_post.ID_user.avatar);
+      setIcon('reader')
+      setbackground('#E1E111')
 
 
     }
-    if(data.type == 'Bạn có 1 cuộc gọi video đến'){
+    if (data.type == 'Bạn có 1 cuộc gọi video đến') {
       if (data.ID_group.isPrivate) {
         const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
         setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
@@ -142,9 +142,9 @@ const ItemNotification = ({data}) => {
         setName(
           data.ID_group.name ||
           data.ID_group.members
-              ?.filter((user) => user._id !== me._id)
-              .map((user) => `${user.first_name} ${user.last_name}`)
-              .join(', ')
+            ?.filter((user) => user._id !== me._id)
+            .map((user) => `${user.first_name} ${user.last_name}`)
+            .join(', ')
         );
         setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
         setIcon('call')
@@ -152,7 +152,7 @@ const ItemNotification = ({data}) => {
 
       }
     }
-    if(data.type == 'Bạn có 1 cuộc gọi đến'){
+    if (data.type == 'Bạn có 1 cuộc gọi đến') {
       if (data.ID_group.isPrivate) {
         const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
         setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
@@ -163,9 +163,9 @@ const ItemNotification = ({data}) => {
         setName(
           data.ID_group.name ||
           data.ID_group.members
-              ?.filter((user) => user._id !== me._id)
-              .map((user) => `${user.first_name} ${user.last_name}`)
-              .join(', ')
+            ?.filter((user) => user._id !== me._id)
+            .map((user) => `${user.first_name} ${user.last_name}`)
+            .join(', ')
         );
         setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
         setIcon('call')
@@ -174,7 +174,7 @@ const ItemNotification = ({data}) => {
       }
     }
 
-    if(data.type == 'Bạn đã được mời vào nhóm mới'){
+    if (data.type == 'Bạn đã được mời vào nhóm mới') {
       if (data.ID_group.isPrivate) {
         const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
         setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
@@ -184,28 +184,28 @@ const ItemNotification = ({data}) => {
         setName(
           data.ID_group.name ||
           data.ID_group.members
-              ?.filter((user) => user._id !== me._id)
-              .map((user) => `${user.first_name} ${user.last_name}`)
-              .join(', ')
+            ?.filter((user) => user._id !== me._id)
+            .map((user) => `${user.first_name} ${user.last_name}`)
+            .join(', ')
         );
         setAvatar(data.ID_group.avatar || 'https://example.com/default-group-avatar.png');
         setIcon('people-circle')
         setbackground('green')
       }
     }
-    if(data.type == 'Tin nhắn mới'){
-      setName(data.ID_message.sender.first_name+ ' ' 
+    if (data.type == 'Tin nhắn mới') {
+      setName(data.ID_message.sender.first_name + ' '
         + data.ID_message.sender.last_name)
       setAvatar(data.ID_message.sender.avatar)
       setIcon('chatbox-ellipses')
       setbackground('green')
     }
-    if(data.type=='Đang livestream'){
+    if (data.type == 'Đang livestream') {
       if (data.ID_relationship.ID_userA._id == me._id) {
         setName(
           data.ID_relationship.ID_userB.first_name +
-            ' ' +
-            data.ID_relationship.ID_userB.last_name,
+          ' ' +
+          data.ID_relationship.ID_userB.last_name,
         );
         setAvatar(data.ID_relationship.ID_userB.avatar);
         setIcon('logo-rss')
@@ -213,12 +213,12 @@ const ItemNotification = ({data}) => {
       } else {
         setName(
           data.ID_relationship.ID_userA.first_name +
-            ' ' +
-            data.ID_relationship.ID_userA.last_name,
+          ' ' +
+          data.ID_relationship.ID_userA.last_name,
         );
         setAvatar(data.ID_relationship.ID_userA.avatar);
-        setIcon('logo-rss')    
-        setbackground('red')    
+        setIcon('logo-rss')
+        setbackground('red')
       }
     }
     if(data.type=='Đã thả biểu cảm vào bài viết của bạn'){
@@ -227,26 +227,26 @@ const ItemNotification = ({data}) => {
       setIcon('happy')
       setbackground('green')
     }
-    if(data.type=='Đã bình luận vào bài viết của bạn'){
-      setName(data.ID_comment.ID_user.first_name + ' ' + data.ID_comment.ID_user.last_name)
-      setAvatar(data.ID_comment.ID_user.avatar)
-      setIcon('chatbubble-ellipses')
-      setbackground('green')
-    }    
-    if(data.type=='Đã trả lời bình luận của bạn'){
+    if (data.type == 'Đã bình luận vào bài viết của bạn') {
       setName(data.ID_comment.ID_user.first_name + ' ' + data.ID_comment.ID_user.last_name)
       setAvatar(data.ID_comment.ID_user.avatar)
       setIcon('chatbubble-ellipses')
       setbackground('green')
     }
-    if(data.type=='Mời chơi game 3 lá'){
+    if (data.type == 'Đã trả lời bình luận của bạn') {
+      setName(data.ID_comment.ID_user.first_name + ' ' + data.ID_comment.ID_user.last_name)
+      setAvatar(data.ID_comment.ID_user.avatar)
+      setIcon('chatbubble-ellipses')
+      setbackground('green')
+    }
+    if (data.type == 'Mời chơi game 3 lá') {
       const otherUser = data.ID_group.members?.find((user) => user._id !== me._id);
       setName(otherUser ? `${otherUser.first_name} ${otherUser.last_name}` : 'Người gọi');
       setAvatar(otherUser?.avatar || 'https://example.com/default-avatar.png');
       setIcon('game-controller-outline')
       setbackground('#007bff')
     }
-    if(data.type=='Đã thả biểu cảm vào story của bạn'){
+    if (data.type == 'Đã thả biểu cảm vào story của bạn') {
       setName('Người nào đó')
       setAvatar(data.ID_post.ID_user?.avatar);
       setIcon('happy')
@@ -305,18 +305,18 @@ const ItemNotification = ({data}) => {
   return (
     <TouchableOpacity onPress={navigateToScreen}>
       <View style={styles.container}>
-        {avatar && 
-        <View>
-        <Image source={{uri: avatar}} style={[styles.img,]} />
-        <View style={[{backgroundColor:background},styles.icon,]}><Icon name={icon} size={16} color='white' /></View>
-        </View>
+        {avatar &&
+          <View>
+            <Image source={{ uri: avatar }} style={[styles.img,]} />
+            <View style={[{ backgroundColor: background }, styles.icon,]}><Icon name={icon} size={16} color='white' /></View>
+          </View>
         }
         <View style={styles.container_content}>
           <View style={styles.container_name}>
             <Text style={styles.text_name}>{name}</Text>
             <Text style={styles.text_content}>
               {
-                data.type == 'Đang livestream' ? 'Đang livestream' : (data.content ?? data.type ??'Bạn có thông báo mới')
+                data.type == 'Đang livestream' ? 'Đang livestream' : (data.content ?? data.type ?? 'Bạn có thông báo mới')
               }
             </Text>
           </View>
@@ -364,12 +364,12 @@ const styles = StyleSheet.create({
     color: 'gray',
     marginTop: 3,
   },
-  icon:{
+  icon: {
     position: 'absolute',
     top: 40,
     left: 40,
     //backgroundColor: '#007bff',
-    borderRadius:50,
-    padding:5
+    borderRadius: 50,
+    padding: 5
   }
 });

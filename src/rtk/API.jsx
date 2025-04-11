@@ -732,7 +732,7 @@ export const getChiTietPost = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await AxiosHelper(data.token)
-        .get(`post/getChiTietPost?ID_post=${data.ID_post}`);
+        .get(`post/getChiTietPost?ID_post=${data.ID_post}&ID_user=${data.ID_user}`);
       //console.log(response.status)
       if (response.status == true) {
         return response;
@@ -1116,6 +1116,27 @@ export const quenMatKhau_gmail = createAsyncThunk(
         .post('user/quenMatKhau_gmail', data);
       //console.log(response)
       return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Gợi ý kết bạn
+// params :  me
+// "status": true, data: 
+export const getGoiYBanBe = createAsyncThunk(
+  'relationship/getGoiYBanBe',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`relationship/getGoiYBanBe?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
     } catch (error) {
       return rejectWithValue(error.message);
     }

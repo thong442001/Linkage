@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,16 +10,13 @@ import {
   Image,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  getAllFriendOfID_user,
-  getAllGroupOfUser,
-} from '../../rtk/API';
-import Groupcomponent from '../../components/chat/Groupcomponent';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
+import { getAllFriendOfID_user, getAllGroupOfUser } from '../../rtk/API';
+import { useSocket } from '../../context/socketContext';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ItemFriendHomeChat from '../../components/items/ItemFriendHomeChat';
-import { useSocket } from '../../context/socketContext';
+import Groupcomponent from '../../components/chat/Groupcomponent';
+import ChatHomeLoading from '../../utils/skeleton_loading/ChatHomeLoading';
 
 const { width, height } = Dimensions.get('window');
 
@@ -34,17 +31,14 @@ const HomeChat = ({ route, navigation }) => {
   const [filteredGroups, setFilteredGroups] = useState([]);
   const { socket, onlineUsers } = useSocket();
 
-  // Chuẩn hóa văn bản cho tìm kiếm
-  const normalizeText = text => {
-    return text
+  const normalizeText = text =>
+    text
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/đ/g, 'd')
       .replace(/Đ/g, 'D');
-  };
 
-  // Lọc nhóm chat dựa trên tìm kiếm
   useEffect(() => {
     if (!searchText.trim()) {
       setFilteredGroups(groups || []);
@@ -70,38 +64,31 @@ const HomeChat = ({ route, navigation }) => {
     }
   }, [searchText, groups]);
 
-  // Sắp xếp bạn bè online lên đầu (chỉ khi dữ liệu thay đổi thực sự)
-  useEffect(() => {
-    if (!onlineUsers || onlineUsers.length === 0 || friends.length === 0) {
-      return; // Không làm gì nếu không có dữ liệu
-    }
+  // Tính toán danh sách bạn bè đã sắp xếp với useMemo
+  const sortedFriends = useMemo(() => {
+    if (!onlineUsers || onlineUsers.length === 0 || friends.length === 0) return friends;
 
-    // Tạo danh sách bạn bè đã sắp xếp
-    const sortedFriends = [...friends].sort((a, b) => {
+    return [...friends].sort((a, b) => {
       const friendA_ID = a.ID_userA._id === me._id ? a.ID_userB._id : a.ID_userA._id;
       const friendB_ID = b.ID_userA._id === me._id ? b.ID_userB._id : b.ID_userA._id;
       const isOnlineA = onlineUsers.includes(friendA_ID);
       const isOnlineB = onlineUsers.includes(friendB_ID);
-
-      return isOnlineB - isOnlineA; // Online lên đầu
+      return isOnlineB - isOnlineA;
     });
+  }, [onlineUsers, friends, me._id]);
 
-    // Chỉ cập nhật state nếu danh sách thay đổi
-    if (JSON.stringify(sortedFriends) !== JSON.stringify(friends)) {
-      setFriends(sortedFriends);
-      console.log('✅ Danh sách bạn bè đã sắp xếp:', sortedFriends); 
-    }
-  }, [onlineUsers, friends]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!friends.length) {
+        callGetAllFriendOfID_user(me._id);
+      }
+      if (!groups) {
+        callGetAllGroupOfUser(me._id);
+      }
+    }, [me._id, friends.length, groups])
+  );
 
-  // Gọi API và xử lý Socket.IO
   useEffect(() => {
-    callGetAllFriendOfID_user(me._id);
-    callGetAllGroupOfUser(me._id);
-
-    const focusListener = navigation.addListener('focus', () => {
-      callGetAllGroupOfUser(me._id);
-    });
-
     socket.on('new_group', ({ group }) => {
       setGroups(prevGroups => {
         if (!prevGroups) return [group];
@@ -155,18 +142,16 @@ const HomeChat = ({ route, navigation }) => {
       socket.off('new_message');
       socket.off('group_deleted');
       socket.off('kicked_from_group');
-      focusListener();
     };
-  }, [navigation]);
+  }, [socket]);
 
   const callGetAllFriendOfID_user = async ID_user => {
     try {
       await dispatch(getAllFriendOfID_user({ me: ID_user, token }))
         .unwrap()
-        .then(response => setFriends(response.relationships))
-        .catch(error => console.log('Error1 getAllFriendOfID_user:', error));
+        .then(response => setFriends(response.relationships));
     } catch (error) {
-      console.log(error);
+      console.log('Error1 getAllFriendOfID_user:', error);
     }
   };
 
@@ -177,10 +162,9 @@ const HomeChat = ({ route, navigation }) => {
         .then(response => {
           setGroups(response.groups);
           setLoading(false);
-        })
-        .catch(error => console.log('Error:', error));
+        });
     } catch (error) {
-      console.log(error);
+      console.log('Error:', error);
     }
   };
 
@@ -188,22 +172,50 @@ const HomeChat = ({ route, navigation }) => {
     ID_group ? navigation.navigate('Chat', { ID_group }) : console.log('ID_group: ' + ID_group);
   };
 
+  const headerOnline = () => {
+    if (!onlineUsers) return null; // Không render nếu onlineUsers chưa sẵn sàng
+
+    return (
+      <View>
+        <FlatList
+          contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+          data={sortedFriends}
+          renderItem={({ item }) => {
+            const friendID = item.ID_userA._id === me._id ? item.ID_userB._id : item.ID_userA._id;
+            const isOnline = onlineUsers.includes(friendID);
+            return (
+              <ItemFriendHomeChat item={item} navigation={navigation} isOnline={isOnline} />
+            );
+          }}
+          keyExtractor={item => item._id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.vHeader}>
-        <TouchableOpacity onPress={() => navigation.navigate('TabHome')}>
-          <MaterialIcons name="arrow-back-ios-new" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.header}>Đoạn chat</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <TouchableOpacity onPress={() => navigation.navigate('TabHome')} style={{ marginRight: width * 0.03 }}>
+            <Icon name="chevron-back-outline" size={25} color="black" />
+          </TouchableOpacity>
+          <View style={styles.logo}>
+            <Image style={{ width: 15, height: 22 }} source={require('../../../assets/images/LK.png')} />
+            <Text style={styles.title}>inkageChat</Text>
+          </View>
+        </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
-            <Icon name="chatbubbles-outline" size={25} color="black" />
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('ChatBot')}>
+            <Icon name="chatbubbles-outline" size={25} color="#333" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('QRSannerAddGroup')}>
-            <Icon name="scan-circle-outline" size={25} color="black" />
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('QRSannerAddGroup')}>
+            <Icon name="scan-circle-outline" size={25} color="#333" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('CreateGroup')}>
-            <MaterialIcons name="group-add" size={24} color="black" />
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('CreateGroup')}>
+            <Icon name="create-outline" size={24} color="#333" />
           </TouchableOpacity>
         </View>
       </View>
@@ -213,112 +225,73 @@ const HomeChat = ({ route, navigation }) => {
         <TextInput
           style={styles.search}
           placeholder="Tìm kiếm đoạn chat"
-          placeholderTextColor="#ADB5BD"
+          placeholderTextColor="black"
           value={searchText}
           onChangeText={setSearchText}
+          color="black"
         />
       </View>
 
       {loading ? (
         <ChatHomeLoading />
       ) : (
-        <View style={styles.container}>
-          <FlatList
-            data={friends}
-            renderItem={({ item }) => {
-              const friendID = item.ID_userA._id === me._id ? item.ID_userB._id : item.ID_userA._id;
-              const isOnline = onlineUsers.includes(friendID);
-              return (
-                <ItemFriendHomeChat item={item} navigation={navigation} isOnline={isOnline} />
-              );
-            }}
-            keyExtractor={item => item._id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          />
-
-          <FlatList
-            data={filteredGroups}
-            keyExtractor={item => item._id}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
-                <Groupcomponent item={item} />
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>Bạn chưa có cuộc trò chuyện nào.</Text>
-            }
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+        <FlatList
+          contentContainerStyle={{ paddingBottom: height * 0.02 }}
+          ListHeaderComponent={headerOnline}
+          data={filteredGroups}
+          keyExtractor={item => item._id}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => onChat(item._id)} key={item._id}>
+              <Groupcomponent item={item} />
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={<Text style={styles.emptyText}>Bạn chưa có cuộc trò chuyện nào.</Text>}
+          showsVerticalScrollIndicator={false}
+        />
       )}
     </View>
   );
 };
 
+// Styles giữ nguyên
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: width * 0.01,
-  },
-  header: {
-    fontSize: width * 0.06,
+  logo: { flexDirection: 'row', alignItems: 'center' },
+  title: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: width * 0.05,
+    color: '#0064E0',
     fontWeight: 'bold',
-    color: 'black',
-    textAlign: 'center',
-    flex: 1,
+    top: height * 0.004,
   },
-  headerIcons: {
-    flexDirection: 'row',
-    gap: width * 0.04,
-  },
+  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: width * 0.01 },
   vHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: height * 0.025,
+    margin: width * 0.025,
+  },
+  headerIcons: { flexDirection: 'row', gap: width * 0.02 },
+  iconButton: {
+    width: width * 0.1,
+    height: width * 0.1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: width * 0.05,
+    backgroundColor: '#dbf3f7',
   },
   inputSearch: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F7F7FC',
+    backgroundColor: '#dddfe1',
     borderRadius: width * 0.08,
-    paddingVertical: height * 0.008,
+    paddingVertical: height * 0.002,
     paddingHorizontal: width * 0.04,
     marginBottom: height * 0.025,
+    marginHorizontal: width * 0.015,
   },
-  search: {
-    flex: 1,
-    color: 'black',
-    fontSize: width * 0.04,
-  },
-  container_item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: height * 0.02,
-    paddingHorizontal: width * 0.03,
-    backgroundColor: '#F0F0F5',
-    borderRadius: width * 0.03,
-    marginBottom: height * 0.02,
-  },
-  text_name_AI: {
-    fontSize: width * 0.045,
-    fontWeight: '500',
-    marginLeft: width * 0.04,
-    color: 'black',
-  },
-  img: {
-    width: width * 0.12,
-    height: width * 0.12,
-    borderRadius: width * 0.06,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: 'gray',
-    marginTop: height * 0.03,
-    fontSize: width * 0.04,
-  },
+  search: { flex: 1, color: 'black', fontSize: width * 0.04 },
+  emptyText: { textAlign: 'center', color: 'gray', marginTop: height * 0.03, fontSize: width * 0.04 },
 });
 
 export default HomeChat;

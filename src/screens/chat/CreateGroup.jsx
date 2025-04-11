@@ -15,6 +15,8 @@ import {
 } from '../../rtk/API';
 import FriendAdd from '../../components/chat/FriendAdd';
 import { useSocket } from '../../context/socketContext';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 const { width, height } = Dimensions.get('window');
 
 const CreateGroup = (props) => {// cần param
@@ -29,7 +31,8 @@ const CreateGroup = (props) => {// cần param
     const [nameGroup, setNameGroup] = useState(null);
     const [friends, setFriends] = useState(null);
     const [selectedUsers, setSelectedUsers] = useState([me._id]);// me phải trong nhóm 
-
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
     const toggleSelectUser = (id) => {
         setSelectedUsers((prev) =>
             prev.includes(id)
@@ -59,14 +62,17 @@ const CreateGroup = (props) => {// cần param
             await dispatch(getAllFriendOfID_user({ me: me._id, token: token }))
                 .unwrap()
                 .then((response) => {
+                   
                     //console.log(response.groups)
                     setFriends(response.relationships);
                 })
                 .catch((error) => {
+                  
                     console.log('Error1 getAllFriendOfID_user:', error);
                 });
 
         } catch (error) {
+         
             console.log(error)
         }
     }
@@ -81,6 +87,8 @@ const CreateGroup = (props) => {// cần param
             await dispatch(addGroup(paramsAPI))
                 .unwrap()
                 .then((response) => {
+                    setSuccessModalVisible(true);
+                    setTimeout(() => setSuccessModalVisible(false), 2000);
                     console.log("ID_group: " + response.group._id)
                     // Emit sự kiện "new_group" để cập nhật danh sách nhóm
                     socket.emit("new_group", { group: response.group, members: members });
@@ -90,10 +98,14 @@ const CreateGroup = (props) => {// cần param
                     navigation.navigate("Chat", { ID_group: response.group._id })
                 })
                 .catch((error) => {
+                    setFailedModalVisible(true);
+                    setTimeout(() => setFailedModalVisible(false), 2000);
                     console.log('Error1 addGroup:', error);
                 });
 
         } catch (error) {
+            setFailedModalVisible(true);
+            setTimeout(() => setFailedModalVisible(false), 2000);
             console.log(error)
         }
     }
@@ -109,40 +121,43 @@ const CreateGroup = (props) => {// cần param
 
     return (
         <View style={styles.containerAll}>
-            <View style={styles.container}>
-                {/* header */}
-                <View
-                    style={styles.vHeader}
+            <SuccessModal visible={successModalVisible} message={'Tạo nhóm thành công'}/>
+            <FailedModal visible={failedModalVisible} message={'Tạo nhóm thất bại'}/>
+            <View style={styles.headerContainer}>
+                <TouchableOpacity onPress={() => navigation.navigate("HomeChat")}>
+                    <Text style={styles.cancelText}>Hủy</Text>
+                </TouchableOpacity>
+                <Text style={styles.headerText}>Tạo nhóm</Text>
+                <TouchableOpacity
+                    onPress={taogGroup}
+                    disabled={selectedUsers.length < 3}
+                    style={[
+                        styles.createButton,
+                        selectedUsers.length < 3 && styles.createButtonDisabled
+                    ]}
                 >
-                    {/* Nút quay lại */}
-                    <TouchableOpacity onPress={() => navigation.navigate("HomeChat")}>
-                        <Text style={styles.txtHuy}>Hủy</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.header}>Tạo nhóm</Text>
-                    {/* Nút tạo group */}
-                    <TouchableOpacity
-                        onPress={taogGroup}
-                        disabled={selectedUsers.length < 3}
-                    >
-                        <Text style={[styles.txtTao, selectedUsers.length > 2 && { color: "blue" }]}>Tạo</Text>
-                    </TouchableOpacity>
-                </View>
-                {/* ten nhóm */}
-                <Text style={styles.txtGrey}>Tên nhóm (không bắt buộc)</Text>
+                    <Text style={[
+                        styles.createText,
+                        selectedUsers.length >= 3 && { color: '#0064E0' }
+                    ]}>Tạo</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.contentContainer}>
+                <Text style={styles.labelText}>Tên nhóm (không bắt buộc)</Text>
                 <TextInput
-                    style={styles.searchBox}
+                    style={styles.input}
                     placeholder="Nhập tên nhóm..."
+                    placeholderTextColor="#8C96A2"
                     value={nameGroup}
                     onChangeText={setNameGroup}
                 />
 
-                {/* <TextInput style={styles.searchBox} placeholder="Tìm kiếm" /> */}
-                {/* gợi ý */}
-                <Text style={styles.txtGrey}>Gợi ý</Text>
+                <Text style={styles.labelText}>Gợi ý</Text>
                 <FlatList
                     data={friends}
                     keyExtractor={(item) => item._id}
-                    extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
+                    extraData={selectedUsers}
                     renderItem={({ item }) => (
                         <FriendAdd
                             item={item}
@@ -151,54 +166,79 @@ const CreateGroup = (props) => {// cần param
                             membersGroup={[]}
                         />
                     )}
+                    showsVerticalScrollIndicator={false}
                 />
-            </View >
+            </View>
         </View>
-    )
-}
-
-export default CreateGroup
+    );
+};
 
 const styles = StyleSheet.create({
     containerAll: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#f0f4ff', // Màu nền chính
     },
-    container: {
-        marginHorizontal: width * 0.05, // 5% chiều rộng màn hình
-    },
-    header: {
-        fontSize: width * 0.06, // 6% chiều rộng màn hình
-        fontWeight: 'bold',
-        color: "black",
-        width: width * 0.5, // 50% chiều rộng màn hình
-        textAlign: 'center',
-    },
-    txtHuy: {
-        fontSize: width * 0.04, // 4% chiều rộng màn hình
-        color: "blue",
-        textAlign: 'center',
-    },
-    txtTao: {
-        fontSize: width * 0.04, // 4% chiều rộng màn hình
-        color: "grey",
-        textAlign: 'center',
-    },
-    searchBox: {
-        backgroundColor: '#eee',
-        borderRadius: width * 0.025, // 2.5% chiều rộng màn hình
-        padding: height * 0.018, // 1.8% chiều cao màn hình
-        marginBottom: height * 0.018, // 1.8% chiều cao màn hình
-    },
-    vHeader: {
+    headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginVertical: height * 0.018, // 1.8% chiều cao màn hình
-        alignItems: "center",
+        alignItems: 'center',
+        paddingVertical: height * 0.02,
+        paddingHorizontal: width * 0.05,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+        elevation: 2, // Bóng đổ cho Android
+        shadowColor: '#000', // Bóng đổ cho iOS
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
     },
-    txtGrey: {
-        fontSize: width * 0.04, // 4% chiều rộng màn hình
-        color: "#797979",
-        marginBottom: height * 0.012, // 1.2% chiều cao màn hình
+    headerText: {
+        fontSize: width * 0.06,
+        fontWeight: 'bold',
+        color: '#333',
+        textAlign: 'center',
+        flex: 1,
+    },
+    cancelText: {
+        fontSize: width * 0.045,
+        color: '#0064E0', // Màu xanh đậm
+        fontWeight: '500',
+    },
+    createButton: {
+        paddingHorizontal: width * 0.03,
+        paddingVertical: height * 0.01,
+        borderRadius: width * 0.02,
+    },
+    createButtonDisabled: {
+        opacity: 0.5,
+    },
+    createText: {
+        fontSize: width * 0.045,
+        color: '#999', // Màu xám khi chưa đủ điều kiện
+        fontWeight: '500',
+    },
+    contentContainer: {
+        flex: 1,
+        paddingHorizontal: width * 0.05,
+        paddingTop: height * 0.02,
+    },
+    labelText: {
+        fontSize: width * 0.04,
+        color: '#666',
+        marginBottom: height * 0.015,
+        fontWeight: '500',
+    },
+    input: {
+        backgroundColor: '#fff',
+        borderRadius: width * 0.1,
+        padding: height * 0.018,
+        marginBottom: height * 0.025,
+        fontSize: width * 0.04,
+        color: '#333',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
     },
 });
+
+export default CreateGroup;

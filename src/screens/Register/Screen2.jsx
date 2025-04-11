@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { checkPhone, sendOTP_dangKi_phone } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const Screen2 = (props) => {
     const { route, navigation } = props;
@@ -12,6 +15,10 @@ const Screen2 = (props) => {
     const dispatch = useDispatch();
     const [phone, setPhone] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // Trạng thái loading
+    const [isSuccess, setIsSuccess] = useState(false); // Trạng thái thông báo thành công
+    const [isFailed, setIsFailed] = useState(false); // Trạng thái thông báo thất bại
+    const [failedMessage, setFailedMessage] = useState(''); // Thông báo lỗi cụ thể
 
     // Hàm kiểm tra định dạng số điện thoại
     function isValidPhone(phone) {
@@ -33,6 +40,8 @@ const Screen2 = (props) => {
         }
 
         setError('');
+        setIsLoading(true); // Hiển thị loading
+
         try {
             // Gọi API checkPhone để kiểm tra số có tồn tại không
             const checkResponse = await dispatch(checkPhone({ phone })).unwrap();
@@ -44,28 +53,52 @@ const Screen2 = (props) => {
                 console.log("Response từ sendOTP_dangKi:", otpResponse);
 
                 if (otpResponse.status) {
-                    // Chuyển sang OTPScreen với dữ liệu người dùng
-                    navigation.navigate('OTPScreen', {
-                        first_name: params.first_name,
-                        last_name: params.last_name,
-                        dateOfBirth: params.dateOfBirth,
-                        sex: params.sex,
-                        phone: phone,
-                    });
+                    setIsLoading(false);
+                    setIsSuccess(true); // Hiển thị thông báo thành công
+                    setTimeout(() => {
+                        setIsSuccess(false);
+                        // Chuyển sang OTPScreen với dữ liệu người dùng
+                        navigation.navigate('OTPScreen', {
+                            first_name: params.first_name,
+                            last_name: params.last_name,
+                            dateOfBirth: params.dateOfBirth,
+                            sex: params.sex,
+                            phone: phone,
+                        });
+                    }, 2000);
                 } else {
-                    Alert.alert('Lỗi', otpResponse.message || 'Không thể gửi OTP.');
+                    setIsLoading(false);
+                    setIsFailed(true);
+                    setFailedMessage(otpResponse.message || 'Không thể gửi OTP.');
+                    setTimeout(() => {
+                        setIsFailed(false);
+                    }, 2000);
                 }
             } else {
-                setError(checkResponse.message)
+                setIsLoading(false);
+                setIsFailed(true);
+                setFailedMessage(checkResponse.message || 'Số điện thoại đã được sử dụng.');
+                setTimeout(() => {
+                    setIsFailed(false);
+                }, 2000);
             }
         } catch (error) {
-            Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xử lý. Vui lòng thử lại.');
+            setIsLoading(false);
+            setIsFailed(true);
+            setFailedMessage('Đã xảy ra lỗi khi xử lý. Vui lòng thử lại.');
             console.log('Error:', error);
+            setTimeout(() => {
+                setIsFailed(false);
+            }, 2000);
         }
     };
 
     return (
         <View style={styles.container}>
+            <LoadingModal visible={isLoading} />
+            <SuccessModal visible={isSuccess} message="Gửi OTP thành công!" />
+            <FailedModal visible={isFailed} message={failedMessage} />
+
             <Pressable onPress={() => navigation.navigate('Screen1', params)}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
@@ -84,17 +117,27 @@ const Screen2 = (props) => {
                 style={[styles.inputDate, error && { borderColor: 'red' }]}
                 keyboardType="phone-pad"
             />
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? (
+                <View style={styles.errorContainer}>
+                    <Icon name="exclamation-circle" size={width * 0.04} color="red" style={styles.errorIcon} />
+                    <Text style={styles.errorText}>{error}</Text>
+                </View>
+            ) : null}
 
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua SMS</Text>
-            <Pressable style={styles.button} onPress={handleNext}>
+            <Pressable
+                style={[styles.button, { opacity: isLoading ? 0.6 : 1 }]}
+                onPress={handleNext}
+                disabled={isLoading}
+            >
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
 
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
-                    onPress={() => navigation.navigate('Screen3', params)}>
+                    onPress={() => navigation.navigate('Screen3', params)}
+                >
                     <Text style={styles.buttonTextNextScreen}>Đăng ký bằng email</Text>
                 </Pressable>
             </View>
@@ -131,10 +174,17 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         color: 'black',
     },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    errorIcon: {
+        marginRight: 8,
+    },
     errorText: {
         color: 'red',
         fontSize: 14,
-        marginBottom: 10,
     },
     infoText: {
         fontSize: 14,

@@ -8,6 +8,10 @@ import {
 } from '../../rtk/API';
 import { useDispatch } from 'react-redux';
 import auth from '@react-native-firebase/auth';
+import LoadingModal from '../../utils/animation/loading/LoadingModal';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
+import { set } from '@react-native-firebase/database';
 
 const { width, height } = Dimensions.get('window');
 
@@ -19,18 +23,21 @@ const Screen3 = (props) => {
     const [email, setEmail] = useState('');
     const [emailVerified, setEmailVerified] = useState(false);
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [isFailed, setIsFailed] = useState(false);
 
-   useEffect(() => {
-    const checkUserEmail = async () => {
-        const user = auth().currentUser;
-        if (user) {
-            await user.reload(); // Cập nhật trạng thái từ Firebase
-            callcheck_email(user.uid);
-        }
-    };
+    useEffect(() => {
+        const checkUserEmail = async () => {
+            const user = auth().currentUser;
+            if (user) {
+                await user.reload(); // Cập nhật trạng thái từ Firebase
+                callcheck_email(user.uid);
+            }
+        };
 
-    checkUserEmail();
-}, []); // Chạy một lần khi component mount
+        checkUserEmail();
+    }, []); // Chạy một lần khi component mount
 
     const callcheck_email = (uid) => {
         dispatch(check_email({ uid: uid }))
@@ -49,6 +56,9 @@ const Screen3 = (props) => {
     };
 
     const handleTiep = async () => {
+        // Ngăn spam khi đang loading
+        if (isLoading) return;
+
         // Kiểm tra email hợp lệ
         if (!validateEmail(email)) {
             setError('Email không hợp lệ');
@@ -56,40 +66,56 @@ const Screen3 = (props) => {
         }
 
         setError(''); // Xóa lỗi nếu có
+        setIsLoading(true); // Bật trạng thái loading
 
         try {
-            // Gọi API checkEmail (Đã chú thích để test API sendOTP_dangKi_gmail)
+            // API checkEmail
             const checkEmailResponse = await dispatch(checkEmail({ email: email })).unwrap();
             if (!checkEmailResponse.status) {
                 setError(checkEmailResponse.message || 'Email không hợp lệ hoặc đã được sử dụng');
+                setIsLoading(false);
+                setIsFailed(true);
+                setTimeout(() => setIsFailed(false), 1500);
                 return;
             }
 
-            // Gọi API sendOTP_dangKi_gmail
+            // API sendOTP_dangKi_gmail
             const sendOTPResponse = await dispatch(sendOTP_dangKi_gmail({ gmail: email })).unwrap();
             if (!sendOTPResponse.status) {
                 setError(sendOTPResponse.message || 'Gửi OTP thất bại');
+                setIsLoading(false);
+                setIsFailed(true);
+                setTimeout(() => setIsFailed(false), 1500);
                 return;
             }
 
-            // Nếu gửi OTP thành công, chuyển sang màn hình tiếp theo
-            navigation.navigate('OTPGmailScreen', {
-                first_name: params.first_name,
-                last_name: params.last_name,
-                dateOfBirth: params.dateOfBirth,
-                sex: params.sex,
-                phone: null,
-                email: email,
-            });
+            // Nếu gửi OTP thành công
+            setIsSuccess(true);
+            setTimeout(() => {
+                setIsLoading(false);
+                setIsSuccess(false);
+                navigation.navigate('OTPGmailScreen', {
+                    first_name: params.first_name,
+                    last_name: params.last_name,
+                    dateOfBirth: params.dateOfBirth,
+                    sex: params.sex,
+                    phone: null,
+                    email: email,
+                });
+            }, 2000);
+            setEmail(''); // Reset email sau khi gửi thành công
         } catch (error) {
             console.log('Error:', error);
             setError('Có lỗi xảy ra. Vui lòng thử lại.');
+            setIsLoading(false);
+            setIsFailed(true);
+            setTimeout(() => setIsFailed(false), 1500);
         }
     };
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => 
+            <Pressable onPress={() =>
                 navigation.navigate('Screen2', {
                     first_name: params.first_name,
                     last_name: params.last_name,
@@ -112,12 +138,17 @@ const Screen3 = (props) => {
                 placeholderTextColor={'#8C96A2'}
                 placeholder="Email"
                 style={[styles.inputDate, error && { borderColor: 'red' }]}
+                editable={!isLoading} // Vô hiệu hóa input khi đang loading
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             <Text style={styles.infoText}>Chúng tôi có thể gửi thông báo cho bạn qua email</Text>
 
-            <Pressable style={styles.button} onPress={handleTiep}>
+            <Pressable
+                style={[styles.button, isLoading && styles.buttonDisabled]}
+                onPress={handleTiep}
+                disabled={isLoading} // Vô hiệu hóa nút khi đang loading
+            >
                 <Text style={styles.buttonText}>Tiếp</Text>
             </Pressable>
 
@@ -130,10 +161,16 @@ const Screen3 = (props) => {
                         dateOfBirth: params.dateOfBirth,
                         sex: params.sex,
                     })}
+                    disabled={isLoading} // Vô hiệu hóa nút khi đang loading
                 >
                     <Text style={styles.buttonTextNextScreen}>Đăng ký bằng số điện thoại</Text>
                 </Pressable>
             </View>
+
+            {/* Thêm các Modal */}
+            <LoadingModal visible={isLoading} />
+            <SuccessModal visible={isSuccess} message="Gửi OTP thành công!" />
+            <FailedModal visible={isFailed} message="Không thể gửi OTP tới email này!" />
         </View>
     );
 };
@@ -166,12 +203,12 @@ const styles = StyleSheet.create({
         padding: height * 0.015,
         backgroundColor: '#fff',
         marginVertical: height * 0.02,
-        color: 'black'
+        color: 'black',
     },
     errorText: {
         color: 'red',
         fontSize: height * 0.018,
-        marginBottom: height * 0.015,
+        bottom: height * 0.015,
     },
     infoText: {
         fontSize: height * 0.018,
@@ -183,6 +220,10 @@ const styles = StyleSheet.create({
         paddingVertical: height * 0.015,
         borderRadius: width * 0.05,
         alignItems: 'center',
+    },
+    buttonDisabled: {
+        backgroundColor: '#A0C4FF', // Màu nhạt hơn khi bị vô hiệu hóa
+        opacity: 0.6,
     },
     buttonText: {
         color: '#fff',
@@ -204,8 +245,8 @@ const styles = StyleSheet.create({
     buttonTextNextScreen: {
         fontWeight: '500',
         fontSize: height * 0.02,
-        color: 'black'
-    }
+        color: 'black',
+    },
 });
 
 export default Screen3;
