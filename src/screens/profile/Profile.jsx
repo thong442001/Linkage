@@ -9,6 +9,7 @@ import {
     Pressable,
     Animated,
     RefreshControl,
+    Clipboard//copy
 } from 'react-native';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -58,7 +59,7 @@ const Profile = props => {
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
-    const [relationship, setRelationship] = useState(null);posts
+    const [relationship, setRelationship] = useState(null); posts
     const [friendRelationships, setFriendRelationships] = useState([]);
     const [stories, setStories] = useState(null);
     const [mutualFriendsCount, setMutualFriendsCount] = useState(0);
@@ -71,11 +72,19 @@ const Profile = props => {
     const scrollY = useRef(new Animated.Value(0)).current;
     const previousScrollY = useRef(0);
 
+    //Deeplink 
+    const [dialogCopyVisible, setDialogCopyVisible] = useState(false); // dialog copy
+    // Hàm copy tin nhắn
+    const copyToClipboard = text => {
+        Clipboard.setString(text);
+        setDialogCopyVisible(true); // hiện dialog copy
+    };
+
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         callAllProfile().finally(() => setRefreshing(false));
-      }, [params?._id, me]);
+    }, [params?._id, me]);
 
     useEffect(() => {
         const listenerId = scrollY.addListener(({ value }) => {
@@ -391,18 +400,34 @@ const Profile = props => {
                 <View style={ProfileS.rectangle}>
                     <View style={ProfileS.lineBottomSheet}></View>
                 </View>
-
+                {
+                    (me._id != user?._id)
+                    && (
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={() => {
+                                closeBottomSheet();
+                                navigation.navigate('Report', { ID_post: null, ID_user: user._id });
+                            }}
+                        >
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="ban" size={25} />
+                            </View>
+                            <Text style={ProfileS.optionText}>Báo cáo</Text>
+                        </TouchableOpacity>
+                    )
+                }
                 <TouchableOpacity
                     style={ProfileS.option}
                     onPress={() => {
                         closeBottomSheet();
-                        navigation.navigate('Report', { ID_post: null, ID_user: user._id });
+                        copyToClipboard(`https://linkage.id.vn/deeplink?url=linkage://profile?ID_user=${user?._id.toString()}`); // copy
                     }}
                 >
                     <View style={ProfileS.anhBia}>
-                        <Icon name="ban" size={25} />
+                        <Icon name="unlink" size={25} />
                     </View>
-                    <Text style={ProfileS.optionText}>Báo cáo</Text>
+                    <Text style={ProfileS.optionText}>Sao chép liên kết</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -852,7 +877,7 @@ const Profile = props => {
                                             <Text style={ProfileS.textEdit}>Nhắn tin</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            disabled={me._id == user?._id}
+                                            //disabled={me._id == user?._id}
                                             style={ProfileS.btnMore}
                                             onPress={openBottomSheetReportUser}>
                                             <Icon
@@ -879,6 +904,16 @@ const Profile = props => {
                                             <Text style={ProfileS.textEdit}>
                                                 Chỉnh sửa trang cá nhân
                                             </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            //disabled={me._id == user?._id}
+                                            style={ProfileS.btnMore}
+                                            onPress={openBottomSheetReportUser}>
+                                            <Icon
+                                                name="ellipsis-horizontal"
+                                                size={25}
+                                                color="black"
+                                            />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -1004,7 +1039,7 @@ const Profile = props => {
                                             style={ProfileS.avataStatus}
                                             source={{ uri: user?.avatar }}
                                         />
-                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray',}}>
+                                        <Text style={{ fontSize: 13, marginLeft: 10, color: 'gray', }}>
                                             Bạn đang nghĩ gì?
                                         </Text>
                                     </View>
@@ -1036,11 +1071,18 @@ const Profile = props => {
                         </View>
                     )
                 }
+                {/* Hiển thị Snackbar dưới cùng màn hình */}
+                <Snackbar
+                    visible={dialogCopyVisible}
+                    onDismiss={() => setDialogCopyVisible(false)}
+                    duration={1000}>
+                    Đã sao chép tin nhắn!
+                </Snackbar>
             </View >
         );
     };
 
-    
+
     return (
         <View style={ProfileS.container}>
             <LoadingModal visible={isLoading} />
@@ -1051,7 +1093,7 @@ const Profile = props => {
                             <View style={{ backgroundColor: '#FFFFFF' }}>
                                 <ProfileLoading />
                                 <FriendLoading />
-                                <FriendLoading/>
+                                <FriendLoading />
                             </View>
                         ) : (
                             <Animated.FlatList
@@ -1067,13 +1109,13 @@ const Profile = props => {
                                 )}
                                 scrollEventThrottle={16}
                                 refreshControl={
-                                    <RefreshControl 
-                                    refreshing={refreshing}
-                                    onRefresh={onRefresh}
-                                    colors={['#0064E0']}
-                                    tintColor="#0064E0"
-                                        >
-                                        </RefreshControl>
+                                    <RefreshControl
+                                        refreshing={refreshing}
+                                        onRefresh={onRefresh}
+                                        colors={['#0064E0']}
+                                        tintColor="#0064E0"
+                                    >
+                                    </RefreshControl>
                                 }
                             />
                         )}
