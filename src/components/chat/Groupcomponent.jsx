@@ -153,7 +153,6 @@ export default function Groupcomponent({ item }) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   chatItem: {
     top: 10,

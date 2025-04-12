@@ -100,6 +100,8 @@ const ListFriend = (props) => {
         >
           <FlatList
             data={filteredFriends}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) =>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Profile', { _id: item.ID_userA._id == me._id ? item.ID_userB._id : item.ID_userA._id })}

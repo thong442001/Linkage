@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   image: {
     width: width * 0.24, // Giữ nguyên vì đã responsive
     height: height * 0.12, // Giữ nguyên vì đã responsive
-    borderRadius: width * 5, 
+    borderRadius: width * 5,
     alignSelf: 'center',
   },
   info: {

@@ -14,7 +14,7 @@ const Stories = memo(({ StoryPost }) => {
 
   const allMedias = StoryPost.stories.flatMap(story => story.medias);
   const firstImages = StoryPost.stories.map(story => story.medias?.[0] || null);
-
+console.log('firstImages', StoryPost);
   // Hàm kiểm tra xem media tại index 0 có phải là video không
   const isVideoAtIndex0 = () => {
     const firstStory = StoryPost.stories[0];

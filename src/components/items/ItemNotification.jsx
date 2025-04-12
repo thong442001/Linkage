@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { set } from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/Ionicons'
-
-const ItemNotification = ({ data }) => {
+import { oStackHome } from '../../navigations/HomeNavigation';
+const ItemNotification = ({data}) => {
   const me = useSelector(state => state.app.user);
   const navigation = useNavigation();
 
@@ -221,9 +221,9 @@ const ItemNotification = ({ data }) => {
         setbackground('red')
       }
     }
-    if (data.type == 'Đã thả biểu cảm vào bài viết của bạn') {
-      setName(data.ID_post_reaction.ID_user?.first_name + ' ' + data.ID_post_reaction.ID_user?.last_name)
-      setAvatar(data.ID_post_reaction.ID_user?.avatar);
+    if(data.type=='Đã thả biểu cảm vào bài viết của bạn'){
+      setName(data.ID_post_reaction?.ID_user?.first_name + ' ' + data.ID_post_reaction?.ID_user?.last_name)
+      setAvatar(data.ID_post_reaction?.ID_user?.avatar);
       setIcon('happy')
       setbackground('green')
     }
@@ -253,16 +253,52 @@ const ItemNotification = ({ data }) => {
       setbackground('green')
     }
 
-  }, []);
+  }, [data,navigation]);
 
   // Xác định màn hình cần chuyển đến dựa vào loại thông báo
   const navigateToScreen = () => {
     if (data.type === 'Lời mời kết bạn') {
-      navigation.navigate('Friend', { userId: me._id });
-    } else if (data.type === 'Tin nhắn mới') {
-      navigation.navigate('ChatScreen', { conversationId: data.conversationId });
-    } else if (data.type === 'Bài viết mới') {
-      navigation.navigate('PostDetailScreen', { postId: data.postId });
+      navigation.navigate('Friend', {userId: me._id});
+    } 
+    else if (data.type === 'Đã đăng story mới') {
+    //  navigation.navigate(oStackHome.StoryViewer.name, {
+    //            StoryView: data.ID_post.medias,
+    //            currentUserId: data.ID_post.ID_user._id,
+    //          })
+    } 
+    else if (data.type === 'Đã thành bạn bè của bạn') {
+      navigation.navigate('Profile', { _id: data.ID_relationship.ID_userA._id == me._id ? data.ID_relationship.ID_userB._id : data.ID_relationship.ID_userA._id });
+    }
+    else if (data.type === 'Đã đăng bài mới') {
+      navigation.navigate("PostDetail", { ID_post: data.ID_post._id, typeClick: "comment" });
+    }
+    else if (data.type === 'Bạn đã được mời vào nhóm mới') {
+      navigation.navigate("Chat", { ID_group: data.ID_group._id })
+    }
+    else if (data.type === 'Tin nhắn mới') {
+      navigation.navigate("Chat", { ID_group: data.ID_message.ID_group._id })
+    }
+    else if (data.type === 'Đang livestream') {
+      // navigation.navigate('AudienceScreen', {
+      //   userID: me._id,
+      //   userName: me.first_name + me.last_name,
+      //   liveID: data.content,
+      // })
+    }
+    else if (data.type === 'Đã thả biểu cảm vào bài viết của bạn') {
+      navigation.navigate("PostDetail", { ID_post: data.ID_post_reaction.ID_post._id, typeClick: "reaction" });
+    }
+    else if (data.type === 'Đã thả biểu cảm vào bài viết của bạn') {
+      navigation.navigate("PostDetail", { ID_post: data.ID_post_reaction.ID_post._id, typeClick: "reaction" });
+    }
+    else if (data.type === 'Đã bình luận vào bài viết của bạn') {
+      navigation.navigate("PostDetail", { ID_post: data.ID_comment.ID_post._id, typeClick: "comment" });
+    }
+    else if (data.type === 'Mời chơi game 3 lá') {
+      navigation.navigate("Chat", { ID_group: data.ID_group._id })
+    }
+    else if (data.type === 'Đã thả biểu cảm vào story của bạn') {
+      navigation.navigate("Chat", { ID_group: data.ID_group._id })
     }
   };
 
