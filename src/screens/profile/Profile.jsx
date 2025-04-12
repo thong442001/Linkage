@@ -777,7 +777,7 @@ const Profile = props => {
                 <SendRequestFriendModal visible={successModalVisible} message={'Lời mời đã được gửi'} />
                 <FailedRequestFriendModal visible={failedModalVisible} message={'Đã hủy lời mời kết bạn'} />
                 <RecallSuccessFriendRequestModal visible={recallSuccessModalVisible} message={'Đã hủy lời mời kết bạn'} />
-                <RecallFailedFriendRequestModal visible={recallFailedModalVisible} message={'Đã hủy lời mời kết bạn'} />
+                <RecallSuccessFriendRequestModal visible={recallFailedModalVisible} message={'Đã hủy lời mời kết bạn'} />
                 <AcceptFriendRequestModal visible={acceptFriendRequestModalVisible} message={'Đã chấp nhận lời mời kết bạn'} />
                 <View style={ProfileS.boxHeader}>
                     {/* <Snackbar

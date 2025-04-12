@@ -6,28 +6,6 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-// Tắt thông báo từ Zego
-const originalConsoleLog = console.log;
-const originalConsoleWarn = console.warn;
-const originalConsoleError = console.error;
-
-console.log = (...args) => {
-  const message = args.join(' ');
-  if (message.includes('[ZegoUIKit]')) return;
-  originalConsoleLog(...args);
-};
-
-console.warn = (...args) => {
-  const message = args.join(' ');
-  if (message.includes('[ZegoUIKit]')) return;
-  originalConsoleWarn(...args);
-};
-
-console.error = (...args) => {
-  const message = args.join(' ');
-  if (message.includes('[ZegoUIKit]')) return;
-  originalConsoleError(...args);
-}
 
 export default function AudienceScreen(props) {
   const { route } = props;

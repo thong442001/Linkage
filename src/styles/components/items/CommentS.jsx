@@ -2,6 +2,30 @@ import { StyleSheet, Text, View, Dimensions } from 'react-native'
 import React from 'react'
 const { width, height } = Dimensions.get('window');
 const CommentS = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        top: 350,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+    shareBottomSheetContainer: {
+        backgroundColor: 'white',
+        padding: 15,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+      },
+      shareButton: {
+        backgroundColor: '#0064E0',
+        borderRadius: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+      },
+      shareButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+      },
     postContainer: {
         backgroundColor: '#fff',
         // padding: width * 0.025, // 2.5% chiều rộng màn hình

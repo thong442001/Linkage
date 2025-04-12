@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, Dimensions, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ItemListFriend from '../../components/items/ItemListFriend';

@@ -100,6 +100,7 @@ const HomeChat = ({ route, navigation }) => {
     });
 
     socket.on('new_message', ({ ID_group, message }) => {
+      console.log('Dữ liệu message từ socket:', message);
       setGroups(prevGroups => {
         return prevGroups
           .map(group => {
@@ -110,8 +111,10 @@ const HomeChat = ({ route, navigation }) => {
                   ID_message: message._id,
                   sender: message.sender,
                   content: message.content,
+                  type: message.type,
                   createdAt: message.createdAt,
                   _destroy: message._destroy,
+              
                 },
               };
             }
@@ -160,6 +163,7 @@ const HomeChat = ({ route, navigation }) => {
       await dispatch(getAllGroupOfUser({ ID_user, token }))
         .unwrap()
         .then(response => {
+          console.log('Groups from API:', response.groups);
           setGroups(response.groups);
           setLoading(false);
         });

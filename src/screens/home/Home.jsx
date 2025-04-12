@@ -125,13 +125,7 @@ const Home = props => {
     }
   };
 
-  //cập nhật danh sách bài viết khi có bài viết mới
-  useEffect(() => {
-    if (route.params?.newPost) {
-      setPosts(prevPosts => [route.params.newPost, ...prevPosts]);
-      navigation.setParams({ newPost: undefined }); // Reset param
-    }
-  }, [route.params?.newPost]);
+ 
 
   useEffect(() => {
     callGetAllPostsInHome(me._id);
@@ -162,12 +156,20 @@ const Home = props => {
   };
 
   useEffect(() => {
-    if (route.params?.isRestored && route.params?.restoredPost && me?._id) {
-      console.log('Post restored, updating list...');
-      setPosts(prevPosts => [route.params.restoredPost, ...prevPosts]); // Thêm bài viết vào đầu danh sách
-      navigation.setParams({ isRestored: undefined, restoredPost: undefined }); // Reset tham số
+    if (route.params?.newPost && me?._id) {
+        console.log('New post received:', route.params.newPost);
+        setPosts(prevPosts => {
+            // Kiểm tra tránh trùng lặp dựa trên _id
+            if (prevPosts?.some(post => post._id === route.params.newPost._id)) {
+                return prevPosts;
+            }
+            // Thêm bài viết mới vào đầu danh sách
+            return [route.params.newPost, ...(prevPosts || [])];
+        });
+        // Reset params để tránh xử lý lại
+        navigation.setParams({ newPost: undefined });
     }
-  }, [route.params?.isRestored, route.params?.restoredPost, me?._id]);
+}, [route.params?.newPost, me?._id]);
 
 
 

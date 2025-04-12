@@ -7,7 +7,8 @@ import {
   TextInput,
   Modal,
   TouchableWithoutFeedback,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Video from 'react-native-video';
@@ -758,7 +759,11 @@ const PostDetail = (props) => {
 
   const header = () => {
     if (isLoading) {
-      return <LoadingTron />;
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
     }
     if (!isPermission) {
       return <NoAccessModal message="Bạn không có quyền xem bài viết này." />;

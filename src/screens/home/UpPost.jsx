@@ -318,9 +318,9 @@ const UpPost = (props) => {
             setTimeout(() => setFailedModalVisible(false), 2000); 
             return;
         }
-
+    
         setIsPosting(true); // Bật trạng thái đăng bài
-
+    
         try {
             const paramsAPI = {
                 ID_user: me._id,
@@ -331,17 +331,39 @@ const UpPost = (props) => {
                 ID_post_shared: null,
                 tags: tags,
             };
-
+    
             console.log("Push", paramsAPI);
             await dispatch(addPost(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log(response);
-                    const newPost = response.post;
-                    setSuccessModalVisible(true); // Hiển thị modal thành công
+                    console.log('API response:', response);
+                    const newPost = {
+                        ...response.post,
+                        ID_user: {
+                            _id: me._id,
+                            first_name: me.first_name || '',
+                            last_name: me.last_name || '',
+                            avatar: me.avatar || '',
+                        },
+                        post_reactions: response.post.post_reactions || [],
+                        comments: response.post.comments || [],
+                    };
+                    setSuccessModalVisible(true); 
                     setTimeout(() => {
                         setSuccessModalVisible(false);
-                        navigation.navigate(oStackHome.TabHome, { newPost });
+                        // Điều hướng về Home trong TabHome
+                        navigation.navigate('TabHome', {
+                            screen: 'Home',
+                            params: {
+                                newPost: newPost,
+                            },
+                        });
+                        // Reset form
+                        setCaption('');
+                        setMedias([]);
+                        setTags([]);
+                        setTypePost('Normal');
+                        setSelectedOption({ status: 1, name: "Công khai" });
                     }, 2000); 
                 })
                 .catch((error) => {
