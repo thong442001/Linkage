@@ -155,6 +155,16 @@ const Home = props => {
     }
   };
 
+
+  // useEffect(() => {
+  //   if (route.params?.refresh && me?._id) {
+  //     console.log('Refreshing posts after new post...');
+  //     callGetAllPostsInHome(me._id);
+  //     navigation.setParams({ refresh: undefined });
+  //   }
+  // }, [route.params?.refresh, me?._id]);
+
+
   useEffect(() => {
     if (route.params?.newPost && me?._id) {
         console.log('New post received:', route.params.newPost);
