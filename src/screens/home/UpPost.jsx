@@ -313,72 +313,93 @@ const UpPost = (props) => {
     //call api addPost
     const callAddPost = async () => {
         if (caption == '' && medias.length == 0) {
-            setFailedModalVisible(true);
-            console.log('Chưa có dữ liệu');
-            setTimeout(() => setFailedModalVisible(false), 2000); 
-            return;
+          setFailedModalVisible(true);
+          console.log('Chưa có dữ liệu');
+          setTimeout(() => setFailedModalVisible(false), 2000);
+          return;
         }
-    
-        setIsPosting(true); // Bật trạng thái đăng bài
-    
+      
+        setIsPosting(true);
+      
         try {
-            const paramsAPI = {
-                ID_user: me._id,
-                caption: caption,
-                medias: medias,
-                status: selectedOption.name,
-                type: typePost,
-                ID_post_shared: null,
-                tags: tags,
-            };
-    
-            console.log("Push", paramsAPI);
-            await dispatch(addPost(paramsAPI))
-                .unwrap()
-                .then((response) => {
-                    console.log('API response:', response);
-                    const newPost = {
-                        ...response.post,
-                        ID_user: {
-                            _id: me._id,
-                            first_name: me.first_name || '',
-                            last_name: me.last_name || '',
-                            avatar: me.avatar || '',
-                        },
-                        post_reactions: response.post.post_reactions || [],
-                        comments: response.post.comments || [],
-                    };
-                    setSuccessModalVisible(true); 
-                    setTimeout(() => {
-                        setSuccessModalVisible(false);
-                        // Điều hướng về Home trong TabHome
-                        navigation.navigate('TabHome', {
-                            screen: 'Home',
-                            params: {
-                                newPost: newPost,
-                            },
-                        });
-                        // Reset form
-                        setCaption('');
-                        setMedias([]);
-                        setTags([]);
-                        setTypePost('Normal');
-                        setSelectedOption({ status: 1, name: "Công khai" });
-                    }, 2000); 
-                })
-                .catch((error) => {
-                    console.log('Error addPost:', error);
-                    setFailedModalVisible(true); 
-                    setTimeout(() => setFailedModalVisible(false), 2000);
+          const paramsAPI = {
+            ID_user: me._id,
+            caption: caption,
+            medias: medias,
+            status: selectedOption.name,
+            type: typePost,
+            ID_post_shared: null,
+            tags: tags,
+          };
+      
+          console.log("Push", paramsAPI);
+          await dispatch(addPost(paramsAPI))
+            .unwrap()
+            .then((response) => {
+              console.log('API response:', response);
+      
+              // Bổ sung thông tin chi tiết cho tags từ danh sách friends
+              const enrichedTags = response.post.tags.map(tagId => {
+                const friend = friends.find(f => {
+                  const friendId = f.ID_userA._id === me._id ? f.ID_userB._id : f.ID_userA._id;
+                  return friendId === tagId;
                 });
+      
+                if (friend) {
+                  const taggedUser = friend.ID_userA._id === me._id ? friend.ID_userB : friend.ID_userA;
+                  return {
+                    _id: taggedUser._id,
+                    first_name: taggedUser.first_name || '',
+                    last_name: taggedUser.last_name || '',
+                    avatar: taggedUser.avatar || '',
+                  };
+                }
+                return { _id: tagId }; // Nếu không tìm thấy friend, chỉ trả về ID
+              });
+      
+              const newPost = {
+                ...response.post,
+                ID_user: {
+                  _id: me._id,
+                  first_name: me.first_name || '',
+                  last_name: me.last_name || '',
+                  avatar: me.avatar || '',
+                },
+                post_reactions: response.post.post_reactions || [],
+                comments: response.post.comments || [],
+                tags: enrichedTags, // Gán tags đã được bổ sung thông tin chi tiết
+              };
+      
+              setSuccessModalVisible(true);
+              setTimeout(() => {
+                setSuccessModalVisible(false);
+                navigation.navigate('TabHome', {
+                  screen: 'Home',
+                  params: {
+                    newPost: newPost,
+                  },
+                });
+                // Reset form
+                setCaption('');
+                setMedias([]);
+                setTags([]);
+                setTypePost('Normal');
+                setSelectedOption({ status: 1, name: "Công khai" });
+              }, 2000);
+            })
+            .catch((error) => {
+              console.log('Error addPost:', error);
+              setFailedModalVisible(true);
+              setTimeout(() => setFailedModalVisible(false), 2000);
+            });
         } catch (error) {
-            console.log(error);
-            setFailedModalVisible(true); 
-            setTimeout(() => setFailedModalVisible(false), 2000);   
+          console.log(error);
+          setFailedModalVisible(true);
+          setTimeout(() => setFailedModalVisible(false), 2000);
         } finally {
-            setIsPosting(false); 
+          setIsPosting(false);
         }
-    };
+      };
 
 
     const handleSelectOption = (option) => {
