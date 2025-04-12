@@ -1,18 +1,70 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image
-} from "react-native";
+import { StyleSheet, Text, View, Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 export default function Groupcomponent({ item }) {
-
   const me = useSelector(state => state.app.user);
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
-  //console.log(item);
+
+  // Hàm kiểm tra link (giữ lại nhưng không dùng trong getMessageContent)
+  const isLink = text => {
+    const trimmedText = text?.trim() || '';
+    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=:+]*)*$|^[\w-]+:\/\/[\w-./?%&=:+]*$/i;
+    return urlPattern.test(trimmedText);
+  };
+
+  // Hàm kiểm tra link Google Maps
+  const isGoogleMapsLink = text => {
+    return /^https:\/\/www\.google\.com\/maps\?q=/.test(text || '');
+  };
+
+  // Hàm kiểm tra link Cloudinary (giữ lại nhưng không dùng)
+  const isCloudinaryLink = text => {
+    return /https:\/\/res\.cloudinary\.com\/ddbolgs7p\//.test(text || '');
+  };
+
+  // Hàm kiểm tra link video (giữ lại nhưng không dùng)
+  const isVideoLink = text => {
+    return (
+      /\.(mp4|mov|avi|wmv)$/i.test(text || '') ||
+      /youtube\.com|youtu\.be|vimeo\.com/.test(text || '') ||
+      /https:\/\/res\.cloudinary\.com\/ddbolgs7p\/video\//.test(text || '')
+    );
+  };
+
+  // Hàm hiển thị nội dung tin nhắn
+  const getMessageContent = message => {
+    if (!message || !message.content) return '';
+
+    // Debug dữ liệu message
+    console.log('messageLatest:', {
+      type: message.type,
+      content: message.content,
+      sender: message.sender,
+    });
+
+    const type = message.type || 'text'; // Mặc định là 'text' nếu type undefined
+    const content = message.content;
+
+    // Kiểm tra Google Maps dựa trên content
+    if (isGoogleMapsLink(content)) {
+      return 'Link Google Map';
+    }
+
+    // Phân loại dựa trên type
+    switch (type) {
+      case 'image':
+        return 'Hình ảnh';
+      case 'video':
+        return 'Video';
+      case 'game3la':
+        return 'Lời mời chơi game bài cào';
+      case 'text':
+      default:
+        return content; // Hiển thị nội dung gốc nếu là text hoặc type không xác định
+    }
+  };
 
   useEffect(() => {
     if (item.isPrivate == true) {
@@ -20,22 +72,23 @@ export default function Groupcomponent({ item }) {
       if (otherUser) {
         setAvatar(otherUser.avatar);
       } else {
-        console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
+        console.log('⚠️ Không tìm thấy thành viên khác trong nhóm!');
       }
 
       if (item.name == null) {
         if (otherUser) {
-          //setName(otherUser.displayName);
-          setName((otherUser.first_name + " " + otherUser.last_name));
+          setName(`${otherUser.first_name} ${otherUser.last_name}`);
         } else {
-          console.log("⚠️ Không tìm thấy thành viên khác trong nhóm!");
+          console.log('⚠️ Không tìm thấy thành viên khác trong nhóm!');
         }
       } else {
         setName(item.name);
       }
     } else {
       if (item.avatar == null) {
-        setAvatar('https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4');
+        setAvatar(
+          'https://firebasestorage.googleapis.com/v0/b/hamstore-5c2f9.appspot.com/o/Anlene%2Flogo.png?alt=media&token=f98a4e03-1a8e-4a78-8d0e-c952b7cf94b4',
+        );
       } else {
         setAvatar(item.avatar);
       }
@@ -43,73 +96,64 @@ export default function Groupcomponent({ item }) {
         const names = item.members
           .filter(user => user._id !== me._id)
           .map(user => `${user.first_name} ${user.last_name}`)
-          .join(", ");
-        // Cập nhật state một lần duy nhất
+          .join(', ');
         setName(names);
       } else {
         setName(item.name);
       }
     }
+  }, [item, me._id]);
 
-  }, []);
-
-  const formatTime = (timestamp) => {
+  const formatTime = timestamp => {
     if (!timestamp) return '';
 
     const date = new Date(timestamp);
     return date.toLocaleTimeString('vi-VN', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false, // Hiển thị 24h (Bỏ dòng này nếu muốn 12h)
+      hour12: false,
     });
   };
 
   return (
     <View style={styles.chatItem}>
-      {
-        (name != null)
-        && <Image source={{ uri: avatar }} style={styles.avatar} />
-      }
-      {/* view tên nhóm và tin nhắn mới nhất */}
+      {name != null && <Image source={{ uri: avatar }} style={styles.avatar} />}
       <View style={styles.vTxt}>
-        {
-          (avatar != null)
-          && <View style={styles.chatInfo}>
-            <Text style={styles.name}
-              numberOfLines={1} // Số dòng tối đa
-              ellipsizeMode="tail" // Cách hiển thị dấu 3 chấm (tail: ở cuối)
-            >{name}</Text>
+        {avatar != null && (
+          <View style={styles.chatInfo}>
+            <Text
+              style={styles.name}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {name}
+            </Text>
           </View>
-        }
-        {/* tin nhắn mới nhất */}
-        {
-          item.messageLatest != null
-          && (
-            <View style={styles.vMessageNew}>
-              {/* name */}
-              {
-                me._id != item.messageLatest.sender.ID_user
-                  ? <Text
-                    style={styles.messageName}>
-                    {item.messageLatest.sender.first_name} {item.messageLatest.sender.last_name}: </Text>
-                  : <Text
-                    style={styles.messageName}>
-                    Bạn: </Text>
-              }
-              {/* content */}
-              <Text
-                style={styles.messageContent}
-                numberOfLines={1}
-              >{item.messageLatest.content}</Text>
-              {/* thời gian */}
-              <Text style={styles.messageNewTime}>{formatTime(item.messageLatest.createdAt)}</Text>
-            </View>
-          )
-        }
+        )}
+        {item.messageLatest != null && (
+          <View style={styles.vMessageNew}>
+            {me._id != item.messageLatest.sender.ID_user ? (
+              <Text style={styles.messageName}>
+                {item.messageLatest.sender.first_name}{' '}
+                {item.messageLatest.sender.last_name}:{' '}
+              </Text>
+            ) : (
+              <Text style={styles.messageName}>Bạn: </Text>
+            )}
+            <Text
+              style={styles.messageContent}
+              numberOfLines={1}>
+              {getMessageContent(item.messageLatest)}
+            </Text>
+            <Text style={styles.messageNewTime}>
+              {formatTime(item.messageLatest.createdAt)}
+            </Text>
+          </View>
+        )}
       </View>
-    </View >
+    </View>
   );
 }
+
 const styles = StyleSheet.create({
   chatItem: {
     top: 10,
