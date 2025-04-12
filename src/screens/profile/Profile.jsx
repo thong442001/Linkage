@@ -49,6 +49,7 @@ import AcceptFriendRequestModal from '../../utils/animation/success/SuccessModal
 import CancelFriendRequestModal from '../../utils/animation/failed/FailedModal';
 
 import { set } from '@react-native-firebase/database';
+import { oStackHome } from '../../navigations/HomeNavigation';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -375,7 +376,7 @@ const Profile = props => {
                             style={ProfileS.option}
                             onPress={() => {
                                 closeBottomSheet();
-                                navigation.navigate('StoryViewer', { StoryView: stories });
+                                navigation.navigate(oStackHome.StoryViewer.name, { StoryView: stories, currentUserId: me?._id, });
                             }}>
                             <View style={ProfileS.anhBia}>
                                 <Icon name="radio-button-on" size={25} color="black" />

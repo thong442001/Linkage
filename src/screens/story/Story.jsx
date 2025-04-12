@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  optionText: { fontSize: 16 },
+  optionText: { fontSize: 16, color:'black' },
   addTextButton: {
     position: 'absolute',
     bottom: 30,

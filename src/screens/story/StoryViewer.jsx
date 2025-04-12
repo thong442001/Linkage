@@ -26,6 +26,7 @@ const { width, height } = Dimensions.get('window');
 const Story = () => {
   const route = useRoute();
   const { StoryView, currentUserId, onDeleteStory } = route.params || {};
+  // console.log('StoryView:', StoryView);
   const me = useSelector(state => state.app.user);
   const reactions = useSelector(state => state.app.reactions);
   const navigation = useNavigation();
@@ -394,8 +395,10 @@ const onVideoProgress = (data) => {
 
         <View style={styles.headerContainer}>
           <View style={styles.userInfoContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: StoryView?.user?._id })}>
             <Image source={{ uri: StoryView.user.avatar }} style={styles.avatar} />
-            <Text style={styles.username}>
+            </TouchableOpacity>
+            <Text style={styles.username} onPress={() => navigation.navigate('Profile', { _id: StoryView?.user?._id })}>
               {StoryView.user.first_name + ' ' + StoryView.user.last_name}
             </Text>
           </View>
