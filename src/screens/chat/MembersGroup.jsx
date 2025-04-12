@@ -132,6 +132,14 @@ const MembersGroup = (props) => {// cần ID_group (param)
         callPassKey(me._id, newAdmin);
     };
 
+    const shortenName = (name) => {
+        if (!name) return '';
+        if (name.length > 15) {
+            return name.substring(0, 12) + '...';
+        }
+        return name;
+    };
+
     return (
         <View style={styles.container}>
             {/* header */}

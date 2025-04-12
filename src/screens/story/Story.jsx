@@ -72,7 +72,7 @@ const Story = ({ route }) => {
         if (response.didCancel) {
           setErrorMessage('Bạn đã hủy chụp');
           setShowFailedModal(true);
-          setTimeout(() => setShowFailedModal(false), 1500); 
+          setTimeout(() => setShowFailedModal(false), 1500);
         } else if (response.errorCode) {
           setErrorMessage(`Lỗi khi mở camera: ${response.errorMessage}`);
           setShowFailedModal(true);
@@ -112,8 +112,8 @@ const Story = ({ route }) => {
   const callAddPost = async () => {
     if (!previewMedia) {
       setErrorMessage('Vui lòng chọn media trước khi đăng!');
-     setShowFailedModal(true);
-     setTimeout(() => setShowFailedModal(false), 1500);
+      setShowFailedModal(true);
+      setTimeout(() => setShowFailedModal(false), 1500);
       return;
     }
 
@@ -126,8 +126,8 @@ const Story = ({ route }) => {
       const uploadedUrl = await uploadToCloudinary(previewMedia);
       if (!uploadedUrl) {
         setErrorMessage('Không thể tải media!');
-       setShowFailedModal(true);
-       setTimeout(() => setShowFailedModal(false), 2000);
+        setShowFailedModal(true);
+        setTimeout(() => setShowFailedModal(false), 2000);
         return;
       }
 
@@ -144,10 +144,10 @@ const Story = ({ route }) => {
 
       await dispatch(addPost(paramsAPI)).unwrap();
       setIsPosted(true);
-      
+
       // Hiển thị StoriesModal khi đăng thành công
       setShowSuccessModal(true);
-      
+
       // Tự động ẩn StoriesModal sau 2 giây và điều hướng về TabHome
       setTimeout(() => {
         setShowSuccessModal(false);
@@ -155,15 +155,15 @@ const Story = ({ route }) => {
       }, 2000);
 
     } catch (error) {
-     setErrorMessage('Đăng bài thất bại. Vui lòng thử lại!');
-     setShowFailedModal(true);
-     setTimeout(() => setShowFailedModal(false), 2000);
+      setErrorMessage('Đăng bài thất bại. Vui lòng thử lại!');
+      setShowFailedModal(true);
+      setTimeout(() => setShowFailedModal(false), 2000);
       console.log("Lỗi đăng bài:", error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const uploadToCloudinary = async (mediaUri) => {
     const formData = new FormData();
     formData.append('file', {
@@ -297,10 +297,10 @@ const Story = ({ route }) => {
         </Modal>
 
         {/* Success Modal */}
-      {showSuccessModal && <SuccessModal message={'Đăng story thành công'} />}
+        {showSuccessModal && <SuccessModal message={'Đăng story thành công'} />}
 
-{/* Failed Modal */}
-{showFailedModal && <FailedModal message={errorMessage} />}
+        {/* Failed Modal */}
+        {showFailedModal && <FailedModal message={errorMessage} />}
 
       </View>
     </TouchableWithoutFeedback>
@@ -315,12 +315,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: StatusBar.currentHeight || 0,
   },
-  image: {    width: width * 0.8, // Thu nhỏ chiều rộng xuống 80% kích thước màn hình
+  image: {
+    width: width * 0.8, // Thu nhỏ chiều rộng xuống 80% kích thước màn hình
     height: height * 0.8,
     aspectRatio: 1, // Giữ tỷ lệ ảnh (có thể thay đổi tùy theo tỷ lệ thực tế của ảnh)
     marginTop: 30,
     resizeMode: 'contain', // Đảm bảo ảnh không bị cắt, thay vì 'cover'
-     },
+  },
   headerContainer: {
     position: 'absolute',
     top: 30,
@@ -382,7 +383,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
   },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, olor: 'black' },
   optionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  optionText: { fontSize: 16 },
+  optionText: { fontSize: 16, color: 'black' },
   addTextButton: {
     position: 'absolute',
     bottom: 30,
