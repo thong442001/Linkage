@@ -117,9 +117,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     marginBottom: 5,
-    borderRadius: 30, 
-    paddingHorizontal: 10,  
-    borderColor: '#d8dce0', 
+    borderRadius: 30,
+    paddingHorizontal: 10,
+    borderColor: '#d8dce0',
   },
   avatar: {
     width: 50,

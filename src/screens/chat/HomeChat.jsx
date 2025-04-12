@@ -110,6 +110,7 @@ const HomeChat = ({ route, navigation }) => {
                                     ID_message: message._id,
                                     sender: message.sender,
                                     content: message.content,
+                                    type: message.type,
                                     createdAt: message.createdAt,
                                     _destroy: message._destroy,
                                 },
