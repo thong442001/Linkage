@@ -149,8 +149,8 @@ const AppNavigation = () => {
       console.log(error);
     }
   };
-   
-  
+
+
   //call api getAllReaction
   const callCheckBanUser = async () => {
     try {
