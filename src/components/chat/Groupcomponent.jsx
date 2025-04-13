@@ -7,31 +7,13 @@ export default function Groupcomponent({ item }) {
   const [name, setName] = useState(null);
   const [avatar, setAvatar] = useState(null);
 
-  // Hàm kiểm tra link (giữ lại nhưng không dùng trong getMessageContent)
-  const isLink = text => {
-    const trimmedText = text?.trim() || '';
-    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=:+]*)*$|^[\w-]+:\/\/[\w-./?%&=:+]*$/i;
-    return urlPattern.test(trimmedText);
-  };
 
   // Hàm kiểm tra link Google Maps
   const isGoogleMapsLink = text => {
     return /^https:\/\/www\.google\.com\/maps\?q=/.test(text || '');
   };
 
-  // Hàm kiểm tra link Cloudinary (giữ lại nhưng không dùng)
-  const isCloudinaryLink = text => {
-    return /https:\/\/res\.cloudinary\.com\/ddbolgs7p\//.test(text || '');
-  };
 
-  // Hàm kiểm tra link video (giữ lại nhưng không dùng)
-  const isVideoLink = text => {
-    return (
-      /\.(mp4|mov|avi|wmv)$/i.test(text || '') ||
-      /youtube\.com|youtu\.be|vimeo\.com/.test(text || '') ||
-      /https:\/\/res\.cloudinary\.com\/ddbolgs7p\/video\//.test(text || '')
-    );
-  };
 
   // Hàm hiển thị nội dung tin nhắn
   const getMessageContent = message => {
@@ -44,7 +26,7 @@ export default function Groupcomponent({ item }) {
       sender: message.sender,
     });
 
-    const type = message.type || 'text'; // Mặc định là 'text' nếu type undefined
+    const type = message.type || 'text'; 
     const content = message.content;
 
     // Kiểm tra Google Maps dựa trên content
@@ -153,6 +135,7 @@ export default function Groupcomponent({ item }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   chatItem: {
     top: 10,

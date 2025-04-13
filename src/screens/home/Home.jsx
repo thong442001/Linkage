@@ -18,9 +18,8 @@ const { height } = Dimensions.get('window');
 const HEADER_HEIGHT = height * 0.1;
 
 const Home = props => {
-
   const { navigation } = props;
-  const route = useRoute(); // Thêm useRoute để nhận params
+  const route = useRoute();
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
@@ -31,10 +30,7 @@ const Home = props => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-
   const previousScrollY = useRef(0);
-
-  // Animated value
   const scrollY = useRef(new Animated.Value(0)).current;
   const clampedScrollY = Animated.diffClamp(scrollY, 0, HEADER_HEIGHT);
   const headerTranslate = clampedScrollY.interpolate({
@@ -43,16 +39,8 @@ const Home = props => {
     extrapolate: 'clamp',
   });
 
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     setCurrentTime(Date.now());
-  //   }, 60000); // Cập nhật mỗi phút
-
-  //   return () => clearInterval(timer);
-  // }, [refreshing]); // Thêm refreshing vào dependencies
-
   useEffect(() => {
-    const listenerId = scrollY.addListener(({ value }) => { });
+    const listenerId = scrollY.addListener(({ value }) => {});
     return () => {
       scrollY.removeListener(listenerId);
     };
@@ -63,21 +51,17 @@ const Home = props => {
 
     const listenerId = scrollY.addListener(({ value }) => {
       if (value - previousScrollY > 0) {
-        // Cuộn xuống => Ẩn Bottom Tab
         props.route.params.handleScroll(false);
       } else if (value - previousScrollY < 0) {
-        // Cuộn lên => Hiện Bottom Tab
         props.route.params.handleScroll(true);
       }
-      previousScrollY = value; // Cập nhật vị trí cuộn trước đó
+      previousScrollY = value;
     });
 
     return () => {
       scrollY.removeListener(listenerId);
     };
   }, [scrollY]);
-
-
 
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
@@ -88,21 +72,19 @@ const Home = props => {
     return () => liveSessionsRef.off('value', onValueChange);
   }, []);
 
-
-  // Gọi lại API khi nhận được isDeleted: true từ StoryViewer
   useEffect(() => {
     if (route.params?.isDeleted && me?._id) {
       console.log('Story deleted, refreshing data...');
       setTimeout(() => {
-        callGetAllPostsInHome(me._id);
-      }, 1000); // Chờ 1 giây
+        callGetAllPostsInHome(me._id, true);
+      }, 1000);
       navigation.setParams({ isDeleted: undefined });
     }
   }, [route.params?.isDeleted, me?._id]);
 
-  const callGetAllPostsInHome = async ID_user => {
+  const callGetAllPostsInHome = async (ID_user, showLoading = true) => {
     try {
-      if (!refreshing) setloading(true);
+      if (!refreshing && showLoading) setloading(true);
       await dispatch(getAllPostsInHome({ me: ID_user, token, timestamp: Date.now() }))
         .unwrap()
         .then(response => {
@@ -110,32 +92,29 @@ const Home = props => {
           setPosts(response.posts || []);
           setStories(response.stories || []);
           setLiveSessions([]);
-          setloading(false);
+          if (showLoading) setloading(false);
         })
         .catch(error => {
           console.log('Error getAllPostsInHome:: ', error);
           setPosts([]);
           setStories([]);
           setLiveSessions([]);
-          setloading(false);
+          if (showLoading) setloading(false);
         });
     } catch (error) {
       console.log(error);
-      setloading(false);
+      if (showLoading) setloading(false);
     }
   };
-
- 
 
   useEffect(() => {
     callGetAllPostsInHome(me._id);
   }, [me._id]);
 
-  // Hàm xử lý làm mới khi kéo xuống
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setCurrentTime(Date.now());
-    callGetAllPostsInHome(me._id).finally(() => {
+    callGetAllPostsInHome(me._id, false).finally(() => {
       setRefreshing(false);
     });
   }, [me._id]);
@@ -156,32 +135,14 @@ const Home = props => {
   };
 
 
-  // useEffect(() => {
-  //   if (route.params?.refresh && me?._id) {
-  //     console.log('Refreshing posts after new post...');
-  //     callGetAllPostsInHome(me._id);
-  //     navigation.setParams({ refresh: undefined });
-  //   }
-  // }, [route.params?.refresh, me?._id]);
-
-
+  //call api lấy bài viết khi đăng bài thành công
   useEffect(() => {
-    if (route.params?.newPost && me?._id) {
-        console.log('New post received:', route.params.newPost);
-        setPosts(prevPosts => {
-            // Kiểm tra tránh trùng lặp dựa trên _id
-            if (prevPosts?.some(post => post._id === route.params.newPost._id)) {
-                return prevPosts;
-            }
-            // Thêm bài viết mới vào đầu danh sách
-            return [route.params.newPost, ...(prevPosts || [])];
-        });
-        // Reset params để tránh xử lý lại
-        navigation.setParams({ newPost: undefined });
+    if (route.params?.refresh && me?._id) {
+      console.log('Refreshing posts after new post...');
+      callGetAllPostsInHome(me._id, false);
+      navigation.setParams({ refresh: undefined });
     }
-}, [route.params?.newPost, me?._id]);
-
-
+  }, [route.params?.refresh, me?._id]);
 
   const updatePostReaction = (ID_post, newReaction, ID_post_reaction) => {
     setPosts(prevPosts =>
@@ -225,8 +186,6 @@ const Home = props => {
     );
   };
 
-
-
   const renderPosts = useCallback(
     ({ item }) => (
       <ProfilePage
@@ -238,7 +197,7 @@ const Home = props => {
         deletPostReaction={deletPostReaction}
       />
     ),
-    [me._id, currentTime] // Chỉ phụ thuộc vào me._id và currentTime
+    [me._id, currentTime]
   );
 
   return (

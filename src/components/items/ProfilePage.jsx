@@ -985,6 +985,9 @@ const PostItem = memo(({
                 </TouchableWithoutFeedback>
             </Modal>
 
+
+
+
             {/* Modal để hiển thị danh sách trạng thái */}
             < Modal
                 transparent={true}  // Cho phép nền của modal trong suốt, giúp nhìn thấy nền bên dưới modal.
@@ -1066,7 +1069,7 @@ const PostItem = memo(({
                 message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"
             />
 
-
+            
             <FailedModal
                 visible={failedModalVisible}
                 message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"

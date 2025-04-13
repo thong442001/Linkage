@@ -92,8 +92,6 @@ const CreateGroup = (props) => {// cần param
                     console.log("ID_group: " + response.group._id)
                     // Emit sự kiện "new_group" để cập nhật danh sách nhóm
                     socket.emit("new_group", { group: response.group, members: members });
-
-
                     // Chuyển sang màn hình chat của nhóm vừa tạo
                     navigation.navigate("Chat", { ID_group: response.group._id })
                 })
