@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
   },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, color:'red' },
   optionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
