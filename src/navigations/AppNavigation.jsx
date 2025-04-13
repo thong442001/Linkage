@@ -68,7 +68,6 @@ const AppNavigation = () => {
           //console.log('🌐 Deeplink:', url);
           // Parse deeplink: linkage://post-chi-tiet?ID_post=124
           const [path, queryString] = url.split('?');
-          // share post
           if (path.includes('post-chi-tiet')) {
             const params = parseQueryString(queryString);
             const ID_post = params.ID_post;
@@ -80,18 +79,7 @@ const AppNavigation = () => {
               console.error('❌ Thiếu ID_post trong deeplink');
             }
           }
-          // share profile
-          if (path.includes('profile')) {
-            const params = parseQueryString(queryString);
-            const ID_user = params.ID_user;
-            if (ID_user) {
-              //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
-              // Navigate to PostScreen
-              navigation.navigate("Profile", { _id: ID_user });
-            } else {
-              console.error('❌ Thiếu ID_post trong deeplink');
-            }
-          }
+
         }
       } catch (error) {
         console.error('❌ Lỗi khi xử lý deeplink:', error);
@@ -103,25 +91,12 @@ const AppNavigation = () => {
     const subscription = Linking.addEventListener('url', ({ url }) => {
       //console.log('🌐 Nhận deeplink:', url);
       const [path, queryString] = url.split('?');
-      // share post
       if (path.includes('post-chi-tiet')) {
         const params = parseQueryString(queryString);
         const ID_post = params.ID_post;
         if (ID_post) {
           //console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
           navigation.navigate("PostDetail", { ID_post: ID_post, typeClick: "comment" });
-        } else {
-          console.error('❌ Thiếu ID_post trong deeplink');
-        }
-      }
-      // share profile
-      if (path.includes('profile')) {
-        const params = parseQueryString(queryString);
-        const ID_user = params.ID_user;
-        if (ID_user) {
-          //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
-          // Navigate to PostScreen
-          navigation.navigate("Profile", { _id: ID_user });
         } else {
           console.error('❌ Thiếu ID_post trong deeplink');
         }
@@ -174,7 +149,8 @@ const AppNavigation = () => {
       console.log(error);
     }
   };
-
+   
+  
   //call api getAllReaction
   const callCheckBanUser = async () => {
     try {
@@ -642,15 +618,7 @@ const AppNavigation = () => {
         console.log(`🔕 Thông báo bị tắt cho channel: ${channelId}`);
         return;
       }
-      // Kiểm tra nếu sender._id trùng với user._id thì bỏ qua
-    if (
-      notification?.ID_message?.sender?._id === user?._id  || 
-      notification?.ID_post?.ID_user?._id === user?._id 
-    ) {
-      console.log(`🔇 Bỏ qua thông báo từ chính người dùng: ${notification.type}`);
-      return;
-    }
-    /////
+
       const formattedData = {};
       Object.keys(notification).forEach(key => {
         formattedData[key] = typeof notification[key] === 'string'

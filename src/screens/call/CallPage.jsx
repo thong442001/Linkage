@@ -13,7 +13,7 @@ const CallPage = props => {
   const { route, navigation } = props;
   const { params } = route;
   const prebuiltRef = useRef();
-
+console.log('params', params);
   const callConfig =
     params?.members?.length > 2
       ? params.status === true

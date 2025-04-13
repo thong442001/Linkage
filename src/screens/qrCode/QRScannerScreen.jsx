@@ -127,7 +127,6 @@ const QRScannerScreen = props => {
             }
             const qrToken = parts[1].split('?')[0]; // Chỉ lấy `userId`, bỏ qua query params
 
-            console.log('UserID:', qrToken);
 
             // ✅ Gọi hàm xử lý với chỉ userId
             handleLoginPress(qrToken);

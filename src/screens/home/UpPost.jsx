@@ -315,11 +315,11 @@ const UpPost = (props) => {
         if (caption == '' && medias.length == 0) {
             setFailedModalVisible(true);
             console.log('Chưa có dữ liệu');
-            setTimeout(() => setFailedModalVisible(false), 2000); 
+            setTimeout(() => setFailedModalVisible(false), 2000);
             return;
         }
 
-        setIsPosting(true); // Bật trạng thái đăng bài
+        setIsPosting(true);
 
         try {
             const paramsAPI = {
@@ -336,25 +336,38 @@ const UpPost = (props) => {
             await dispatch(addPost(paramsAPI))
                 .unwrap()
                 .then((response) => {
-                    console.log(response);
-                    const newPost = response.post;
-                    setSuccessModalVisible(true); // Hiển thị modal thành công
+                    console.log('API response:', response);
+
+
+
+                    setSuccessModalVisible(true);
                     setTimeout(() => {
                         setSuccessModalVisible(false);
-                        navigation.navigate(oStackHome.TabHome, { newPost });
-                    }, 2000); 
+                        navigation.navigate('TabHome', {
+                            screen: 'Home',
+                            params: {
+                                refresh: true, // Thêm tham số refresh để thông báo cho Home
+                            },
+                        });
+                        // Reset form
+                        setCaption('');
+                        setMedias([]);
+                        setTags([]);
+                        setTypePost('Normal');
+                        setSelectedOption({ status: 1, name: "Công khai" });
+                    }, 2000);
                 })
                 .catch((error) => {
                     console.log('Error addPost:', error);
-                    setFailedModalVisible(true); 
+                    setFailedModalVisible(true);
                     setTimeout(() => setFailedModalVisible(false), 2000);
                 });
         } catch (error) {
             console.log(error);
-            setFailedModalVisible(true); 
-            setTimeout(() => setFailedModalVisible(false), 2000);   
+            setFailedModalVisible(true);
+            setTimeout(() => setFailedModalVisible(false), 2000);
         } finally {
-            setIsPosting(false); 
+            setIsPosting(false);
         }
     };
 
@@ -417,9 +430,9 @@ const UpPost = (props) => {
 
     return (
         <View style={UpPostS.Container}>
-            <SuccessModal 
-                visible={successModalVisible} 
-                message={"Đăng bài thành công"}/>
+            <SuccessModal
+                visible={successModalVisible}
+                message={"Đăng bài thành công"} />
             <FailedModal
                 visible={failedModalVisible}
                 message="Đăng bài thất bại. Vui lòng thử lại!"

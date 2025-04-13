@@ -155,10 +155,10 @@ export default function MessageComponent({
       messageRef.current.measure((x, y, width, height, pageX, pageY) => {
         const windowHeight = Dimensions.get('window').height;
         const halfScreen = windowHeight / 2; // Ranh giới giữa nửa trên và nửa dưới
-  
+
         // Kiểm tra vị trí Y của tin nhắn
         const menuTop = pageY > halfScreen ? pageY - 200 : pageY - 63;
-  
+
         setMenuPosition({
           top: menuTop,
           left: pageX,
@@ -213,24 +213,24 @@ export default function MessageComponent({
       externalLocation: { latitude: lat, longitude: lng },
     });
   };
-//tách link và non link
-const renderStyledMessage = (text) => {
-  const parts = text.split(/(https?:\/\/[^\s]+)/g); // Tách link và non-link
+  //tách link và non link
+  const renderStyledMessage = (text) => {
+    const parts = text.split(/(https?:\/\/[^\s]+)/g); // Tách link và non-link
 
-  return parts.map((part, index) => {
-    if (isLink(part)) {
-      return (
-        <Text
-          key={index}
-          style={[styles.linkStyle, isCurrentUser && styles.currentUserTextLink]}
-          onPress={() => Linking.openURL(part)}>
-          {part}
-        </Text>
-      );
-    }
-    return <Text key={index}>{part}</Text>;
-  });
-};
+    return parts.map((part, index) => {
+      if (isLink(part)) {
+        return (
+          <Text
+            key={index}
+            style={[styles.linkStyle, isCurrentUser && styles.currentUserTextLink]}
+            onPress={() => Linking.openURL(part)}>
+            {part}
+          </Text>
+        );
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+  };
 
 
   return (

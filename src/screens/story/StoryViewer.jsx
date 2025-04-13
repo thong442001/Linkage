@@ -60,7 +60,7 @@ const Story = () => {
   useEffect(() => {
     callStoryViewerOfStory();
   }, [currentIndex]);
-
+// console.log('StoryView', route.params);
   const callStoryViewerOfStory = async () => {
     try {
       const response = await dispatch(storyViewerOfStory({ ID_post: stories[currentIndex]._id, ID_user: me._id })).unwrap();

@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, TextInput, Dimensions } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ItemListFriend from '../../components/items/ItemListFriend';
@@ -100,6 +100,8 @@ const ListFriend = (props) => {
         >
           <FlatList
             data={filteredFriends}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) =>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Profile', { _id: item.ID_userA._id == me._id ? item.ID_userB._id : item.ID_userA._id })}

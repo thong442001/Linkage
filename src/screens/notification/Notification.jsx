@@ -1,24 +1,24 @@
-import {useFocusEffect} from '@react-navigation/native';
-import React, {useState, useCallback} from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, LayoutAnimation} from 'react-native';
-import {useSelector, useDispatch} from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ScrollView, LayoutAnimation } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import ItemNotification from '../../components/items/ItemNotification';
-import {getAllNotificationOfUser} from '../../rtk/API';
+import { getAllNotificationOfUser } from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons'
 import { oStackHome } from '../../navigations/HomeNavigation';
 
 const Notification = (props) => {
-  const [notifications, setNotifications] = useState([]); 
+  const [notifications, setNotifications] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false); // ✅ Thêm state mở rộng
- 
-  const {navigation} = props;
+
+  const { navigation } = props;
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
 
   const callGetAllNotificationOfUser = async () => {
     try {
-      await dispatch(getAllNotificationOfUser({me: me._id, token: token}))
+      await dispatch(getAllNotificationOfUser({ me: me._id, token: token }))
         .unwrap()
         .then(response => {
           setNotifications(response.notifications);
@@ -46,15 +46,15 @@ const Notification = (props) => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Thông báo</Text>
-        <TouchableOpacity  onPress={() => navigation.navigate(oStackHome.Search.name)}>
-        <Icon name="search-outline" size={30} color='black' />
+        <TouchableOpacity onPress={() => navigation.navigate(oStackHome.Search.name)}>
+          <Icon name="search-outline" size={30} color='black' />
         </TouchableOpacity>
       </View>
 
       <View style={styles.categoryContainer}>
         <FlatList
           data={isExpanded ? notifications : notifications.slice(0, 7)} // 👈 Toggle số lượng hiển thị
-          renderItem={({item}) => <ItemNotification data={item} />}
+          renderItem={({ item }) => <ItemNotification data={item} />}
           keyExtractor={(item, index) => index.toString()}
           scrollEnabled={false}
         />
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingTop: 30,
-    paddingHorizontal:20
+    paddingHorizontal: 20
   },
   title: {
     fontSize: 25,
@@ -110,9 +110,9 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: 'black',
   },
-  header:{
+  header: {
     flexDirection: 'row',
-    justifyContent:'space-between',
-    alignItems:'center'
+    justifyContent: 'space-between',
+    alignItems: 'center'
   }
 });

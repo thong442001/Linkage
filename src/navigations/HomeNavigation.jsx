@@ -254,7 +254,7 @@ import listgame from '../screens/game/listgame';
 import CheckPhone from '../screens/forgot_password/CheckPhone';
 import CreatePasswordPhone from '../screens/forgot_password/CreatePasswordPhone';
 import ListGoiY from '../screens/friend/ListGoiY';
-import OTPScreen from '../screens/Register/OTPScreen';
+import OTPScreen from '../screens/register/OTPScreen';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },

@@ -52,7 +52,7 @@ const ListGoiY = ({ navigation, route }) => {
       const relationshipResponse = await dispatch(getRelationshipAvsB({ ID_user, me: me._id })).unwrap();
       const ID_relationship = relationshipResponse.relationship._id;
       await dispatch(guiLoiMoiKetBan({ ID_relationship, me: me._id })).unwrap();
-      
+
       console.log('Gửi lời mời kết bạn thành công:', ID_user);
       // Hiển thị modal thành công
       setSuccessModalVisible(true);
@@ -84,6 +84,8 @@ const ListGoiY = ({ navigation, route }) => {
         <View style={{ paddingBottom: width * 0.1 }}>
           <FlatList
             data={listGoiY}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => navigation.navigate('Profile', { _id: item.user._id })}
