@@ -313,63 +313,63 @@ const UpPost = (props) => {
     //call api addPost
     const callAddPost = async () => {
         if (caption == '' && medias.length == 0) {
-          setFailedModalVisible(true);
-          console.log('Chưa có dữ liệu');
-          setTimeout(() => setFailedModalVisible(false), 2000);
-          return;
+            setFailedModalVisible(true);
+            console.log('Chưa có dữ liệu');
+            setTimeout(() => setFailedModalVisible(false), 2000);
+            return;
         }
-      
+
         setIsPosting(true);
-      
+
         try {
-          const paramsAPI = {
-            ID_user: me._id,
-            caption: caption,
-            medias: medias,
-            status: selectedOption.name,
-            type: typePost,
-            ID_post_shared: null,
-            tags: tags,
-          };
-      
-          console.log("Push", paramsAPI);
-          await dispatch(addPost(paramsAPI))
-            .unwrap()
-            .then((response) => {
-              console.log('API response:', response);
-      
-         
-      
-              setSuccessModalVisible(true);
-              setTimeout(() => {
-                setSuccessModalVisible(false);
-                navigation.navigate('TabHome', {
-                  screen: 'Home',
-                  params: {
-                    refresh: true, // Thêm tham số refresh để thông báo cho Home
-                  },
+            const paramsAPI = {
+                ID_user: me._id,
+                caption: caption,
+                medias: medias,
+                status: selectedOption.name,
+                type: typePost,
+                ID_post_shared: null,
+                tags: tags,
+            };
+
+            console.log("Push", paramsAPI);
+            await dispatch(addPost(paramsAPI))
+                .unwrap()
+                .then((response) => {
+                    console.log('API response:', response);
+
+
+
+                    setSuccessModalVisible(true);
+                    setTimeout(() => {
+                        setSuccessModalVisible(false);
+                        navigation.navigate('TabHome', {
+                            screen: 'Home',
+                            params: {
+                                refresh: true, // Thêm tham số refresh để thông báo cho Home
+                            },
+                        });
+                        // Reset form
+                        setCaption('');
+                        setMedias([]);
+                        setTags([]);
+                        setTypePost('Normal');
+                        setSelectedOption({ status: 1, name: "Công khai" });
+                    }, 2000);
+                })
+                .catch((error) => {
+                    console.log('Error addPost:', error);
+                    setFailedModalVisible(true);
+                    setTimeout(() => setFailedModalVisible(false), 2000);
                 });
-                // Reset form
-                setCaption('');
-                setMedias([]);
-                setTags([]);
-                setTypePost('Normal');
-                setSelectedOption({ status: 1, name: "Công khai" });
-              }, 2000);
-            })
-            .catch((error) => {
-              console.log('Error addPost:', error);
-              setFailedModalVisible(true);
-              setTimeout(() => setFailedModalVisible(false), 2000);
-            });
         } catch (error) {
-          console.log(error);
-          setFailedModalVisible(true);
-          setTimeout(() => setFailedModalVisible(false), 2000);
+            console.log(error);
+            setFailedModalVisible(true);
+            setTimeout(() => setFailedModalVisible(false), 2000);
         } finally {
-          setIsPosting(false);
+            setIsPosting(false);
         }
-      };
+    };
 
 
     const handleSelectOption = (option) => {
@@ -430,9 +430,9 @@ const UpPost = (props) => {
 
     return (
         <View style={UpPostS.Container}>
-            <SuccessModal 
-                visible={successModalVisible} 
-                message={"Đăng bài thành công"}/>
+            <SuccessModal
+                visible={successModalVisible}
+                message={"Đăng bài thành công"} />
             <FailedModal
                 visible={failedModalVisible}
                 message="Đăng bài thất bại. Vui lòng thử lại!"
