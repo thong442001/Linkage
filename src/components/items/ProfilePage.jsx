@@ -23,6 +23,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 const { width, height } = Dimensions.get('window');
 import {
     addPost_Reaction,
@@ -36,8 +37,6 @@ import styles from '../../styles/screens/postItem/PostItemS';
 // Component SharedPost
 const SharedPost = ({
     me,
-    setModalVisible,
-    selectedOption,
     callAddPostShare,
     copyToClipboard,
     post,
@@ -46,6 +45,11 @@ const SharedPost = ({
     setShareVisible,
 }) => {
     const [captionShare, setCaptionShare] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedOption, setSelectedOption] = useState({
+        status: 1,
+        name: 'Công khai',
+    });
 
     const recentContacts = [
         { id: '1', name: 'Thái Nguyên', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
@@ -55,7 +59,17 @@ const SharedPost = ({
         { id: '5', name: 'Hoàng Phú', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
     ];
 
+    const status = [
+        { status: 1, name: 'Công khai', icon: "user-alt" },
+        { status: 2, name: 'Bạn bè', icon: "user-friends" },
+        { status: 3, name: 'Chỉ mình tôi', icon: "user-lock" },
+    ];
 
+    const handleSelectOption = (option) => {
+        console.log('Selected option:', option);
+        setSelectedOption(option);
+        setModalVisible(false);
+    };
 
     const renderContact = ({ item }) => (
         <View style={styles.contactItem}>
@@ -64,12 +78,10 @@ const SharedPost = ({
         </View>
     );
 
-    return (
-        <View style={{
+    console.log('Current selectedOption in SharedPost:', selectedOption);
 
-            justifyContent: 'center',
-            alignItems: 'center',
-        }}>
+    return (
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <View style={styles.rectangle}>
                 <View style={styles.lineBottomSheet}></View>
             </View>
@@ -83,42 +95,57 @@ const SharedPost = ({
                     justifyContent: 'center',
                     width: width * 0.9,
                     marginVertical: 10,
-                }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', borderRadius: 10, marginHorizontal: 15 }}>
+                }}
+            >
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        borderRadius: 10,
+                        marginHorizontal: 15,
+                    }}
+                >
                     <Image source={{ uri: me?.avatar }} style={styles.avatar} />
                     <View style={{ flexDirection: 'column' }}>
-                        <Text style={{ top: 15, color: 'black', fontWeight: 'bold' }}>{me?.first_name + ' ' + me?.last_name}</Text>
+                        <Text style={{ top: 10, color: 'black', fontWeight: 'bold' }}>
+                            {me?.first_name + ' ' + me?.last_name}
+                        </Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            <TouchableOpacity style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                backgroundColor: '#dce0e0',
-                                borderRadius: 5,
-                                paddingHorizontal: 10,
-                            }}
-                                onPress={() => setModalVisible(true)}>
-                                <Text style={{
-                                    color: 'black',
-                                    fontSize: 14,
-                                }}>
-                                    {selectedOption.name}</Text>
+                            <TouchableOpacity
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    backgroundColor: '#dce0e0',
+                                    paddingVertical: 2,
+                                    borderRadius: 5,
+                                    paddingHorizontal: 10,
+                                }}
+                                onPress={() => setModalVisible(true)}
+                            >
+                                <Text style={{ color: 'black', fontSize: 14 }}>{selectedOption.name}</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                onPress={() => callAddPostShare(captionShare)}
-                                style={[styles.shareButton, {
-                                    marginHorizontal: 10,
-                                    marginRight: 5,
-                                    paddingVertical: 1, // Tăng padding dọc
-                                    paddingHorizontal: 10, // Tăng padding ngang
-                                    backgroundColor: '#0064E0', // Màu nền để nút nổi bật hơn
-                                    borderRadius: 5,
-                                }]}
+                                onPress={() => callAddPostShare(captionShare, selectedOption.name)}
+                                style={[
+                                    styles.shareButton,
+                                    {
+                                        marginHorizontal: 10,
+                                        marginRight: 5,
+                                        paddingVertical: 2,
+                                        paddingHorizontal: 10,
+                                        backgroundColor: '#0064E0',
+                                        borderRadius: 5,
+                                    },
+                                ]}
                             >
-                                <Text style={[styles.shareButtonText, {
-                                    fontSize: 13, // Tăng kích thước chữ
-                                    color: 'white', // Màu chữ trắng để nổi bật
-                                }]}>
+                                <Text
+                                    style={[
+                                        styles.shareButtonText,
+                                        { fontSize: 14, color: 'white' },
+                                    ]}
+                                >
                                     Chia sẻ ngay
                                 </Text>
                             </TouchableOpacity>
@@ -126,30 +153,30 @@ const SharedPost = ({
                     </View>
                 </View>
 
-
                 <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
                     <TextInput
                         editable={true}
                         multiline={true}
-                        scrollEnabled={true} // Cho phép cuộn bên trong TextInput
+                        scrollEnabled={true}
                         placeholder="Hãy nói gì đó về nội dung này"
                         placeholderTextColor="gray"
-                        style={[styles.contentShare, {
-                            flexShrink: 1, // Ngăn TextInput mở rộng quá mức
-                            maxHeight: 100, // Chiều cao tối đa
-                            minHeight: 40, // Chiều cao tối thiểu
-                            marginHorizontal: 10,
-                            textAlignVertical: 'top', // Đảm bảo văn bản bắt đầu từ trên cùng
-                            overflow: 'hidden', // Ẩn nội dung tràn ra ngoài
-                        }]}
+                        style={[
+                            styles.contentShare,
+                            {
+                                flexShrink: 1,
+                                maxHeight: 100,
+                                minHeight: 40,
+                                marginHorizontal: 10,
+                                textAlignVertical: 'top',
+                                overflow: 'hidden',
+                            },
+                        ]}
                         value={captionShare}
                         onChangeText={(text) => setCaptionShare(text)}
                         color="black"
                         maxLength={500}
                     />
-
                 </View>
-
             </View>
 
             <View style={{ marginBottom: 10 }}>
@@ -162,6 +189,7 @@ const SharedPost = ({
                         keyExtractor={(item) => item.id}
                         horizontal
                         showsHorizontalScrollIndicator={false}
+                        nestedScrollEnabled={true}
                         style={styles.contactList}
                     />
                 </View>
@@ -180,10 +208,39 @@ const SharedPost = ({
                     </View>
                 </View>
             </View>
+
+            <Modal
+                transparent={true}
+                visible={modalVisible}
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    onPress={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalContent1}>
+                        {status.map((option, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={[
+                                    styles.optionButton,
+                                    selectedOption.status === option.status && { backgroundColor: '#e0e0e0' },
+                                ]}
+                                onPress={() => handleSelectOption(option)}
+                            >
+                                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 5 }}>
+                                    <Text style={styles.optionText}>{option.name}</Text>
+                                    <FontAwesome5 name={option.icon} size={15} color={"black"} />
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 };
-
 
 // Component chính PostItem
 const PostItem = memo(({
@@ -209,11 +266,6 @@ const PostItem = memo(({
     const [successModalVisible, setSuccessModalVisible] = useState(false);
     const [failedModalVisible, setFailedModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedOption, setSelectedOption] = useState({
-        status: 1,
-        name: "Công khai",
-    });
     const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
     const reactionRef = useRef(null);
     const [dialogCopyVisible, setDialogCopyVisible] = useState(false);
@@ -223,23 +275,7 @@ const PostItem = memo(({
     const [isImageModalVisible, setImageModalVisible] = useState(false);
 
 
-    useEffect(() => {
-        if (shareVisible) {
-            openBottomSheet(55, (
-                <SharedPost
-                    me={me}
-                    setModalVisible={setModalVisible}
-                    selectedOption={selectedOption}
-                    callAddPostShare={callAddPostShare}
-                    copyToClipboard={copyToClipboard}
-                    post={post}
-                    width={width}
-                    styles={styles}
-                    setShareVisible={setShareVisible}
-                />
-            ));
-        }
-    }, [selectedOption, shareVisible, me, post, width, styles, openBottomSheet]);
+
 
     useEffect(() => {
         if (isFirstRender) {
@@ -361,16 +397,8 @@ const PostItem = memo(({
         }
     };
 
-    const status = [
-        { status: 1, name: "Công khai" },
-        { status: 2, name: "Bạn bè" },
-        { status: 3, name: "Chỉ mình tôi" },
-    ];
 
-    const handleSelectOption = (option) => {
-        setSelectedOption(option);
-        setModalVisible(false);
-    };
+
 
     useEffect(() => {
         const updateDiff = () => {
@@ -472,14 +500,15 @@ const PostItem = memo(({
         }
     };
 
-    const callAddPostShare = async (captionShare) => {
+    const callAddPostShare = async (captionShare, status) => {
         try {
             setIsLoading(true);
+            console.log('Sharing with status:', status);
             const paramsAPI = {
                 ID_user: ID_user,
                 caption: captionShare,
                 medias: [],
-                status: selectedOption.name,
+                status: status,
                 type: 'Share',
                 ID_post_shared: post.ID_post_shared ? post.ID_post_shared._id : post._id,
                 tags: [],
@@ -511,8 +540,7 @@ const PostItem = memo(({
             setTimeout(() => {
                 setFailedModalVisible(false);
             }, 1500);
-        }
-        finally {
+        } finally {
             closeBottomSheet();
         }
     };
@@ -906,12 +934,9 @@ const PostItem = memo(({
                     <TouchableOpacity
                         style={styles.action}
                         onPress={() => {
-                            setShareVisible(true); // Đặt shareVisible thành true khi mở BottomSheet
                             openBottomSheet(55, (
                                 <SharedPost
                                     me={me}
-                                    setModalVisible={setModalVisible}
-                                    selectedOption={selectedOption}
                                     callAddPostShare={callAddPostShare}
                                     copyToClipboard={copyToClipboard}
                                     post={post}
@@ -962,29 +987,7 @@ const PostItem = memo(({
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
-            <Modal
-                transparent={true}
-                visible={modalVisible}
-                animationType="fade"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    onPress={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalContent1}>
-                        {status.map((option, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={styles.optionButton}
-                                onPress={() => handleSelectOption(option)}
-                            >
-                                <Text style={styles.optionText}>{option.name}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </TouchableOpacity>
-            </Modal>
+
             <Modal
                 visible={isImageModalVisible}
                 transparent={true}
