@@ -70,9 +70,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
       },
       shareButtonText: {
-        color: 'white',
-        fontSize: 13,
-        fontWeight: '500',
+        color: 'black',
       },
       copyLinkButton: {
         padding: 10,
@@ -399,15 +397,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalContent1: {
-        width: '80%',
+        width: width * 0.9,
         backgroundColor: '#fff',
-        borderRadius: 8,
+        borderRadius: 12,
         padding: 16,
     },
     optionButton: {
         padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        marginVertical: height * 0.01,
+        borderRadius: width * 0.5,
+        borderWidth: 1,
+        borderColor: '#ccc',
     },
     optionText: {
         fontSize: 16,
