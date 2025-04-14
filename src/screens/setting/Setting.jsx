@@ -162,7 +162,9 @@ const Setting = props => {
         </View>
         <View style={styles.body}>
           <View style={styles.profile}>
-            <Pressable>
+            <Pressable
+              onPress={() => navigation.navigate('Profile', { _id: me._id })}
+            >
               <Image
                 source={{
                   uri: me.avatar,
@@ -171,7 +173,9 @@ const Setting = props => {
               />
             </Pressable>
             <View style={styles.profileInfo}>
-              <Text style={styles.name}>
+              <Text style={styles.name}
+                onPress={() => navigation.navigate('Profile', { _id: me._id })}
+              >
                 {me.first_name} {me.last_name}
               </Text>
             </View>
@@ -196,24 +200,24 @@ const Setting = props => {
               </View>
             </Modal>
           </View>
-  
 
-      {/* Danh sách các tùy chọn cài đặt khác */}
-      {settingsOptions.map((item) => (
-        <TouchableOpacity
-          key={item.id}
-          onPress={() =>
-            item.screen ? navigation.navigate(item.screen) : item.action()
-          }
-        >
-          <Option
-            icon={item.icon}
-            title={item.title}
-            color={item.color}
-          />
-        </TouchableOpacity>
-      ))}
-    </View>
+
+          {/* Danh sách các tùy chọn cài đặt khác */}
+          {settingsOptions.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() =>
+                item.screen ? navigation.navigate(item.screen) : item.action()
+              }
+            >
+              <Option
+                icon={item.icon}
+                title={item.title}
+                color={item.color}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
         {/* canhphan */}
       </View>
     </View>

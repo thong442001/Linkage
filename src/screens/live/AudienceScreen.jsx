@@ -5,7 +5,9 @@ import Keycenter from './Keycenter';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { LogBox } from 'react-native';
 
+LogBox.ignoreAllLogs();
 
 export default function AudienceScreen(props) {
   const { route } = props;
