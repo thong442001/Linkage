@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, BackHandler } from 'react-native';
-import ZegoUIKitPrebuiltLiveStreaming, { AUDIENCE_DEFAULT_CONFIG } from '@zegocloud/zego-uikit-prebuilt-live-streaming-rn';
+import ZegoUIKitPrebuiltLiveStreaming, { ZegoMenuBarButtonName } from '@zegocloud/zego-uikit-prebuilt-live-streaming-rn';
 import Keycenter from './Keycenter';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import database from '@react-native-firebase/database';
@@ -86,7 +86,20 @@ export default function AudienceScreen(props) {
             userName={userName}
             liveID={liveID}
             config={{
-              ...AUDIENCE_DEFAULT_CONFIG,
+              audioVideoView: {
+                showAvatarInAudioMode: true,
+                showSoundWavesInAudioMode: true,
+              },
+              bottomMenuBar: {
+                buttons: [ZegoMenuBarButtonName.chatButton],
+                showInRoomMessageButton: true,
+              },
+              topMenuBar: {
+                showCloseButton: true,
+              },
+              turnOnCameraWhenJoining: false,
+              turnOnMicrophoneWhenJoining: false,
+              useSpeakerWhenJoining: true,
               onLeaveLiveStreaming: () => {
                 props.navigation.navigate('TabHome', { screen: 'Home' });
               },
@@ -133,7 +146,7 @@ const styles = StyleSheet.create({
   },
   liveEndedText: {
     color: '#fff',
-    fontSize: 18,    
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

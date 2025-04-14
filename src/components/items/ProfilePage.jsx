@@ -55,13 +55,7 @@ const SharedPost = ({
       { id: '5', name: 'Hoàng Phú', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
     ];
   
-    const shareOptions = [
-      { id: '1', name: 'Messenger', icon: 'https://example.com/messenger.png' },
-      { id: '2', name: 'Sao chép', icon: 'https://example.com/copy.png' },
-      { id: '3', name: 'Nhóm', icon: 'https://example.com/group.png' },
-      { id: '4', name: 'Tin của bạn', icon: 'https://example.com/story.png' },
-      { id: '5', name: 'Tin nhắn liên kết', icon: 'https://example.com/link.png' },
-    ];
+  
   
     const renderContact = ({ item }) => (
       <View style={styles.contactItem}>
@@ -71,7 +65,11 @@ const SharedPost = ({
     );
   
     return (
-      <View style={styles.modalContainer}>
+      <View style={{
+
+        justifyContent: 'center',
+        alignItems: 'center',
+        }}>
         <View style={styles.rectangle}>
           <View style={styles.lineBottomSheet}></View>
         </View>
@@ -81,66 +79,77 @@ const SharedPost = ({
             flexDirection: 'column',
             backgroundColor: '#ecf0f0',
             borderRadius: 10,
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
             width: width * 0.9,
             marginVertical: 10,
-            right: 20,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', padding: 5, borderRadius: 10 }}>
+          }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', borderRadius: 10, marginHorizontal: 15 }}>
             <Image source={{ uri: me?.avatar }} style={styles.avatar} />
             <View style={{ flexDirection: 'column' }}>
-              <Text style={styles.name}>{me?.first_name + ' ' + me?.last_name}</Text>
-              <View style={styles.boxStatus}>
-                <TouchableOpacity style={styles.btnStatus} onPress={() => setModalVisible(true)}>
-                  <Text style={styles.txtPublic}>{selectedOption.name}</Text>
+              <Text style={{top: 15, color: 'black', fontWeight: 'bold'}}>{me?.first_name + ' ' + me?.last_name}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' , justifyContent: 'center'}}>
+                <TouchableOpacity style={{ 
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      backgroundColor: '#dce0e0',
+                      borderRadius: 5,
+                      paddingHorizontal: 10,}} 
+                      onPress={() => setModalVisible(true)}>
+                  <Text style={{ 
+                    color: 'black',
+                    fontSize: 14,}}>
+                    {selectedOption.name}</Text>
                 </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
-            <TextInput
-              pointerEvents="auto"
-              editable={true}
-              autoFocus={true}
-              placeholder="Hãy nói gì đó về nội dung này"
-              placeholderTextColor="gray"
-              multiline={true}
-              style={[styles.contentShare, { 
-                flex: 1, 
-                maxHeight: 100, // Giới hạn chiều cao tối đa
-                minHeight: 40, // Chiều cao tối thiểu
-                padding: 10, // Thêm padding để nội dung dễ đọc
-                marginHorizontal: 10, // Khoảng cách ngang
-              }]}
-              value={captionShare}
-              onChangeText={(text) => setCaptionShare(text)}
-              color="black"
-              maxLength={500}
-            />
-            <TouchableOpacity 
+                
+          <TouchableOpacity 
             onPress={() => callAddPostShare(captionShare)} 
             style={[styles.shareButton, { 
+              marginHorizontal: 10,
               marginRight: 5,
-              paddingVertical: 5, // Tăng padding dọc
-              paddingHorizontal: 15, // Tăng padding ngang
+              paddingVertical: 1, // Tăng padding dọc
+              paddingHorizontal: 10, // Tăng padding ngang
               backgroundColor: '#0064E0', // Màu nền để nút nổi bật hơn
-              borderRadius: 8, // Bo góc
-            }]}
+              borderRadius: 5, }]}
           >
             <Text style={[styles.shareButtonText, { 
               fontSize: 13, // Tăng kích thước chữ
               color: 'white', // Màu chữ trắng để nổi bật
-              fontWeight: '500', // Chữ đậm
             }]}>
               Chia sẻ ngay
             </Text>
           </TouchableOpacity>
+              </View>
+            </View>
           </View>
+                   
+    
+          <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+          <TextInput
+              editable={true}
+              multiline={true}
+              scrollEnabled={true} // Cho phép cuộn bên trong TextInput
+              placeholder="Hãy nói gì đó về nội dung này"
+              placeholderTextColor="gray"
+              style={[styles.contentShare, { 
+                flexShrink: 1, // Ngăn TextInput mở rộng quá mức
+                maxHeight: 100, // Chiều cao tối đa
+                minHeight: 40, // Chiều cao tối thiểu
+                marginHorizontal: 10,
+                textAlignVertical: 'top', // Đảm bảo văn bản bắt đầu từ trên cùng
+                overflow: 'hidden', // Ẩn nội dung tràn ra ngoài
+              }]}
+              value={captionShare}
+              onChangeText={(text) => setCaptionShare(text)}
+              color="black" 
+              maxLength={500}
+            />
+
+          </View>
+ 
         </View>
   
-        <View style={{ right: 20, marginBottom: 10, width: width * 1 }}>
+        <View style={{ marginBottom: 10}}>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Gửi bằng Chat</Text>
             <FlatList
@@ -209,6 +218,25 @@ const PostItem = memo(({
   const [isFirstRender, setIsFirstRender] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isImageModalVisible, setImageModalVisible] = useState(false);
+
+
+  useEffect(() => {
+    if (shareVisible) {
+      openBottomSheet(55, (
+        <SharedPost
+          me={me}
+          setModalVisible={setModalVisible}
+          selectedOption={selectedOption}
+          callAddPostShare={callAddPostShare}
+          copyToClipboard={copyToClipboard}
+          post={post}
+          width={width}
+          styles={styles}
+          setShareVisible={setShareVisible}
+        />
+      ));
+    }
+  }, [selectedOption, shareVisible, me, post, width, styles, openBottomSheet]);
 
   useEffect(() => {
     if (isFirstRender) {
@@ -480,6 +508,9 @@ const PostItem = memo(({
       setTimeout(() => {
         setFailedModalVisible(false);
       }, 1500);
+    }
+    finally{
+      closeBottomSheet();
     }
   };
 
@@ -871,7 +902,8 @@ const PostItem = memo(({
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.action}
-            onPress={() =>
+            onPress={() => {
+              setShareVisible(true); // Đặt shareVisible thành true khi mở BottomSheet
               openBottomSheet(55, (
                 <SharedPost
                   me={me}
@@ -884,8 +916,8 @@ const PostItem = memo(({
                   styles={styles}
                   setShareVisible={setShareVisible}
                 />
-              ))
-            }
+              ));
+            }}
           >
             <Icon4 name="share-alt" size={20} color="black" />
             <Text style={styles.actionText}>Chia sẻ</Text>

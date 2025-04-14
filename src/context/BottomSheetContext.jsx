@@ -92,7 +92,7 @@ export const BottomSheetProvider = ({ children }) => {
                 }}
             >
                 <BottomSheetView style={{ backgroundColor: '#fff', height: '100%', borderTopEndRadius: 20, borderTopStartRadius: 20 }}>
-                    <View style={{ flex: 1, padding: 20 }}>
+                    <View style={{ flex: 1, padding: 15 }}>
                         {content}
                     </View>
                 </BottomSheetView>

@@ -3,6 +3,7 @@ import { Dimensions, StyleSheet } from "react-native";
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
+    
     contactList:{
         marginHorizontal: -10,
         },
@@ -21,7 +22,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
       },
       rectangle: {
-        left: 35,
         justifyContent: 'center',
         alignItems: 'center',
         borderTopLeftRadius: 20,
@@ -38,11 +38,6 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         marginRight: 10,
-      },
-      name: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
       },
       boxStatus: {
         marginTop: 5,
@@ -84,7 +79,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#444',
         borderRadius: 10,
         alignItems: 'center',
-        marginVertical: 10,
       },
       copyLinkText: {
         color: 'white',
@@ -225,7 +219,7 @@ const styles = StyleSheet.create({
         color: 'grey',
     },
     name: {
-        fontSize: width * 0.045, // 4% chiều rộng màn hình
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         fontWeight: '500',
         color: 'black',
         width: width * 0.6
