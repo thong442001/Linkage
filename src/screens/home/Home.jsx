@@ -44,7 +44,7 @@ const Home = props => {
     const liveSessionsRef = database().ref('/liveSessions');
     const onValueChange = liveSessionsRef.on('value', snapshot => {
       const liveSessions = snapshot.val() ? Object.values(snapshot.val()) : [];
-      console.log('Live sessions from Firebase:', liveSessions); // Debug
+      //console.log('Live sessions from Firebase:', liveSessions); // Debug
       setLiveSessions(liveSessions);
     });
     return () => liveSessionsRef.off('value', onValueChange);
@@ -66,7 +66,7 @@ const Home = props => {
       await dispatch(getAllPostsInHome({ me: ID_user, token, timestamp: Date.now() }))
         .unwrap()
         .then(response => {
-          console.log('API response - Posts:', response.posts.length, 'Stories:', response.stories.length);
+          //console.log('API response - Posts:', response.posts.length, 'Stories:', response.stories.length);
           setPosts(response.posts || []);
           setStories(response.stories || []);
           // Không đặt lại liveSessions để giữ dữ liệu từ Firebase
