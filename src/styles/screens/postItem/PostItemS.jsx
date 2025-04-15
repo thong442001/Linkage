@@ -3,6 +3,7 @@ import { Dimensions, StyleSheet } from "react-native";
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
+    
     contactList:{
         marginHorizontal: -10,
         },
@@ -21,7 +22,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
       },
       rectangle: {
-        left: 35,
         justifyContent: 'center',
         alignItems: 'center',
         borderTopLeftRadius: 20,
@@ -38,11 +38,6 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         marginRight: 10,
-      },
-      name: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
       },
       boxStatus: {
         marginTop: 5,
@@ -75,16 +70,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
       },
       shareButtonText: {
-        color: 'white',
-        fontSize: 13,
-        fontWeight: '500',
+        color: 'black',
       },
       copyLinkButton: {
         padding: 10,
         backgroundColor: '#444',
         borderRadius: 10,
         alignItems: 'center',
-        marginVertical: 10,
       },
       copyLinkText: {
         color: 'white',
@@ -225,7 +217,7 @@ const styles = StyleSheet.create({
         color: 'grey',
     },
     name: {
-        fontSize: width * 0.045, // 4% chiều rộng màn hình
+        fontSize: width * 0.04, // 4% chiều rộng màn hình
         fontWeight: '500',
         color: 'black',
         width: width * 0.6
@@ -405,15 +397,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalContent1: {
-        width: '80%',
+        width: width * 0.9,
         backgroundColor: '#fff',
-        borderRadius: 8,
+        borderRadius: 12,
         padding: 16,
     },
     optionButton: {
         padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        marginVertical: height * 0.01,
+        borderRadius: width * 0.5,
+        borderWidth: 1,
+        borderColor: '#ccc',
     },
     optionText: {
         fontSize: 16,

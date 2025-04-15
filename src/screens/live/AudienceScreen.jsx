@@ -1,17 +1,6 @@
-import React, {useRef, useEffect, useState} from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  BackHandler,
-} from 'react-native';
-import ZegoUIKitPrebuiltLiveStreaming, {
-  AUDIENCE_DEFAULT_CONFIG,
-  ZegoMenuBarButtonName,
-  ZegoLayout,
-} from '@zegocloud/zego-uikit-prebuilt-live-streaming-rn';
+import React, { useRef, useEffect, useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, BackHandler } from 'react-native';
+import ZegoUIKitPrebuiltLiveStreaming, { ZegoMenuBarButtonName } from '@zegocloud/zego-uikit-prebuilt-live-streaming-rn';
 import Keycenter from './Keycenter';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import database from '@react-native-firebase/database';
