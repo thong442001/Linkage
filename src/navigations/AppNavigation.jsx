@@ -318,6 +318,12 @@ const AppNavigation = () => {
         name: 'Sự kiện mới',
         importance: AndroidImportance.HIGH,
       });
+
+      await notifee.createChannel({
+        id: 'reaction-channel',
+        name: 'Đã thả biểu cảm vào story của bạn',
+        importance: AndroidImportance.HIGH,
+      });
     }
   }
 
@@ -490,12 +496,14 @@ const AppNavigation = () => {
       return 'Tài khoản của bạn đã bị khóa';
     }
 
-    // 15. Thông báo tài khoản bị khóa
-    if (notification?.type === 'Tài khoản bị khóa') {
-      return 'Tài khoản của bạn đã bị khóa';
+    // 14. Thả biểu cảm
+    if (notification?.type === 'Đã thả biểu cảm vào story của bạn') {
+      const { ID_user } = notification.ID_post || {};
+      return `${ID_user?.first_name || ''} ${ID_user?.last_name || ''
+        } đã thả biểu cảm vào story của bạn`;
     }
 
-    // 16. Thông báo mặc định nếu không khớp loại nào
+    // 15. Thông báo mặc định nếu không khớp loại nào
     return 'Bạn có một thông báo mới';
   };
 
@@ -560,6 +568,9 @@ const AppNavigation = () => {
       case 'Tham gia sự kiện mới':
         return 'event-channel';
 
+      case 'Đã thả biểu cảm vào story của bạn':
+        return 'reaction-channel';
+  
       default:
         return 'default-channel';
     }
@@ -592,17 +603,24 @@ const AppNavigation = () => {
         navigation.navigate('Chat', { ID_group: notification?.ID_group?._id });
         break;
 
-      // case 'Đã đăng bài mới':
-      //   navigation.navigate('PostDetailScreen', { postId: notification?.ID_post?._id });
-      //   break;
+        case 'Đã thả biểu cảm vào story của bạn':
+          console.log('Thông báo ID_post:', notification?.ID_post);
+          navigation.navigate('Profile', {
+            _id: user._id,
+            autoPlayStory: true, // Thêm tham số để kích hoạt tự động xem story
+          });
+          break;
+      case 'Đã đăng bài mới':
+        navigation.navigate('PostDetail', { ID_post: notification?.ID_post?._id });
+        break;
 
       // case 'Đang livestream':
       //   navigation.navigate('LivestreamScreen', { livestreamId: notification?.ID_user?._id });
       //   break;
 
-      // case 'Bình luận':
-      //   navigation.navigate('CommentScreen', { postId: notification?.ID_comment?.postId });
-      //   break;
+      case 'Bình luận':
+        navigation.navigate('PostDetail', { ID_post: notification?.ID_comment?.postId });
+        break;
 
       default:
         console.warn("⚠ Không tìm thấy màn hình phù hợp với loại thông báo:", notification.type);
@@ -704,7 +722,7 @@ const AppNavigation = () => {
             notification = JSON.parse(remoteMessage.data.notification);
             if (notification?.type === 'Tài khoản bị khóa') {
               console.log('🔒 Tài khoản bị khóa khi nhấn thông báo - Đăng xuất');
-              onLogout();
+              onLogoutAndNavigate();
             }
           } catch (error) {
             console.error('❌ Lỗi khi parse JSON notification:', error);
@@ -721,7 +739,7 @@ const AppNavigation = () => {
           console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
           if (notification?.type === 'Tài khoản bị khóa') {
             console.log('🔒 Tài khoản bị khóa khi mở app - Đăng xuất');
-            onLogout();
+            navigation.navigate('Login');
           }
         } catch (error) {
           console.error('❌ Lỗi khi parse JSON notification:', error);

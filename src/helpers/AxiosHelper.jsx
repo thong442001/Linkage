@@ -32,8 +32,6 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
             console.log("403, token hết hạn");
             x.sent = true;
             //gọi api refreshToken
-            //gọi api refreshToken`https://172.16.3.108:3001/user/refreshToken`
-            //await axios.post(`http://192.168.1.20:3001/user/refreshToken`, {
             await axios.post(`https://linkage.id.vn/user/refreshToken`, {
                 refreshToken: store.getState().app.refreshToken
             })
@@ -43,7 +41,7 @@ const AxiosHelper = (token = '', contentType = 'application/json') => {
                     x.headers['Authorization'] = `Bearer ${response.data?.token}`;
                 })
                 .catch(async function (error) {
-                    console.log("token hết hạn");
+                    console.log("token hết hạn: " + error);
                     // refreshToken hết hạn đăng xuất ra
                     await store.dispatch(logout());
                 });

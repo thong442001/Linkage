@@ -76,16 +76,16 @@ const PostStory = ({ navigation }) => {
   };
 
   const postStory = (mediaUrl, type) => {
-    navigation.replace(oStackHome.Story.name, { 
+    navigation.replace(oStackHome.Story.name, {
       newStory: mediaUrl,
-      mediaType: type 
+      mediaType: type
     });
   };
 
   return (
     <View style={styles.container}>
       {loading && <LoadingTron />}
-      
+
       {selectedMedia && !loading && (
         mediaType === 'photo' ? (
           <Image source={{ uri: selectedMedia }} style={styles.image} />

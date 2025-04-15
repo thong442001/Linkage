@@ -101,6 +101,21 @@ const Profile = props => {
         callAllProfile().finally(() => setRefreshing(false));
     }, [params?._id, me]);
 
+ // Tự động mở story khi vào từ thông báo
+ useEffect(() => {
+    if (params?.autoPlayStory && stories?.stories?.length > 0) {
+      console.log('Tự động mở StoryViewer với stories:', stories);
+      navigation.navigate(oStackHome.StoryViewer.name, {
+        StoryView: stories,
+        currentUserId: me?._id,
+      });
+      // Xóa autoPlayStory khỏi params để tránh lặp lại khi quay lại
+      navigation.setParams({ autoPlayStory: undefined });
+    }
+  }, [stories, params?.autoPlayStory, navigation, me?._id]);
+
+
+
     useEffect(() => {
         const listenerId = scrollY.addListener(({ value }) => {
             const currentScrollY = value;
@@ -172,7 +187,7 @@ const Profile = props => {
             data.append('upload_preset', 'ml_default');
 
             const response = await axios.post(
-                'https://api.cloudinary.com/v1_1/ddbolgs7p/upload',
+                'https://api.cloudinary.com/v1_1/ddasyg5z3/upload',
                 data,
                 {
                     headers: {
