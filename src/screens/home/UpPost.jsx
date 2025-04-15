@@ -338,8 +338,6 @@ const UpPost = (props) => {
                 .then((response) => {
                     console.log('API response:', response);
 
-
-
                     setSuccessModalVisible(true);
                     setTimeout(() => {
                         setSuccessModalVisible(false);

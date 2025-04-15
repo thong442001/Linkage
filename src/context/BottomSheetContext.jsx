@@ -68,7 +68,8 @@ export const BottomSheetProvider = ({ children }) => {
                 ref={bottomSheetRef}
                 index={-1}
                 snapPoints={snapPoints}
-                enablePanDownToClose={true}
+                enableContentPanningGesture={false}
+                enablePanDownToClose={false}
                 onClose={() => {
                     setIsVisible(false);
                     if (onCloseCallback) {
@@ -91,7 +92,7 @@ export const BottomSheetProvider = ({ children }) => {
                 }}
             >
                 <BottomSheetView style={{ backgroundColor: '#fff', height: '100%', borderTopEndRadius: 20, borderTopStartRadius: 20 }}>
-                    <View style={{ flex: 1, padding: 20 }}>
+                    <View style={{ flex: 1, padding: 15 }}>
                         {content}
                     </View>
                 </BottomSheetView>

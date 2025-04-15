@@ -12,7 +12,7 @@ import axios from "axios";
 import { oStackHome } from "../../navigations/HomeNavigation";
 import LoadingTron from "../../utils/animation/loadingTron/LoadingTron";
 
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddasyg5z3/upload';
 const UPLOAD_PRESET = 'ml_default';
 
 const PostStory = ({ navigation }) => {
