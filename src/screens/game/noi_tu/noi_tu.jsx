@@ -7,9 +7,10 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  Keyboard,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import words from './words.json'; // Danh sách từ
+import words from './words.json';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width, height } = Dimensions.get('window');
@@ -21,8 +22,38 @@ export default function GameScreen() {
   const [userInput, setUserInput] = useState('');
   const [score, setScore] = useState(0);
   const [message, setMessage] = useState(null);
-  const [fadeAnim] = useState(new Animated.Value(0)); // Hiệu ứng mờ dần cho thông báo
-  const [isInputEditable, setIsInputEditable] = useState(true); // Trạng thái khóa/mở ô nhập
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [isInputEditable, setIsInputEditable] = useState(true);
+  const [keyboardOffset] = useState(new Animated.Value(0));
+
+  // Lắng nghe sự kiện bàn phím
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      (e) => {
+        Animated.timing(keyboardOffset, {
+          toValue: -e.endCoordinates.height / 3.5,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        Animated.timing(keyboardOffset, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const scrambleWord = (word) => {
     const letters = word.split('');
@@ -40,7 +71,7 @@ export default function GameScreen() {
     setScrambledWord(scrambleWord(newWord));
     setUserInput('');
     setMessage(null);
-    setIsInputEditable(true); // Mở khóa ô nhập khi từ mới được tải
+    setIsInputEditable(true);
   };
 
   const checkAnswer = () => {
@@ -51,16 +82,16 @@ export default function GameScreen() {
         type: 'success',
       });
       animateMessage();
-      setIsInputEditable(false); // Khóa ô nhập khi nhấn "Kiểm tra"
-      setTimeout(getNewWord, 4000); // Tăng thời gian lên 4 giây
+      setIsInputEditable(false);
+      setTimeout(getNewWord, 4000);
     } else {
       setMessage({
         text: `Sai rồi! Đáp án đúng là: ${currentWord}`,
         type: 'error',
       });
       animateMessage();
-      setIsInputEditable(false); // Khóa ô nhập khi nhấn "Kiểm tra"
-      setTimeout(getNewWord, 4000); // Tăng thời gian lên 4 giây
+      setIsInputEditable(false);
+      setTimeout(getNewWord, 4000);
     }
   };
 
@@ -69,17 +100,17 @@ export default function GameScreen() {
     Animated.sequence([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 500, // Hiển thị trong 0.5 giây
+        duration: 500,
         useNativeDriver: true,
       }),
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 2500, // Giữ hiển thị trong 2.5 giây
+        duration: 2500,
         useNativeDriver: true,
       }),
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 500, // Mờ dần trong 0.5 giây
+        duration: 500,
         useNativeDriver: true,
       }),
     ]).start();
@@ -94,40 +125,56 @@ export default function GameScreen() {
       {/* Gradient Background */}
       <View style={styles.gradientOverlay} />
 
-      {/* Back Button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
+      {/* Header with Back Button and Title */}
+      <View
+        style={styles.headerContainer}
       >
-        <Icon name="arrow-back" size={width * 0.06} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Title */}
-      <Text style={styles.title}>Vua Tiếng Việt</Text>
-
-      {/* Score */}
-      <Text style={styles.score}>Điểm: {score}</Text>
-
-      {/* Scrambled Word Card */}
-      <View style={styles.wordCard}>
-        <Text style={styles.scrambledWord}>Từ trộn: {scrambledWord}</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={width * 0.06} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Vua Tiếng Việt</Text>
       </View>
 
+      {/* Score */}
+      <Animated.View
+        style={[styles.scoreContainer, { transform: [{ translateY: keyboardOffset }] }]}
+      >
+        <Text style={styles.score}>Điểm: {score}</Text>
+      </Animated.View>
+
+      {/* Scrambled Word Card */}
+      <Animated.View
+        style={[styles.wordCard, { transform: [{ translateY: keyboardOffset }] }]}
+      >
+        <Text style={styles.scrambledWord}>Từ trộn: {scrambledWord}</Text>
+      </Animated.View>
+
       {/* Input */}
-      <TextInput
-        style={styles.input}
-        value={userInput}
-        onChangeText={setUserInput}
-        placeholder="Nhập đáp án của bạn"
-        placeholderTextColor="#888"
-        autoCapitalize="none"
-        editable={isInputEditable} // Khóa/mở ô nhập dựa trên state
-      />
+      <Animated.View
+        style={[styles.inputContainer, { transform: [{ translateY: keyboardOffset }] }]}
+      >
+        <TextInput
+          style={styles.input}
+          value={userInput}
+          onChangeText={setUserInput}
+          placeholder="Nhập đáp án của bạn"
+          placeholderTextColor="#888"
+          autoCapitalize="none"
+          editable={isInputEditable}
+        />
+      </Animated.View>
 
       {/* Button */}
-      <TouchableOpacity style={styles.button} onPress={checkAnswer}>
-        <Text style={styles.buttonText}>Kiểm tra</Text>
-      </TouchableOpacity>
+      <Animated.View
+        style={[styles.buttonContainer, { transform: [{ translateY: keyboardOffset }] }]}
+      >
+        <TouchableOpacity style={styles.button} onPress={checkAnswer}>
+          <Text style={styles.buttonText}>Kiểm tra</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* Message with Animation */}
       {message && (
@@ -148,8 +195,8 @@ export default function GameScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0e7ff', // Màu nền nhẹ nhàng
-    position: 'relative', // Để các thành phần con có thể dùng position absolute
+    backgroundColor: '#e0e7ff',
+    position: 'relative',
   },
   gradientOverlay: {
     position: 'absolute',
@@ -157,35 +204,41 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Gradient overlay nhẹ
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-  backButton: {
+  headerContainer: {
+    flexDirection: 'row', // Đặt bố cục ngang
+    alignItems: 'center', // Căn giữa theo chiều dọc
     position: 'absolute',
     top: height * 0.05,
-    left: width * 0.05,
-    backgroundColor: '#0064E0',
-    paddingVertical: height * 0.015,
+    width: '100%',
     paddingHorizontal: width * 0.05,
-    borderRadius: 10,
-    elevation: 3,
     zIndex: 1,
   },
+  backButton: {
+    backgroundColor: '#0064E0',
+    paddingVertical: height * 0.015,
+    paddingHorizontal: width * 0.03,
+    borderRadius: 10,
+    elevation: 3,
+  },
   title: {
-    position: 'absolute',
-    top: height * 0.15,
-    width: '100%',
-    fontSize: width * 0.09,
+    fontSize: width * 0.08, // Giảm nhẹ để vừa với hàng
     fontWeight: '800',
     color: '#1e3a8a',
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+    flex: 1, // Chiếm không gian còn lại để căn giữa
   },
-  score: {
+  scoreContainer: {
     position: 'absolute',
     top: height * 0.25,
     width: '100%',
+    alignItems: 'center',
+  },
+  score: {
     fontSize: width * 0.06,
     color: '#475569',
     textAlign: 'center',
@@ -211,10 +264,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-  input: {
+  inputContainer: {
     position: 'absolute',
     top: height * 0.55,
     width: width * 0.85,
+    alignSelf: 'center',
+  },
+  input: {
     borderWidth: 1,
     borderColor: '#d1d5db',
     padding: width * 0.04,
@@ -222,16 +278,17 @@ const styles = StyleSheet.create({
     fontSize: width * 0.045,
     backgroundColor: '#fff',
     elevation: 2,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    top: height * 0.65,
     alignSelf: 'center',
   },
   button: {
-    position: 'absolute',
-    top: height * 0.65,
     backgroundColor: '#0064E0',
     paddingVertical: height * 0.02,
     paddingHorizontal: width * 0.15,
     borderRadius: 12,
-    alignSelf: 'center',
   },
   buttonText: {
     color: '#fff',
