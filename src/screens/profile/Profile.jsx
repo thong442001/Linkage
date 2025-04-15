@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
 import Friends from '../../components/items/Friends';
+
 import { useDispatch, useSelector } from 'react-redux';
 import {
     joinGroupPrivate,

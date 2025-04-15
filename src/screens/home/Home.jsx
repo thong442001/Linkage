@@ -14,6 +14,7 @@ import {
 import database from '@react-native-firebase/database';
 import HomeHeader from './HomeHeader';
 import HomeStories from './HomeStories';
+
 const { height } = Dimensions.get('window');
 const HEADER_HEIGHT = height * 0.1;
 
@@ -23,7 +24,7 @@ const Home = props => {
   const dispatch = useDispatch();
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-  const [loading, setloading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState(null);
   const [stories, setStories] = useState([]);
   const [liveSessions, setLiveSessions] = useState([]);
@@ -40,33 +41,10 @@ const Home = props => {
   });
 
   useEffect(() => {
-    const listenerId = scrollY.addListener(({ value }) => {});
-    return () => {
-      scrollY.removeListener(listenerId);
-    };
-  }, [scrollY]);
-
-  useEffect(() => {
-    let previousScrollY = 0;
-
-    const listenerId = scrollY.addListener(({ value }) => {
-      if (value - previousScrollY > 0) {
-        props.route.params.handleScroll(false);
-      } else if (value - previousScrollY < 0) {
-        props.route.params.handleScroll(true);
-      }
-      previousScrollY = value;
-    });
-
-    return () => {
-      scrollY.removeListener(listenerId);
-    };
-  }, [scrollY]);
-
-  useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
     const onValueChange = liveSessionsRef.on('value', snapshot => {
       const liveSessions = snapshot.val() ? Object.values(snapshot.val()) : [];
+      console.log('Live sessions from Firebase:', liveSessions); // Debug
       setLiveSessions(liveSessions);
     });
     return () => liveSessionsRef.off('value', onValueChange);
@@ -84,26 +62,25 @@ const Home = props => {
 
   const callGetAllPostsInHome = async (ID_user, showLoading = true) => {
     try {
-      if (!refreshing && showLoading) setloading(true);
+      if (!refreshing && showLoading) setLoading(true);
       await dispatch(getAllPostsInHome({ me: ID_user, token, timestamp: Date.now() }))
         .unwrap()
         .then(response => {
-          console.log('Stories sau khi xóa:', response.stories);
+          console.log('API response - Posts:', response.posts.length, 'Stories:', response.stories.length);
           setPosts(response.posts || []);
           setStories(response.stories || []);
-          setLiveSessions([]);
-          if (showLoading) setloading(false);
+          // Không đặt lại liveSessions để giữ dữ liệu từ Firebase
+          if (showLoading) setLoading(false);
         })
         .catch(error => {
-          console.log('Error getAllPostsInHome:: ', error);
+          console.log('Error getAllPostsInHome:', error);
           setPosts([]);
           setStories([]);
-          setLiveSessions([]);
-          if (showLoading) setloading(false);
+          if (showLoading) setLoading(false);
         });
     } catch (error) {
-      console.log(error);
-      if (showLoading) setloading(false);
+      console.log('Error in callGetAllPostsInHome:', error);
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -114,28 +91,27 @@ const Home = props => {
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setCurrentTime(Date.now());
+    console.log('Refreshing, keeping liveSessions:', liveSessions); // Debug
     callGetAllPostsInHome(me._id, false).finally(() => {
       setRefreshing(false);
     });
-  }, [me._id]);
+  }, [me._id, liveSessions]);
 
   const callChangeDestroyPost = async ID_post => {
     try {
       await dispatch(changeDestroyPost({ _id: ID_post }))
         .unwrap()
-        .then(response => {
+        .then(() => {
           setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
         })
         .catch(error => {
-          console.log('Lỗi khi xóa bài viết:', error);
+          console.log('Error deleting post:', error);
         });
     } catch (error) {
-      console.log('Lỗi trong callChangeDestroyPost:', error);
+      console.log('Error in callChangeDestroyPost:', error);
     }
   };
 
-
-  //call api lấy bài viết khi đăng bài thành công
   useEffect(() => {
     if (route.params?.refresh && me?._id) {
       console.log('Refreshing posts after new post...');
@@ -238,12 +214,12 @@ const Home = props => {
                 listener: (event) => {
                   const currentScrollY = event.nativeEvent.contentOffset.y;
                   if (currentScrollY < 50) {
-                    props.route.params.handleScroll(true);
+                    props.route.params?.handleScroll?.(true);
                   } else {
                     if (currentScrollY - previousScrollY.current > 0) {
-                      props.route.params.handleScroll(false);
+                      props.route.params?.handleScroll?.(false);
                     } else if (currentScrollY - previousScrollY.current < 0) {
-                      props.route.params.handleScroll(true);
+                      props.route.params?.handleScroll?.(true);
                     }
                   }
                   previousScrollY.current = currentScrollY;

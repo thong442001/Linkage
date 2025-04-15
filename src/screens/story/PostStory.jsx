@@ -12,7 +12,7 @@ import axios from "axios";
 import { oStackHome } from "../../navigations/HomeNavigation";
 import LoadingTron from "../../utils/animation/loadingTron/LoadingTron";
 
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddasyg5z3/upload';
 const UPLOAD_PRESET = 'ml_default';
 
 const PostStory = ({ navigation }) => {
@@ -76,16 +76,16 @@ const PostStory = ({ navigation }) => {
   };
 
   const postStory = (mediaUrl, type) => {
-    navigation.replace(oStackHome.Story.name, { 
+    navigation.replace(oStackHome.Story.name, {
       newStory: mediaUrl,
-      mediaType: type 
+      mediaType: type
     });
   };
 
   return (
     <View style={styles.container}>
       {loading && <LoadingTron />}
-      
+
       {selectedMedia && !loading && (
         mediaType === 'photo' ? (
           <Image source={{ uri: selectedMedia }} style={styles.image} />
