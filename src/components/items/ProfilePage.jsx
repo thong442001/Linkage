@@ -29,11 +29,13 @@ import {
     addPost_Reaction,
     addPost,
     deletePost_reaction,
+    getAllGroupOfUser
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
 import { Snackbar } from 'react-native-paper';
 import styles from '../../styles/screens/postItem/PostItemS';
-
+import GroupcomponentShare from '../../components/chat/GroupcomponentShare'
+import { useSocket } from '../../context/socketContext';
 // Component SharedPost
 const SharedPost = ({
     me,
@@ -44,20 +46,17 @@ const SharedPost = ({
     styles,
     setShareVisible,
 }) => {
+    const token = useSelector(state => state.app.token);
+    const dispatch = useDispatch();
     const [captionShare, setCaptionShare] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedOption, setSelectedOption] = useState({
         status: 1,
         name: 'Công khai',
     });
-
-    const recentContacts = [
-        { id: '1', name: 'Thái Nguyên', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
-        { id: '2', name: 'Group 3 ml', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
-        { id: '3', name: 'Phương Đạt', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
-        { id: '4', name: 'Mai Trường', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
-        { id: '5', name: 'Hoàng Phú', avatar: 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/Yasuo.jpg' },
-    ];
+    const [groups, setGroups] = useState([]);
+    const { socket } = useSocket();
+    const deeplinkPost = `https://linkage.id.vn/deeplink?url=linkage://post-chi-tiet?ID_post=${post._id.toString()}`
 
     const status = [
         { status: 1, name: 'Công khai', icon: "user-alt" },
@@ -71,14 +70,53 @@ const SharedPost = ({
         setModalVisible(false);
     };
 
+    useEffect(() => {
+        callGetAllGroupOfUser(me._id)
+    }, []);
+
+    const callGetAllGroupOfUser = async ID_user => {
+        try {
+            await dispatch(getAllGroupOfUser({ ID_user, token }))
+                .unwrap()
+                .then(response => {
+                    //console.log('Groups from API:', response.groups);
+                    setGroups(response.groups);
+                });
+        } catch (error) {
+            console.log('Error:', error);
+        }
+    };
+
+    // gửi tin nhắn
+    const sendMessage = async (ID_group) => {
+
+        await socket.emit("joinGroup", ID_group);
+
+        if (socket == null) {
+            console.log("socket ko joinGroup đc")
+            return;
+        }
+        const payload = {
+            ID_group: ID_group,
+            sender: me._id,
+            content: deeplinkPost,
+            type: 'text',
+            ID_message_reply: null
+        };
+        socket.emit('send_message', payload);
+
+    };
+
     const renderContact = ({ item }) => (
-        <View style={styles.contactItem}>
-            <Image source={{ uri: item.avatar }} style={styles.contactAvatar} />
-            <Text style={styles.contactName}>{item.name}</Text>
-        </View>
+        <TouchableOpacity
+            onPress={() => sendMessage(item._id)}
+            key={item._id}
+        >
+            <GroupcomponentShare item={item} />
+        </TouchableOpacity>
     );
 
-    console.log('Current selectedOption in SharedPost:', selectedOption);
+    //console.log('Current selectedOption in SharedPost:', selectedOption);
 
     return (
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -183,7 +221,7 @@ const SharedPost = ({
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Gửi bằng Chat</Text>
                     <FlatList
-                        data={recentContacts}
+                        data={groups}
                         pointerEvents="auto"
                         renderItem={renderContact}
                         keyExtractor={(item) => item.id}
@@ -199,7 +237,7 @@ const SharedPost = ({
                     <View style={{ marginHorizontal: 10 }}>
                         <TouchableOpacity
                             onPress={() => {
-                                copyToClipboard(`https://linkage.id.vn/deeplink?url=linkage://post-chi-tiet?ID_post=${post._id.toString()}`);
+                                copyToClipboard(deeplinkPost.toString());
                             }}
                             style={styles.copyLinkButton}
                         >
