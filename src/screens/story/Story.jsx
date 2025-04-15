@@ -26,7 +26,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddbolgs7p/upload';
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/ddasyg5z3/upload';
 const UPLOAD_PRESET = 'ml_default';
 
 const { width, height } = Dimensions.get('window');
