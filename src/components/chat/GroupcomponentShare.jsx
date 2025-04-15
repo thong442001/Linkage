@@ -50,7 +50,7 @@ export default function GroupcomponentShare({ item }) {
   return (
     <View style={styles.contactItem}>
       <Image source={{ uri: avatar }} style={styles.contactAvatar} />
-      <Text style={styles.contactName}>{name}</Text>
+      <Text numberOfLines={1} style={styles.contactName}>{name}</Text>
     </View>
   );
 }
@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
   contactItem: {
     alignItems: 'center',
     marginRight: 15,
+    maxWidth: 80
   },
   contactAvatar: {
     width: 50,

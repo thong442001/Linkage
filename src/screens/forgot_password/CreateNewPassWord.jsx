@@ -120,13 +120,13 @@ const CreateNewPassWord = (props) => {
             <View style={styles.inputContainer}>
                 <TextInput
                     onChangeText={handlePasswordNewChange}
-                    placeholderTextColor={'#8C96A2'}
+                    placeholderTextColor={'black'}
                     placeholder="Mật khẩu mới"
                     value={passwordNew}
                     style={[styles.inputDate, errors.passwordNew && { borderColor: 'red' }]}
                     secureTextEntry={!showPasswordNew}
                     autoCapitalize="none"
-                    color={'#8C96A2'}
+                    color={'black'}
                     autoCompleteType="password"
                 />
                 <Pressable
@@ -151,13 +151,13 @@ const CreateNewPassWord = (props) => {
             <View style={styles.inputContainer}>
                 <TextInput
                     onChangeText={handleConfirmPasswordChange}
-                    placeholderTextColor={'#8C96A2'}
+                    placeholderTextColor={'black'}
                     placeholder="Xác nhận mật khẩu"
                     value={confirmPassword}
                     style={[styles.inputDate, errors.confirmPassword && { borderColor: 'red' }]}
                     secureTextEntry={!showConfirmPassword}
                     autoCapitalize="none"
-                    color={'#8C96A2'}
+                    color={'black'}
                     autoCompleteType="password"
                     maxLength={20}
                     minLength={6}

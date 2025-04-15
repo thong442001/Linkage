@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
 import Friends from '../../components/items/Friends';
+
 import { useDispatch, useSelector } from 'react-redux';
 import {
     joinGroupPrivate,
@@ -204,6 +205,7 @@ const Profile = props => {
             setavatar(fileUrl);
             return fileUrl;
         } catch (error) {
+            
             console.error(
                 'Lỗi uploadFile:',
                 error.response ? error.response.data : error.message,

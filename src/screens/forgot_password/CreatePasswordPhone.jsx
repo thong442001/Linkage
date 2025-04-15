@@ -120,13 +120,13 @@ const CreatePasswordPhone = (props) => {
             <View style={styles.inputContainer}>
                 <TextInput
                     onChangeText={handlePasswordNewChange}
-                    placeholderTextColor={'#8C96A2'}
+                    placeholderTextColor={'black'}
                     placeholder="Mật khẩu mới"
                     value={passwordNew}
                     style={[styles.inputDate, errors.passwordNew && { borderColor: 'red' }]}
                     secureTextEntry={!showPasswordNew}
                     autoCapitalize="none"
-                    color={'#8C96A2'}
+                    color={'black'}
                     autoCompleteType="password"
                     maxLength={20} // Giới hạn độ dài tối đa của mật khẩu
                     minLength={6} // Giới hạn độ dài tối thiểu của mật khẩu
