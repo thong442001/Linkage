@@ -146,7 +146,7 @@ const Chat = (props) => {// cần ID_group (param)
             });
             data.append('upload_preset', 'ml_default');
 
-            const response = await axios.post('https://api.cloudinary.com/v1_1/ddbolgs7p/upload', data, {
+            const response = await axios.post('https://api.cloudinary.com/v1_1/ddasyg5z3/upload', data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
