@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -54,7 +54,6 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
           const { options } = descriptors[route.key];
           const isFocused = state.index === index;
 
-          // Điều hướng tab
           const onPress = () => {
             const event = navigation.emit({
               type: 'tabPress',
@@ -73,7 +72,6 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
             });
           };
 
-          // Xác định bộ icon và tên icon
           let iconComponent;
           let iconName;
           if (route.name === 'Home') {
@@ -94,29 +92,17 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
           }
           const Icon = iconComponent;
 
-          // Animated.Value để điều khiển hiệu ứng fade + scale
           const circleAnim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
 
           useEffect(() => {
-            // Khi tab được focus => circleAnim = 1, ngược lại = 0
-            if (isFocused) {
-              Animated.timing(circleAnim, {
-                toValue: 1,
-                duration: 100,
-                easing: Easing.out(Easing.circle),
-                useNativeDriver: true,
-              }).start();
-            } else {
-              Animated.timing(circleAnim, {
-                toValue: 0,
-                duration: 300,
-                easing: Easing.in(Easing.circle),
-                useNativeDriver: true,
-              }).start();
-            }
+            Animated.timing(circleAnim, {
+              toValue: isFocused ? 1 : 0,
+              duration: 200,
+              easing: Easing.out(Easing.circle),
+              useNativeDriver: true,
+            }).start();
           }, [isFocused, circleAnim]);
 
-          // Style vòng tròn: scale + opacity
           const circleStyle = {
             transform: [{ scale: circleAnim }],
             opacity: circleAnim,
@@ -130,7 +116,6 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
               style={styles.tabButton}
             >
               <View style={styles.iconWrapper}>
-                {/* Vòng tròn màu nằm dưới icon */}
                 <Animated.View style={[styles.circle, circleStyle]} />
                 <Icon
                   name={iconName}
@@ -147,37 +132,55 @@ const CustomTabBar = ({ state, descriptors, navigation, tabAnimation }) => {
   );
 };
 
-
-const TabHome = () => {
-  const me = useSelector(state => state.app.user);
+const TabHome = ({ navigation }) => {
+  const me = useSelector((state) => state.app.user);
   const [isTabVisible, setTabVisible] = useState(true);
-  const [shouldHide, setShouldHide] = useState(false);
-
   const tabAnimation = useRef(new Animated.Value(1)).current;
 
-  useEffect(() => {
-    Animated.timing(tabAnimation, {
-      toValue: isTabVisible ? 1 : 0,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-  }, [isTabVisible, tabAnimation]);
+  const handleScroll = useCallback(
+    (visible) => {
+      setTabVisible(visible);
+      Animated.timing(tabAnimation, {
+        toValue: visible ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    },
+    [tabAnimation]
+  );
 
-  const handleScroll = (visible) => {
-    setTabVisible(visible);
-  };
+  // Xử lý nút back của thiết bị
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!isTabVisible) {
+        handleScroll(true); // Hiển thị Bottom Tab khi nhấn back
+      }
+      return false; // Cho phép hành vi back mặc định
+    });
+
+    return () => backHandler.remove();
+  }, [isTabVisible, handleScroll]);
+
+  // Đặt lại trạng thái khi chuyển tab
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      handleScroll(true); // Hiển thị Bottom Tab khi nhấn tab
+    });
+
+    return unsubscribe;
+  }, [navigation, handleScroll]);
 
   return (
     <Tab.Navigator
       initialRouteName="Home"
       tabBar={(props) => <CustomTabBar {...props} tabAnimation={tabAnimation} />}
-      screenOptions={({ route }) => ({
+      screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: '#D17842',
-        tabBarActiveBackgroundColor: "white",
-        tabBarInactiveBackgroundColor: "white",
+        tabBarActiveBackgroundColor: 'white',
+        tabBarInactiveBackgroundColor: 'white',
         tabBarHideOnKeyboard: true,
-      })}
+      }}
     >
       {Object.keys(oTab).map((item, index) => {
         if (oTab[item].name === 'Profile') {
@@ -186,12 +189,13 @@ const TabHome = () => {
               key={index}
               name={oTab[item].name}
               component={oTab[item].component}
-              options={{ title: "" }}
-              initialParams={{ handleScroll }} // Thêm handleScroll vào đây
+              options={{ title: '' }}
+              initialParams={{ handleScroll }}
               listeners={({ navigation }) => ({
                 tabPress: (e) => {
                   e.preventDefault();
-                  navigation.navigate("Profile", { _id: me._id, handleScroll }); // Truyền handleScroll khi điều hướng
+                  navigation.navigate('Profile', { _id: me._id, handleScroll });
+                  handleScroll(true);
                 },
               })}
             />
@@ -202,8 +206,13 @@ const TabHome = () => {
               key={index}
               name={oTab[item].name}
               component={oTab[item].component}
-              options={{ title: "" }}
+              options={{ title: '' }}
               initialParams={{ handleScroll }}
+              listeners={() => ({
+                tabPress: () => {
+                  handleScroll(true);
+                },
+              })}
             />
           );
         }
@@ -211,6 +220,7 @@ const TabHome = () => {
     </Tab.Navigator>
   );
 };
+
 
 //stack home
 import Search from '../screens/home/Search';
@@ -255,6 +265,7 @@ import CheckPhone from '../screens/forgot_password/CheckPhone';
 import CreatePasswordPhone from '../screens/forgot_password/CreatePasswordPhone';
 import ListGoiY from '../screens/friend/ListGoiY';
 import OTPScreen from '../screens/register/OTPScreen';
+import { useFocusEffect } from '@react-navigation/native';
 const oStackHome = {
   TabHome: { name: 'TabHome', component: TabHome },
   Search: { name: 'Search', component: Search },

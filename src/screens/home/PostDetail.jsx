@@ -766,7 +766,8 @@ const PostDetail = (props) => {
       );
     }
     if (!isPermission) {
-      return <NoAccessModal message="Bạn không có quyền xem bài viết này." />;
+      return  <View style={{flex: 1, justifyContent: 'flex-end', alignItems: 'center', top: height * 0.5}}><Text style={{fontWeight: '500', color: 'black'}}>Bạn không có quyền truy cập vào bài viết!</Text></View>
+      
     }
     if (!post) {
       return null;

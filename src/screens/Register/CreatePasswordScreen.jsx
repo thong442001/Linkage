@@ -11,9 +11,11 @@ const { width, height } = Dimensions.get('window');
 const CreatePassWord = ({ route, navigation }) => {
     const { first_name, last_name, dateOfBirth, sex, email, phone } = route.params;
     const [password, setPassword] = useState('');
-    const [errors, setErrors] = useState({ password: '' }); // Tách lỗi cho trường password
+    const [confirmPassword, setConfirmPassword] = useState(''); // Thêm state cho nhập lại mật khẩu
+    const [errors, setErrors] = useState({ password: '', confirmPassword: '' }); // Thêm lỗi cho confirmPassword
     const [validPassword, setValidPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Thêm state để hiển thị/ẩn confirmPassword
     const [successVisible, setSuccessVisible] = useState(false);
     const [failed, setFailed] = useState(false);
 
@@ -39,24 +41,45 @@ const CreatePassWord = ({ route, navigation }) => {
         return '';
     };
 
+    // Hàm validate nhập lại mật khẩu
+    const validateConfirmPassword = (confirmText, passwordText) => {
+        if (!confirmText.trim()) {
+            return 'Vui lòng nhập lại mật khẩu.';
+        }
+        if (confirmText !== passwordText) {
+            return 'Mật khẩu nhập lại không khớp.';
+        }
+        return '';
+    };
+
     // Hàm xử lý khi người dùng nhập mật khẩu
     const handlePasswordChange = (text) => {
         setPassword(text);
-        const error = validatePassword(text);
-        setErrors({ password: error });
-        setValidPassword(!error); // Mật khẩu hợp lệ nếu không có lỗi
+        const passwordError = validatePassword(text);
+        const confirmError = validateConfirmPassword(confirmPassword, text); // Cập nhật lỗi confirm khi mật khẩu gốc thay đổi
+        setErrors({ password: passwordError, confirmPassword: confirmError });
+        setValidPassword(!passwordError && !confirmError && confirmPassword.trim());
+    };
+
+    // Hàm xử lý khi người dùng nhập lại mật khẩu
+    const handleConfirmPasswordChange = (text) => {
+        setConfirmPassword(text);
+        const confirmError = validateConfirmPassword(text, password);
+        setErrors((prev) => ({ ...prev, confirmPassword: confirmError }));
+        setValidPassword(!errors.password && !confirmError && password.trim());
     };
 
     // Hàm xử lý đăng ký
     const handleRegister = () => {
         const passwordError = validatePassword(password);
+        const confirmError = validateConfirmPassword(confirmPassword, password);
 
-        if (passwordError) {
-            setErrors({ password: passwordError });
+        if (passwordError || confirmError) {
+            setErrors({ password: passwordError, confirmPassword: confirmError });
             return;
         }
 
-        setErrors({ password: '' });
+        setErrors({ password: '', confirmPassword: '' });
         const userData = { first_name, last_name, dateOfBirth, sex, email, phone, password };
         dispatch(register(userData))
             .unwrap()
@@ -70,7 +93,7 @@ const CreatePassWord = ({ route, navigation }) => {
             .catch((err) => {
                 console.error(err);
                 setFailed(true);
-                setErrors({ password: err.message || 'Đăng ký thất bại. Vui lòng thử lại.' });
+                setErrors({ password: '', confirmPassword: err.message || 'Đăng ký thất bại. Vui lòng thử lại.' });
                 setTimeout(() => {
                     setFailed(false);
                 }, 2000);
@@ -89,26 +112,47 @@ const CreatePassWord = ({ route, navigation }) => {
                 Bạn nên chọn mật khẩu thật khó đoán.
             </Text>
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, errors.password && styles.inputContainerError]}>
                 <TextInput
                     value={password}
-                    onChangeText={handlePasswordChange} // Kiểm tra ngay khi nhập
+                    onChangeText={handlePasswordChange}
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Mật khẩu mới"
                     color={'black'}
                     secureTextEntry={!showPassword}
-                    style={[styles.inputDate, errors.password && styles.inputError]}
-                    maxLength={20} 
+                    style={[styles.inputDate]}
+                    maxLength={20}
                 />
                 <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.iconEye}>
-                    <Icon name={showPassword ? "eye" : "eye-slash"} size={width * 0.05} color="#8C96A2" />
+                    <Icon name={showPassword ? 'eye' : 'eye-slash'} size={width * 0.05} color="#8C96A2" />
                 </Pressable>
             </View>
-
             {errors.password ? (
                 <View style={styles.errorContainer}>
                     <Icon name="exclamation-circle" size={width * 0.04} color="red" style={styles.errorIcon} />
                     <Text style={styles.errorText}>{errors.password}</Text>
+                </View>
+            ) : null}
+
+            <View style={[styles.inputContainer, errors.confirmPassword && styles.inputContainerError]}>
+                <TextInput
+                    value={confirmPassword}
+                    onChangeText={handleConfirmPasswordChange}
+                    placeholderTextColor={'#8C96A2'}
+                    placeholder="Nhập lại mật khẩu"
+                    color={'black'}
+                    secureTextEntry={!showConfirmPassword}
+                    style={[styles.inputDate]}
+                    maxLength={20}
+                />
+                <Pressable onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.iconEye}>
+                    <Icon name={showConfirmPassword ? 'eye' : 'eye-slash'} size={width * 0.05} color="#8C96A2" />
+                </Pressable>
+            </View>
+            {errors.confirmPassword ? (
+                <View style={styles.errorContainer}>
+                    <Icon name="exclamation-circle" size={width * 0.04} color="red" style={styles.errorIcon} />
+                    <Text style={styles.errorText}>{errors.confirmPassword}</Text>
                 </View>
             ) : null}
 
@@ -154,15 +198,15 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         borderRadius: width * 0.03,
         paddingHorizontal: width * 0.03,
-        marginVertical: height * 0.02,
+        marginVertical: height * 0.01,
+    },
+    inputContainerError: {
+        borderColor: 'red',
+        borderWidth: 1,
     },
     inputDate: {
         flex: 1,
-        paddingVertical: height * 0.015,
         color: 'black',
-    },
-    inputError: {
-        borderColor: 'red',
     },
     iconEye: {
         position: 'absolute',

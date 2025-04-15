@@ -61,7 +61,7 @@ const CheckEmail = (props) => {
 
             <Text style={styles.label}>Kiểm tra Email</Text>
             <Text style={styles.label2}>
-                Chúng tôi đã gửi mã đến email <Text style={styles.emailText}>{gmail}</Text> Hãy nhập mã đó để xác nhận tài khoản.
+                Chúng tôi đã gửi 1 mã xác nhận gồm 4 số đến email <Text style={styles.emailText}>{gmail}</Text>. Mã này dùng để đặt lại mật khẩu mới cho tài khoản của bạn.
             </Text>
 
             <TextInput

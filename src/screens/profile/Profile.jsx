@@ -172,7 +172,7 @@ const Profile = props => {
             data.append('upload_preset', 'ml_default');
 
             const response = await axios.post(
-                'https://api.cloudinary.com/v1_1/ddbolgs7p/upload',
+                'https://api.cloudinary.com/v1_1/ddasyg5z3/upload',
                 data,
                 {
                     headers: {
@@ -189,6 +189,7 @@ const Profile = props => {
             setavatar(fileUrl);
             return fileUrl;
         } catch (error) {
+            
             console.error(
                 'Lỗi uploadFile:',
                 error.response ? error.response.data : error.message,
