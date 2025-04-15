@@ -1,21 +1,41 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, BackHandler } from 'react-native';
-import ZegoUIKitPrebuiltLiveStreaming, { AUDIENCE_DEFAULT_CONFIG } from '@zegocloud/zego-uikit-prebuilt-live-streaming-rn';
+import React, {useRef, useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  BackHandler,
+} from 'react-native';
+import ZegoUIKitPrebuiltLiveStreaming, {
+  AUDIENCE_DEFAULT_CONFIG,
+  ZegoMenuBarButtonName,
+  ZegoLayout,
+} from '@zegocloud/zego-uikit-prebuilt-live-streaming-rn';
 import Keycenter from './Keycenter';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import database from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { LogBox } from 'react-native';
 
+LogBox.ignoreAllLogs();
 
 export default function AudienceScreen(props) {
-  const { route } = props;
-  const { liveID, userName, userID } = route.params;
+  const {route} = props;
+  const {liveID, userName, userID} = route.params;
   const navigation = useNavigation();
   const prebuiltRef = useRef();
   const [isHostOnline, setIsHostOnline] = useState(false);
 
-
-  console.log("du lieu nguoi xem:" + "liveID: " + liveID + "userName" + userName + "userID" + userID)
+  console.log(
+    'du lieu nguoi xem:' +
+      'liveID: ' +
+      liveID +
+      'userName' +
+      userName +
+      'userID' +
+      userID,
+  );
   useEffect(() => {
     const liveRef = database().ref(`/liveSessions/${liveID}`);
     liveRef.on('value', snapshot => {
@@ -33,18 +53,18 @@ export default function AudienceScreen(props) {
   // Hiển thị dialog xác nhận thoát
   const handleExit = () => {
     Alert.alert(
-      "Thoát phiên live",
-      "Bạn có chắc chắn muốn thoát khỏi phiên live?",
+      'Thoát phiên live',
+      'Bạn có chắc chắn muốn thoát khỏi phiên live?',
       [
         {
-          text: "Hủy",
-          style: "cancel"
+          text: 'Hủy',
+          style: 'cancel',
         },
         {
-          text: "Thoát",
-          onPress: () => navigation.goBack() // Điều hướng về Home
-        }
-      ]
+          text: 'Thoát',
+          onPress: () => navigation.goBack(), // Điều hướng về Home
+        },
+      ],
     );
   };
 
@@ -57,12 +77,12 @@ export default function AudienceScreen(props) {
       };
 
       const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        backAction
+        'hardwareBackPress',
+        backAction,
       );
 
       return () => backHandler.remove(); // Xóa listener khi component bị unmount hoặc mất focus
-    }, [])
+    }, []),
   );
 
   return (
@@ -77,7 +97,6 @@ export default function AudienceScreen(props) {
 
       {/* Màn hình Live Streaming của Zego */}
       <View style={styles.liveContainer}>
-        {isHostOnline ? (
           <ZegoUIKitPrebuiltLiveStreaming
             ref={prebuiltRef}
             userID={userID}
@@ -86,17 +105,31 @@ export default function AudienceScreen(props) {
             userName={userName}
             liveID={liveID}
             config={{
-              ...AUDIENCE_DEFAULT_CONFIG,
+              audioVideoView: {
+                showAvatarInAudioMode: true,
+                showSoundWavesInAudioMode: true,
+              },
+              bottomMenuBar: {
+                buttons: [ZegoMenuBarButtonName.chatButton],
+                showInRoomMessageButton: true,
+              },
+              topMenuBar: {
+                showCloseButton: true,
+              },
+              turnOnCameraWhenJoining: false,
+              turnOnMicrophoneWhenJoining: false,
+              useSpeakerWhenJoining: true,
               onLeaveLiveStreaming: () => {
-                props.navigation.navigate('TabHome', { screen: 'Home' });
+                props.navigation.navigate('TabHome', {screen: 'Home'});
+              },
+              onError: (error) => {
+                console.error('Zego error:', error);
+              },
+              onNetworkStatus: (status) => {
+                console.log('Network status:', status);
               },
             }}
           />
-        ) : (
-          <View style={styles.overlay}>
-            <Text style={styles.liveEndedText}>Phiên live không tồn tại</Text>
-          </View>
-        )}
       </View>
     </View>
   );
@@ -133,7 +166,7 @@ const styles = StyleSheet.create({
   },
   liveEndedText: {
     color: '#fff',
-    fontSize: 18,    
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

@@ -8,7 +8,8 @@ import {
     Modal,
     TouchableWithoutFeedback,
     FlatList,
-    ActivityIndicator
+    ActivityIndicator,
+    Alert
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import UpPostS from '../../styles/screens/home/UpPostS';
@@ -100,6 +101,7 @@ const UpPost = (props) => {
 
 
         } catch (error) {
+            Alert.alert('Thông báo', 'Không thể tạo ảnh. Vui lòng thử lại sau.');
             console.error('Error generating image:', error);
         } finally {
             setLoading(false);
