@@ -14,32 +14,24 @@ import { setReactions, setFcmToken, logout } from '../rtk/Reducer';
 import database from '@react-native-firebase/database';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-import { useSocket } from '../context/socketContext';
 import { useNavigation } from '@react-navigation/native';
 import { navigate } from '../navigations/NavigationService';
 import { getNotificationPreference } from '../noti/notificationHelper';
-import { io } from 'socket.io-client';
 import { Linking } from 'react-native';
 import { parseQueryString } from '../utils/deeplink/queryParser';
-
+import { AppState } from 'react-native'; // Thêm AppState từ react-native
 const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
   const navigation = useNavigation(); // Lấy navigation
-  const [socket, setSocket] = useState(null);
-  const [onlineUsers, setOnlineUsers] = useState([]); // Lưu danh sách user online
   const [isSplashVisible, setSplashVisible] = useState(true); // Trạng thái để kiểm soát màn hình chào
   //const reactions = useSelector(state => state.app.reactions)
   //console.log("****: " + reactions)
   const fcmToken = useSelector(state => state.app.fcmToken);
-  console.log('📲 FCM Token từ Redux:', fcmToken);
+  //console.log('📲 FCM Token từ Redux:', fcmToken);
 
   useEffect(() => {
-    // check user có bị khóa ko
-    callCheckBanUser();
-    //reactions
-    callGetAllReaction();
     // Hiển thị màn hình chào trong 2 giây
     const timeout = setTimeout(() => {
       setSplashVisible(false); // Ẩn màn hình chào sau 2 giây
@@ -50,18 +42,37 @@ const AppNavigation = () => {
     };
   }, []);
 
+  // Chạy khi component mount và mỗi khi app trở lại foreground
+  useEffect(() => {
+    // Chạy lần đầu khi component mount
+    if (user) {
+      callCheckBanUser();
+      callGetAllReaction();
+    }
+
+    // Hàm xử lý khi app trở lại foreground
+    const handleAppStateChange = (nextAppState) => {
+      if (nextAppState === 'active') {
+        console.log('App is in foreground, re-running logic...');
+        if (user) {
+          callCheckBanUser();
+          callGetAllReaction();
+        }
+      }
+    };
+
+    // Lắng nghe sự kiện AppState
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    // Cleanup khi component unmount
+    return () => {
+      subscription.remove();
+    };
+  }, [user]);
+
   // deeplink
   useEffect(() => {
     const handleDeepLink = async () => {
-      // const url = await Linking.getInitialURL();
-      // console.log("link1: " + url)
-      // if (url) {
-      //   const params = new URLSearchParams(url.split('?')[1]);
-      //   const ID_post = params.get('ID_post');
-      //   if (ID_post) {
-      //     console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
-      //   }
-      // }
       try {
         const url = await Linking.getInitialURL();
         if (url) {
@@ -106,33 +117,6 @@ const AppNavigation = () => {
 
   }, []);
 
-
-  useEffect(() => {
-    // Kết nối tới server
-    const newSocket = io('https://linkage.id.vn', {
-      transports: ['websocket', 'polling'],
-      reconnection: true, // Cho phép tự động kết nối lại
-      reconnectionAttempts: 5, // Thử kết nối lại tối đa 5 lần
-      timeout: 5000, // Chờ tối đa 5 giây trước khi báo lỗi
-    });
-    setSocket(newSocket);
-    if (user && socket) {
-      newSocket.emit('user_online', user._id); // Gửi ID user lên server khi đăng nhập
-    }
-
-    newSocket.on('online_users', userList => {
-      setOnlineUsers(userList);
-      console.log('🟢 Danh sách user online:', userList);
-    });
-    console.log('OnlineUsers: ' + onlineUsers);
-
-    return () => {
-      newSocket.off('online_users');
-    };
-  }, [user]);
-
-
-
   //call api getAllReaction
   const callGetAllReaction = async () => {
     try {
@@ -151,7 +135,7 @@ const AppNavigation = () => {
   };
 
 
-  //call api getAllReaction
+  //call api checkBanUser
   const callCheckBanUser = async () => {
     try {
       await dispatch(checkBanUser({ ID_user: user._id, token: token }))
@@ -162,7 +146,7 @@ const AppNavigation = () => {
         .catch(error => {
           console.log('Tài khoản đã bị khóa');
           // quay về trang login
-          onLogout();
+          onLogoutAndNavigate();
         });
     } catch (error) {
       console.log(error);
@@ -187,19 +171,6 @@ const AppNavigation = () => {
           index: 0,
           routes: [{ name: 'Login' }], // Điều hướng về màn hình Login
         });
-      });
-  };
-
-  const onLogout = () => {
-    dispatch(setNoti_token({ ID_user: user._id, fcmToken: fcmToken }))
-      .unwrap()
-      .then(response => {
-        //console.log(response);
-        // xóa user trong redux
-        dispatch(logout());
-      })
-      .catch(error => {
-        console.log(error);
       });
   };
 
@@ -316,6 +287,12 @@ const AppNavigation = () => {
       await notifee.createChannel({
         id: 'event-channel',
         name: 'Sự kiện mới',
+        importance: AndroidImportance.HIGH,
+      });
+
+      await notifee.createChannel({
+        id: 'reaction-channel',
+        name: 'Đã thả biểu cảm vào story của bạn',
         importance: AndroidImportance.HIGH,
       });
     }
@@ -490,12 +467,14 @@ const AppNavigation = () => {
       return 'Tài khoản của bạn đã bị khóa';
     }
 
-    // 15. Thông báo tài khoản bị khóa
-    if (notification?.type === 'Tài khoản bị khóa') {
-      return 'Tài khoản của bạn đã bị khóa';
+    // 14. Thả biểu cảm
+    if (notification?.type === 'Đã thả biểu cảm vào story của bạn') {
+      const { ID_user } = notification.ID_post || {};
+      return `${ID_user?.first_name || ''} ${ID_user?.last_name || ''
+        } đã thả biểu cảm vào story của bạn`;
     }
 
-    // 16. Thông báo mặc định nếu không khớp loại nào
+    // 15. Thông báo mặc định nếu không khớp loại nào
     return 'Bạn có một thông báo mới';
   };
 
@@ -560,6 +539,9 @@ const AppNavigation = () => {
       case 'Tham gia sự kiện mới':
         return 'event-channel';
 
+      case 'Đã thả biểu cảm vào story của bạn':
+        return 'reaction-channel';
+
       default:
         return 'default-channel';
     }
@@ -592,17 +574,24 @@ const AppNavigation = () => {
         navigation.navigate('Chat', { ID_group: notification?.ID_group?._id });
         break;
 
-      // case 'Đã đăng bài mới':
-      //   navigation.navigate('PostDetailScreen', { postId: notification?.ID_post?._id });
-      //   break;
+      case 'Đã thả biểu cảm vào story của bạn':
+        console.log('Thông báo ID_post:', notification?.ID_post);
+        navigation.navigate('Profile', {
+          _id: user._id,
+          autoPlayStory: true, // Thêm tham số để kích hoạt tự động xem story
+        });
+        break;
+      case 'Đã đăng bài mới':
+        navigation.navigate('PostDetail', { ID_post: notification?.ID_post?._id });
+        break;
 
       // case 'Đang livestream':
       //   navigation.navigate('LivestreamScreen', { livestreamId: notification?.ID_user?._id });
       //   break;
 
-      // case 'Bình luận':
-      //   navigation.navigate('CommentScreen', { postId: notification?.ID_comment?.postId });
-      //   break;
+      case 'Bình luận':
+        navigation.navigate('PostDetail', { ID_post: notification?.ID_comment?.postId });
+        break;
 
       default:
         console.warn("⚠ Không tìm thấy màn hình phù hợp với loại thông báo:", notification.type);
@@ -704,7 +693,7 @@ const AppNavigation = () => {
             notification = JSON.parse(remoteMessage.data.notification);
             if (notification?.type === 'Tài khoản bị khóa') {
               console.log('🔒 Tài khoản bị khóa khi nhấn thông báo - Đăng xuất');
-              onLogout();
+              onLogoutAndNavigate();
             }
           } catch (error) {
             console.error('❌ Lỗi khi parse JSON notification:', error);
@@ -721,7 +710,7 @@ const AppNavigation = () => {
           console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
           if (notification?.type === 'Tài khoản bị khóa') {
             console.log('🔒 Tài khoản bị khóa khi mở app - Đăng xuất');
-            onLogout();
+            navigation.navigate('Login');
           }
         } catch (error) {
           console.error('❌ Lỗi khi parse JSON notification:', error);

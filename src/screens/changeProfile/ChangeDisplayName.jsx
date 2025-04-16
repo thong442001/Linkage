@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector, useDispatch } from 'react-redux';
 import { editNameOfUser } from '../../rtk/API';
@@ -20,36 +20,55 @@ const ChangeDisplayName = ({ navigation }) => {
     const [failed, setFailed] = useState(false);
     const [showErrorFirstName, setShowErrorFirstName] = useState(false);
     const [showErrorLastName, setShowErrorLastName] = useState(false);
+    const [errorMessageFirstName, setErrorMessageFirstName] = useState('');
+    const [errorMessageLastName, setErrorMessageLastName] = useState('');
 
-    // Hàm validate tên: chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
+    // Hàm validate tên: chỉ kiểm tra ký tự hợp lệ
     const validateName = (name) => {
-        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]+$/; // Chỉ kiểm tra ký tự hợp lệ, không giới hạn độ dài
+        const regex = /^[A-Za-zÀ-Ỹà-ỹ\s]+$/;
         return regex.test(name);
     };
 
-    const onChangeNameUser = async () => {
-        // Kiểm tra không để trống
-        if (!first_name.trim() || !last_name.trim()) {
-            setShowErrorFirstName(!first_name.trim());
-            setShowErrorLastName(!last_name.trim());
-            Alert.alert('Thông báo', "Vui lòng nhập đầy đủ họ và tên mới.");
-            return;
-        }
+    // Hàm kiểm tra và đặt thông báo lỗi
+    const checkErrors = (firstName, lastName) => {
+        const totalLength = firstName.trim().length + lastName.trim().length;
 
-        // Kiểm tra ký tự hợp lệ
-        if (!validateName(first_name) || !validateName(last_name)) {
-            setShowErrorFirstName(!validateName(first_name));
-            setShowErrorLastName(!validateName(last_name));
-            Alert.alert('Thông báo', "Tên không hợp lệ! Chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt.");
-            return;
-        }
-
-        // Kiểm tra tổng độ dài
-        const totalLength = first_name.trim().length + last_name.trim().length;
-        if (totalLength > 30) {
+        // Kiểm tra lỗi cho first_name
+        if (!firstName.trim()) {
             setShowErrorFirstName(true);
+            setErrorMessageFirstName('Vui lòng nhập tên');
+        } else if (!validateName(firstName)) {
+            setShowErrorFirstName(true);
+            setErrorMessageFirstName('Tên chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt');
+        } else if (totalLength > 30) {
+            setShowErrorFirstName(true);
+            setErrorMessageFirstName('Tổng độ dài họ và tên không được vượt quá 30 ký tự');
+        } else {
+            setShowErrorFirstName(false);
+            setErrorMessageFirstName('');
+        }
+
+        // Kiểm tra lỗi cho last_name
+        if (!lastName.trim()) {
             setShowErrorLastName(true);
-            Alert.alert('Thông báo', "Tổng độ dài của họ và tên không được vượt quá 30 ký tự.");
+            setErrorMessageLastName('Vui lòng nhập họ');
+        } else if (!validateName(lastName)) {
+            setShowErrorLastName(true);
+            setErrorMessageLastName('Họ chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt');
+        } else if (totalLength > 30) {
+            setShowErrorLastName(true);
+            setErrorMessageLastName('Tổng độ dài họ và tên không được vượt quá 30 ký tự');
+        } else {
+            setShowErrorLastName(false);
+            setErrorMessageLastName('');
+        }
+    };
+
+    const onChangeNameUser = async () => {
+        checkErrors(first_name, last_name);
+
+        // Nếu có lỗi, không thực hiện đổi tên
+        if (showErrorFirstName || showErrorLastName) {
             return;
         }
 
@@ -89,38 +108,40 @@ const ChangeDisplayName = ({ navigation }) => {
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
-            <Text>{me.first_name} {me.last_name}</Text>
+            <Text style={{ color: 'black' }}>{me.first_name} {me.last_name}</Text>
             <Text style={styles.label}>Thay đổi tên</Text>
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, showErrorFirstName && styles.inputContainerError]}>
                 <TextInput
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Nhập tên mới"
-                    style={showErrorFirstName ? styles.inputError : styles.input}
+                    style={styles.input}
                     value={first_name}
                     onChangeText={(text) => {
                         setFirstname(text);
-                        const totalLength = text.trim().length + last_name.trim().length;
-                        setShowErrorFirstName(!text.trim() || !validateName(text) || totalLength > 30);
-                        setShowErrorLastName(!last_name.trim() || !validateName(last_name) || totalLength > 30);
+                        checkErrors(text, last_name);
                     }}
                 />
             </View>
+            {showErrorFirstName && (
+                <Text style={styles.errorText}>{errorMessageFirstName}</Text>
+            )}
 
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, showErrorLastName && styles.inputContainerError]}>
                 <TextInput
                     placeholderTextColor={'#8C96A2'}
                     placeholder="Nhập họ mới"
-                    style={showErrorLastName ? styles.inputError : styles.input}
+                    style={styles.input}
                     value={last_name}
                     onChangeText={(text) => {
                         setLastName(text);
-                        const totalLength = first_name.trim().length + text.trim().length;
-                        setShowErrorFirstName(!first_name.trim() || !validateName(first_name) || totalLength > 30);
-                        setShowErrorLastName(!text.trim() || !validateName(text) || totalLength > 30);
+                        checkErrors(first_name, text);
                     }}
                 />
             </View>
+            {showErrorLastName && (
+                <Text style={styles.errorText}>{errorMessageLastName}</Text>
+            )}
 
             <View style={styles.passInfoContainer}>
                 <Text style={styles.textBlue}>Tên của bạn sẽ là: {first_name} {last_name}</Text>
@@ -170,21 +191,20 @@ const styles = StyleSheet.create({
         borderRadius: width * 0.03,
         paddingHorizontal: width * 0.04,
         backgroundColor: '#FFFFFF',
-        marginBottom: height * 0.015,
+        marginVertical: height * 0.009,
+    },
+    inputContainerError: {
+        borderColor: 'red',
+        borderWidth: 1,
     },
     input: {
         flex: 1,
         fontSize: width * 0.04,
         color: 'black',
     },
-    inputError: {
-        flex: 1,
-        fontSize: width * 0.04,
-        color: 'black',
-        borderColor: 'red',
-        borderWidth: 1,
-        borderRadius: width * 0.03,
-        paddingHorizontal: width * 0.04,
+    errorText: {
+        color: 'red',
+        fontSize: width * 0.035,
     },
     passInfoContainer: {
         paddingVertical: width * 0.01,

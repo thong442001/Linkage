@@ -38,8 +38,7 @@ const FindWithEmail = (props) => {
                 setError(response.message || 'Gửi OTP thất bại. Vui lòng thử lại.');
             }
         } catch (error) {
-            console.error("Lỗi khi gửi OTP:", error);
-            setError(error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
+            setError('Có lỗi xảy ra, hãy chắc chắn email này đã được đăng kí.');
         } finally {
             setIsLoading(false); // Tắt loading sau khi xử lý xong (dù thành công hay thất bại)
         }
@@ -57,9 +56,9 @@ const FindWithEmail = (props) => {
                     setGmail(text);
                     setError('');
                 }}
-                placeholderTextColor={'#8C96A2'}
-                placeholder="Email"
-                color={'#8C96A2'}
+                placeholderTextColor={'black'}
+                placeholder="Nhập email"
+                color={'black'}
                 autoCapitalize="none"
                 value={gmail}
                 style={styles.inputDate}

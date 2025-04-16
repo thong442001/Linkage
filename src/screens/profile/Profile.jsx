@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfilePage from '../../components/items/ProfilePage';
 import Friends from '../../components/items/Friends';
+
 import { useDispatch, useSelector } from 'react-redux';
 import {
     joinGroupPrivate,
@@ -100,6 +101,21 @@ const Profile = props => {
         setRefreshing(true);
         callAllProfile().finally(() => setRefreshing(false));
     }, [params?._id, me]);
+
+ // Tự động mở story khi vào từ thông báo
+ useEffect(() => {
+    if (params?.autoPlayStory && stories?.stories?.length > 0) {
+      console.log('Tự động mở StoryViewer với stories:', stories);
+      navigation.navigate(oStackHome.StoryViewer.name, {
+        StoryView: stories,
+        currentUserId: me?._id,
+      });
+      // Xóa autoPlayStory khỏi params để tránh lặp lại khi quay lại
+      navigation.setParams({ autoPlayStory: undefined });
+    }
+  }, [stories, params?.autoPlayStory, navigation, me?._id]);
+
+
 
     useEffect(() => {
         const listenerId = scrollY.addListener(({ value }) => {
@@ -189,6 +205,7 @@ const Profile = props => {
             setavatar(fileUrl);
             return fileUrl;
         } catch (error) {
+            
             console.error(
                 'Lỗi uploadFile:',
                 error.response ? error.response.data : error.message,

@@ -8,7 +8,8 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Dimensions,
-  ActivityIndicator
+  ActivityIndicator,
+  Clipboard
 } from 'react-native';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Video from 'react-native-video';
@@ -20,6 +21,8 @@ import styles from '../../styles/components/items/CommentS';
 import ListComment from '../../components/items/ListComment';
 import { useRoute } from '@react-navigation/native';
 import { useBottomSheet } from '../../context/BottomSheetContext';
+import { useSocket } from '../../context/socketContext';
+import GroupcomponentShare from '../../components/chat/GroupcomponentShare';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getChiTietPost,
@@ -27,31 +30,306 @@ import {
   deletePost_reaction,// xóa biểu cảm
   addPost, // api share
   addComment, // api tạo comment
-  changeDestroyPost, //xoa post
+  changeDestroyPost,
+  getAllGroupOfUser, //xoa post
 } from '../../rtk/API';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 import LoadingTron from '../../utils/animation/loadingTron/LoadingTron';
 import { set } from '@react-native-firebase/database';
 import { oStackHome, oTab } from '../../navigations/HomeNavigation';
 const { width, height } = Dimensions.get('window');
 import NoAccessModal from '../../utils/animation/no_access/NoAccessModal';
+import styleShared from '../../styles/screens/postItem/PostItemS';
+import SuccessModal from '../../utils/animation/success/SuccessModal';
+import FailedModal from '../../utils/animation/failed/FailedModal';
+import LoadingChatList from '../../utils/animation/loadingChatList/LoadingChatList';
+
+
+// Component SharedPost
+
+const SharedPost = ({
+  me,
+  callAddPostShare,
+  copyToClipboard,
+  post,
+  width,
+  styleShared,
+  setShareVisible,
+}) => {
+  const token = useSelector((state) => state.app.token);
+  const dispatch = useDispatch();
+  const [captionShare, setCaptionShare] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false); // Thêm trạng thái loading
+  const [selectedOption, setSelectedOption] = useState({
+    status: 1,
+    name: 'Công khai',
+  });
+  const [groups, setGroups] = useState([]);
+  const { socket } = useSocket();
+  const deeplinkPost = `https://linkage.id.vn/deeplink?url=linkage://post-chi-tiet?ID_post=${post._id.toString()}`;
+
+  const status = [
+    { status: 1, name: 'Công khai', icon: 'user-alt' },
+    { status: 2, name: 'Bạn bè', icon: 'user-friends' },
+    { status: 3, name: 'Chỉ mình tôi', icon: 'user-lock' },
+  ];
+
+  const handleSelectOption = (option) => {
+    console.log('Selected option:', option);
+    setSelectedOption(option);
+    setModalVisible(false);
+  };
+
+  useEffect(() => {
+    callGetAllGroupOfUser(me._id);
+  }, []);
+
+  const callGetAllGroupOfUser = async (ID_user) => {
+    try {
+      setIsLoadingGroups(true); 
+  
+      const response = await dispatch(getAllGroupOfUser({ ID_user, token })).unwrap();
+      setGroups(response.groups);
+  
+      
+      setTimeout(() => {
+        setIsLoadingGroups(false); 
+      }, 2000);
+    } catch (error) {
+      console.log('Error:', error);
+      setIsLoadingGroups(false);
+    }
+  };
+  
+
+  const sendMessage = async (ID_group) => {
+    await socket.emit('joinGroup', ID_group);
+    if (socket == null) {
+      console.log('Socket không joinGroup được');
+      return;
+    }
+    const payload = {
+      ID_group: ID_group,
+      sender: me._id,
+      content: deeplinkPost,
+      type: 'text',
+      ID_message_reply: null,
+    };
+    socket.emit('send_message', payload);
+  };
+
+  const renderContact = ({ item }) => {
+    // Giới hạn tên nhóm tối đa 10 ký tự
+
+    return (
+      <TouchableOpacity onPress={() => sendMessage(item._id)} key={item._id}>
+        <GroupcomponentShare item={item}
+        />
+      </TouchableOpacity>
+    );
+  };
+
+  const handleSharePress = async () => {
+    setIsButtonLoading(true);
+    await callAddPostShare(captionShare, selectedOption.name);
+    setIsButtonLoading(false);
+  };
+
+  return (
+    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styleShared.rectangle}>
+        <View style={styleShared.lineBottomSheet}></View>
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'column',
+          backgroundColor: '#ecf0f0',
+          borderRadius: 10,
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          width: width * 0.9,
+          marginVertical: 10,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            borderRadius: 10,
+            marginHorizontal: 15,
+          }}
+        >
+          <Image source={{ uri: me?.avatar }} style={styleShared.avatar} />
+          <View style={{ flexDirection: 'column' }}>
+            <Text style={{ top: 10, color: 'black', fontWeight: 'bold' }}>
+              {me?.first_name + ' ' + me?.last_name}
+            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: '#dce0e0',
+                  paddingVertical: 2,
+                  borderRadius: 5,
+                  paddingHorizontal: 10,
+                }}
+                onPress={() => setModalVisible(true)}
+              >
+                <Text style={{ color: 'black', fontSize: 14 }}>{selectedOption.name}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleSharePress}
+                style={[
+                  styleShared.shareButton,
+                  {
+                    marginHorizontal: 10,
+                    marginRight: 5,
+                    paddingVertical: 2,
+                    paddingHorizontal: 10,
+                    backgroundColor: '#0064E0',
+                    borderRadius: 5,
+                    opacity: isButtonLoading ? 0.6 : 1,
+                  },
+                ]}
+                disabled={isButtonLoading}
+              >
+              
+                  <Text
+                    style={[
+                      styleShared.shareButtonText,
+                      { fontSize: 14, color: 'white' },
+                    ]}
+                  >
+                    Chia sẻ ngay
+                  </Text>
+              
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+          <TextInput
+            editable={true}
+            multiline={true}
+            scrollEnabled={true}
+            placeholder="Hãy nói gì đó về nội dung này"
+            placeholderTextColor="gray"
+            style={[
+              styleShared.contentShare,
+              {
+                flexShrink: 1,
+                maxHeight: 100,
+                minHeight: 40,
+                marginHorizontal: 10,
+                textAlignVertical: 'top',
+                overflow: 'hidden',
+              },
+            ]}
+            value={captionShare}
+            onChangeText={(text) => setCaptionShare(text)}
+            color="black"
+            maxLength={500}
+          />
+        </View>
+      </View>
+
+      <View style={{ marginBottom: 10 }}>
+        <View style={styleShared.sectionContainer}>
+          <Text style={styleShared.sectionTitle}>Gửi bằng Chat</Text>
+          {isLoadingGroups ? (
+              <LoadingChatList />
+                      ) : (
+                        <FlatList
+                          data={groups}
+                          pointerEvents="auto"
+                          renderItem={renderContact}
+                          keyExtractor={(item) => item._id.toString()}
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          nestedScrollEnabled={true}
+                          style={styleShared.contactList}
+                        />
+                      )}
+        </View>
+
+        <View style={styleShared.sectionContainer}>
+          <Text style={styleShared.sectionTitle}>Chia sẻ lên</Text>
+          <View style={{ marginHorizontal: 10 }}>
+            <TouchableOpacity
+              onPress={() => {
+                copyToClipboard(deeplinkPost.toString());
+              }}
+              style={styleShared.copyLinkButton}
+            >
+              <Text style={styleShared.copyLinkText}>Sao chép liên kết</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styleShared.modalOverlay}
+          onPress={() => setModalVisible(false)}
+        >
+          <View style={styleShared.modalContent1}>
+            {status.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styleShared.optionButton,
+                  selectedOption.status === option.status && { backgroundColor: '#e0e0e0' },
+                ]}
+                onPress={() => handleSelectOption(option)}
+              >
+                <View
+                  style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 5 }}
+                >
+                  <Text style={styleShared.optionText}>{option.name}</Text>
+                  <FontAwesome5 name={option.icon} size={15} color={'black'} />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+};
+
+
 const PostDetail = (props) => {
   const { navigation } = props
   const route = useRoute();
   const { ID_post, typeClick: initialTypeClick } = route.params || {}
   const [typeClick, setTypeClick] = useState(initialTypeClick); // Khởi tạo typeClick từ params
   const dispatch = useDispatch()
-  const me = useSelector(state => state.app.user)
+  const me = useSelector(state => state.app.user);
   const reactions = useSelector(state => state.app.reactions)
 
   const { openBottomSheet, closeBottomSheet } = useBottomSheet();
   const token = useSelector(state => state.app.token);
-
+  const [isSharing, setIsSharing] = useState(false);
   const [comments, setComments] = useState([])
   const [comment, setComment] = useState('')
   const [countComments, setCountComments] = useState(0)
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   const [reply, setReply] = useState(null);
   const [isReplying, setIsReplying] = useState(false); // Thêm trạng thái trả lời
@@ -68,15 +346,10 @@ const PostDetail = (props) => {
 
   // trang thai
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedOption, setSelectedOption] = useState({
-    status: 1,
-    name: "Công khai"
-  });
+ 
   const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
   const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
-  //share 
-  const [captionShare, setCaptionShare] = useState('');
 
   // Cảnh
   // post_reactions: list của reaction của post
@@ -90,10 +363,21 @@ const PostDetail = (props) => {
 
   //loading
   const [isSending, setIsSending] = useState(false);
+    const [failedModalVisible, setFailedModalVisible] = useState(false);
 
   //có quyền xem bài post hay ko
   const [isPermission, setIsPermission] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+
+    const [dialogCopyVisible, setDialogCopyVisible] = useState(false);
+
+
+// Hàm sao chép liên kết
+const copyToClipboard = text => {
+  Clipboard.setString(text);
+  setDialogCopyVisible(true);
+};
+
 
   //call api chi tiet bai post
   const callGetChiTietPost = async (ID_post) => {
@@ -409,40 +693,8 @@ const PostDetail = (props) => {
     }
   };
 
-  //share
-  const handleShare = () => {
-    if (reactionRef.current) {
-      reactionRef.current.measure((x, y, width, height, pageX, pageY) => {
-        setMenuPosition({
-          top: pageY - 57,
-          left: pageX,
-          right: pageX,
-        });
-        setShareVisible(true);
-      });
-    }
-  }
+  
 
-  // Các tùy chọn trạng thái
-  const status = [
-    {
-      status: 1,
-      name: "Công khai"
-    },
-    {
-      status: 2,
-      name: "Bạn bè"
-    },
-    {
-      status: 3,
-      name: "Chỉ mình tôi"
-    },
-  ];
-
-  const handleSelectOption = (option) => {
-    setSelectedOption(option);
-    setModalVisible(false);
-  };
 
   useEffect(() => {
     const updateDiff = () => {
@@ -718,32 +970,66 @@ const PostDetail = (props) => {
 
 
   //call api addPost
-  const callAddPostShare = async () => {
+  const callAddPostShare = async (captionShare, status) => {
+    if (!me || !me._id) {
+      console.log('Người dùng chưa đăng nhập hoặc thông tin người dùng không hợp lệ');
+      setFailedModalVisible(true);
+      setTimeout(() => {
+        setFailedModalVisible(false);
+      }, 1500);
+      return;
+    }
+
+    if (!post || !post._id) {
+      console.log('Bài viết không hợp lệ');
+      setFailedModalVisible(true);
+      setTimeout(() => {
+        setFailedModalVisible(false);
+      }, 1500);
+      return;
+    }
+
     try {
+      setIsSharing(true);
+      console.log('Sharing with status:', status);
       const paramsAPI = {
         ID_user: me._id,
         caption: captionShare,
         medias: [],
-        status: selectedOption.name,
+        status: status,
         type: 'Share',
-        ID_post_shared: post.ID_post_shared ? post.ID_post_shared._id : post._id,//nếu share bài post share thì share bài gốc 
+        ID_post_shared: post.ID_post_shared ? post.ID_post_shared._id : post._id,
         tags: [],
-      }
-      //console.log("push", paramsAPI);
+      };
       await dispatch(addPost(paramsAPI))
         .unwrap()
         .then((response) => {
-          //console.log(response)
-          setShareVisible(false)
+          setShareVisible(false);
+          setSuccessModalVisible(true);
+          setTimeout(() => {
+            setSuccessModalVisible(false);
+          }, 1500);
         })
         .catch((error) => {
-          console.log('Error1 callAddPostShare:', error);
+          console.log('Lỗi khi share bài viết:', error);
+          setShareVisible(false);
+          setFailedModalVisible(true);
+          setTimeout(() => {
+            setFailedModalVisible(false);
+          }, 1500);
         });
-
     } catch (error) {
-      console.log(error)
+      console.log('Lỗi share bài viết:', error);
+      setShareVisible(false);
+      setFailedModalVisible(true);
+      setTimeout(() => {
+        setFailedModalVisible(false);
+      }, 1500);
+    } finally {
+      setIsSharing(false);
+      closeBottomSheet();
     }
-  }
+  };
 
   const renderComment = useCallback(({ item }) => (
     <ListComment
@@ -766,7 +1052,8 @@ const PostDetail = (props) => {
       );
     }
     if (!isPermission) {
-      return <NoAccessModal message="Bạn không có quyền xem bài viết này." />;
+      return  <View style={{flex: 1, justifyContent: 'flex-end', alignItems: 'center', top: height * 0.5}}><Text style={{fontWeight: '500', color: 'black'}}>Bạn không có quyền truy cập vào bài viết!</Text></View>
+      
     }
     if (!post) {
       return null;
@@ -1155,17 +1442,28 @@ const PostDetail = (props) => {
                 {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.action}
-              onPress={() => { setTypeClick("comment") }}
-            >
-              <Icon3 name="comment" size={20} color="black" />
-              <Text style={styles.actionText}>Bình luận</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.action} onPress={() => handleShare()}>
+            <TouchableOpacity style={styles.action}
+               onPress={() => {
+                openBottomSheet(55, (
+                    <SharedPost
+                        me={me}
+                        callAddPostShare={callAddPostShare}
+                        copyToClipboard={copyToClipboard}
+                        post={post}
+                        width={width}
+                        styleShared={styleShared}
+                        setShareVisible={setShareVisible}
+                    />
+                ));
+            }}
+             
+             
+             >
               <Icon4 name="share-alt" size={20} color="black" />
               <Text style={styles.actionText}>Chia sẻ</Text>
             </TouchableOpacity>
+
+
           </View>
         }
 
@@ -1212,87 +1510,6 @@ const PostDetail = (props) => {
           </TouchableWithoutFeedback>
         </Modal >
 
-
-        {/* Chia sẻ */}
-        <Modal
-          visible={shareVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShareVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setShareVisible(false)}>
-            <View style={styles.overlay1}>
-              <View style={styles.modalContainer}>
-                <View >
-                  <View style={{ flexDirection: 'row' }}>
-                    <Image source={{ uri: me?.avatar }} style={styles.avatar} />
-                    <View style={{ marginLeft: 10 }}>
-                      <Text style={styles.name}>{me?.first_name + " " + me?.last_name}</Text>
-                      <View style={styles.boxStatus}>
-                        <TouchableOpacity
-                          style={styles.btnStatus}
-                          onPress={() => setModalVisible(true)}
-                        >
-                          <Text style={styles.txtPublic}>{selectedOption.name}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                  <View style={{ marginHorizontal: 10 }}>
-                    <TextInput
-                      placeholder='Hãy nói gì đó về nội dung này'
-                      placeholderTextColor={"gray"}
-                      multiline={true}
-                      style={styles.contentShare}
-                      value={captionShare}
-                      onChangeText={setCaptionShare}
-                    />
-                    <View style={{ backgroundColor: "#0064E0", borderRadius: 10, alignItems: 'center' }}>
-                      <TouchableOpacity
-                        style={{ padding: 10 }}
-                        onPress={callAddPostShare}
-                      >
-                        <Text style={{ color: 'white' }}>Chia sẻ ngay</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-
-        {/* Modal để hiển thị danh sách trạng thái */}
-        < Modal
-          transparent={true}  // Cho phép nền của modal trong suốt, giúp nhìn thấy nền bên dưới modal.
-          visible={modalVisible}  // Điều khiển việc modal có hiển thị hay không dựa trên trạng thái `modalVisible`.
-          animationType="fade"  // Hiệu ứng khi modal xuất hiện. Ở đây là kiểu "slide" từ dưới lên.
-          onRequestClose={() => setModalVisible(false)}  // Khi modal bị yêu cầu đóng (ví dụ trên Android khi bấm nút back), hàm này sẽ được gọi để đóng modal.
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}  // Overlay của modal, tạo hiệu ứng làm mờ nền dưới modal.
-            onPress={() => setModalVisible(false)}  // Đóng modal khi người dùng chạm vào khu vực bên ngoài modal.
-          >
-            {/* // Nội dung chính của modal, nơi hiển thị các tùy chọn. */}
-            <View style={styles.modalContent1}>
-              {
-                status.map((option, index) => (
-                  <TouchableOpacity
-                    key={index}  // Mỗi phần tử trong danh sách cần có một key duy nhất.
-                    style={styles.optionButton}  // Styling cho mỗi nút tùy chọn trong danh sách.
-                    onPress={() => {
-                      //console.log(option.name)
-                      handleSelectOption(option)
-                    }}  // Khi người dùng chọn một tùy chọn, hàm này sẽ được gọi để cập nhật trạng thái và đóng modal.
-                  >
-                    {/* // Hiển thị tên của tùy chọn. */}
-                    <Text style={styles.optionText}>{option.name}</Text>
-                  </TouchableOpacity>
-                ))
-              }
-            </View>
-          </TouchableOpacity>
-        </Modal >
 
 
         {/* Modal hiển thị ảnh */}
@@ -1477,6 +1694,9 @@ const PostDetail = (props) => {
             <View></View>
         }
       </View>
+      <SuccessModal visible={successModalVisible} message={"Đã chia sẻ bài viết!"} />
+      <FailedModal visible={failedModalVisible} message={"Đã có lỗi khi chia sẻ bài viết!"}/>
+      <LoadingModal visible={isSharing} />
     </View>
   );
 };
