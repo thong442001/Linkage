@@ -9,17 +9,28 @@ import FailedModal from '../../utils/animation/failed/FailedModal';
 const { width, height } = Dimensions.get('window');
 
 const CreatePassWord = ({ route, navigation }) => {
-    const { first_name, last_name, dateOfBirth, sex, email, phone } = route.params;
+    const { first_name, last_name, dateOfBirth, sex, email, phone } = route.params || {};
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState(''); // Thêm state cho nhập lại mật khẩu
-    const [errors, setErrors] = useState({ password: '', confirmPassword: '' }); // Thêm lỗi cho confirmPassword
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [errors, setErrors] = useState({ password: '', confirmPassword: '' });
     const [validPassword, setValidPassword] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Thêm state để hiển thị/ẩn confirmPassword
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [successVisible, setSuccessVisible] = useState(false);
     const [failed, setFailed] = useState(false);
 
     const dispatch = useDispatch();
+
+    // Kiểm tra tham số
+    const requiredParams = { first_name, last_name, dateOfBirth, sex };
+    const missingParams = Object.keys(requiredParams).filter((key) => !requiredParams[key]);
+    if (missingParams.length > 0) {
+        console.error('Missing params:', missingParams);
+        setErrors({ password: '', confirmPassword: 'Dữ liệu không hợp lệ. Vui lòng thử lại.' });
+        setFailed(true);
+        setTimeout(() => setFailed(false), 2000);
+        return <View style={styles.container}><Text>Lỗi dữ liệu</Text></View>;
+    }
 
     // Hàm validate mật khẩu
     const validatePassword = (text) => {
@@ -56,7 +67,7 @@ const CreatePassWord = ({ route, navigation }) => {
     const handlePasswordChange = (text) => {
         setPassword(text);
         const passwordError = validatePassword(text);
-        const confirmError = validateConfirmPassword(confirmPassword, text); // Cập nhật lỗi confirm khi mật khẩu gốc thay đổi
+        const confirmError = validateConfirmPassword(confirmPassword, text);
         setErrors({ password: passwordError, confirmPassword: confirmError });
         setValidPassword(!passwordError && !confirmError && confirmPassword.trim());
     };
@@ -100,9 +111,24 @@ const CreatePassWord = ({ route, navigation }) => {
             });
     };
 
+    // Hàm xử lý nút back
+    const handleBack = () => {
+        const params = { first_name, last_name, dateOfBirth, sex, email, phone };
+        if (!email || email.trim() === '') {
+            // Đăng ký bằng số điện thoại -> Back về OTPScreen
+            navigation.navigate('Screen2', params);
+        } else if (!phone || phone.trim() === '') {
+            // Đăng ký bằng email -> Back về OTPGmailScreen
+            navigation.navigate('Screen3', params);
+        } else {
+            // Trường hợp bất ngờ (cả email và phone đều có), quay về OTPScreen mặc định
+            navigation.navigate('OTPScreen', params);
+        }
+    };
+
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable onPress={handleBack}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
@@ -165,7 +191,7 @@ const CreatePassWord = ({ route, navigation }) => {
             </Pressable>
 
             <SuccessModal visible={successVisible} message="Tạo tài khoản thành công!" />
-            <FailedModal visible={failed} message="Đã có lỗi xảy ra! Vui lòng thử lại" />
+            <FailedModal visible={failed} message={errors.confirmPassword || 'Đã có lỗi xảy ra! Vui lòng thử lại'} />
         </View>
     );
 };

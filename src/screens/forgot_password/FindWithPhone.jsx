@@ -15,44 +15,55 @@ const FindWithPhone = (props) => {
     const dispatch = useDispatch();
 
 
-     const handleCheckPhone = async () => {
-            if (!phone.trim()) {
-                setError('Vui lòng nhập số điện thoại.');
+    const handleCheckPhone = async () => {
+        if (!phone.trim()) {
+            setError('Vui lòng nhập số điện thoại.');
+            return;
+        }
+    
+        const phoneRegex = /^(?:\+84|84|0)(3[2-9]|5[5-9]|7[0|6-9]|8[1-9]|9[0-4|6-9])\d{7}$/;
+        if (!phoneRegex.test(phone)) {
+            setError('Số điện thoại không hợp lệ.');
+            return;
+        }
+    
+        setError('');
+        setIsLoading(true); // Bật loading trước khi gửi request
+    
+        try {
+            // Kiểm tra số điện thoại có tồn tại 
+            console.log("Checking phone:", { phone });
+            const checkPhoneResponse = await dispatch(checkPhone({ phone })).unwrap();
+            console.log("Response từ checkPhone:", checkPhoneResponse);
+    
+            // Nếu số điện thoại không tồn tại
+            if (!checkPhoneResponse.status) {
+                setIsLoading(false);
+                setError(checkPhoneResponse.message || 'Số điện thoại chưa được đăng kí.');
                 return;
             }
     
-            const phoneRegex = /^(?:\+84|84|0)(3[2-9]|5[5-9]|7[0|6-9]|8[1-9]|9[0-4|6-9])\d{7}$/;
-            if (!phoneRegex.test(phone)) {
-                setError('Số điện thoại không hợp lệ.');
-                return;
-            }
+            // Nếu số điện thoại tồn tại, gửi OTP
+            console.log("Sending OTP for phone:", { phone });
+            const otpResponse = await dispatch(sendOTP_dangKi_phone({ phone })).unwrap();
+            console.log("Response từ sendOTP_dangKi_phone:", otpResponse);
     
-            setError('');
-            setIsLoading(true); // Bật loading trước khi gửi request
-            try {
-                setIsLoading(true); // Bật loading trước khi gửi request
-                console.log("Sending payload:", { phone });
-                const response = await dispatch(sendOTP_dangKi_phone({ phone })).unwrap();
-                console.log("Response từ sendOTP_dangKi_phone:", response);
-                if (response.status) {
-                    setIsLoading(false);
-                    setTimeout(() => {
-                        setIsLoading(false);
-                    }, 2000);
-                    navigation.navigate('CheckPhone', { phone });
-                } else {
-                    setError(response.message || 'Gửi OTP thất bại. Vui lòng thử lại.');
-                }
-            } catch (error) {
-                setError(error);
-            } finally {
-                setIsLoading(false); // Tắt loading sau khi xử lý xong (dù thành công hay thất bại)
+            if (otpResponse.status) {
+                navigation.navigate('CheckPhone', { phone });
+            } else {
+                setError(otpResponse.message || 'Gửi OTP thất bại. Vui lòng thử lại.');
             }
-        };
+        } catch (error) {
+            console.error("Error:", error);
+            setError(error || 'Đã xảy ra lỗi. Vui lòng thử lại.');
+        } finally {
+            setIsLoading(false); // Tắt loading
+        }
+    };
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable onPress={() => navigation.navigate('FindWithEmail')}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 
@@ -78,7 +89,7 @@ const FindWithPhone = (props) => {
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
-                    onPress={() => navigation.navigate('FindWithEmail')}>
+                    onPress={() => navigation.navigate('FindWithEmail', setError(''))}>
                     <Text style={styles.buttonTextNextScreen}>Tìm kiếm bằng email</Text>
                 </Pressable>
             </View>

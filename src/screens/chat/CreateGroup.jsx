@@ -174,36 +174,36 @@ const CreateGroup = (props) => {// cần param
 const styles = StyleSheet.create({
     containerAll: {
         flex: 1,
-        backgroundColor: '#f0f4ff', // Màu nền chính
+        backgroundColor: '#fff', // Màu nền chính
     },
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: height * 0.02,
+        paddingVertical: height * 0.005,
         paddingHorizontal: width * 0.05,
         backgroundColor: '#fff',
         borderBottomWidth: 1,
         borderBottomColor: '#E0E0E0',
-        elevation: 2, // Bóng đổ cho Android
-        shadowColor: '#000', // Bóng đổ cho iOS
+        elevation: 2, 
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 5,
     },
     headerText: {
-        fontSize: width * 0.06,
+        fontSize: width * 0.05,
         fontWeight: 'bold',
         color: '#333',
         textAlign: 'center',
         flex: 1,
     },
     cancelText: {
-        fontSize: width * 0.045,
+        fontSize: width * 0.041,
         color: '#0064E0', // Màu xanh đậm
         fontWeight: '500',
     },
     createButton: {
+        fontSize: width * 0.041,
         paddingHorizontal: width * 0.03,
         paddingVertical: height * 0.01,
         borderRadius: width * 0.02,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     createText: {
-        fontSize: width * 0.045,
+        fontSize: width * 0.041,
         color: '#999', // Màu xám khi chưa đủ điều kiện
         fontWeight: '500',
     },

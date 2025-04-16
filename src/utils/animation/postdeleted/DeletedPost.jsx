@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet } from 'react-native';
 import LottieView from 'lottie-react-native';
 
-const NoAccessModal = ({ visible, message, onClose }) => {
+const DeletedPost = ({ visible, message, onClose }) => {
   return (
     <Modal
       transparent={true}
@@ -13,7 +13,7 @@ const NoAccessModal = ({ visible, message, onClose }) => {
       <View style={styles.modalBackground}>
         <View style={styles.modalContent}>
           <LottieView
-            source={require('./no_access.json')}
+            source={require('./deletedpost.json')}
             autoPlay
             loop
             style={styles.successAnimation}
@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
+    backgroundColor: 'white',
     alignItems: 'center',
   },
   successAnimation: {
@@ -45,4 +46,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NoAccessModal;
+export default DeletedPost;

@@ -34,6 +34,7 @@ const FindWithEmail = (props) => {
             console.log("Response từ sendOTP_quenMatKhau_gmail:", response);
             if (response.status) {
                 navigation.navigate('CheckEmail', { gmail });
+                setGmail('')
             } else {
                 setError(response.message || 'Gửi OTP thất bại. Vui lòng thử lại.');
             }
@@ -46,7 +47,7 @@ const FindWithEmail = (props) => {
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable onPress={() => navigation.navigate('Login')}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
             <Text style={styles.label}>Tìm tài khoản</Text>
@@ -70,7 +71,7 @@ const FindWithEmail = (props) => {
             <View style={styles.containerButton}>
                 <Pressable
                     style={styles.buttonNextSceen}
-                    onPress={() => navigation.navigate('FindWithPhone')}
+                    onPress={() => navigation.navigate('FindWithPhone', setError(''))}
                     disabled={isLoading} 
                 >
                     <Text style={styles.buttonTextNextScreen}>Tìm bằng số điện thoại</Text>

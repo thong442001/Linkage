@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch } from 'react-redux'; 
-import { checkOTP_phone } from '../../rtk/API'; 
+import { checkOTP_phone, sendOTP_dangKi_phone } from '../../rtk/API'; 
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import LoadingModal from '../../utils/animation/loading/LoadingModal';
 const { width, height } = Dimensions.get('window');
@@ -14,7 +14,30 @@ const CheckPhone = (props) => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false); 
     const [isSuccess, setIsSuccess] = useState(false); 
-    const dispatch = useDispatch(); // Khai báo dispatch
+    const [resendCooldown, setResendCooldown] = useState(30);
+    const [isResendDisabled, setIsResendDisabled] = useState(true);
+    const [isSendSuccess, setIsSendSuccess] = useState(false);
+    
+    const dispatch = useDispatch(); 
+
+
+      // Bộ đếm ngược cho nút "Lấy mã mới"
+      useEffect(() => {
+        let timer;
+        if (resendCooldown > 0 && isResendDisabled) {
+          timer = setInterval(() => {
+            setResendCooldown((prev) => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                setIsResendDisabled(false);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
+        return () => clearInterval(timer);
+      }, [resendCooldown, isResendDisabled]);
 
     const handleCheckOTP = async () => {
         if (!code.trim()) {
@@ -51,11 +74,52 @@ const CheckPhone = (props) => {
         }
     };
 
+
+
+      // Hàm xử lý khi nhấn "Lấy mã mới"
+      const handleResendOTP = () => {
+        if (isResendDisabled) return;
+    
+        setIsLoading(true);
+        setError('');
+        dispatch(sendOTP_dangKi_phone({ phone }))
+          .unwrap()
+          .then((response) => {
+            if (response.status) {
+              setIsSendSuccess(true);
+              setTimeout(() => {
+                setIsSendSuccess(false);
+                setResendCooldown(30);
+                setIsResendDisabled(true);
+                setCode('');
+              }, 2000);
+            } else {
+              setError(response.message || 'Không thể gửi OTP mới');
+              setIsFailed(true);
+              setTimeout(() => {
+                setIsFailed(false);
+              }, 2000);
+            }
+          })
+          .catch((error) => {
+            console.log('Error resending OTP:', error);
+            setError('Không thể gửi OTP mới. Vui lòng thử lại.');
+            setIsFailed(true);
+            setTimeout(() => {
+              setIsFailed(false);
+            }, 2000);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      };
+
     return (
         <View style={styles.container}>
             <LoadingModal visible={isLoading} />
             <SuccessModal visible={isSuccess} message="Xác thực OTP thành công!" />
-            <Pressable onPress={() => navigation.goBack()}>
+            <SuccessModal visible={isSendSuccess} message={"Mã OTP đã được gửi lại!"}/>
+            <Pressable onPress={() => navigation.navigate('FindWithPhone')}>
                 <Icon style={styles.iconBack} name="angle-left" size={width * 0.08} color="black" />
             </Pressable>
 

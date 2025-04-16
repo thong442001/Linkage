@@ -47,6 +47,7 @@ import styleShared from '../../styles/screens/postItem/PostItemS';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 import LoadingChatList from '../../utils/animation/loadingChatList/LoadingChatList';
+import DeletedPost from '../../utils/animation/postdeleted/DeletedPost';
 
 
 // Component SharedPost
@@ -1052,12 +1053,23 @@ const copyToClipboard = text => {
       );
     }
     if (!isPermission) {
-      return  <View style={{flex: 1, justifyContent: 'flex-end', alignItems: 'center', top: height * 0.5}}><Text style={{fontWeight: '500', color: 'black'}}>Bạn không có quyền truy cập vào bài viết!</Text></View>
+      return  <View style={{flex: 1, flexDirection: 'column', gap: 10, justifyContent: 'flex-end', alignItems: 'center', top: height * 0.5}}><Text style={{fontWeight: '500', color: 'black'}}>Bạn không có quyền truy cập vào bài viết!</Text></View>
       
     }
     if (!post) {
       return null;
     }
+
+    // Kiểm tra nếu bài viết bị xóa và không thuộc về người dùng hiện tại
+  if (post._destroy && me._id !== post.ID_user._id) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', top: height * 0.5 }}>
+        <Text style={{ fontWeight: '500', color: 'black' }}>
+          Bài viết đã bị xóa.
+        </Text>
+      </View>
+    );
+  }
     return (
       <View style={styles.postContainer}>
         <View>
@@ -1616,64 +1628,51 @@ const copyToClipboard = text => {
         data={comments}
         renderItem={renderComment}
         keyExtractor={(item) => item._id.toString()}
-        // getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })}
         extraData={comments}
         ListHeaderComponent={header}
         contentContainerStyle={{ paddingBottom: '17%' }}
       />
-      <View style={styles.boxInputText}>
-        {/* Hiển thị reply */}
-        {
-          reply && (
+      {/* Chỉ hiển thị ô nhập bình luận khi bài viết hợp lệ */}
+      {post && isPermission && (!post._destroy || me._id === post.ID_user._id) && (
+        <View style={styles.boxInputText}>
+          {/* Hiển thị reply */}
+          {reply && (
             <View style={styles.replyPreview}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={styles.replyTitle}>Đang phản hồi</Text>
                 <Text style={[styles.replyContent, { fontWeight: 'bold' }]}>
-                  {
-                    // me._id == reply.ID_user._id && (
-                    ` ${reply.ID_user.first_name} ${reply.ID_user.last_name} `
-                    // )
-                  }
-
+                  {` ${reply.ID_user.first_name} ${reply.ID_user.last_name} `}
                 </Text>
-                {/* <Text style={styles.replyContent}>
-                  {
-                    reply.type === 'text'
-                      ? `${reply.content}`
-                      : reply.type === 'image'
-                        ? 'Ảnh'
-                        : 'Video'
-                  }
-                </Text> */}
               </View>
               <TouchableOpacity
                 style={styles.replyRight}
-                onPress={() => { setReply(null), setIsReplying(false), setComment("") }}
+                onPress={() => {
+                  setReply(null);
+                  setIsReplying(false);
+                  setComment('');
+                }}
               >
                 <Text style={styles.replyTitle}>Hủy</Text>
               </TouchableOpacity>
             </View>
-          )
-        }
-        {
-          typeClick == "comment" ?
+          )}
+          {typeClick === 'comment' ? (
             <View style={styles.boxCommentAll}>
-              <View
-                style={styles.boxComment}
-              >
-                {/* Thư Viện */}
+              <View style={styles.boxComment}>
+                {/* Thư viện */}
                 <View style={styles.librarySelect}>
-                  <TouchableOpacity
-                    onPress={onOpenGallery}
-                  >
+                  <TouchableOpacity onPress={onOpenGallery}>
                     <Icon name="image" size={25} color="#007bff" />
                   </TouchableOpacity>
-
                 </View>
                 <TextInput
-                  ref={textInputRef} // Gắn ref vào TextInput
+                  ref={textInputRef}
                   style={styles.textInput}
-                  placeholder={isReplying ? `Trả lời ${reply?.ID_user.first_name} ${reply?.ID_user.last_name}` : "Viết bình luận"}
+                  placeholder={
+                    isReplying
+                      ? `Trả lời ${reply?.ID_user.first_name} ${reply?.ID_user.last_name}`
+                      : 'Viết bình luận'
+                  }
                   multiline={true}
                   value={comment}
                   onChangeText={setComment}
@@ -1684,18 +1683,18 @@ const copyToClipboard = text => {
                     style={styles.sendButton}
                     disabled={isSending}
                   >
-                    <Icon name="send" size={25} color='#007bff' />
-                    {/* <Text style={styles.sendText}>Send</Text> */}
+                    <Icon name="send" size={25} color="#007bff" />
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
-            :
+          ) : (
             <View></View>
-        }
-      </View>
-      <SuccessModal visible={successModalVisible} message={"Đã chia sẻ bài viết!"} />
-      <FailedModal visible={failedModalVisible} message={"Đã có lỗi khi chia sẻ bài viết!"}/>
+          )}
+        </View>
+      )}
+      <SuccessModal visible={successModalVisible} message={'Đã chia sẻ bài viết!'} />
+      <FailedModal visible={failedModalVisible} message={'Đã có lỗi khi chia sẻ bài viết!'} />
       <LoadingModal visible={isSharing} />
     </View>
   );

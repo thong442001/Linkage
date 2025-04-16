@@ -12,6 +12,7 @@ import CheckEmail from '../screens/forgot_password/CheckEmail';
 import CreateNewPassWord from '../screens/forgot_password/CreateNewPassWord';
 import OTPScreen from '../screens/register/OTPScreen';
 import OTPGmailScreen from '../screens/register/OTPGmailScreen';
+import CheckPhone from '../screens/forgot_password/CheckPhone';
 const UserNavigation = () => {
     return (
         <UserStack.Navigator initialRouteName='Login' screenOptions={{ headerShown: false }}>
@@ -29,6 +30,7 @@ const UserNavigation = () => {
             <UserStack.Screen name="CreateNewPassWord" component={CreateNewPassWord} />
             <UserStack.Screen name="OTPScreen" component={OTPScreen} />
             <UserStack.Screen name="OTPGmailScreen" component={OTPGmailScreen} />
+            <UserStack.Screen name="CheckPhone" component={CheckPhone} />
         </UserStack.Navigator>
     );
 };
