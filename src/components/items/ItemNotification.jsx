@@ -53,7 +53,7 @@ const ItemNotification = ({data}) => {
 
     // return () => clearInterval(interval);
   }, []);
-  //console.log('data', data);
+  console.log('data', data);
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
@@ -252,6 +252,12 @@ const ItemNotification = ({data}) => {
       setIcon('happy')
       setbackground('green')
     }
+    if (data.type == 'Tài khoản bị khóa') {
+      setName('Người Dùng')
+      setAvatar('https://i.pinimg.com/736x/99/01/a7/9901a78c402edd1f13fc2dd098550214.jpg');
+      setIcon('shield')
+      setbackground('#007bff')
+    }
 
   }, [data,navigation]);
 
@@ -265,7 +271,7 @@ const ItemNotification = ({data}) => {
     //            StoryView: data.ID_post.medias,
     //            currentUserId: data.ID_post.ID_user._id,
     //          })
-    } 
+    }
     else if (data.type === 'Đã thành bạn bè của bạn') {
       navigation.navigate('Profile', { _id: data.ID_relationship.ID_userA._id == me._id ? data.ID_relationship.ID_userB._id : data.ID_relationship.ID_userA._id });
     }
