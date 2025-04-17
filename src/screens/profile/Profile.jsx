@@ -825,7 +825,10 @@ const Profile = props => {
                                 <View style={ProfileS.header}>
                                     <TouchableOpacity
                                         style={ProfileS.header1}
-                                        onPress={() => navigation.goBack()}>
+                                        onPress={() => {
+                                            props.route.params.handleScroll(true); // Đảm bảo bottom tab hiển thị
+                                            navigation.goBack();
+                                          }}>
                                         <View>
                                             <Icon name="chevron-back" size={20} color="black" />
                                         </View>
