@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useSelector, useDispatch } from 'react-redux';
 import { editPasswordOfUser } from '../../rtk/API';
@@ -17,8 +17,8 @@ const ChangePassWord = (props) => {
     const [passwordOLd, setPasswordOld] = useState('');
     const [RePass, setRepass] = useState('');
     const [btnState, setBtnState] = useState(false);
-    const [loading, setLoading] = useState(false); 
-    const [successVisible, setSuccessVisible] = useState(false); 
+    const [loading, setLoading] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
     const [failed, setfailed] = useState(false);
 
     const [errorOldPassword, setErrorOldPassword] = useState('');
@@ -28,7 +28,7 @@ const ChangePassWord = (props) => {
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showRePassword, setShowRePassword] = useState(false);
-    
+
     useEffect(() => {
         if (passwordNew.trim() && passwordOLd.trim() && RePass.trim()) {
             setBtnState(true);
@@ -42,42 +42,42 @@ const ChangePassWord = (props) => {
         setErrorOldPassword('');
         setErrorNewPassword('');
         setErrorRePass('');
-        
+
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-    
+
         if (!passwordRegex.test(passwordNew)) {
             setErrorNewPassword('Mật khẩu mới phải có ít nhất 6 ký tự, bao gồm chữ cái và số, không được chứa ký tự đặc biệt.');
             hasError = true;
         }
-    
+
         if (passwordNew === passwordOLd) {
             setErrorOldPassword('Mật khẩu mới không được trùng với mật khẩu cũ.');
             hasError = true;
         }
-    
+
         if (passwordNew !== RePass) {
             setErrorRePass('Mật khẩu nhập lại không khớp.');
             hasError = true;
         }
-    
+
         if (hasError) {
             return;
         }
-    
+
         setLoading(true);
         setBtnState(false);
         const data = { ID_user: me._id, passwordOLd, passwordNew };
-    
+
         setTimeout(() => {
             dispatch(editPasswordOfUser(data))
                 .unwrap()
                 .then((response) => {
                     if (response.status === true) {
-                        setSuccessVisible(true); 
+                        setSuccessVisible(true);
                         setTimeout(() => {
                             setSuccessVisible(false);
-                            navigation.goBack(); 
-                        }, 2000); 
+                            navigation.goBack();
+                        }, 2000);
                     } else {
                         setfailed(true);
                         setTimeout(() => {
@@ -168,7 +168,7 @@ const ChangePassWord = (props) => {
             </Pressable>
 
             <SuccessModal visible={successVisible} message="Cập nhật mật khẩu thành công!" />
-            <FailedModal visible={failed} message="Cập nhật thất bại! Vui lòng thử lại"/> 
+            <FailedModal visible={failed} message="Cập nhật thất bại! Vui lòng thử lại" />
         </View>
     );
 };
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#fff',
         paddingHorizontal: width * 0.03,
-        
+
         borderRadius: width * 0.08,
         marginBottom: height * 0.015,
         justifyContent: 'space-between',
