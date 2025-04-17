@@ -149,6 +149,17 @@ const TabHome = ({ navigation }) => {
     [tabAnimation]
   );
 
+
+  // Đặt lại trạng thái bottom tab khi Home được focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      handleScroll(true); // Hiển thị bottom tab khi Home được focus
+    });
+
+    return unsubscribe;
+  }, [navigation, handleScroll]);
+
+  
   // Xử lý nút back của thiết bị
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {

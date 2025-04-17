@@ -39,7 +39,7 @@ const Home = props => {
     outputRange: [0, -HEADER_HEIGHT],
     extrapolate: 'clamp',
   });
-
+  
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
     const onValueChange = liveSessionsRef.on('value', snapshot => {
