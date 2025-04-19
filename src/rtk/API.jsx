@@ -73,6 +73,7 @@ export const register = createAsyncThunk(
     }
   }
 )
+
 export const check_email = createAsyncThunk(
   'gg/check-email',
   async (data, { rejectWithValue }) => {
@@ -177,6 +178,7 @@ export const joinGroupPrivate = createAsyncThunk(
     }
   }
 );
+
 export const addGroup = createAsyncThunk(
   'group/addGroup',
   async (data, { rejectWithValue }) => {
