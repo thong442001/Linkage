@@ -79,6 +79,7 @@ const AppNavigation = () => {
           //console.log('🌐 Deeplink:', url);
           // Parse deeplink: linkage://post-chi-tiet?ID_post=124
           const [path, queryString] = url.split('?');
+          // share post
           if (path.includes('post-chi-tiet')) {
             const params = parseQueryString(queryString);
             const ID_post = params.ID_post;
@@ -90,7 +91,18 @@ const AppNavigation = () => {
               console.error('❌ Thiếu ID_post trong deeplink');
             }
           }
-
+          // share profile
+          if (path.includes('profile')) {
+            const params = parseQueryString(queryString);
+            const ID_user = params.ID_user;
+            if (ID_user) {
+              //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
+              // Navigate to PostScreen
+              navigation.navigate("Profile", { _id: ID_user });
+            } else {
+              console.error('❌ Thiếu ID_post trong deeplink');
+            }
+          }
         }
       } catch (error) {
         console.error('❌ Lỗi khi xử lý deeplink:', error);
@@ -102,12 +114,25 @@ const AppNavigation = () => {
     const subscription = Linking.addEventListener('url', ({ url }) => {
       //console.log('🌐 Nhận deeplink:', url);
       const [path, queryString] = url.split('?');
+      // share post
       if (path.includes('post-chi-tiet')) {
         const params = parseQueryString(queryString);
         const ID_post = params.ID_post;
         if (ID_post) {
           //console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
           navigation.navigate("PostDetail", { ID_post: ID_post, typeClick: "comment" });
+        } else {
+          console.error('❌ Thiếu ID_post trong deeplink');
+        }
+      }
+      // share profile
+      if (path.includes('profile')) {
+        const params = parseQueryString(queryString);
+        const ID_user = params.ID_user;
+        if (ID_user) {
+          //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
+          // Navigate to PostScreen
+          navigation.navigate("Profile", { _id: ID_user });
         } else {
           console.error('❌ Thiếu ID_post trong deeplink');
         }

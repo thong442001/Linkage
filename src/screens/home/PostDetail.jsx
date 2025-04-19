@@ -1454,6 +1454,13 @@ const PostDetail = (props) => {
                 {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.action}
+              onPress={() => { setTypeClick("comment") }}
+            >
+              <Icon3 name="comment" size={20} color="black" />
+              <Text style={styles.actionText}>Bình luận</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.action}
               onPress={() => {
                 openBottomSheet(55, (
