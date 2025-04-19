@@ -191,18 +191,22 @@ const UpPost = (props) => {
         },
     ];
 
+    //bỏ chọn ảnh
+    const handleRemoveMedia = (index) => {
+        setMedias((prev) => prev.filter((_, i) => i !== index));
+    };
 
     const hasMedia = medias?.length > 0;
     const isVideo = (uri) => uri?.endsWith('.mp4') || uri?.endsWith('.mov');
     const renderMediaGrid = (medias) => {
         const mediaCount = medias.length;
-
+    
         if (mediaCount === 0) return null;
-
+    
         return (
             <View style={CommentS.mediaContainer}>
-                {medias.slice(0, 5).map((uri, index) => (
-                    <TouchableOpacity key={index} style={getMediaStyle(mediaCount, index)}>
+                {medias.slice(0, 10).map((uri, index) => (
+                    <View key={index} style={getMediaStyle(mediaCount, index)}>
                         {isVideo(uri) ? (
                             <View style={CommentS.videoWrapper}>
                                 <Video source={{ uri }} style={CommentS.video} resizeMode="cover" paused />
@@ -211,16 +215,23 @@ const UpPost = (props) => {
                                 </View>
                             </View>
                         ) : (
-
                             <Image source={{ uri }} style={CommentS.image} resizeMode="cover" />
                         )}
-
+    
+                        {/* Nút Xóa */}
+                        <TouchableOpacity
+                            style={CommentS.removeButton}
+                            onPress={() => handleRemoveMedia(index)}
+                        >
+                            <Icon name="close-circle" size={24} color="red" />
+                        </TouchableOpacity>
+    
                         {index === 4 && mediaCount > 5 && (
                             <View style={CommentS.overlay}>
                                 <Text style={CommentS.overlayText}>+{mediaCount - 5}</Text>
                             </View>
                         )}
-                    </TouchableOpacity>
+                    </View>
                 ))}
             </View>
         );
@@ -749,5 +760,14 @@ const styles = StyleSheet.create({
         width: 300,
         height: 300,
         resizeMode: 'contain',
+    },
+    removeButton: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Nền bán trong suốt
+        borderRadius: 12,
+        padding: 2,
+        zIndex: 1, // Đảm bảo nút nằm trên media
     },
 });

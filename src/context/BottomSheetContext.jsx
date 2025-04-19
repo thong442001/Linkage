@@ -68,7 +68,7 @@ export const BottomSheetProvider = ({ children }) => {
                 ref={bottomSheetRef}
                 index={-1}
                 snapPoints={snapPoints}
-                enableContentPanningGesture={true}
+                enableContentPanningGesture={false}
                 enablePanDownToClose={true}
                 onClose={() => {
                     setIsVisible(false);

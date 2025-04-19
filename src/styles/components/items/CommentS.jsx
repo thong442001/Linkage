@@ -93,10 +93,7 @@ const CommentS = StyleSheet.create({
         color: 'black',
         // marginLeft: width * 0.04
     },
-    mediaContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
+
     singleMedia: {
         width: '100%',
         height: height * 0.4, // 40% chiều cao màn hình
@@ -145,12 +142,14 @@ const CommentS = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-    videoWrapper: {
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-    },
+    // videoWrapper: {
+    //     position: 'relative',
+    //     width: '100%',
+    //     height: '100%',
+    //     overflow: 'hidden',
+
+    
+    // },
     video: {
         width: '100%',
         height: '100%',
@@ -441,7 +440,9 @@ const CommentS = StyleSheet.create({
     mediaContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        
+ 
     },
     singleMedia: {
         width: '100%',
@@ -495,7 +496,7 @@ const CommentS = StyleSheet.create({
         position: 'relative',
         width: '100%',
         height: '100%',
-        overflow: 'hidden',
+        overflow: 'hidden',   
     },
     video: {
         width: '100%',
@@ -603,7 +604,15 @@ const CommentS = StyleSheet.create({
     boxInfor1: {
         marginHorizontal: width * 0.05,
         marginTop: height * 0.02
-    }
+    },
+    removeButton: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+        borderRadius: 12,
+        padding: 2,
+        zIndex: 1, // Đảm bảo nút nằm trên media
+    },
 });
 
 
