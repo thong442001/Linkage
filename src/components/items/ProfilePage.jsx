@@ -105,12 +105,15 @@ const SharedPost = ({
             ID_message_reply: null
         };
         socket.emit('send_message', payload);
-
     };
 
     const renderContact = ({ item }) => (
         <TouchableOpacity
-            onPress={() => sendMessage(item._id)}
+            onPress={() => {
+                sendMessage(item._id)
+                //closeBottomSheet();
+            }
+            }
             key={item._id}
         >
             <GroupcomponentShare item={item} />
