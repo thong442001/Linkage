@@ -8,15 +8,14 @@ import {
     TextInput,
     Dimensions,
 } from "react-native";
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getGroupID,
-    editAvtNameGroup,
 } from '../../rtk/API';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
+import { useSocket } from '../../context/socketContext';
 const AvtNameGroup = (props) => { // cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -28,6 +27,22 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
     const [AvtGroup, setAvtGroup] = useState(null);
     const [nameGroup, setNameGroup] = useState(null);
     const [isEditing, setIsEditing] = useState(false);// input name
+    const { socket } = useSocket();
+
+    useEffect(() => {
+
+        socket.emit("joinGroup", params?.ID_group);
+
+
+        socket.on("lang_nghe_chat_edit_avt_name_group", (data) => {
+            console.log("lang_nghe_chat_edit_avt_name_group")
+        });
+
+        return () => {
+            socket.off("lang_nghe_chat_edit_avt_name_group");
+        };
+    }, [params?.ID_group]);
+
     useEffect(() => {
         // Call API khi lần đầu vào trang
         callGetGroupID();
@@ -49,7 +64,7 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
             await dispatch(getGroupID({ ID_group: params.ID_group, token: token }))
                 .unwrap()
                 .then((response) => {
-                    //console.log(response.groups)
+                    console.log(response.group)
                     setAvtGroup(response.group.avatar);
                     if (response.group.name == null) {
                         setNameGroup("Nhóm chưa có tên");
@@ -69,28 +84,14 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
 
     //call api editAvtNameGroup
     const callEditAvtNameGroup = async () => {
-        try {
-            if (AvtGroup == null || nameGroup == null) {
-                return;
-            }
-            const paramsAPI = {
-                ID_group: params.ID_group,
-                avatar: AvtGroup,
-                name: nameGroup == "Nhóm chưa có tên" ? null : nameGroup,
-            }
-            await dispatch(editAvtNameGroup(paramsAPI))
-                .unwrap()
-                .then((response) => {
-                    //console.log(response.groups)
-                    navigation.navigate("SettingChat", { ID_group: params.ID_group })
-                })
-                .catch((error) => {
-                    console.log('Error1 editAvtNameGroup:', error);
-                });
-
-        } catch (error) {
-            console.log(error)
-        }
+        if (!socket) return;
+        const payload = {
+            ID_group: params.ID_group,
+            avatar: AvtGroup,
+            name: nameGroup == "Nhóm chưa có tên" ? null : nameGroup,
+        };
+        socket.emit('edit_avt_name-group', payload);
+        navigation.navigate("SettingChat", { ID_group: params.ID_group })
     }
 
     //up lên cloudiary
@@ -152,8 +153,6 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
         navigation.navigate("SettingChat", { ID_group: params.ID_group })
     };
 
-
-
     return (
         <View style={styles.container}>
 
@@ -188,13 +187,13 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
                         {/* Name group */}
                         <TextInput
                             style={styles.searchBox}
-                            value={isEditing ? nameGroup : "Nhóm chưa có tên"}
-                            onFocus={() => {
-                                if (!isEditing) {
-                                    setNameGroup("");
-                                    setIsEditing(true);
-                                }
-                            }}
+                            value={nameGroup}
+                            // onFocus={() => {
+                            //     if (!isEditing) {
+                            //         setNameGroup("");
+                            //         setIsEditing(true);
+                            //     }
+                            // }}
                             onChangeText={setNameGroup}
                         />
                         <TouchableOpacity
@@ -289,11 +288,21 @@ const styles = StyleSheet.create({
         borderRadius: 100
     },
     searchBox: {
-        borderColor: 'gray',
-        borderRadius: 10,
+        // borderColor: 'gray',
+        // borderRadius: 10,
         borderWidth: 0.5,
         padding: 10,
-        marginTop: 20
+        marginTop: 20,
+        //
+
+        //flex: 1,
+        height: 40,
+        paddingHorizontal: 15,
+        borderRadius: 10,
+        marginHorizontal: 10,
+        color: 'black',
+        backgroundColor: '#E1E6EA'
+
     }
 });
 

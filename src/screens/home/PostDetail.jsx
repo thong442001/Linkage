@@ -59,9 +59,9 @@ const SharedPost = ({
   post,
   width,
   styleShared,
-  setShareVisible,
 }) => {
   const token = useSelector((state) => state.app.token);
+  const { closeBottomSheet } = useBottomSheet();
   const dispatch = useDispatch();
   const [captionShare, setCaptionShare] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -82,7 +82,7 @@ const SharedPost = ({
   ];
 
   const handleSelectOption = (option) => {
-    console.log('Selected option:', option);
+    //console.log('Selected option:', option);
     setSelectedOption(option);
     setModalVisible(false);
   };
@@ -98,10 +98,9 @@ const SharedPost = ({
       const response = await dispatch(getAllGroupOfUser({ ID_user, token })).unwrap();
       setGroups(response.groups);
 
-
       setTimeout(() => {
         setIsLoadingGroups(false);
-      }, 2000);
+      }, 500);
     } catch (error) {
       console.log('Error:', error);
       setIsLoadingGroups(false);
@@ -127,9 +126,14 @@ const SharedPost = ({
 
   const renderContact = ({ item }) => {
     // Giới hạn tên nhóm tối đa 10 ký tự
-
     return (
-      <TouchableOpacity onPress={() => sendMessage(item._id)} key={item._id}>
+      <TouchableOpacity
+        onPress={() => {
+          sendMessage(item._id)
+          closeBottomSheet();
+        }}
+        key={item._id}
+      >
         <GroupcomponentShare item={item}
         />
       </TouchableOpacity>

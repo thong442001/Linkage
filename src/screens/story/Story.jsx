@@ -267,39 +267,39 @@ const Story = ({ route }) => {
           </Text>
         </TouchableOpacity>
         <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => setModalVisible(false)}
->
-  <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-    <View style={styles.modalContainer}>
-      <TouchableWithoutFeedback>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Chọn quyền riêng tư</Text>
-          <FlatList
-            data={statusOptions}
-            keyExtractor={item => item.status.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.optionItem}
-                onPress={() => {
-                  setSelectedOption(item);
-                  setModalVisible(false);
-                }}
-              >
-                <Text style={styles.optionText}>{item.name}</Text>
-                {selectedOption.status === item.status && (
-                  <Icon name="checkmark" size={20} color="blue" />
-                )}
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+            <View style={styles.modalContainer}>
+              <TouchableWithoutFeedback>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Chọn quyền riêng tư</Text>
+                  <FlatList
+                    data={statusOptions}
+                    keyExtractor={item => item.status.toString()}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={styles.optionItem}
+                        onPress={() => {
+                          setSelectedOption(item);
+                          setModalVisible(false);
+                        }}
+                      >
+                        <Text style={styles.optionText}>{item.name}</Text>
+                        {selectedOption.status === item.status && (
+                          <Icon name="checkmark" size={20} color="blue" />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         {/* Success Modal */}
         {showSuccessModal && <SuccessModal message={'Đăng story thành công'} />}

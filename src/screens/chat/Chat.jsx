@@ -385,6 +385,9 @@ const Chat = (props) => {// cần ID_group (param)
             console.log("lang-nghe-tu-choi-choi-game-3-la")
         });
 
+        socket.on('lang_nghe_chat_edit_avt_name_group', (data) => {
+            getInforGroup(data._id)
+        });
         //bàn phím
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
             setKeyboardHeight(e.endCoordinates.height);
@@ -411,6 +414,8 @@ const Chat = (props) => {// cần ID_group (param)
             // bàn phím
             keyboardDidShowListener.remove();
             keyboardDidHideListener.remove();
+            //lang_nghe_home_chat_edit_avt_name_group
+            socket.off("lang_nghe_chat_edit_avt_name_group");
         };
     }, [group, params?.ID_group, navigation, socket, me]);
 

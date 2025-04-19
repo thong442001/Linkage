@@ -26,6 +26,20 @@ const SettingChat = (props) => { // cần ID_group (param)
 
 
     useEffect(() => {
+
+        socket.emit("joinGroup", params?.ID_group);
+
+        socket.on("lang_nghe_chat_edit_avt_name_group", (data) => {
+            console.log("lang_nghe_chat_edit_avt_name_group")
+            callGetGroupID();
+        });
+
+        return () => {
+            socket.off("lang_nghe_chat_edit_avt_name_group");
+        };
+    }, [params?.ID_group]);
+
+    useEffect(() => {
         // Call API khi lần đầu vào trang
         callGetGroupID();
 

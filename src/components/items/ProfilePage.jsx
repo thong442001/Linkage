@@ -36,6 +36,7 @@ import { Snackbar } from 'react-native-paper';
 import styles from '../../styles/screens/postItem/PostItemS';
 import GroupcomponentShare from '../../components/chat/GroupcomponentShare'
 import { useSocket } from '../../context/socketContext';
+import LoadingChatList from '../../utils/animation/loadingChatList/LoadingChatList';
 // Component SharedPost
 
 const SharedPost = ({
@@ -45,12 +46,13 @@ const SharedPost = ({
     post,
     width,
     styles,
-    setShareVisible,
 }) => {
     const token = useSelector(state => state.app.token);
+    const { closeBottomSheet } = useBottomSheet();
     const dispatch = useDispatch();
     const [captionShare, setCaptionShare] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
+    const [isLoadingGroups, setIsLoadingGroups] = useState(false); // Thêm trạng thái loading
     const [selectedOption, setSelectedOption] = useState({
         status: 1,
         name: 'Công khai',
@@ -77,14 +79,17 @@ const SharedPost = ({
 
     const callGetAllGroupOfUser = async ID_user => {
         try {
-            await dispatch(getAllGroupOfUser({ ID_user, token }))
-                .unwrap()
-                .then(response => {
-                    //console.log('Groups from API:', response.groups);
-                    setGroups(response.groups);
-                });
+            setIsLoadingGroups(true);
+
+            const response = await dispatch(getAllGroupOfUser({ ID_user, token })).unwrap();
+            setGroups(response.groups);
+
+            setTimeout(() => {
+                setIsLoadingGroups(false);
+            }, 500);
         } catch (error) {
             console.log('Error:', error);
+            setIsLoadingGroups(false);
         }
     };
 
@@ -111,9 +116,8 @@ const SharedPost = ({
         <TouchableOpacity
             onPress={() => {
                 sendMessage(item._id)
-                //closeBottomSheet();
-            }
-            }
+                closeBottomSheet();
+            }}
             key={item._id}
         >
             <GroupcomponentShare item={item} />
@@ -224,16 +228,20 @@ const SharedPost = ({
             <View style={{ marginBottom: 10 }}>
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Gửi bằng Chat</Text>
-                    <FlatList
-                        data={groups}
-                        pointerEvents="auto"
-                        renderItem={renderContact}
-                        keyExtractor={(item) => item.id}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        nestedScrollEnabled={true}
-                        style={styles.contactList}
-                    />
+                    {isLoadingGroups ? (
+                        <LoadingChatList />
+                    ) : (
+                        <FlatList
+                            data={groups}
+                            pointerEvents="auto"
+                            renderItem={renderContact}
+                            keyExtractor={(item) => item._id.toString()}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            nestedScrollEnabled={true}
+                            style={styles.contactList}
+                        />
+                    )}
                 </View>
 
                 <View style={styles.sectionContainer}>

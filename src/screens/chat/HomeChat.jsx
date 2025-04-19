@@ -140,11 +140,29 @@ const HomeChat = ({ route, navigation }) => {
             setGroups(prevGroups => prevGroups.filter(group => group._id !== ID_group));
         });
 
+        socket.on('lang_nghe_home_chat_edit_avt_name_group', (data) => {
+            //console.log(data)
+            setGroups(prevGroups => {
+                return prevGroups
+                    .map(group => {
+                        if (group._id === data._id) {
+                            return {
+                                ...group,
+                                avatar: data.avatar,
+                                name: data.name,
+                            };
+                        }
+                        return group;
+                    })
+            });
+        });
+
         return () => {
             socket.off('new_group');
             socket.off('new_message');
             socket.off('group_deleted');
             socket.off('kicked_from_group');
+            socket.off('lang_nghe_home_chat_edit_avt_name_group');
         };
     }, [socket]);
 
