@@ -27,6 +27,7 @@ import CommentS from '../../styles/components/items/CommentS';
 import { oStackHome } from '../../navigations/HomeNavigation';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
+import { ScrollView } from 'react-native-gesture-handler';
 const UpPost = (props) => {
     const { navigation } = props;
 
@@ -205,35 +206,35 @@ const UpPost = (props) => {
     
         return (
             <View style={CommentS.mediaContainer}>
-                {medias.slice(0, 10).map((uri, index) => (
-                    <View key={index} style={getMediaStyle(mediaCount, index)}>
-                        {isVideo(uri) ? (
-                            <View style={CommentS.videoWrapper}>
-                                <Video source={{ uri }} style={CommentS.video} resizeMode="cover" paused />
-                                <View style={CommentS.playButton}>
-                                    <Icon name="play-circle" size={40} color="white" />
-                                </View>
+            {medias.slice(0, 5).map((uri, index) => (
+                <View key={index} style={getMediaStyle(mediaCount, index)}>
+                    {isVideo(uri) ? (
+                        <View style={CommentS.videoWrapper}>
+                            <Video source={{ uri }} style={CommentS.video} resizeMode="cover" paused />
+                            <View style={CommentS.playButton}>
+                                <Icon name="play-circle" size={40} color="white" />
                             </View>
-                        ) : (
-                            <Image source={{ uri }} style={CommentS.image} resizeMode="cover" />
-                        )}
-    
-                        {/* Nút Xóa */}
-                        <TouchableOpacity
-                            style={CommentS.removeButton}
-                            onPress={() => handleRemoveMedia(index)}
-                        >
-                            <Icon name="close-circle" size={24} color="red" />
-                        </TouchableOpacity>
-    
-                        {index === 4 && mediaCount > 5 && (
-                            <View style={CommentS.overlay}>
-                                <Text style={CommentS.overlayText}>+{mediaCount - 5}</Text>
-                            </View>
-                        )}
-                    </View>
-                ))}
-            </View>
+                        </View>
+                    ) : (
+                        <Image source={{ uri }} style={CommentS.image} resizeMode="cover" />
+                    )}
+
+                    {/* Nút Xóa */}
+                    <TouchableOpacity
+                        style={CommentS.removeButton}
+                        onPress={() => handleRemoveMedia(index)}
+                    >
+                        <Icon name="close-circle" size={24} color="red" />
+                    </TouchableOpacity>
+
+                    {index === 4 && mediaCount > 5 && (
+                        <View style={CommentS.overlay}>
+                            <Text style={CommentS.overlayText}>+{mediaCount - 5}</Text>
+                        </View>
+                    )}
+                </View>
+            ))}
+        </View>
         );
     };
 

@@ -94,66 +94,6 @@ const CommentS = StyleSheet.create({
         // marginLeft: width * 0.04
     },
 
-    singleMedia: {
-        width: '100%',
-        height: height * 0.4, // 40% chiều cao màn hình
-    },
-    doubleMedia: {
-        width: '49.5%',
-        height: height * 0.4,
-        padding: 1,
-    },
-    tripleMediaFirst: {
-        width: '100%',
-        height: height * 0.33, // 33% chiều cao màn hình
-        padding: 1,
-    },
-    tripleMediaSecond: {
-        width: '49.5%',
-        height: height * 0.2, // 20% chiều cao màn hình
-        padding: 1,
-    },
-    quadMedia: {
-        width: '49.5%',
-        height: height * 0.2,
-        padding: 1,
-    },
-    fivePlusMediaFirstRow: {
-        width: '49.5%',
-        height: height * 0.2,
-        padding: 1,
-    },
-    fivePlusMediaSecondRowLeft: {
-        width: '32.66%',
-        height: height * 0.2,
-        padding: 1,
-    },
-    fivePlusMediaSecondRowMiddle: {
-        width: '32.66%',
-        height: height * 0.2,
-        padding: 1,
-    },
-    fivePlusMediaSecondRowRight: {
-        width: '32.66%',
-        height: height * 0.2,
-        padding: 1,
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-    },
-    // videoWrapper: {
-    //     position: 'relative',
-    //     width: '100%',
-    //     height: '100%',
-    //     overflow: 'hidden',
-
-    
-    // },
-    video: {
-        width: '100%',
-        height: '100%',
-    },
     playButton: {
         position: 'absolute',
         top: '50%',
@@ -162,7 +102,7 @@ const CommentS = StyleSheet.create({
     },
     overlay: {
         position: 'absolute',
-        //backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
         top: 0,
@@ -451,42 +391,42 @@ const CommentS = StyleSheet.create({
     doubleMedia: {
         width: '49.5%',
         height: height * 0.4,
-        padding: 1,
+        padding: 5,
     },
     tripleMediaFirst: {
         width: '100%',
         height: height * 0.33, // 33% chiều cao màn hình
-        padding: 1,
+        padding: 5,
     },
     tripleMediaSecond: {
         width: '49.5%',
         height: height * 0.2, // 20% chiều cao màn hình
-        padding: 1,
+        padding: 5,
     },
     quadMedia: {
-        width: '49.5%',
+        width: '49%',
         height: height * 0.2,
-        padding: 1,
+        padding: 5,
     },
     fivePlusMediaFirstRow: {
         width: '49.5%',
         height: height * 0.2,
-        padding: 1,
+        padding: 5,
     },
     fivePlusMediaSecondRowLeft: {
         width: '32.66%',
-        height: height * 0.2,
-        padding: 1,
+        height: height * 0.3,
+        padding: 5,
     },
     fivePlusMediaSecondRowMiddle: {
         width: '32.66%',
-        height: height * 0.2,
-        padding: 1,
+        height: height * 0.3,
+        padding: 5,
     },
     fivePlusMediaSecondRowRight: {
         width: '32.66%',
-        height: height * 0.2,
-        padding: 1,
+        height: height * 0.3,
+        padding: 5,
     },
     image: {
         width: '100%',
@@ -494,7 +434,7 @@ const CommentS = StyleSheet.create({
     },
     videoWrapper: {
         position: 'relative',
-        width: '100%',
+        width: '90%',
         height: '100%',
         overflow: 'hidden',   
     },
@@ -607,8 +547,8 @@ const CommentS = StyleSheet.create({
     },
     removeButton: {
         position: 'absolute',
-        top: 5,
-        right: 5,
+        top: 3,
+        right: 10,
         borderRadius: 12,
         padding: 2,
         zIndex: 1, // Đảm bảo nút nằm trên media
