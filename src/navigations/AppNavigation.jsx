@@ -21,7 +21,7 @@ import { getNotificationPreference } from '../noti/notificationHelper';
 import { io } from 'socket.io-client';
 import { Linking } from 'react-native';
 import { parseQueryString } from '../utils/deeplink/queryParser';
-
+import { AppState } from 'react-native'; // Thêm AppState từ react-native
 const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
@@ -50,18 +50,37 @@ const AppNavigation = () => {
     };
   }, []);
 
+  // Chạy khi component mount và mỗi khi app trở lại foreground
+  useEffect(() => {
+    // Chạy lần đầu khi component mount
+    if (user) {
+      callCheckBanUser();
+      callGetAllReaction();
+    }
+
+    // Hàm xử lý khi app trở lại foreground
+    const handleAppStateChange = (nextAppState) => {
+      if (nextAppState === 'active') {
+        console.log('App is in foreground, re-running logic...');
+        if (user) {
+          callCheckBanUser();
+          callGetAllReaction();
+        }
+      }
+    };
+
+    // Lắng nghe sự kiện AppState
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    // Cleanup khi component unmount
+    return () => {
+      subscription.remove();
+    };
+  }, [user]);
+
   // deeplink
   useEffect(() => {
     const handleDeepLink = async () => {
-      // const url = await Linking.getInitialURL();
-      // console.log("link1: " + url)
-      // if (url) {
-      //   const params = new URLSearchParams(url.split('?')[1]);
-      //   const ID_post = params.get('ID_post');
-      //   if (ID_post) {
-      //     console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
-      //   }
-      // }
       try {
         const url = await Linking.getInitialURL();
         if (url) {
