@@ -10,19 +10,19 @@ import {
   Dimensions,
   Modal,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../rtk/Reducer';
 import QRCode from 'react-native-qrcode-svg';
-import { setNoti_token } from '../../rtk/API';
+import { setNoti_token, getUser } from '../../rtk/API';
 import {
   setNotificationPreference,
   getNotificationPreference,
 } from '../../noti/notificationHelper';
 import { FlatList, Switch } from 'react-native-gesture-handler';
 import { useBottomSheet } from '../../context/BottomSheetContext'; // Điều chỉnh đường dẫn import
-
+import { useFocusEffect } from '@react-navigation/native';
 const { width, height } = Dimensions.get('window');
 
 const Setting = props => {
@@ -37,6 +37,32 @@ const Setting = props => {
 
   const [preferences, setPreferences] = useState({});
   const [showNotificationList, setShowNotificationList] = useState(false); // Trạng thái mở/đóng danh sách thông báo
+
+  // user api
+  const [api_user, setApi_user] = useState(null);
+
+  const callgetUser = async (ID_user) => {
+    try {
+      await dispatch(getUser({ ID_user: ID_user, token }))
+        .unwrap()
+        .then((response) => {
+          setApi_user(response.user);
+          //console.log('API User:', response.user);
+        })
+        .catch((error) => {
+          console.log('Error callgetUser:: ', error);
+
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      callgetUser(me._id);
+    }, [me._id]) // Chỉ phụ thuộc vào me._id
+  );
 
   const onLogout = () => {
     dispatch(setNoti_token({ ID_user: me._id, fcmToken: fcmToken }))
@@ -167,17 +193,25 @@ const Setting = props => {
             >
               <Image
                 source={{
-                  uri: me.avatar,
+                  uri: api_user?.avatar || me.avatar,
                 }}
                 style={styles.avatar}
               />
             </Pressable>
             <View style={styles.profileInfo}>
-              <Text style={styles.name}
-                onPress={() => navigation.navigate('Profile', { _id: me._id })}
-              >
-                {me.first_name} {me.last_name}
-              </Text>
+              {
+                api_user
+                  ? <Text style={styles.name}
+                    onPress={() => navigation.navigate('Profile', { _id: me._id })}
+                  >
+                    {api_user.first_name} {api_user.last_name}
+                  </Text>
+                  : <Text style={styles.name}
+                    onPress={() => navigation.navigate('Profile', { _id: me._id })}
+                  >
+                    {me.first_name} {me.last_name}
+                  </Text>
+              }
             </View>
             <TouchableOpacity onPress={() => setQrVisible(true)}>
               <Icon name="qr-code-outline" size={22} color="black" />

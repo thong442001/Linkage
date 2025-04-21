@@ -82,10 +82,8 @@ const HomeChat = ({ route, navigation }) => {
             if (!friends.length) {
                 callGetAllFriendOfID_user(me._id);
             }
-            if (!groups) {
-                callGetAllGroupOfUser(me._id);
-            }
-        }, [me._id, friends.length, groups])
+            callGetAllGroupOfUser(me._id);
+        }, [me._id, friends.length]) // Chỉ phụ thuộc vào me._id
     );
 
     useEffect(() => {
