@@ -19,6 +19,7 @@ import { oStackHome } from '../../navigations/HomeNavigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import { useBottomSheet } from '../../context/BottomSheetContext';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const { width, height } = Dimensions.get('window');
 
@@ -396,7 +397,12 @@ const Story = () => {
         </View>
 
         {me._id !== StoryView.user?._id && (
-          <View style={styles.reactionContainer}>
+         <ScrollView
+         horizontal={true} // Bật cuộn ngang
+         showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn
+         style={styles.reactionContainer}
+         contentContainerStyle={styles.reactionContent}
+         >
             {reactions && reactions.length > 0 ? (
               reactions.map((reaction, index) => (
                 <TouchableOpacity
@@ -413,7 +419,7 @@ const Story = () => {
             ) : (
               <Text style={{ color: '#fff' }}>Không có biểu cảm</Text>
             )}
-          </View>
+          </ScrollView>
         )}
 
   
@@ -564,7 +570,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   reactionButton: {
-    padding: 10,
+    padding: 0,
     borderRadius: 20,
     margin: 10,
   },
