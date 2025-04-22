@@ -60,7 +60,22 @@ const Story = () => {
     try {
       const response = await dispatch(storyViewerOfStory({ ID_post: stories[currentIndex]._id, ID_user: me._id })).unwrap();
       if (response && response.storyViewers) {
-        setViewers(response.storyViewers);
+        // Hợp nhất danh sách viewers để loại bỏ trùng lặp
+        const uniqueViewers = [];
+        const seenUserIds = new Set();
+        for (const viewer of response.storyViewers) {
+          if (!seenUserIds.has(viewer.ID_user._id)) {
+            uniqueViewers.push(viewer);
+            seenUserIds.add(viewer.ID_user._id);
+          } else {
+            // Nếu đã có user, giữ bản ghi mới nhất (hoặc có reaction)
+            const existingIndex = uniqueViewers.findIndex(v => v.ID_user._id === viewer.ID_user._id);
+            if (viewer.ID_reaction && (!uniqueViewers[existingIndex].ID_reaction || new Date(viewer.createdAt) > new Date(uniqueViewers[existingIndex].createdAt))) {
+              uniqueViewers[existingIndex] = viewer;
+            }
+          }
+        }
+        setViewers(uniqueViewers);
       }
     } catch (error) {
       console.log('Lỗi khi callStoryViewerOfStory:', error);
@@ -291,15 +306,21 @@ const Story = () => {
     ), handleCloseBottomSheet);
   }, [viewers, openBottomSheet, handleCloseBottomSheet, currentIndex, stories]);
 
-  const renderViewerItem = ({ item }) => (
-    <View style={styles.viewerItem}>
-      <Image source={{ uri: item.ID_user.avatar }} style={styles.viewerAvatar} />
-      <Text style={styles.viewerName}>
-        {item.ID_user.first_name + ' ' + item.ID_user.last_name}
-        {item.ID_reaction && <Text style={styles.reaction}> {item.ID_reaction.icon}</Text>}
-      </Text>
-    </View>
-  );
+  const renderViewerItem = ({ item }) => {
+    if (item.ID_user._id === me._id) {
+      return null;
+    }
+  
+    return (
+      <View style={styles.viewerItem}>
+        <Image source={{ uri: item.ID_user.avatar }} style={styles.viewerAvatar} />
+        <Text style={styles.viewerName}>
+          {item.ID_user.first_name + ' ' + item.ID_user.last_name}
+          {item.ID_reaction && <Text style={styles.reaction}> {item.ID_reaction.icon}</Text>}
+        </Text>
+      </View>
+    );
+  };
 
   if (!StoryView || !stories || stories.length === 0) {
     return (
@@ -399,7 +420,7 @@ const Story = () => {
 
         {me._id === StoryView.user?._id && (
           <TouchableOpacity style={styles.viewersCountContainer} onPress={handleOpenBottomSheet}>
-            <Text style={styles.viewersTitle}>Đã xem ({viewers.length})</Text>
+            <Text style={styles.viewersTitle}>Đã xem ({viewers.length - 1})</Text>
           </TouchableOpacity>
         )}
 
