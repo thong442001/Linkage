@@ -60,8 +60,8 @@ const UpPost = (props) => {
 
 
     // Mô hình tạo ảnh
-    const MODEL_URL = 'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5';
-    const API_KEY = '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'; // Thay bằng API key của bạn
+    const MODEL_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0';
+    const API_KEY = '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'; // Thay bằng API key của bạn
 
     // AI tạo ảnh
     const generateImage = async () => {
@@ -78,11 +78,32 @@ const UpPost = (props) => {
                 },
                 body: JSON.stringify({ inputs: prompt }),
             });
-
+            // Check if the model is still loading
+            if (response.status === 503) {
+                const json = await response.json();
+                if (json.error && json.error.includes("Loading")) {
+                // Model is loading, retry after a delay
+                Alert.alert(
+                    'Thông báo', 
+                    'Mô hình đang được khởi động. Vui lòng thử lại sau vài giây.',
+                    [{ text: 'OK' }]
+                );
+                setLoading(false);
+                return;
+                }
+            }
+            
+            // Check for other errors
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API error response:', errorText);
+                throw new Error('Không thể tạo ảnh từ API: ' + errorText.substring(0, 100));
+            }
             // Chuyển đổi response thành base64
             const arrayBuffer = await response.arrayBuffer();
             const base64 = arrayBufferToBase64(arrayBuffer);
             const imageUri = `data:image/jpeg;base64,${base64}`;
+            console.log('🌍 Image URI:', imageUri);
             setImage(imageUri);
 
             // Chuyển Base64 thành file tạm thời để tải lên Cloudinary
@@ -98,9 +119,6 @@ const UpPost = (props) => {
             if (uploadedUrl) {
                 setMedias(prev => [...prev, uploadedUrl]); // Thêm URL thật vào danh sách ảnh để đăng bài
             }
-
-
-
         } catch (error) {
             Alert.alert('Thông báo', 'Không thể tạo ảnh. Vui lòng thử lại sau.');
             console.error('Error generating image:', error);

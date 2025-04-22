@@ -32,7 +32,8 @@ const HomeHeader = ({ navigation, me, headerTranslate }) => {
             <Icon name="scan-outline" size={25} color="black" />
           </TouchableOpacity>
           {/* <TouchableOpacity
-            style={HomeS.iconsPadding}>
+            style={HomeS.iconsPadding}
+            onPress={() => navigation.navigate('HuggingFaceImageGenerator')}>
             <Icon name="add" size={25} color="black" />
           </TouchableOpacity> */}
           <TouchableOpacity

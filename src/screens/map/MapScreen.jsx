@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   PermissionsAndroid,
+  Image,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -18,7 +19,8 @@ export default function MapScreen(props) {
   const [error, setError] = useState(null);
   const navigation = useNavigation();
   const route = useRoute();
-  const {ID_group, externalLocation, isGui } = route.params || {};
+  const {ID_group, externalLocation, isGui,Avatar } = route.params || {};
+  console.log('avatar', Avatar);
 
   // Hàm yêu cầu quyền truy cập vị trí
   const requestLocationPermission = async () => {
@@ -117,7 +119,10 @@ export default function MapScreen(props) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={getCurrentLocation}>
+        <TouchableOpacity style={styles.retryButton} onPress={() => {
+          getCurrentLocation()
+          navigation.goBack()
+        }}>
           <Text style={styles.retryButtonText}>Thử lại</Text>
         </TouchableOpacity>
       </View>
@@ -146,7 +151,15 @@ export default function MapScreen(props) {
             longitude: externalLocation ? externalLocation.longitude : location.longitude,
           }}
           title={externalLocation ? 'Vị trí được chia sẻ' : 'Vị trí của bạn'}
-        />
+        >
+           {/* Sử dụng hình ảnh avatar thay cho chấm đỏ mặc định */}
+           <Image
+            source={{ uri: Avatar }}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+        </Marker>
+
       </MapView>
       {isGui && (
         <TouchableOpacity style={styles.button} onPress={handleSendLocation}>
@@ -211,5 +224,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  avatar: {
+    width: 50, // Kích thước avatar
+    height: 50,
+    borderRadius: 20, // Làm tròn để giống avatar
+    borderWidth: 2,
+    borderColor: '#fff', // Viền trắng để nổi bật
   },
 });

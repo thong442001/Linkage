@@ -36,7 +36,7 @@ const Ringing = ({ route, navigation }) => {
     socket.on("lang-nghe-chap-nhan-call", () => {
       console.log('lang-nghe-chap-nhan-call');
       // onCall();
-      navigation.navigate('CallPage', {
+      navigation.replace('CallPage', {
         ID_group: group._id,
         id_user: me._id,
         MyUsername: me.last_name + ' ' + me.first_name,

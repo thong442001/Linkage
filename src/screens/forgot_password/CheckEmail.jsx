@@ -153,7 +153,6 @@ const CheckEmail = (props) => {
           }}
           onFilled={(text) => {
             setCode(text);
-            handleCheckOTP();
           }}
           theme={{
             containerStyle: styles.otpContainer,

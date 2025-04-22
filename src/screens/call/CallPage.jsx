@@ -56,7 +56,7 @@ console.log('params', params);
                     },
                     onCallEnd: (callID, reason, duration) => {
                         console.log('########CallPage onCallEnd');
-                        navigation.navigate('TabHome', { screen: 'Home' });
+                        navigation.replace("Chat", { ID_group: params.ID_group })
                     },
                     timingConfig: {
                       isDurationVisible: true,
@@ -74,7 +74,7 @@ console.log('params', params);
                     },
                     onWindowMinimized: () => {
                         console.log('[Demo]CallPage onWindowMinimized');
-                        navigation.navigate('TabHome', { screen: 'Home' });
+                        navigation.navigate("Chat", { ID_group: params.ID_group })
                     },
                     onWindowMaximized: () => {
                         console.log('[Demo]CallPage onWindowMaximized');

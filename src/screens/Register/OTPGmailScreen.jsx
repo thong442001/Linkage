@@ -158,7 +158,6 @@ const OTPGmailScreen = (props) => {
           }}
           onFilled={(text) => {
             setOtp(text);
-            handleSubmit(text);
           }}
           theme={{
             containerStyle: styles.otpContainer,

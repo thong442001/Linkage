@@ -121,24 +121,6 @@ export const checkEmail = createAsyncThunk(
   }
 );
 
-export const getUser = createAsyncThunk(
-  'user/getUser',
-  async (data, { rejectWithValue }) => {
-    try {
-      const response = await AxiosHelper(data.token)
-        .get(`user/getUser?userId=${data.userId}`);
-      //console.log(response.status)
-      if (response.status == true) {
-        return response;
-      } else {
-        return rejectWithValue(response.data.message);
-      }
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
 /// test token
 export const getAllUsers = createAsyncThunk(
   'user/getAllUsers',
@@ -1133,6 +1115,25 @@ export const getGoiYBanBe = createAsyncThunk(
     try {
       const response = await AxiosHelper(data.token)
         .get(`relationship/getGoiYBanBe?me=${data.me}`);
+      //console.log(response.status)
+      if (response.status == true) {
+        return response;
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// avatar name của user trong setting
+export const getUser = createAsyncThunk(
+  'user/getUser',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await AxiosHelper(data.token)
+        .get(`user/getUser?ID_user=${data.ID_user}`);
       //console.log(response.status)
       if (response.status == true) {
         return response;
