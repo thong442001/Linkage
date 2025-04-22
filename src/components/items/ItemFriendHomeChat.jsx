@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Image, StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { joinGroupPrivate } from '../../rtk/API';
-
+///jahahahah
 const { width, height } = Dimensions.get('window');
 
 const ItemFriendHomeChat = ({ item, navigation, isOnline }) => {
