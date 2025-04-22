@@ -28,6 +28,7 @@ import { oStackHome } from '../../navigations/HomeNavigation';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 import { ScrollView } from 'react-native-gesture-handler';
+import LottieView from 'lottie-react-native';
 const UpPost = (props) => {
     const { navigation } = props;
 
@@ -52,6 +53,7 @@ const UpPost = (props) => {
     const [failedModalVisible, setFailedModalVisible] = useState(false);
     const [loadingUpload, setLoadingUpload] = useState(false);
     const [isPosting, setIsPosting] = useState(false);
+    const [loadingAI, setloadingAI] = useState(false)
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filtered, setFiltered] = useState([]);
@@ -60,15 +62,15 @@ const UpPost = (props) => {
 
 
     // Mô hình tạo ảnh
-    const MODEL_URL = 'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5';
-    const API_KEY = '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'; // Thay bằng API key của bạn
+    const MODEL_URL = 'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0';
+    const API_KEY = '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'; // Thay bằng API key của bạn
 
     // AI tạo ảnh
     const generateImage = async () => {
         if (!prompt) return;
 
         try {
-            setLoading(true);
+            setloadingAI(true);
 
             const response = await fetch(MODEL_URL, {
                 method: 'POST',
@@ -78,11 +80,32 @@ const UpPost = (props) => {
                 },
                 body: JSON.stringify({ inputs: prompt }),
             });
-
+            // Check if the model is still loading
+            if (response.status === 503) {
+                const json = await response.json();
+                if (json.error && json.error.includes("Loading")) {
+                // Model is loading, retry after a delay
+                Alert.alert(
+                    'Thông báo', 
+                    'Mô hình đang được khởi động. Vui lòng thử lại sau vài giây.',
+                    [{ text: 'OK' }]
+                );
+                setloadingAI(false);
+                return;
+                }
+            }
+            
+            // Check for other errors
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API error response:', errorText);
+                throw new Error('Không thể tạo ảnh từ API: ' + errorText.substring(0, 100));
+            }
             // Chuyển đổi response thành base64
             const arrayBuffer = await response.arrayBuffer();
             const base64 = arrayBufferToBase64(arrayBuffer);
             const imageUri = `data:image/jpeg;base64,${base64}`;
+            console.log('🌍 Image URI:', imageUri);
             setImage(imageUri);
 
             // Chuyển Base64 thành file tạm thời để tải lên Cloudinary
@@ -93,19 +116,16 @@ const UpPost = (props) => {
             };
 
             // Gọi hàm uploadFile để tải ảnh lên Cloudinary
-            const uploadedUrl = await uploadFile(file);
+            const uploadedUrl = await uploadFile(file, false); // Truyền showUploadLoading = false
 
             if (uploadedUrl) {
                 setMedias(prev => [...prev, uploadedUrl]); // Thêm URL thật vào danh sách ảnh để đăng bài
             }
-
-
-
         } catch (error) {
             Alert.alert('Thông báo', 'Không thể tạo ảnh. Vui lòng thử lại sau.');
             console.error('Error generating image:', error);
         } finally {
-            setLoading(false);
+            setloadingAI(false);
         }
     };
 
@@ -256,47 +276,51 @@ const UpPost = (props) => {
     };
 
     // Hàm tải lên một file lên Cloudinary
-    const uploadFile = async (file) => {
+    const uploadFile = async (file, showUploadLoading = true) => {
         try {
-            setLoadingUpload(true);
-            const data = new FormData();
-            data.append('file', {
-                uri: file.uri,
-                type: file.type,
-                name: file.fileName || (file.type.startsWith('video/') ? 'video.mp4' : 'image.png'),
-            });
-            data.append('upload_preset', 'ml_default');
-
-            const response = await axios.post('https://api.cloudinary.com/v1_1/ddasyg5z3/upload', data, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-
-            const fileUrl = response.data.secure_url;
-            console.log('🌍 Link file Cloudinary:', fileUrl);
-            return fileUrl;
+          if (showUploadLoading) {
+            setLoadingUpload(true); // Chỉ bật loadingUpload nếu showUploadLoading là true
+          }
+          const data = new FormData();
+          data.append('file', {
+            uri: file.uri,
+            type: file.type,
+            name: file.fileName || (file.type.startsWith('video/') ? 'video.mp4' : 'image.png'),
+          });
+          data.append('upload_preset', 'ml_default');
+      
+          const response = await axios.post('https://api.cloudinary.com/v1_1/ddasyg5z3/upload', data, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+      
+          const fileUrl = response.data.secure_url;
+          console.log('🌍 Link file Cloudinary:', fileUrl);
+          return fileUrl;
         } catch (error) {
-            console.log('uploadFile -> ', error.response ? error.response.data : error.message);
-            console.log("Lỗi khi tải file");
-            return null;
+          console.log('uploadFile -> ', error.response ? error.response.data : error.message);
+          console.log("Lỗi khi tải file");
+          return null;
         } finally {
-            setLoadingUpload(false);
+          if (showUploadLoading) {
+            setLoadingUpload(false); // Chỉ tắt loadingUpload nếu showUploadLoading là true
+          }
         }
-    };
+      };
 
 
     // Hàm tải lên nhiều file cùng lúc
     const uploadMultipleFiles = async (files) => {
         try {
-            setLoadingUpload(true);
-            const uploadedUrls = await Promise.all(files.map(file => uploadFile(file)));
-            const validUrls = uploadedUrls.filter(url => url !== null);
-            setMedias(prev => [...prev, ...validUrls]);
+          setLoadingUpload(true);
+          const uploadedUrls = await Promise.all(files.map(file => uploadFile(file, true))); // Truyền showUploadLoading = true
+          const validUrls = uploadedUrls.filter(url => url !== null);
+          setMedias(prev => [...prev, ...validUrls]);
         } catch (error) {
-            console.log('uploadMultipleFiles -> ', error);
+          console.log('uploadMultipleFiles -> ', error);
         } finally {
-            setLoadingUpload(false);
+          setLoadingUpload(false);
         }
-    };
+      };
 
 
     // Mở thư viện và chọn nhiều ảnh/video
@@ -442,274 +466,308 @@ const UpPost = (props) => {
 
     return (
         <View style={UpPostS.Container}>
-            <SuccessModal
-                visible={successModalVisible}
-                message={"Đăng bài thành công"} />
-            <FailedModal
-                visible={failedModalVisible}
-                message="Đăng bài thất bại. Vui lòng thử lại!"
-            />
-            <View style={UpPostS.Header}>
-                <View style={UpPostS.boxBack}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <View>
-                            <Icon name="chevron-back-outline" size={30} color="black" />
-                        </View>
-                    </TouchableOpacity>
-                    <Text style={UpPostS.txtCreate}>Tạo bài viết</Text>
-                </View>
-                <TouchableOpacity
-                    style={(caption == '' && medias.length == 0) || isPosting ? UpPostS.btnPost : UpPostS.btnPost2}
-                    onPress={callAddPost}
-                    disabled={(caption == '' && medias.length == 0) || isPosting}
-                >
-                    {isPosting ? (
-                        <ActivityIndicator size="small" color="white" />
-                    ) : (
-                        <Text style={(caption == '' && medias.length == 0) ? UpPostS.txtUpPost : UpPostS.txtUpPost2}>Đăng bài</Text>
-                    )}
-                </TouchableOpacity>
-            </View>
-            <View style={UpPostS.line}></View>
-            <View style={[UpPostS.boxMargin, { flex: 1 }]}>
-                <View style={UpPostS.boxInfor}>
-                    <Image style={UpPostS.avatar}
-                        source={{ uri: me.avatar }}
-                    />
-                    <View style={{ marginLeft: 15 }}>
-                        <Text style={UpPostS.txtName}>
-                            {me.first_name} {me.last_name}
-                            {tags.length > 0 && (
-                                <>
-                                    <Text style={{ color: 'gray' }}> cùng với </Text>
-                                    <Text style={{ fontWeight: 'bold' }}>
-                                        {(() => {
-                                            const taggedUser = formattedFriends.find(friend => friend._id === tags[0]);
-                                            return `${taggedUser?.first_name || ''} ${taggedUser?.last_name || ''}`;
-                                        })()}
-                                    </Text>
-                                    {tags.length > 1 && (
-                                        <>
-                                            <Text style={{ color: 'gray' }}> và </Text>
-                                            <Text style={{ fontWeight: 'bold' }}>{tags.length - 1} người khác</Text>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </Text>
-
-
-                        <View style={UpPostS.boxStatus}>
-                            <TouchableOpacity
-                                style={UpPostS.btnStatus}
-                                onPress={() => setModalVisible(true)}
-                            >
-                                <Text style={UpPostS.txtPublic}>{selectedOption.name}</Text>
-                            </TouchableOpacity>
-                            {/* <TouchableOpacity style={[UpPostS.btnStatus, { marginLeft: 10 }]}>
-                                <Text style={UpPostS.txtPublic}>+ Album</Text>
-                            </TouchableOpacity> */}
-                        </View>
-                    </View>
-                </View>
+          <SuccessModal
+            visible={successModalVisible}
+            message={"Đăng bài thành công"}
+          />
+          <FailedModal
+            visible={failedModalVisible}
+            message="Đăng bài thất bại. Vui lòng thử lại!"
+          />
+          <View style={UpPostS.Header}>
+            <View style={UpPostS.boxBack}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
                 <View>
-                    <TextInput
-                        value={caption}
-                        onChangeText={setCaption}
-                        placeholder='Bạn đang nghĩ gì?'
-                        style={UpPostS.txtInput}
-                        multiline={true}
-                        placeholderTextColor={"gray"}
-                        onPress={() => setFlag(true)}
-                    />
-                    {/* medias */}
-                    {hasMedia && renderMediaGrid(medias)}
-                    {loading && <ActivityIndicator size="large" color="#0000ff" />}
+                  <Icon name="chevron-back-outline" size={30} color="black" />
                 </View>
-
+              </TouchableOpacity>
+              <Text style={UpPostS.txtCreate}>Tạo bài viết</Text>
             </View>
-
-
-
-
-            <View style={UpPostS.boxItems2}>
-                <View
-                    style={Flag == true ? UpPostS.BoxInter : UpPostS.BoxInter1}
+            <TouchableOpacity
+              style={
+                (caption == '' && medias.length == 0) || isPosting
+                  ? UpPostS.btnPost
+                  : UpPostS.btnPost2
+              }
+              onPress={callAddPost}
+              disabled={(caption == '' && medias.length == 0) || isPosting}
+            >
+              {isPosting ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text
+                  style={
+                    caption == '' && medias.length == 0
+                      ? UpPostS.txtUpPost
+                      : UpPostS.txtUpPost2
+                  }
                 >
-                    {
-                        Flag == true ? <View></View> : <View style={UpPostS.line}></View>
-                    }
-
-                    <TouchableOpacity
-                        style={UpPostS.btnIcon}
-                        onPress={onOpenGallery}
-                    >
-                        <View style={UpPostS.boxItems}>
-                            <Icon name="image-outline" size={30} color="#33a850" />
-                            {
-                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Ảnh/video</Text>
-                            }
-                        </View>
-                    </TouchableOpacity>
-                    <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
-
-                    <TouchableOpacity style={UpPostS.btnIcon} onPress={() => handleModelTag()}>
-                        <View style={UpPostS.boxItems}>
-                            <Icon name="pricetag" size={30} color="#48a1ff" />
-                            {
-                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Gắn thẻ</Text>
-                            }
-                        </View>
-                    </TouchableOpacity>
-
-                    <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
-
-                    <TouchableOpacity style={UpPostS.btnIcon} onPress={() => setModalVisibleAI(true)}>
-                        <View style={UpPostS.boxItems}>
-                            <Image
-                                style={{ width: 25, height: 25 }}
-                                source={require('../../../assets/images/ai.png')}
-                            />
-                            {
-                                Flag == true ? <Text></Text> : <Text style={UpPostS.txtIcon}>Tạo ảnh bằng AI</Text>
-                            }
-                        </View>
-                    </TouchableOpacity>
-                    {
-                        Flag == true ? <View></View> : <View style={UpPostS.line}></View>
-                    }
+                  Đăng bài
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={UpPostS.line}></View>
+          <View style={[UpPostS.boxMargin, { flex: 1 }]}>
+            <View style={UpPostS.boxInfor}>
+              <Image style={UpPostS.avatar} source={{ uri: me.avatar }} />
+              <View style={{ marginLeft: 15 }}>
+                <Text style={UpPostS.txtName}>
+                  {me.first_name} {me.last_name}
+                  {tags.length > 0 && (
+                    <>
+                      <Text style={{ color: 'gray' }}> cùng với </Text>
+                      <Text style={{ fontWeight: 'bold' }}>
+                        {(() => {
+                          const taggedUser = formattedFriends.find(
+                            (friend) => friend._id === tags[0]
+                          );
+                          return `${taggedUser?.first_name || ''} ${
+                            taggedUser?.last_name || ''
+                          }`;
+                        })()}
+                      </Text>
+                      {tags.length > 1 && (
+                        <>
+                          <Text style={{ color: 'gray' }}> và </Text>
+                          <Text style={{ fontWeight: 'bold' }}>
+                            {tags.length - 1} người khác
+                          </Text>
+                        </>
+                      )}
+                    </>
+                  )}
+                </Text>
+      
+                <View style={UpPostS.boxStatus}>
+                  <TouchableOpacity
+                    style={UpPostS.btnStatus}
+                    onPress={() => setModalVisible(true)}
+                  >
+                    <Text style={UpPostS.txtPublic}>{selectedOption.name}</Text>
+                  </TouchableOpacity>
                 </View>
+              </View>
             </View>
-            {/* Modal để hiển thị danh sách */}
-
-
-            {loadingUpload && (
-                <View style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -25, marginTop: -25 }}>
-                    <ActivityIndicator size="large" color="#0000ff" />
+            <View>
+              <TextInput
+                value={caption}
+                onChangeText={setCaption}
+                placeholder="Bạn đang nghĩ gì?"
+                style={UpPostS.txtInput}
+                multiline={true}
+                placeholderTextColor={'gray'}
+                onPress={() => setFlag(true)}
+              />
+              {/* medias */}
+              {hasMedia && renderMediaGrid(medias)}
+              {loading && <ActivityIndicator size="large" color="#0000ff" />}
+            </View>
+          </View>
+      
+          <View style={UpPostS.boxItems2}>
+            <View style={Flag == true ? UpPostS.BoxInter : UpPostS.BoxInter1}>
+              {Flag == true ? <View></View> : <View style={UpPostS.line}></View>}
+      
+              <TouchableOpacity style={UpPostS.btnIcon} onPress={onOpenGallery}>
+                <View style={UpPostS.boxItems}>
+                  <Icon name="image-outline" size={30} color="#33a850" />
+                  {Flag == true ? (
+                    <Text></Text>
+                  ) : (
+                    <Text style={UpPostS.txtIcon}>Ảnh/video</Text>
+                  )}
                 </View>
-            )}
-
-            < Modal
-                transparent={true}  // Cho phép nền của modal trong suốt, giúp nhìn thấy nền bên dưới modal.
-                visible={modalVisible}  // Điều khiển việc modal có hiển thị hay không dựa trên trạng thái `modalVisible`.
-                animationType="fade"  // Hiệu ứng khi modal xuất hiện. Ở đây là kiểu "slide" từ dưới lên.
-                onRequestClose={() => setModalVisible(false)}  // Khi modal bị yêu cầu đóng (ví dụ trên Android khi bấm nút back), hàm này sẽ được gọi để đóng modal.
+              </TouchableOpacity>
+              <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
+      
+              <TouchableOpacity style={UpPostS.btnIcon} onPress={() => handleModelTag()}>
+                <View style={UpPostS.boxItems}>
+                  <Icon name="pricetag" size={30} color="#48a1ff" />
+                  {Flag == true ? (
+                    <Text></Text>
+                  ) : (
+                    <Text style={UpPostS.txtIcon}>Gắn thẻ</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+      
+              <View style={Flag == true ? UpPostS.line1 : UpPostS.line}></View>
+      
+              <TouchableOpacity
+                style={UpPostS.btnIcon}
+                onPress={() => setModalVisibleAI(true)}
+              >
+                <View style={UpPostS.boxItems}>
+                  <Image
+                    style={{ width: 25, height: 25 }}
+                    source={require('../../../assets/images/ai.png')}
+                  />
+                  {Flag == true ? (
+                    <Text></Text>
+                  ) : (
+                    <Text style={UpPostS.txtIcon}>Tạo ảnh bằng AI</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+              {Flag == true ? <View></View> : <View style={UpPostS.line}></View>}
+            </View>
+          </View>
+      
+          {/* Hiệu ứng loading cho đăng ảnh từ thư viện */}
+          {loadingUpload && (
+            <View
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginLeft: -50, // Điều chỉnh để căn giữa
+                marginTop: -50,
+              }}
             >
-                <TouchableOpacity
-                    style={UpPostS.modalOverlay}  // Overlay của modal, tạo hiệu ứng làm mờ nền dưới modal.
-                    onPress={() => setModalVisible(false)}  // Đóng modal khi người dùng chạm vào khu vực bên ngoài modal.
-                >
-                    {/* // Nội dung chính của modal, nơi hiển thị các tùy chọn. */}
-                    <View style={UpPostS.modalContent}>
-                        {
-                            status.map((option, index) => (
-                                <TouchableOpacity
-                                    key={index}  // Mỗi phần tử trong danh sách cần có một key duy nhất.
-                                    style={UpPostS.optionButton}  // Styling cho mỗi nút tùy chọn trong danh sách.
-                                    onPress={() => handleSelectOption(option)}  // Khi người dùng chọn một tùy chọn, hàm này sẽ được gọi để cập nhật trạng thái và đóng modal.
-                                >
-                                    {/* // Hiển thị tên của tùy chọn. */}
-                                    <Text style={UpPostS.optionText}>{option.name}</Text>
-                                </TouchableOpacity>
-                            ))
-                        }
-                    </View>
-                </TouchableOpacity>
-            </Modal >
-
-            {/* Tag */}
-            <Modal
-                visible={tagVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setTagVisible(false)}
+              <LottieView
+                source={require('../../utils/animation/loadingPost/loading.json')} // File Lottie cho loading upload
+                autoPlay
+                loop
+                style={{ width: 100, height: 100 }}
+              />
+            </View>
+          )}
+      
+          {/* Hiệu ứng loading cho tạo ảnh AI */}
+          {loadingAI && (
+            <View
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginLeft: -50,
+                marginTop: -50,
+            
+            }}
             >
-                <TouchableWithoutFeedback onPress={() => setTagVisible(false)}>
-                    <View style={UpPostS.overlay1}>
-                        <View style={UpPostS.modalContainerTag}>
-                            <View >
-                                <View style={{ flexDirection: 'column' }}>
-                                    {/* <Image source={{ uri: me?.avatar }} style={UpPostS.avatar} /> */}
-                                    {/* <View style={{ marginLeft: 10 }}> */}
-                                    {/* <Text style={UpPostS.name}>{me?.first_name + " " + me?.last_name}</Text> */}
-                                    <View style={UpPostS.boxTag}>
-                                        <View style={UpPostS.search}>
-                                            <TouchableOpacity>
-                                                <Icon name="search-outline" size={30} color='black' />
-                                            </TouchableOpacity>
-                                            <TextInput
-                                                placeholder='Tìm kiếm'
-                                                placeholderTextColor={'black'}
-                                                value={searchQuery}
-                                                onChangeText={setSearchQuery}
-                                                style={{ color: 'black' }} />
-                                        </View>
-                                        <TouchableOpacity style={UpPostS.btnTag} onPress={() => handleAddTag()}>
-                                            <Text style={UpPostS.tag}>
-                                                Gắn thẻ
-                                            </Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                    <FlatList
-                                        data={filtered}
-                                        keyExtractor={(item) => item._id}
-                                        extraData={selectedUsers} // Cập nhật danh sách khi selectedUsers thay đổi
-                                        renderItem={({ item }) => (
-                                            <FriendAdd
-                                                item={item}
-                                                onToggle={toggleSelectUser}
-                                                selectedUsers={selectedUsers}
-                                                membersGroup={membersGroup}
-
-                                            />
-
-                                        )}
-                                        showsVerticalScrollIndicator={false}
-                                    />
-                                    {/* </View> */}
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-            {/* Modal AI */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisibleAI}
-                onRequestClose={() => setModalVisibleAI(false)}
+              <LottieView
+                source={require('../../utils/animation/loadingAI/loadingAI.json')} 
+                autoPlay
+                loop
+                style={{ width: 100, height: 100 }}
+              />
+            </View>
+          )}
+      
+          {/* Modal để hiển thị danh sách */}
+          <Modal
+            transparent={true}
+            visible={modalVisible}
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <TouchableOpacity
+              style={UpPostS.modalOverlay}
+              onPress={() => setModalVisible(false)}
             >
-                <TouchableOpacity
-                    style={styles.modalBackground}
-                    activeOpacity={1}
-                    onPress={() => setModalVisibleAI(false)}
-                >
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.title}>Nhập mô tả</Text>
-
-                        {/* Ô nhập liệu */}
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Nhập nội dung..."
+              <View style={UpPostS.modalContent}>
+                {status.map((option, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={UpPostS.optionButton}
+                    onPress={() => handleSelectOption(option)}
+                  >
+                    <Text style={UpPostS.optionText}>{option.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableOpacity>
+          </Modal>
+      
+          {/* Tag */}
+          <Modal
+            visible={tagVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setTagVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setTagVisible(false)}>
+              <View style={UpPostS.overlay1}>
+                <View style={UpPostS.modalContainerTag}>
+                  <View>
+                    <View style={{ flexDirection: 'column' }}>
+                      <View style={UpPostS.boxTag}>
+                        <View style={UpPostS.search}>
+                          <TouchableOpacity>
+                            <Icon name="search-outline" size={30} color="black" />
+                          </TouchableOpacity>
+                          <TextInput
+                            placeholder="Tìm kiếm"
                             placeholderTextColor={'black'}
-                            value={prompt}
-                            onChangeText={setPrompt}
-                        />
-
-                        {/* Nút gửi */}
-                        {/* <TouchableOpacity title="Gửi" onPress={() => {
-              console.log("Nội dung nhập:", inputValue);
-              setModalVisible(false);
-            }} /> */}
-                        <TouchableOpacity style={{ backgroundColor: 'blue', padding: 10, borderRadius: 10 }} onPress={() => { generateImage(), setModalVisibleAI(false) }}>
-                            <Text style={{ color: 'white' }}>Tạo ảnh</Text>
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            style={{ color: 'black' }}
+                          />
+                        </View>
+                        <TouchableOpacity
+                          style={UpPostS.btnTag}
+                          onPress={() => handleAddTag()}
+                        >
+                          <Text style={UpPostS.tag}>Gắn thẻ</Text>
                         </TouchableOpacity>
+                      </View>
+                      <FlatList
+                        data={filtered}
+                        keyExtractor={(item) => item._id}
+                        extraData={selectedUsers}
+                        renderItem={({ item }) => (
+                          <FriendAdd
+                            item={item}
+                            onToggle={toggleSelectUser}
+                            selectedUsers={selectedUsers}
+                            membersGroup={membersGroup}
+                          />
+                        )}
+                        showsVerticalScrollIndicator={false}
+                      />
                     </View>
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+      
+          {/* Modal AI */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisibleAI}
+            onRequestClose={() => setModalVisibleAI(false)}
+          >
+            <TouchableOpacity
+              style={styles.modalBackground}
+              activeOpacity={1}
+              onPress={() => setModalVisibleAI(false)}
+            >
+              <View style={styles.modalContainer}>
+                <Text style={styles.title}>Nhập mô tả</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập nội dung..."
+                  placeholderTextColor={'black'}
+                  value={prompt}
+                  onChangeText={setPrompt}
+                />
+                <TouchableOpacity
+                  style={{ backgroundColor: 'blue', padding: 10, borderRadius: 10 }}
+                  onPress={() => {
+                    generateImage();
+                    setModalVisibleAI(false);
+                  }}
+                >
+                  <Text style={{ color: 'white' }}>Tạo ảnh</Text>
                 </TouchableOpacity>
-            </Modal>
+              </View>
+            </TouchableOpacity>
+          </Modal>
         </View>
-    )
+      );
 }
 
 export default UpPost

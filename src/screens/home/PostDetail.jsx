@@ -1070,25 +1070,36 @@ const SharedPost = ({
       }
 
 
-     // Nếu bài viết không hợp lệ, không hiển thị nội dung bài viết
-    if (!isPostValid()) {
-      return (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: height, // Đảm bảo chiếm toàn bộ chiều cao màn hình
-          }}
-        >
-          <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-            {post && post._destroy && me._id !== post.ID_user._id
-              ? 'Bài viết đã bị xóa.'
-              : 'Bạn không có quyền truy cập vào bài viết!'}
-          </Text>
-        </View>
-      );
-    }
+   // Nếu bài viết không hợp lệ, không hiển thị nội dung bài viết
+if (!isPostValid()) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: height, // Đảm bảo chiếm toàn bộ chiều cao màn hình
+      }}
+    >
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          top: 40,
+          left: 15,
+          padding: 10,
+        }}
+        onPress={() => navigation.navigate(oStackHome.TabHome)} // Quay về màn hình chính
+      >
+        <Icon name="arrow-back" size={25} color="black" />
+      </TouchableOpacity>
+      <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
+        {post && post._destroy && me._id !== post.ID_user._id
+          ? 'Bài viết đã bị xóa.'
+          : 'Bạn không có quyền truy cập vào bài viết!'}
+      </Text>
+    </View>
+  );
+}
       return (
         <View style={styles.postContainer}>
           <View>
@@ -1473,6 +1484,13 @@ const SharedPost = ({
                   {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
                 </Text>
               </TouchableOpacity>
+              <TouchableOpacity
+              style={styles.action}
+              onPress={() => { setTypeClick("comment") }}
+            >
+              <Icon3 name="comment" size={20} color="black" />
+              <Text style={styles.actionText}>Bình luận</Text>
+            </TouchableOpacity>
               <TouchableOpacity style={styles.action}
                 onPress={() => {
                   openBottomSheet(55, (
@@ -1732,6 +1750,17 @@ const SharedPost = ({
               alignItems: 'center',
             }}
           >
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                top: 20,
+                left: 15,
+                padding: 10,
+              }}
+              onPress={() => navigation.navigate(oStackHome.TabHome)} // Quay về màn hình chính
+            >
+              <Icon name="arrow-back" size={25} color="black" />
+            </TouchableOpacity>
             <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
               {post && post._destroy && me._id !== post.ID_user._id
                 ? 'Bài viết đã bị xóa.'
