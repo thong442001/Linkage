@@ -6,18 +6,17 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   Animated,
   LayoutAnimation,
   Dimensions,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import ItemNotification from '../../components/items/ItemNotification';
-import { getAllNotificationOfUser } from '../../rtk/API';
+import { getAllNotificationOfUser, getAllPostsInHome } from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { oStackHome } from '../../navigations/HomeNavigation';
 
-const {width, height} = Dimensions.get('window')
+const { width, height } = Dimensions.get('window');
 
 const Notification = (props) => {
   const { navigation, route } = props;
@@ -26,6 +25,7 @@ const Notification = (props) => {
   const token = useSelector((state) => state.app.token);
   const [notifications, setNotifications] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [stories, setStories] = useState([]);
 
   // Thêm Animated và ref để xử lý sự kiện cuộn
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -36,7 +36,7 @@ const Notification = (props) => {
       await dispatch(getAllNotificationOfUser({ me: me._id, token: token }))
         .unwrap()
         .then((response) => {
-          setNotifications(response.notifications);
+          setNotifications(response.notifications || []);
         })
         .catch((error) => {
           console.log('Error getAllNotificationOfUser: ', error);
@@ -46,12 +46,31 @@ const Notification = (props) => {
     }
   };
 
+  const callGetAllPostsInHome = async (ID_user, showLoading = false) => {
+    try {
+      await dispatch(getAllPostsInHome({ me: ID_user, token, timestamp: Date.now() }))
+        .unwrap()
+        .then((response) => {
+          setStories(response.stories || []);
+        })
+        .catch((error) => {
+          console.log('Error getAllPostsInHome:', error);
+          setStories([]);
+        });
+    } catch (error) {
+      console.log('Error in callGetAllPostsInHome:', error);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
-      callGetAllNotificationOfUser();
+      if (me?._id) {
+        callGetAllNotificationOfUser();
+        callGetAllPostsInHome(me._id, false);
+      }
       // Hiển thị bottom tab khi màn hình được focus
       route.params?.handleScroll?.(true);
-    }, [route.params?.handleScroll])
+    }, [route.params?.handleScroll, me._id])
   );
 
   const toggleExpand = () => {
@@ -98,7 +117,7 @@ const Notification = (props) => {
       <View style={styles.categoryContainer}>
         <FlatList
           data={isExpanded ? notifications : notifications.slice(0, 7)}
-          renderItem={({ item }) => <ItemNotification data={item} />}
+          renderItem={({ item }) => <ItemNotification data={item} stories={stories} />}
           keyExtractor={(item, index) => index.toString()}
           scrollEnabled={false}
         />

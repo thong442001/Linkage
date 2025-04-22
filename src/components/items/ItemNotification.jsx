@@ -5,7 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { set } from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/Ionicons'
 import { oStackHome } from '../../navigations/HomeNavigation';
-const ItemNotification = ({data}) => {
+const ItemNotification = ({data,stories}) => {
+  console.log('data', stories);
   const me = useSelector(state => state.app.user);
   const navigation = useNavigation();
 
@@ -13,6 +14,7 @@ const ItemNotification = ({data}) => {
   const [avatar, setAvatar] = useState(null);
   const [icon, setIcon] = useState(null);
   const [background, setbackground] = useState(null);
+  
   // time
   const [timeAgo, setTimeAgo] = useState(data.updatedAt);
 
@@ -53,7 +55,7 @@ const ItemNotification = ({data}) => {
 
     // return () => clearInterval(interval);
   }, []);
-  console.log('data', data);
+  // console.log('data', data);
   useEffect(() => {
     if (data.type == 'Lời mời kết bạn') {
       if (data.ID_relationship.ID_userA._id == me._id) {
@@ -267,10 +269,14 @@ const ItemNotification = ({data}) => {
       navigation.navigate('Friend', {userId: me._id});
     } 
     else if (data.type === 'Đã đăng story mới') {
-    //  navigation.navigate(oStackHome.StoryViewer.name, {
-    //            StoryView: data.ID_post.medias,
-    //            currentUserId: data.ID_post.ID_user._id,
-    //          })
+      const userStories = stories.find(
+        (story) => story.user._id === data.ID_post.ID_user._id
+      );
+     navigation.navigate("StoryViewer", {
+      
+      StoryView: userStories,
+      currentUserId: me._id,
+             })
     }
     else if (data.type === 'Đã thành bạn bè của bạn') {
       navigation.navigate('Profile', { _id: data.ID_relationship.ID_userA._id == me._id ? data.ID_relationship.ID_userB._id : data.ID_relationship.ID_userA._id });
@@ -304,7 +310,13 @@ const ItemNotification = ({data}) => {
       navigation.navigate("Chat", { ID_group: data.ID_group._id })
     }
     else if (data.type === 'Đã thả biểu cảm vào story của bạn') {
-      // navigation.navigate("Chat", { ID_group: data.ID_group._id })
+      const userStories = stories.find(
+        (story) => story.user._id === data.ID_post.ID_user._id
+      );
+      navigation.navigate("StoryViewer", {         
+        StoryView: userStories,
+        currentUserId: me._id,
+      })
     }
   };
 
