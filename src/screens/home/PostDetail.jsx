@@ -352,7 +352,6 @@ const SharedPost = ({
     const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
     const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
-
     // Cảnh
     // post_reactions: list của reaction của post
     const [reactionsOfPost, setReactionsOfPost] = useState([]);
@@ -383,36 +382,51 @@ const SharedPost = ({
     };
 
 
-    // Hàm kiểm tra bài viết hợp lệ
-    const isPostValid = () => {
-      return post && isPermission && (!post._destroy || me._id === post.ID_user._id);
-    };
+   // Hàm kiểm tra quyền truy cập bài viết
+  const hasAccessToPost = () => {
+    return isPermission; // Trả về true nếu người dùng có quyền truy cập
+  };
+
+  // Hàm kiểm tra bài viết có bị xóa hay không
+  const isPostDeleted = () => {
+    return post?._destroy === true; // Trả về true nếu bài viết bị xóa
+  };
 
 
     //call api chi tiet bai post
     const callGetChiTietPost = async (ID_post) => {
       try {
         setIsLoading(true);
-        //console.log("ID_post:", ID_post);
         await dispatch(getChiTietPost({ ID_post, ID_user: me._id, token }))
           .unwrap()
           .then((response) => {
             if (response.post) {
               setPost(response.post);
-              setComments(response.post.comments)
-              setReactionsOfPost(response.post.post_reactions)
+              setComments(response.post.comments);
+              setReactionsOfPost(response.post.post_reactions);
               setCountComments(response.post.countComments);
+              setIsPermission(true);
             } else {
-              setIsPermission(false)
+              // Bài viết không tồn tại, coi như bị xóa
+              setPost(null);
+              setIsPermission(false);
             }
           })
           .catch((error) => {
-            console.log('API không trả về bài viết: ' + error.message);
+            console.log('API không trả về bài viết:', error);
+            setPost(null);
+            if (error.message?.includes("unauthorized") || error.status === 403) {
+              setIsPermission(false); // Không có quyền truy cập
+            } else {
+              // Các lỗi khác (bao gồm "not found"), coi như bài viết bị xóa
+              setIsPermission(false);
+            }
           });
       } catch (error) {
         console.log('Lỗi khi lấy chi tiết bài viết:', error);
-      }
-      finally {
+        setPost(null);
+        setIsPermission(false);
+      } finally {
         setIsLoading(false);
         setIsRefreshing(false);
       }
@@ -1069,37 +1083,63 @@ const SharedPost = ({
         );
       }
 
-
-   // Nếu bài viết không hợp lệ, không hiển thị nội dung bài viết
-if (!isPostValid()) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: height, // Đảm bảo chiếm toàn bộ chiều cao màn hình
-      }}
-    >
-      <TouchableOpacity
+  // Nếu không có quyền truy cập, hiển thị thông báo
+  if (!hasAccessToPost()) {
+    return (
+      <View
         style={{
-          position: 'absolute',
-          top: 40,
-          left: 15,
-          padding: 10,
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: height,
         }}
-        onPress={() => navigation.navigate(oStackHome.TabHome)} // Quay về màn hình chính
       >
-        <Icon name="arrow-back" size={25} color="black" />
-      </TouchableOpacity>
-      <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-        {post && post._destroy && me._id !== post.ID_user._id
-          ? 'Bài viết đã bị xóa.'
-          : 'Bạn không có quyền truy cập vào bài viết!'}
-      </Text>
-    </View>
-  );
-}
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            top: 40,
+            left: 15,
+            padding: 10,
+          }}
+          onPress={() => navigation.navigate(oStackHome.TabHome)}
+        >
+          <Icon name="arrow-back" size={25} color="black" />
+        </TouchableOpacity>
+        <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
+          Bạn không thể truy cập vào bài viết.
+        </Text>
+      </View>
+    );
+  }
+
+  // Nếu bài viết bị xóa (tạm thời hoặc vĩnh viễn)
+  if (isPostDeleted()) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: height,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            top: 40,
+            left: 15,
+            padding: 10,
+          }}
+          onPress={() => navigation.navigate(oStackHome.TabHome)}
+        >
+          <Icon name="arrow-back" size={25} color="black" />
+        </TouchableOpacity>
+        <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
+          Bài viết đã bị xóa.
+        </Text>
+      </View>
+    );
+  }
       return (
         <View style={styles.postContainer}>
           <View>
@@ -1668,7 +1708,7 @@ if (!isPostValid()) {
           >
             <ActivityIndicator size="large" color="#0000ff" />
           </View>
-        ) : isPostValid() ? (
+        ) : (
           <>
             <FlatList
               data={comments}
@@ -1681,13 +1721,12 @@ if (!isPostValid()) {
                 <RefreshControl
                   refreshing={isRefreshing}
                   onRefresh={onRefresh}
-                  colors={['#007bff']} // Màu của vòng xoay làm mới
-                  tintColor="#007bff" // Màu trên iOS
+                  colors={['#007bff']}
+                  tintColor="#007bff"
                 />
               }
             />
-            {/* Ô nhập bình luận */}
-            {typeClick === 'comment' && (
+            {typeClick === 'comment' && !isPostDeleted() && hasAccessToPost() && (
               <View style={styles.boxInputText}>
                 {reply && (
                   <View style={styles.replyPreview}>
@@ -1742,31 +1781,6 @@ if (!isPostValid()) {
               </View>
             )}
           </>
-        ) : (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                position: 'absolute',
-                top: 20,
-                left: 15,
-                padding: 10,
-              }}
-              onPress={() => navigation.navigate(oStackHome.TabHome)} // Quay về màn hình chính
-            >
-              <Icon name="arrow-back" size={25} color="black" />
-            </TouchableOpacity>
-            <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-              {post && post._destroy && me._id !== post.ID_user._id
-                ? 'Bài viết đã bị xóa.'
-                : 'Bạn không có quyền truy cập vào bài viết!'}
-            </Text>
-          </View>
         )}
         <SuccessModal visible={successModalVisible} message={'Đã chia sẻ bài viết!'} />
         <FailedModal visible={failedModalVisible} message={'Đã có lỗi khi chia sẻ bài viết!'} />
@@ -1774,5 +1788,4 @@ if (!isPostValid()) {
       </View>
     );
   };
-
 export default PostDetail;
