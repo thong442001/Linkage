@@ -9,7 +9,8 @@ import { useRoute } from '@react-navigation/native';
 import {
   getAllPostsInHome,
   changeDestroyPost,
-  getAllReason
+  getAllReason,
+  getUser
 } from '../../rtk/API';
 import database from '@react-native-firebase/database';
 import HomeHeader from './HomeHeader';
@@ -39,6 +40,25 @@ const Home = props => {
     outputRange: [0, -HEADER_HEIGHT],
     extrapolate: 'clamp',
   });
+  // user api
+  const [api_user, setApi_user] = useState(null);
+
+  const callgetUser = async (ID_user) => {
+    try {
+      await dispatch(getUser({ ID_user: ID_user, token }))
+        .unwrap()
+        .then((response) => {
+          setApi_user(response.user);
+          //console.log('API User:', response.user);
+        })
+        .catch((error) => {
+          console.log('Error callgetUser:: ', error);
+
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
@@ -55,6 +75,7 @@ const Home = props => {
       console.log('Story deleted, refreshing data...');
       setTimeout(() => {
         callGetAllPostsInHome(me._id, true);
+        callgetUser(me._id);
       }, 1000);
       navigation.setParams({ isDeleted: undefined });
     }
@@ -86,6 +107,7 @@ const Home = props => {
 
   useEffect(() => {
     callGetAllPostsInHome(me._id);
+    callgetUser(me._id);
   }, [me._id]);
 
   const onRefresh = useCallback(() => {
@@ -182,7 +204,7 @@ const Home = props => {
         <HomeLoading />
       ) : (
         <View style={HomeS.container}>
-          <HomeHeader navigation={navigation} me={me} headerTranslate={headerTranslate} />
+          <HomeHeader navigation={navigation} headerTranslate={headerTranslate} />
           <Animated.FlatList
             data={posts}
             renderItem={renderPosts}
@@ -191,7 +213,7 @@ const Home = props => {
             ListHeaderComponent={
               <HomeStories
                 navigation={navigation}
-                me={me}
+                me={api_user || me}
                 stories={stories}
                 liveSessions={liveSessions}
               />

@@ -13,7 +13,7 @@ import {
   ImageBackground,
   Linking,// link
 } from 'react-native';
-import { Snackbar } from 'react-native-paper'; // thông báo (ios and android)
+import { Avatar, Snackbar } from 'react-native-paper'; // thông báo (ios and android)
 import { useSelector } from 'react-redux';
 import Video from 'react-native-video';
 import { useBottomSheet } from '../../context/BottomSheetContext';
@@ -31,7 +31,7 @@ export default function MessageComponent({
   onHuyGame3la,
 }) {
   const isCurrentUser = message.sender._id === currentUserID; // Kiểm tra tin nhắn có phải của user hiện tại không
-
+// console.log('message', message.sender.avatar);
   const reactions = useSelector(state => state.app.reactions);
 
   const [menuVisible, setMenuVisible] = useState(false);
@@ -47,6 +47,7 @@ export default function MessageComponent({
   const { openBottomSheet, closeBottomSheet } = useBottomSheet();
   const [selectedTab, setSelectedTab] = useState('all');
   const [isFirstRender, setIsFirstRender] = useState(true);
+  const [isPaused, setIsPaused] = useState(true);
 
   const navigation = useNavigation();
 
@@ -210,7 +211,7 @@ export default function MessageComponent({
     const [lat, lng] = query.split(',').map(Number);
 
     navigation.navigate('MapScreen', {
-      externalLocation: { latitude: lat, longitude: lng },
+      externalLocation: { latitude: lat, longitude: lng },Avatar:message.sender.avatar
     });
   };
   //tách link và non link
@@ -344,7 +345,10 @@ export default function MessageComponent({
                                 message.content.split('q=')[1].split(',')[1],
                               ),
                             }}
-                          />
+                          >
+                            <Image
+                                  source={{ uri: message.sender.avatar }} style = {styles.avatar}/>
+                          </Marker>
                         </MapView>
                         <TouchableOpacity
                           style={{
@@ -355,7 +359,7 @@ export default function MessageComponent({
                             borderRadius: 8,
                           }}
                           onPress={() => handlePressLocation(message.content)}>
-                          <Text style={{ color: '#fff' }}>Mở Google Maps</Text>
+                          <Text style={{ color: '#fff' }}>Xem chi tiết</Text>
                         </TouchableOpacity>
                       </View>
                     ) : (
@@ -393,14 +397,13 @@ export default function MessageComponent({
                   ) : (
                     message.type == 'video' && (
                       <Video
-                        source={{ uri: message.content }} // URL video
-                        style={[
-                          styles.messageVideo,
-                          isCurrentUser && styles.currentUserText,
-                        ]}
-                        controls={true} // Hiển thị điều khiển video
-                        resizeMode="contain" // Cách hiển thị video
-                      />
+                      source={{ uri: message.content }}
+                      style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
+                      controls={true}
+                      resizeMode="contain"
+                      paused={isPaused}
+                      onLoad={() => setIsPaused(true)} // Đảm bảo tạm dừng khi tải
+                    />
                     )
                   )
                 }
@@ -502,13 +505,56 @@ export default function MessageComponent({
                           Tin nhắn đã được thu hồi
                         </Text>
                       ) : message.type == 'text' ? (
-                        <Text
+                        isGoogleMapsLink(message.content) ? (
+                          <View style={{ alignItems: 'center' }}>
+                            <MapView
+                              style={{ width: 200, height: 120, borderRadius: 10 }}
+                              initialRegion={{
+                                latitude: parseFloat(
+                                  message.content.split('q=')[1].split(',')[0],
+                                ),
+                                longitude: parseFloat(
+                                  message.content.split('q=')[1].split(',')[1],
+                                ),
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                              }}
+                              pointerEvents="none">
+                              <Marker
+                                coordinate={{
+                                  latitude: parseFloat(
+                                    message.content.split('q=')[1].split(',')[0],
+                                  ),
+                                  longitude: parseFloat(
+                                    message.content.split('q=')[1].split(',')[1],
+                                  ),
+                                }}
+                              >
+                                <Image
+                                  source={{ uri: message.sender.avatar }} style = {styles.avatar}/>
+                              </Marker>
+                            </MapView>
+                            <TouchableOpacity
+                              style={{
+                                marginTop: 5,
+                                backgroundColor: '#2196F3',
+                                paddingHorizontal: 12,
+                                paddingVertical: 6,
+                                borderRadius: 8,
+                              }}
+                              onPress={() => handlePressLocation(message.content)}>
+                              <Text style={{ color: '#fff' }}>Xem chi tiết</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ) : ( 
+                          <Text
                           style={[
                             styles.messageText,
                             isCurrentUser && styles.currentUserText,
                           ]}>
                           {renderStyledMessage(message.content)}
                         </Text>
+                        )
                       ) : message.type == 'image' ? (
                         <Image
                           style={[
@@ -520,13 +566,12 @@ export default function MessageComponent({
                       ) : (
                         message.type == 'video' && (
                           <Video
-                            source={{ uri: message.content }} // URL video
-                            style={[
-                              styles.messageVideo,
-                              isCurrentUser && styles.currentUserText,
-                            ]}
-                            controls={true} // Hiển thị điều khiển video
-                            resizeMode="contain" // Cách hiển thị video
+                            source={{ uri: message.content }}
+                            style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
+                            controls={true}
+                            resizeMode="contain"
+                            paused={isPaused}
+                            onLoad={() => setIsPaused(true)} // Đảm bảo tạm dừng khi tải
                           />
                         )
                       )

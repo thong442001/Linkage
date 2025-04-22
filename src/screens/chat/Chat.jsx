@@ -26,6 +26,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import { useBottomSheet } from '../../context/BottomSheetContext';
 import LottieView from 'lottie-react-native';
+import { Avatar } from 'react-native-paper';
 const Chat = (props) => {// cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -742,6 +743,7 @@ const Chat = (props) => {// cần ID_group (param)
                             navigation.navigate('MapScreen', {
                                 ID_group: params?.ID_group,
                                 isGui: true,
+                                Avatar:myAvatar,
                             });
                         }}
                         style={styles.menuItem}>

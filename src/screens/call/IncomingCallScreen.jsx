@@ -76,7 +76,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
       ringtoneRef.current.release();
     }
     socket.emit('chap-nhan-call', { ID_group: group._id });
-    navigation.navigate('CallPage', {
+    navigation.replace('CallPage', {
       ID_group: group._id,
       id_user: me._id,
       MyUsername: me.last_name + ' ' + me.first_name,
@@ -104,9 +104,15 @@ const IncomingCallScreen = ({ route, navigation }) => {
           <TouchableOpacity onPress={() => handlCancelCall()} style={styles.declineButton}>
             <Ionicons name="call" size={40} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
+          {type === true ? (
+            <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
+            <Ionicons name="videocam" size={40} color="#fff" />
+          </TouchableOpacity>
+          ):(
+            <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
             <Ionicons name="call" size={40} color="#fff" />
           </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>

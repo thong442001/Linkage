@@ -351,7 +351,6 @@ const PostDetail = (props) => {
 
   const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
   const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
-  const [isPostNotFound, setIsPostNotFound] = useState(false);
 
   // Cảnh
   // post_reactions: list của reaction của post
@@ -406,27 +405,20 @@ const PostDetail = (props) => {
             setComments(response.post.comments);
             setReactionsOfPost(response.post.post_reactions);
             setCountComments(response.post.countComments);
-            setIsPermission(true); // Có bài viết => có quyền truy cập
-            setIsPostNotFound(false); // Bài viết tồn tại
+            setIsPermission(true);
           } else {
-            // API trả về null, giả sử là do không có quyền truy cập
-            setIsPermission(false);
+            // Bài viết không tồn tại, coi như bị xóa
             setPost(null);
-            setIsPostNotFound(false); // Không phải bài viết không tồn tại
+            setIsPermission(false);
           }
         })
         .catch((error) => {
-          console.log('API không trả về bài viết: ' + error.message);
+          console.log('API không trả về bài viết:', error);
           setPost(null);
-          if (error.message.includes("not found")) {
-            setIsPostNotFound(true); // Bài viết không tồn tại
-            setIsPermission(false);
-          } else if (error.message.includes("unauthorized")) {
-            setIsPostNotFound(false); // Không phải bài viết không tồn tại
+          if (error.message?.includes("unauthorized") || error.status === 403) {
             setIsPermission(false); // Không có quyền truy cập
           } else {
-            // Xử lý lỗi khác (mạng, server, v.v.)
-            setIsPostNotFound(false);
+            // Các lỗi khác (bao gồm "not found"), coi như bài viết bị xóa
             setIsPermission(false);
           }
         });
@@ -434,7 +426,6 @@ const PostDetail = (props) => {
       console.log('Lỗi khi lấy chi tiết bài viết:', error);
       setPost(null);
       setIsPermission(false);
-      setIsPostNotFound(false);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -1115,71 +1106,13 @@ const PostDetail = (props) => {
             <Icon name="arrow-back" size={25} color="black" />
           </TouchableOpacity>
           <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-            Bạn không có quyền truy cập vào bài viết!
+            Bạn không thể truy cập vào bài viết.
           </Text>
         </View>
       );
     }
 
-    // Nếu bài viết không tồn tại (do bị xóa vĩnh viễn hoặc không có trong cơ sở dữ liệu)
-    if (isPostNotFound) {
-      return (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: height,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              top: 40,
-              left: 15,
-              padding: 10,
-            }}
-            onPress={() => navigation.navigate(oStackHome.TabHome)}
-          >
-            <Icon name="arrow-back" size={25} color="black" />
-          </TouchableOpacity>
-          <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-            Bài viết đã bị xóa.
-          </Text>
-        </View>
-      );
-    }
-
-    // Nếu bài viết bị xóa tạm thời (có thể khôi phục)
-    if (isPostDeleted()) {
-      return (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: height,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              top: 40,
-              left: 15,
-              padding: 10,
-            }}
-            onPress={() => navigation.navigate(oStackHome.TabHome)}
-          >
-            <Icon name="arrow-back" size={25} color="black" />
-          </TouchableOpacity>
-          <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-            Bài viết đã bị xóa.
-          </Text>
-        </View>
-      );
-    }
-
-    // Nếu bài viết bị xóa (nhưng có thể khôi phục)
+    // Nếu bài viết bị xóa (tạm thời hoặc vĩnh viễn)
     if (isPostDeleted()) {
       return (
         <View
@@ -1762,6 +1695,7 @@ const PostDetail = (props) => {
     );
   };
 
+
   //comments
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
@@ -1775,7 +1709,58 @@ const PostDetail = (props) => {
         >
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
+      ) : !hasAccessToPost() ? (
+        // Trường hợp không có quyền truy cập
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: height,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              top: 40,
+              left: 15,
+              padding: 10,
+            }}
+            onPress={() => navigation.navigate(oStackHome.TabHome)}
+          >
+            <Icon name="arrow-back" size={25} color="black" />
+          </TouchableOpacity>
+          <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
+            Bạn không thể truy cập vào bài viết.
+          </Text>
+        </View>
+      ) : isPostDeleted() ? (
+        // Trường hợp bài viết bị xóa
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: height,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              top: 40,
+              left: 15,
+              padding: 10,
+            }}
+            onPress={() => navigation.navigate(oStackHome.TabHome)}
+          >
+            <Icon name="arrow-back" size={25} color="black" />
+          </TouchableOpacity>
+          <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
+            Bài viết đã bị xóa.
+          </Text>
+        </View>
       ) : (
+        // Trường hợp có quyền truy cập và bài viết chưa bị xóa
         <>
           <FlatList
             data={comments}
@@ -1793,7 +1778,7 @@ const PostDetail = (props) => {
               />
             }
           />
-          {typeClick === 'comment' && !isPostDeleted() && hasAccessToPost() && (
+          {typeClick === 'comment' && (
             <View style={styles.boxInputText}>
               {reply && (
                 <View style={styles.replyPreview}>
