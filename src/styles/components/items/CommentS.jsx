@@ -373,9 +373,12 @@ const CommentS = StyleSheet.create({
     boxInputText: {
         position: 'absolute',
         bottom: 0,
-        backgroundColor: 'white',
-        width: "100%"
-    },
+        width: '100%',
+        backgroundColor: '#fff',
+        padding: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+      },
     // 🌟 Media (Hình ảnh & Video)
     mediaContainer: {
         flexDirection: 'row',
@@ -458,26 +461,34 @@ const CommentS = StyleSheet.create({
     replyPreview: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        borderTopWidth: 1,
-        borderColor: '#d9d9d9d9',
-        paddingVertical: height * 0.01,
-        paddingHorizontal: width * 0.02,
-    },
-    replyTitle: {
-        color: 'black',
-    },
-    replyContent: {
-        color: 'black',
-    },
+        alignItems: 'center',
+        backgroundColor: '#f0f2f5',
+        padding: 8,
+        borderRadius: 8,
+        marginBottom: 8,
+      },
+      replyTitle: {
+        fontSize: 14,
+        color: '#333',
+        fontWeight: '500',
+      },
+      replyContent: {
+        fontSize: 14,
+        color: '#333',
+      },
     replyRight: {
         alignItems: 'flex-end',
     },
     //input comment 
     boxComment: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        marginHorizontal: width * 0.04,
-    },
+        backgroundColor: '#f0f2f5',
+        borderRadius: 20,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+      },
     boxCommentAll: {
         backgroundColor: 'white', // Đảm bảo có màu nền để bóng hiển thị rõ
         borderRadius: 6, // Nếu muốn bo góc

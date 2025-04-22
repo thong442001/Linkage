@@ -27,12 +27,14 @@ import GroupcomponentShare from '../../components/chat/GroupcomponentShare';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getChiTietPost,
-  addPost_Reaction, // thả biểu cảm
-  deletePost_reaction,// xóa biểu cảm
-  addPost, // api share
-  addComment, // api tạo comment
+  addPost_Reaction,
+  deletePost_reaction,
+  addPost,
+  addComment,
+  editComment,
+  deleteComment,
   changeDestroyPost,
-  getAllGroupOfUser, //xoa post
+  getAllGroupOfUser,
 } from '../../rtk/API';
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
@@ -68,6 +70,7 @@ const SharedPost = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false); // Thêm trạng thái loading
+
   const [selectedOption, setSelectedOption] = useState({
     status: 1,
     name: 'Công khai',
@@ -142,6 +145,8 @@ const SharedPost = ({
     await callAddPostShare(captionShare, selectedOption.name);
     setIsButtonLoading(false);
   };
+
+
 
   return (
     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -374,6 +379,7 @@ const PostDetail = (props) => {
 
   //refresh dữ liệu 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [editingComment, setEditingComment] = useState(null);
 
   // Hàm sao chép liên kết
   const copyToClipboard = text => {
@@ -381,6 +387,94 @@ const PostDetail = (props) => {
     setDialogCopyVisible(true);
   };
 
+
+    // Hàm chỉnh sửa bình luận
+const callEditComment = async (ID_comment, newContent) => {
+  try {
+    // Cập nhật lạc quan: Cập nhật giao diện trước khi gọi API
+    const updateComment = (commentsList, commentId, newContent) => {
+      return commentsList.map((comment) => {
+        if (comment._id === commentId) {
+          return { ...comment, content: newContent, isPending: true };
+        }
+        if (Array.isArray(comment.replys) && comment.replys.length > 0) {
+          return {
+            ...comment,
+            replys: updateComment(comment.replys, commentId, newContent),
+          };
+        }
+        return comment;
+      });
+    };
+
+    setComments((prevComments) => updateComment(prevComments, ID_comment, newContent));
+
+    // Gọi API chỉnh sửa
+    const response = await dispatch(editComment({ ID_comment, newContent })).unwrap();
+
+    if (response.status) {
+      // Cập nhật lại giao diện với trạng thái isPending = false
+      setComments((prevComments) =>
+        updateComment(prevComments, ID_comment, newContent).map((comment) =>
+          comment._id === ID_comment ? { ...comment, isPending: false } : comment
+        )
+      );
+      setSuccessModalVisible(true);
+      setTimeout(() => setSuccessModalVisible(false), 1500);
+    } else {
+      throw new Error('Chỉnh sửa bình luận thất bại');
+    }
+  } catch (error) {
+    console.log('Lỗi khi chỉnh sửa bình luận:', error);
+    setFailedModalVisible(true);
+    setTimeout(() => setFailedModalVisible(false), 1500);
+
+    callGetChiTietPost(post._id);
+  } finally {
+    setEditingComment(null);
+    setComment('');
+  }
+};
+
+// Hàm xóa bình luận
+const callDeleteComment = async (ID_comment) => {
+  try {
+    // Cập nhật lạc quan: Xóa bình luận khỏi giao diện trước khi gọi API
+    const removeComment = (commentsList, commentId) => {
+      return commentsList
+        .map((comment) => {
+          if (comment._id === commentId) {
+            return null;
+          }
+          if (Array.isArray(comment.replys) && comment.replys.length > 0) {
+            return {
+              ...comment,
+              replys: removeComment(comment.replys, commentId).filter(Boolean),
+            };
+          }
+          return comment;
+        })
+        .filter(Boolean);
+    };
+
+    setComments((prevComments) => removeComment(prevComments, ID_comment));
+    setCountComments((prev) => prev - 1);
+
+    // Gọi API xóa
+    const response = await dispatch(deleteComment({ ID_comment })).unwrap();
+
+    if (!response.status) {
+      throw new Error('Xóa bình luận thất bại');
+    }
+    // Bỏ phần hiển thị SuccessModal
+  } catch (error) {
+    console.log('Lỗi khi xóa bình luận:', error);
+    setFailedModalVisible(true);
+    setTimeout(() => setFailedModalVisible(false), 1500);
+    // Rollback: Tải lại chi tiết bài viết
+    callGetChiTietPost(post._id);
+  }
+};
 
   // Hàm kiểm tra quyền truy cập bài viết
   const hasAccessToPost = () => {
@@ -475,43 +569,43 @@ const PostDetail = (props) => {
   //call api chi tiet bai post
   const callAddComment = async (type, content) => {
     try {
-      addComment
-      if ((content == '' && type === 'text') || post == null) {
-        console.log('thiếu ')
-        return null;
+      if ((content === '' && type === 'text') || !post) {
+        console.log('Nội dung hoặc bài viết không hợp lệ');
+        return;
       }
       setIsSending(true);
-      const paramsAPI = {
-        ID_user: me._id,
-        ID_post: post._id,
-        content: content,
-        type: type,
-        ID_comment_reply: reply?._id || null,
-      };
-
-      await dispatch(addComment(paramsAPI))
-        .unwrap()
-        .then((response) => {
-          if (response.comment.ID_comment_reply) {
-            setComments((prevComments) => [...addReplyToComment(prevComments, response.comment)]);
-          } else {
-            setComments((prevComments) => [...prevComments, response.comment]);
-          }
-          setCountComments(countComments + 1);
-          setComment('');
-          setReply(null);
-          setIsReplying(false); // Reset trạng thái trả lời
-        })
-        .catch((error) => {
-          console.log('Error1 addComment:', error);
-        })
-        .finally(() => {
-          // Đặt lại isSending thành false sau khi hoàn tất (thành công hoặc thất bại)
-          setIsSending(false);
-        });
+  
+      if (editingComment) {
+        // Nếu đang chỉnh sửa, gọi hàm chỉnh sửa
+        await callEditComment(editingComment._id, content);
+      } else {
+        // Nếu thêm bình luận mới
+        const paramsAPI = {
+          ID_user: me._id,
+          ID_post: post._id,
+          content: content,
+          type: type,
+          ID_comment_reply: reply?._id || null,
+        };
+  
+        const response = await dispatch(addComment(paramsAPI)).unwrap();
+  
+        if (response.comment.ID_comment_reply) {
+          setComments((prevComments) => [...addReplyToComment(prevComments, response.comment)]);
+        } else {
+          setComments((prevComments) => [...prevComments, response.comment]);
+        }
+        setCountComments((prev) => prev + 1);
+        setComment('');
+        setReply(null);
+        setIsReplying(false);
+      }
     } catch (error) {
-      console.log('Lỗi khi callAddComment:', error);
-      setIsSending(false); // Đảm bảo dừng trạng thái gửi nếu có lỗi
+      console.log('Lỗi khi thêm bình luận:', error);
+      setFailedModalVisible(true);
+      setTimeout(() => setFailedModalVisible(false), 1500);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -1069,8 +1163,14 @@ const PostDetail = (props) => {
         setReply(replyData);
         setIsReplying(true);
         setComment(`${replyData.ID_user.first_name} ${replyData.ID_user.last_name} `);
-        textInputRef.current?.focus(); // Tập trung vào TextInput
+        textInputRef.current?.focus();
       }}
+      onEdit={(comment) => {
+        setEditingComment(comment);
+        setComment(comment.content);
+        textInputRef.current?.focus();
+      }}
+      onDelete={callDeleteComment}
     />
   ), []);
 
@@ -1698,146 +1798,159 @@ const PostDetail = (props) => {
 
   //comments
   return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
-      {isLoading ? (
-        <View
+  <View style={{ flex: 1, backgroundColor: 'white' }}>
+    {isLoading ? (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    ) : !hasAccessToPost() ? (
+      // Trường hợp không có quyền truy cập
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: height,
+        }}
+      >
+        <TouchableOpacity
           style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
+            position: 'absolute',
+            top: 40,
+            left: 15,
+            padding: 10,
           }}
+          onPress={() => navigation.navigate(oStackHome.TabHome)}
         >
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      ) : !hasAccessToPost() ? (
-        // Trường hợp không có quyền truy cập
-        <View
+          <Icon name="arrow-back" size={25} color="black" />
+        </TouchableOpacity>
+        <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
+          Bạn không thể truy cập vào bài viết.
+        </Text>
+      </View>
+    ) : isPostDeleted() ? (
+      // Trường hợp bài viết bị xóa
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: height,
+        }}
+      >
+        <TouchableOpacity
           style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: height,
+            position: 'absolute',
+            top: 40,
+            left: 15,
+            padding: 10,
           }}
+          onPress={() => navigation.navigate(oStackHome.TabHome)}
         >
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              top: 40,
-              left: 15,
-              padding: 10,
-            }}
-            onPress={() => navigation.navigate(oStackHome.TabHome)}
-          >
-            <Icon name="arrow-back" size={25} color="black" />
-          </TouchableOpacity>
-          <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-            Bạn không thể truy cập vào bài viết.
-          </Text>
-        </View>
-      ) : isPostDeleted() ? (
-        // Trường hợp bài viết bị xóa
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: height,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              top: 40,
-              left: 15,
-              padding: 10,
-            }}
-            onPress={() => navigation.navigate(oStackHome.TabHome)}
-          >
-            <Icon name="arrow-back" size={25} color="black" />
-          </TouchableOpacity>
-          <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-            Bài viết đã bị xóa.
-          </Text>
-        </View>
-      ) : (
-        // Trường hợp có quyền truy cập và bài viết chưa bị xóa
-        <>
-          <FlatList
-            data={comments}
-            renderItem={renderComment}
-            keyExtractor={(item) => item._id.toString()}
-            extraData={comments}
-            ListHeaderComponent={header}
-            contentContainerStyle={{ paddingBottom: '17%' }}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={onRefresh}
-                colors={['#007bff']}
-                tintColor="#007bff"
-              />
-            }
-          />
-          {typeClick === 'comment' && (
-            <View style={styles.boxInputText}>
-              {reply && (
-                <View style={styles.replyPreview}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={styles.replyTitle}>Đang phản hồi</Text>
+          <Icon name="arrow-back" size={25} color="black" />
+        </TouchableOpacity>
+        <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
+          Bài viết đã bị xóa.
+        </Text>
+      </View>
+    ) : (
+      // Trường hợp có quyền truy cập và bài viết chưa bị xóa
+      <>
+        <FlatList
+          data={comments.filter(comment => !comment._destroy)} // Filter out deleted comments
+          renderItem={renderComment}
+          keyExtractor={(item) => item._id.toString()}
+          extraData={comments}
+          ListHeaderComponent={header}
+          contentContainerStyle={{ paddingBottom: '17%' }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={onRefresh}
+              colors={['#007bff']}
+              tintColor="#007bff"
+            />
+          }
+        />
+        {typeClick === 'comment' && (
+          <View style={styles.boxInputText}>
+            {(reply || editingComment) && (
+              <View style={styles.replyPreview}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.replyTitle}>
+                    {editingComment ? 'Đang chỉnh sửa bình luận' : 'Đang phản hồi'}
+                  </Text>
+                  {!editingComment && (
                     <Text style={[styles.replyContent, { fontWeight: 'bold' }]}>
                       {` ${reply.ID_user.first_name} ${reply.ID_user.last_name} `}
                     </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.replyRight}
-                    onPress={() => {
-                      setReply(null);
-                      setIsReplying(false);
-                      setComment('');
-                    }}
-                  >
-                    <Text style={styles.replyTitle}>Hủy</Text>
+                  )}
+                </View>
+                <TouchableOpacity
+                  style={styles.replyRight}
+                  onPress={() => {
+                    setReply(null);
+                    setIsReplying(false);
+                    setEditingComment(null);
+                    setComment('');
+                  }}
+                >
+                  <Text style={styles.replyTitle}>Hủy</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            <View style={styles.boxCommentAll}>
+              <View style={styles.boxComment}>
+                <View style={styles.librarySelect}>
+                  <TouchableOpacity onPress={editingComment ? null : onOpenGallery}>
+                    <Icon
+                      name="image"
+                      size={25}
+                      color={editingComment ? '#ccc' : '#007bff'}
+                    />
                   </TouchableOpacity>
                 </View>
-              )}
-              <View style={styles.boxCommentAll}>
-                <View style={styles.boxComment}>
-                  <View style={styles.librarySelect}>
-                    <TouchableOpacity onPress={onOpenGallery}>
-                      <Icon name="image" size={25} color="#007bff" />
-                    </TouchableOpacity>
-                  </View>
-                  <TextInput
-                    ref={textInputRef}
-                    style={styles.textInput}
-                    placeholder={
-                      isReplying
-                        ? `Trả lời ${reply?.ID_user.first_name} ${reply?.ID_user.last_name}`
-                        : 'Viết bình luận'
-                    }
-                    multiline={true}
-                    value={comment}
-                    onChangeText={setComment}
-                  />
-                  <View>
-                    <TouchableOpacity
-                      onPress={() => callAddComment('text', comment)}
-                      style={styles.sendButton}
-                      disabled={isSending}
-                    >
-                      <Icon name="send" size={25} color="#007bff" />
-                    </TouchableOpacity>
-                  </View>
+                <TextInput
+                  ref={textInputRef}
+                  style={styles.textInput}
+                  placeholder={
+                    editingComment
+                      ? 'Chỉnh sửa bình luận...'
+                      : isReplying
+                      ? `Trả lời ${reply?.ID_user.first_name} ${reply?.ID_user.last_name}`
+                      : 'Viết bình luận'
+                  }
+                  multiline={true}
+                  value={comment}
+                  onChangeText={setComment}
+                  onSubmitEditing={() => callAddComment('text', comment)}
+                  editable={!isSending}
+                />
+                <View>
+                  <TouchableOpacity
+                    onPress={() => callAddComment('text', comment)}
+                    style={styles.sendButton}
+                    disabled={isSending}
+                  >
+                    <Icon name="send" size={25} color="#007bff" />
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
-          )}
-        </>
-      )}
-      <SuccessModal visible={successModalVisible} message={'Đã chia sẻ bài viết!'} />
-      <FailedModal visible={failedModalVisible} message={'Đã có lỗi khi chia sẻ bài viết!'} />
-      <LoadingModal visible={isSharing} />
-    </View>
-  );
+          </View>
+        )}
+      </>
+    )}
+    <SuccessModal visible={successModalVisible} message={'Đã chia sẻ bài viết!'} />
+    <FailedModal visible={failedModalVisible} message={'Đã có lỗi khi chia sẻ bài viết!'} />
+    <LoadingModal visible={isSharing} />
+  </View>
+);
 };
 export default PostDetail;
