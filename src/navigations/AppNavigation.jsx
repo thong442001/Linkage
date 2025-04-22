@@ -1,106 +1,88 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import HomeNavigation from './HomeNavigation';
 import UserNavigation from './UserNavigation';
 import Welcome from '../screens/welcome/Welcome';
 import {
   getAllReaction,
   checkBanUser,
-  setNoti_token
+  setNoti_token,
+  getAllPostsInHome,
 } from '../rtk/API';
-import { requestPermissions } from '../screens/service/MyFirebaseMessagingService';
-import { setReactions, setFcmToken, logout } from '../rtk/Reducer';
-import database from '@react-native-firebase/database';
+import {requestPermissions} from '../screens/service/MyFirebaseMessagingService';
+import {setReactions, setFcmToken, logout} from '../rtk/Reducer';
 import messaging from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-import { useNavigation } from '@react-navigation/native';
-import { navigate } from '../navigations/NavigationService';
-import { getNotificationPreference } from '../noti/notificationHelper';
-import { Linking } from 'react-native';
-import { parseQueryString } from '../utils/deeplink/queryParser';
-import { AppState } from 'react-native'; // Thêm AppState từ react-native
+import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
+import {useNavigation} from '@react-navigation/native';
+import {navigate} from '../navigations/NavigationService';
+import {getNotificationPreference} from '../noti/notificationHelper';
+import {Linking, AppState} from 'react-native';
+import {parseQueryString} from '../utils/deeplink/queryParser';
+
 const AppNavigation = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
-  const navigation = useNavigation(); // Lấy navigation
-  const [isSplashVisible, setSplashVisible] = useState(true); // Trạng thái để kiểm soát màn hình chào
-  //const reactions = useSelector(state => state.app.reactions)
-  //console.log("****: " + reactions)
+  const navigation = useNavigation();
+  const [isSplashVisible, setSplashVisible] = useState(true);
+  const [stories, setStories] = useState([]);
   const fcmToken = useSelector(state => state.app.fcmToken);
-  //console.log('📲 FCM Token từ Redux:', fcmToken);
 
   useEffect(() => {
-    // Hiển thị màn hình chào trong 2 giây
     const timeout = setTimeout(() => {
-      setSplashVisible(false); // Ẩn màn hình chào sau 2 giây
+      setSplashVisible(false);
     }, 2000);
-
-    return () => {
-      clearTimeout(timeout);
-    };
+    return () => clearTimeout(timeout);
   }, []);
 
-  // Chạy khi component mount và mỗi khi app trở lại foreground
   useEffect(() => {
-    // Chạy lần đầu khi component mount
-    if (user) {
+    if (user?._id) {
       callCheckBanUser();
       callGetAllReaction();
+      callGetAllPostsInHome(user._id);
     }
 
-    // Hàm xử lý khi app trở lại foreground
-    const handleAppStateChange = (nextAppState) => {
-      if (nextAppState === 'active') {
+    const handleAppStateChange = nextAppState => {
+      if (nextAppState === 'active' && user?._id) {
         console.log('App is in foreground, re-running logic...');
-        if (user) {
-          callCheckBanUser();
-          callGetAllReaction();
-        }
+        callCheckBanUser();
+        callGetAllReaction();
+        callGetAllPostsInHome(user._id);
       }
     };
 
-    // Lắng nghe sự kiện AppState
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+    return () => subscription.remove();
+  }, [user?._id]);
 
-    // Cleanup khi component unmount
-    return () => {
-      subscription.remove();
-    };
-  }, [user]);
-
-  // deeplink
   useEffect(() => {
     const handleDeepLink = async () => {
       try {
         const url = await Linking.getInitialURL();
         if (url) {
-          //console.log('🌐 Deeplink:', url);
-          // Parse deeplink: linkage://post-chi-tiet?ID_post=124
           const [path, queryString] = url.split('?');
-          // share post
           if (path.includes('post-chi-tiet')) {
             const params = parseQueryString(queryString);
             const ID_post = params.ID_post;
             if (ID_post) {
-              //console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
-              // Navigate to PostScreen
-              navigation.navigate("PostDetail", { ID_post: ID_post, typeClick: "comment" });
+              navigation.navigate('PostDetail', {
+                ID_post: ID_post,
+                typeClick: 'comment',
+              });
             } else {
               console.error('❌ Thiếu ID_post trong deeplink');
             }
           }
-          // share profile
           if (path.includes('profile')) {
             const params = parseQueryString(queryString);
             const ID_user = params.ID_user;
             if (ID_user) {
-              //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
-              // Navigate to PostScreen
-              navigation.navigate("Profile", { _id: ID_user });
+              navigation.navigate('Profile', {_id: ID_user});
             } else {
-              console.error('❌ Thiếu ID_post trong deeplink');
+              console.error('❌ Thiếu ID_user trong deeplink');
             }
           }
         }
@@ -110,45 +92,38 @@ const AppNavigation = () => {
     };
 
     handleDeepLink();
-    // Lắng nghe deeplink khi ứng dụng đang chạy
-    const subscription = Linking.addEventListener('url', ({ url }) => {
-      //console.log('🌐 Nhận deeplink:', url);
+    const subscription = Linking.addEventListener('url', ({url}) => {
       const [path, queryString] = url.split('?');
-      // share post
       if (path.includes('post-chi-tiet')) {
         const params = parseQueryString(queryString);
         const ID_post = params.ID_post;
         if (ID_post) {
-          //console.log(`Chuyển hướng đến màn hình ID_post: ${ID_post}`);
-          navigation.navigate("PostDetail", { ID_post: ID_post, typeClick: "comment" });
+          navigation.navigate('PostDetail', {
+            ID_post: ID_post,
+            typeClick: 'comment',
+          });
         } else {
           console.error('❌ Thiếu ID_post trong deeplink');
         }
       }
-      // share profile
       if (path.includes('profile')) {
         const params = parseQueryString(queryString);
         const ID_user = params.ID_user;
         if (ID_user) {
-          //console.log(`Chuyển hướng đến màn hình ID_user: ${ID_user}`);
-          // Navigate to PostScreen
-          navigation.navigate("Profile", { _id: ID_user });
+          navigation.navigate('Profile', {_id: ID_user});
         } else {
-          console.error('❌ Thiếu ID_post trong deeplink');
+          console.error('❌ Thiếu ID_user trong deeplink');
         }
       }
     });
     return () => subscription.remove();
-
   }, []);
 
-  //call api getAllReaction
   const callGetAllReaction = async () => {
     try {
       await dispatch(getAllReaction())
         .unwrap()
         .then(response => {
-          //console.log("****: " + response)
           dispatch(setReactions(response.reactions));
         })
         .catch(error => {
@@ -159,18 +134,15 @@ const AppNavigation = () => {
     }
   };
 
-
-  //call api checkBanUser
   const callCheckBanUser = async () => {
     try {
-      await dispatch(checkBanUser({ ID_user: user._id, token: token }))
+      await dispatch(checkBanUser({ID_user: user._id, token: token}))
         .unwrap()
         .then(response => {
           console.log('status : ' + response.status);
         })
         .catch(error => {
           console.log('Tài khoản đã bị khóa');
-          // quay về trang login
           onLogoutAndNavigate();
         });
     } catch (error) {
@@ -178,23 +150,41 @@ const AppNavigation = () => {
     }
   };
 
+  const callGetAllPostsInHome = async (ID_user, showLoading = false) => {
+    try {
+      await dispatch(
+        getAllPostsInHome({me: ID_user, token, timestamp: Date.now()}),
+      )
+        .unwrap()
+        .then(response => {
+          setStories(response.stories || []);
+        })
+        .catch(error => {
+          console.log('Error getAllPostsInHome:', error);
+          setStories([]);
+        });
+    } catch (error) {
+      console.log('Error in callGetAllPostsInHome:', error);
+    }
+  };
+
   const onLogoutAndNavigate = () => {
-    dispatch(setNoti_token({ ID_user: user._id, fcmToken: fcmToken }))
+    dispatch(setNoti_token({ID_user: user._id, fcmToken: fcmToken}))
       .unwrap()
       .then(response => {
         console.log('✅ Đã gửi token thông báo trước khi logout:', response);
-        dispatch(logout()); // Xóa user trong Redux
+        dispatch(logout());
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Login' }], // Điều hướng về màn hình Login
+          routes: [{name: 'Login'}],
         });
       })
       .catch(error => {
         console.log('❌ Lỗi khi gửi token thông báo:', error);
-        dispatch(logout()); // Vẫn logout dù có lỗi
+        dispatch(logout());
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Login' }], // Điều hướng về màn hình Login
+          routes: [{name: 'Login'}],
         });
       });
   };
@@ -211,110 +201,92 @@ const AppNavigation = () => {
         name: 'Mặc định',
         importance: AndroidImportance.MAX,
       });
-
       await notifee.createChannel({
         id: 'message-channel',
         name: 'Tin nhắn',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'friend-request-channel',
         name: 'Lời mời kết bạn',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'friend-confirmation-channel',
         name: 'Xác nhận kết bạn',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'group-invite-channel',
         name: 'Lời mời tham gia nhóm',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'story-channel',
         name: 'Story mới',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'post-channel',
         name: 'Bài viết mới',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'call-channel',
         name: 'Cuộc gọi',
         importance: AndroidImportance.HIGH,
-        sound: 'ringtone', // Âm thanh riêng cho cuộc gọi
+        sound: 'ringtone',
       });
-
       await notifee.createChannel({
         id: 'livestream-channel',
         name: 'Livestream',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'game-invite-channel',
         name: 'Lời mời chơi game',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'post-share-channel',
         name: 'Chia sẻ bài viết',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'comment-channel',
         name: 'Bình luận',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'account-ban-channel',
         name: 'Thông báo khóa tài khoản',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'tagged-post-channel',
         name: 'Gắn thẻ trong bài viết',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'post-like-channel',
         name: 'Lượt thích bài viết',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'comment-like-channel',
         name: 'Lượt thích bình luận',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'mention-comment-channel',
         name: 'Nhắc đến trong bình luận',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'event-channel',
         name: 'Sự kiện mới',
         importance: AndroidImportance.HIGH,
       });
-
       await notifee.createChannel({
         id: 'reaction-channel',
         name: 'Đã thả biểu cảm vào story của bạn',
@@ -323,83 +295,73 @@ const AppNavigation = () => {
     }
   }
 
-
   const generateNotificationContent = (notification, user) => {
     if (!notification) {
-      console.error("❌ Lỗi: notification không hợp lệ.");
-      return "Bạn có một thông báo mới";
+      console.error('❌ Lỗi: notification không hợp lệ.');
+      return 'Bạn có một thông báo mới';
     }
-    // 1. Thông báo lời mời kết bạn
     if (
       notification?.type === 'Lời mời kết bạn' &&
       notification?.ID_relationship
     ) {
-      const { ID_userA, ID_userB } = notification.ID_relationship;
+      const {ID_userA, ID_userB} = notification.ID_relationship;
       if (user?._id?.toString() === ID_userA?._id?.toString()) {
-        return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''
-          } đã gửi lời mời kết bạn với bạn`;
+        return `${ID_userB?.first_name || ''} ${
+          ID_userB?.last_name || ''
+        } đã gửi lời mời kết bạn với bạn`;
       } else {
-        return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''
-          } đã gửi lời mời kết bạn với bạn`;
+        return `${ID_userA?.first_name || ''} ${
+          ID_userA?.last_name || ''
+        } đã gửi lời mời kết bạn với bạn`;
       }
     }
-
-    // 2. Thông báo đã thành bạn bè
     if (
       notification?.type === 'Đã thành bạn bè của bạn' &&
       notification?.ID_relationship
     ) {
-      const { ID_userA, ID_userB } = notification.ID_relationship;
+      const {ID_userA, ID_userB} = notification.ID_relationship;
       if (user?._id?.toString() === ID_userA?._id?.toString()) {
-        return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''
-          } với bạn đã thành bạn bè`;
+        return `${ID_userB?.first_name || ''} ${
+          ID_userB?.last_name || ''
+        } với bạn đã thành bạn bè`;
       } else {
-        return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''
-          } với bạn đã thành bạn bè`;
+        return `${ID_userA?.first_name || ''} ${
+          ID_userA?.last_name || ''
+        } với bạn đã thành bạn bè`;
       }
     }
-
-    // 3. Thông báo tin nhắn mới
-    if (
-      notification?.type === 'Tin nhắn mới' &&
-      notification?.ID_message
-    ) {
-      const { sender, content } = notification.ID_message;
+    if (notification?.type === 'Tin nhắn mới' && notification?.ID_message) {
+      const {sender, content} = notification.ID_message;
       if (notification.ID_message.type === 'text') {
-        return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã gửi một tin nhắn'
-          }`;
+        return `${sender.first_name || ''} ${sender.last_name || ''}: ${
+          content || 'Đã gửi một tin nhắn'
+        }`;
       } else {
-        return `${sender.first_name || ''} ${sender.last_name || ''
-          }: Đã gửi một ảnh mới`;
+        return `${sender.first_name || ''} ${
+          sender.last_name || ''
+        }: Đã gửi một ảnh mới`;
       }
     }
-
-    // 4. Thông báo được mời vào nhóm mới
     if (
       notification?.type === 'Bạn đã được mời vào nhóm mới' &&
       notification?.ID_group
     ) {
       return 'Bạn đã được mời vào nhóm mới';
     }
-
-    // 5. Thông báo có story mới
-    if (
-      notification?.type === 'Đã đăng story mới' &&
-      notification?.ID_post
-    ) {
-      const { ID_user: postOwner, caption } = notification.ID_post;
-      return `${postOwner?.first_name || ''} ${postOwner?.last_name || ''
-        } đã đăng story mới ${caption ? `: ${caption}` : ''}`;
+    if (notification?.type === 'Đã đăng story mới' && notification?.ID_post) {
+      const {ID_user: postOwner, caption} = notification.ID_post;
+      return `${postOwner?.first_name || ''} ${
+        postOwner?.last_name || ''
+      } đã đăng story mới ${caption ? `: ${caption}` : ''}`;
     }
-
-    // 6. Thông báo có bài đăng mới
     if (notification?.type === 'Đã đăng bài mới' && notification?.ID_post) {
-      const { ID_user, content } = notification.ID_post; // Lấy ID_user thay vì sender
+      const {ID_user, content} = notification.ID_post;
       return ID_user
-        ? `${ID_user.first_name || ''} ${ID_user.last_name || ''}: ${content || 'Đã đăng bài post mới'}`
+        ? `${ID_user.first_name || ''} ${ID_user.last_name || ''}: ${
+            content || 'Đã đăng bài post mới'
+          }`
         : 'Có một bài đăng mới';
     }
-    // 7. Thông báo cuộc gọi thoại đến
     if (
       notification?.type === 'Bạn có 1 cuộc gọi đến' &&
       notification?.ID_group
@@ -408,21 +370,20 @@ const AppNavigation = () => {
         group: notification.ID_group,
         type: false,
       });
-      const { members, isPrivate, name } = notification.ID_group;
+      const {members, isPrivate, name} = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
-        return `${sender.first_name || ''} ${sender.last_name || ''
-          } đang gọi cho bạn`;
+        return `${sender.first_name || ''} ${
+          sender.last_name || ''
+        } đang gọi cho bạn`;
       } else {
         return name
           ? `${name} đang gọi cho bạn`
           : `${members
-            .map(m => `${m.first_name} ${m.last_name}`)
-            .join(', ')} đang gọi cho bạn`;
+              .map(m => `${m.first_name} ${m.last_name}`)
+              .join(', ')} đang gọi cho bạn`;
       }
     }
-
-    // 8. Thông báo cuộc gọi video đến
     if (
       notification?.type === 'Bạn có 1 cuộc gọi video đến' &&
       notification?.ID_group
@@ -431,21 +392,20 @@ const AppNavigation = () => {
         group: notification.ID_group,
         type: true,
       });
-      const { members, isPrivate, name } = notification.ID_group;
+      const {members, isPrivate, name} = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
-        return `${sender.first_name || ''} ${sender.last_name || ''
-          } đang gọi video call cho bạn`;
+        return `${sender.first_name || ''} ${
+          sender.last_name || ''
+        } đang gọi video call cho bạn`;
       } else {
         return name
           ? `Tham gia cuộc gọi video call ${name}`
           : `Tham gia cuộc gọi video call với ${members
-            .map(m => `${m.first_name} ${m.last_name}`)
-            .join(', ')}`;
+              .map(m => `${m.first_name} ${m.last_name}`)
+              .join(', ')}`;
       }
     }
-
-    // 9. Thông báo livestream
     if (
       notification?.type === 'Đang livestream' &&
       notification?.ID_user &&
@@ -453,193 +413,176 @@ const AppNavigation = () => {
     ) {
       const sender = notification.ID_relationship;
       if (sender.ID_userA._id === user._id) {
-        return `${sender.ID_userB.first_name || ''} ${sender.ID_userB.last_name || ''} ${'đang phát trực tiếp'}`;
+        return `${sender.ID_userB.first_name || ''} ${
+          sender.ID_userB.last_name || ''
+        } đang phát trực tiếp`;
       } else {
-        return `${sender.ID_userA.first_name || ''} ${sender.ID_userA.last_name || ''} ${'đang phát trực tiếp'}`;
+        return `${sender.ID_userA.first_name || ''} ${
+          sender.ID_userA.last_name || ''
+        } đang phát trực tiếp`;
       }
     }
-
-    // 10. Thông báo mời chơi game 3 lá
-    if (
-      notification?.type === 'Mời chơi game 3 lá' &&
-      notification?.ID_group
-    ) {
-      const { members, isPrivate } = notification.ID_group;
+    if (notification?.type === 'Mời chơi game 3 lá' && notification?.ID_group) {
+      const {members, isPrivate} = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
-        return `${sender.first_name || ''} ${sender.last_name || ''
-          } đang mời bạn chơi game 3 lá`;
+        return `${sender.first_name || ''} ${
+          sender.last_name || ''
+        } đang mời bạn chơi game 3 lá`;
       }
     }
-
-    // 11. Thông báo bài viết của bạn đã được chia sẻ
     if (
       notification?.type === 'Bạn đã được chia sẻ bài viết của bạn' &&
       notification?.ID_post
     ) {
       return 'Bài viết của bạn đã được chia sẻ';
     }
-
-    // 12. Thông báo có bình luận mới
-    if (notification?.type === 'Đã bình luận vào bài viết của bạn' && notification?.ID_comment) {
-      const { ID_user, content } = notification.ID_comment || {};
-      return `${ID_user?.first_name || ''} ${ID_user?.last_name || ''
-        } đã bình luận: ${content || 'Bạn có bình luận mới'}`;
+    if (
+      notification?.type === 'Đã bình luận vào bài viết của bạn' &&
+      notification?.ID_comment
+    ) {
+      const {ID_user, content} = notification.ID_comment || {};
+      return `${ID_user?.first_name || ''} ${
+        ID_user?.last_name || ''
+      } đã bình luận: ${content || 'Bạn có bình luận mới'}`;
     }
-
-    // 13. Thông báo tài khoản bị khóa
     if (notification?.type === 'Tài khoản bị khóa') {
       return 'Tài khoản của bạn đã bị khóa';
     }
-
-    // 14. Thả biểu cảm
     if (notification?.type === 'Đã thả biểu cảm vào story của bạn') {
-      const { ID_user } = notification.ID_post || {};
-      return `${ID_user?.first_name || ''} ${ID_user?.last_name || ''
-        } đã thả biểu cảm vào story của bạn`;
+      const {ID_user} = notification.ID_post || {};
+      return `${ID_user?.first_name || ''} ${
+        ID_user?.last_name || ''
+      } đã thả biểu cảm vào story của bạn`;
     }
-
-    // 15. Thông báo mặc định nếu không khớp loại nào
     return 'Bạn có một thông báo mới';
   };
 
-
-  const getChannelId = (notificationType) => {
+  const getChannelId = notificationType => {
     switch (notificationType) {
       case 'Tin nhắn mới':
         return 'message-channel';
-
       case 'Lời mời kết bạn':
         return 'friend-request-channel';
-
       case 'Đã thành bạn bè của bạn':
         return 'friend-confirmation-channel';
-
       case 'Bạn đã được mời vào nhóm mới':
         return 'group-invite-channel';
-
       case 'Đã đăng story mới':
         return 'story-channel';
-
       case 'Đã đăng bài mới':
         return 'post-channel';
-
       case 'Bạn có 1 cuộc gọi đến':
       case 'Bạn có 1 cuộc gọi video đến':
         return 'call-channel';
-
       case 'Đang livestream':
         return 'livestream-channel';
-
       case 'Mời chơi game 3 lá':
         return 'game-invite-channel';
-
       case 'Bạn đã được chia sẻ bài viết của bạn':
         return 'post-share-channel';
-
       case 'Bình luận':
         return 'comment-channel';
-
       case 'Tài khoản bị khóa':
         return 'account-ban-channel';
-
       case 'Mời tham gia nhóm':
         return 'group-invite-channel';
-
       case 'Được tag vào bài viết':
         return 'tagged-post-channel';
-
       case 'Nhận được like trên bài viết':
         return 'post-like-channel';
-
       case 'Nhận được like trên bình luận':
         return 'comment-like-channel';
-
       case 'Có người chia sẻ bài viết':
         return 'post-share-channel';
-
       case 'Được nhắc đến trong bình luận':
         return 'mention-comment-channel';
-
       case 'Tham gia sự kiện mới':
         return 'event-channel';
-
       case 'Đã thả biểu cảm vào story của bạn':
         return 'reaction-channel';
-
       default:
         return 'default-channel';
     }
   };
-  //chuyển trang khi ấn vào thông báo
-  const navigateToScreen = (notification) => {
+
+  const navigateToScreen = notification => {
     if (!notification || !notification.type) {
-      console.warn("⚠ Không có thông tin điều hướng từ thông báo");
+      console.warn('⚠ Không có thông tin điều hướng từ thông báo');
       return;
     }
 
     switch (notification.type) {
       case 'Tin nhắn mới':
-        navigation.navigate('Chat', { ID_group: notification?.ID_message?.ID_group?._id });
+        navigation.navigate('Chat', {
+          ID_group: notification?.ID_message?.ID_group?._id,
+        });
         break;
-
       case 'Lời mời kết bạn':
         navigation.navigate('Friend');
         break;
-
       case 'Đã thành bạn bè của bạn':
         navigation.navigate('ListFriend');
         break;
-
       case 'Bạn đã được mời vào nhóm mới':
         navigation.navigate('HomeChat');
         break;
-
       case 'Mời chơi game 3 lá':
-        navigation.navigate('Chat', { ID_group: notification?.ID_group?._id });
+        navigation.navigate('Chat', {ID_group: notification?.ID_group?._id});
         break;
-
       case 'Đã thả biểu cảm vào story của bạn':
+      case 'Đã đăng story mới':
         console.log('Thông báo ID_post:', notification?.ID_post);
-        navigation.navigate('Profile', {
-          _id: user._id,
-          autoPlayStory: true, // Thêm tham số để kích hoạt tự động xem story
-        });
+        const userStories = stories.find(
+          story => story.user._id === notification?.ID_post?.ID_user?._id,
+        );
+        if (userStories) {
+          navigation.navigate('StoryViewer', {
+            StoryView: userStories,
+            currentUserId: user._id,
+          });
+        } else {
+          // Dự phòng: điều hướng đến Profile nếu không tìm thấy story
+          console.warn('⚠ Không tìm thấy userStories, chuyển đến Profile');
+          navigation.navigate('Profile', {
+            _id: notification?.ID_post?.ID_user?._id,
+          });
+        }
         break;
       case 'Đã đăng bài mới':
-        navigation.navigate('PostDetail', { ID_post: notification?.ID_post?._id });
+        navigation.navigate('PostDetail', {
+          ID_post: notification?.ID_post?._id,
+        });
         break;
-
-      // case 'Đang livestream':
-      //   navigation.navigate('LivestreamScreen', { livestreamId: notification?.ID_user?._id });
-      //   break;
-
       case 'Bình luận':
-        navigation.navigate('PostDetail', { ID_post: notification?.ID_comment?.postId });
+        navigation.navigate('PostDetail', {
+          ID_post: notification?.ID_comment?.postId,
+        });
         break;
-
       default:
-        console.warn("⚠ Không tìm thấy màn hình phù hợp với loại thông báo:", notification.type);
+        console.warn(
+          '⚠ Không tìm thấy màn hình phù hợp với loại thông báo:',
+          notification.type,
+        );
         break;
     }
   };
-  const showNotification = async (notification) => {
+
+  const showNotification = async notification => {
     try {
       const channelId = getChannelId(notification?.type);
       const isEnabled = await getNotificationPreference(channelId);
-
       if (!isEnabled) {
         console.log(`🔕 Thông báo bị tắt cho channel: ${channelId}`);
         return;
       }
-
       const formattedData = {};
       Object.keys(notification).forEach(key => {
-        formattedData[key] = typeof notification[key] === 'string'
-          ? notification[key]
-          : JSON.stringify(notification[key]);
+        formattedData[key] =
+          typeof notification[key] === 'string'
+            ? notification[key]
+            : JSON.stringify(notification[key]);
       });
-
       await notifee.displayNotification({
         title: notification?.title || 'Thông báo',
         body: generateNotificationContent(notification, user),
@@ -649,41 +592,34 @@ const AppNavigation = () => {
           smallIcon: 'ic_launcher',
         },
       });
-
     } catch (error) {
       console.error('❌ Lỗi khi hiển thị thông báo:', error);
     }
   };
 
-  // tạo token nè
   useEffect(() => {
     const getFCMToken = async () => {
       try {
         const token = await messaging().getToken();
         console.log('🔥 FCM Token:', token);
         if (token) {
-          dispatch(setFcmToken(token)); // Lưu vào Redux
-          //if(user )
+          dispatch(setFcmToken(token));
         }
       } catch (error) {
         console.log('❌ Lỗi khi lấy FCM Token:', error);
       }
     };
-
     getFCMToken();
   }, []);
 
   useEffect(() => {
-    // Khi app đang mở
     const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
       try {
         console.log('📩 Nhận thông báo khi app đang mở:', remoteMessage);
-
         if (!remoteMessage?.data?.notification) {
           console.warn('⚠ Không có dữ liệu notification');
           return;
         }
-
         let notification;
         try {
           notification = JSON.parse(remoteMessage.data.notification);
@@ -691,34 +627,37 @@ const AppNavigation = () => {
           console.error('❌ Lỗi khi parse JSON notification:', error);
           return;
         }
-
         console.log('✅ Đã parse notification:', notification);
-
-        // Nếu thông báo là "Tài khoản bị khóa"
         if (notification?.type === 'Tài khoản bị khóa') {
-          console.log('🔒 Tài khoản bị khóa - Đăng xuất và chuyển về trang login');
+          console.log(
+            '🔒 Tài khoản bị khóa - Đăng xuất và chuyển về trang login',
+          );
           onLogoutAndNavigate();
           return;
         }
-
-        // Hiển thị thông báo cho các loại khác
         await showNotification(notification);
-
       } catch (error) {
         console.error('❌ Lỗi khi xử lý thông báo:', error);
       }
     });
-    // Khi app chạy nền và người dùng nhấn vào thông báo
+
     const unsubscribeOpenedApp = messaging().onNotificationOpenedApp(
       remoteMessage => {
-        console.log('🔔 Người dùng nhấn vào thông báo khi app chạy nền:', remoteMessage);
+        console.log(
+          '🔔 Người dùng nhấn vào thông báo khi app chạy nền:',
+          remoteMessage,
+        );
         if (remoteMessage?.data?.notification) {
           let notification;
           try {
             notification = JSON.parse(remoteMessage.data.notification);
             if (notification?.type === 'Tài khoản bị khóa') {
-              console.log('🔒 Tài khoản bị khóa khi nhấn thông báo - Đăng xuất');
+              console.log(
+                '🔒 Tài khoản bị khóa khi nhấn thông báo - Đăng xuất',
+              );
               onLogoutAndNavigate();
+            } else {
+              navigateToScreen(notification);
             }
           } catch (error) {
             console.error('❌ Lỗi khi parse JSON notification:', error);
@@ -726,49 +665,54 @@ const AppNavigation = () => {
         }
       },
     );
-    // Khi app bị kill và mở từ thông báo
-    messaging().getInitialNotification().then(remoteMessage => {
-      if (remoteMessage?.data?.notification) {
-        let notification;
-        try {
-          notification = JSON.parse(remoteMessage.data.notification);
-          console.log('🔔 App được mở từ thông báo khi bị kill:', notification);
-          if (notification?.type === 'Tài khoản bị khóa') {
-            console.log('🔒 Tài khoản bị khóa khi mở app - Đăng xuất');
-            navigation.navigate('Login');
+
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage?.data?.notification) {
+          let notification;
+          try {
+            notification = JSON.parse(remoteMessage.data.notification);
+            console.log(
+              '🔔 App được mở từ thông báo khi bị kill:',
+              notification,
+            );
+            if (notification?.type === 'Tài khoản bị khóa') {
+              console.log('🔒 Tài khoản bị khóa khi mở app - Đăng xuất');
+              navigation.navigate('Login');
+            } else {
+              navigateToScreen(notification);
+            }
+          } catch (error) {
+            console.error('❌ Lỗi khi parse JSON notification:', error);
           }
-        } catch (error) {
-          console.error('❌ Lỗi khi parse JSON notification:', error);
         }
-      }
-    });
+      });
 
-    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
+    const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS) {
-        console.log('🔔 Người dùng đã nhấn vào thông báo:', detail.notification);
-
+        console.log(
+          '🔔 Người dùng đã nhấn vào thông báo:',
+          detail.notification,
+        );
         let notificationData = detail.notification?.data;
-
         Object.keys(notificationData).forEach(key => {
           try {
-            notificationData[key] = JSON.parse(notificationData[key]); // ✅ Chuyển về object
+            notificationData[key] = JSON.parse(notificationData[key]);
           } catch (e) {
-            // Nếu lỗi thì giữ nguyên, vì có thể nó đã là string
+            // Giữ nguyên nếu không parse được
           }
         });
-
         navigateToScreen(notificationData);
       }
     });
-
 
     return () => {
       unsubscribeOpenedApp();
       unsubscribeNotifee();
       unsubscribeForeground();
-      // initialNotification();
     };
-  }, [onLogoutAndNavigate]);
+  }, [onLogoutAndNavigate, stories]); // Thêm stories vào dependencies
 
   return isSplashVisible ? (
     <Welcome />
