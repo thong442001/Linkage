@@ -101,7 +101,7 @@ const IncomingCallScreen = ({ route, navigation }) => {
           <Text style={styles.callingText}>Đang gọi...</Text>
         </View>
         <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => handlCancelCall()} style={styles.declineButton}>
+          <TouchableOpacity onPress={() => handlCancelCall()} style={styles.declineButton}>
             <Ionicons name="call" size={40} color="#fff" style={{ transform: [{ rotate: '135deg' }] }} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleAcceptCall} style={styles.acceptButton}>
