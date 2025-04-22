@@ -59,9 +59,9 @@ const SharedPost = ({
   post,
   width,
   styleShared,
-  setShareVisible,
 }) => {
   const token = useSelector((state) => state.app.token);
+  const { closeBottomSheet } = useBottomSheet();
   const dispatch = useDispatch();
   const [captionShare, setCaptionShare] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -82,7 +82,7 @@ const SharedPost = ({
   ];
 
   const handleSelectOption = (option) => {
-    console.log('Selected option:', option);
+    //console.log('Selected option:', option);
     setSelectedOption(option);
     setModalVisible(false);
   };
@@ -93,21 +93,20 @@ const SharedPost = ({
 
   const callGetAllGroupOfUser = async (ID_user) => {
     try {
-      setIsLoadingGroups(true); 
-  
+      setIsLoadingGroups(true);
+
       const response = await dispatch(getAllGroupOfUser({ ID_user, token })).unwrap();
       setGroups(response.groups);
-  
-      
+
       setTimeout(() => {
-        setIsLoadingGroups(false); 
-      }, 2000);
+        setIsLoadingGroups(false);
+      }, 500);
     } catch (error) {
       console.log('Error:', error);
       setIsLoadingGroups(false);
     }
   };
-  
+
 
   const sendMessage = async (ID_group) => {
     await socket.emit('joinGroup', ID_group);
@@ -127,9 +126,14 @@ const SharedPost = ({
 
   const renderContact = ({ item }) => {
     // Giới hạn tên nhóm tối đa 10 ký tự
-
     return (
-      <TouchableOpacity onPress={() => sendMessage(item._id)} key={item._id}>
+      <TouchableOpacity
+        onPress={() => {
+          sendMessage(item._id)
+          closeBottomSheet();
+        }}
+        key={item._id}
+      >
         <GroupcomponentShare item={item}
         />
       </TouchableOpacity>
@@ -204,16 +208,16 @@ const SharedPost = ({
                 ]}
                 disabled={isButtonLoading}
               >
-              
-                  <Text
-                    style={[
-                      styleShared.shareButtonText,
-                      { fontSize: 14, color: 'white' },
-                    ]}
-                  >
-                    Chia sẻ ngay
-                  </Text>
-              
+
+                <Text
+                  style={[
+                    styleShared.shareButtonText,
+                    { fontSize: 14, color: 'white' },
+                  ]}
+                >
+                  Chia sẻ ngay
+                </Text>
+
               </TouchableOpacity>
             </View>
           </View>
@@ -249,19 +253,19 @@ const SharedPost = ({
         <View style={styleShared.sectionContainer}>
           <Text style={styleShared.sectionTitle}>Gửi bằng Chat</Text>
           {isLoadingGroups ? (
-              <LoadingChatList />
-                      ) : (
-                        <FlatList
-                          data={groups}
-                          pointerEvents="auto"
-                          renderItem={renderContact}
-                          keyExtractor={(item) => item._id.toString()}
-                          horizontal
-                          showsHorizontalScrollIndicator={false}
-                          nestedScrollEnabled={true}
-                          style={styleShared.contactList}
-                        />
-                      )}
+            <LoadingChatList />
+          ) : (
+            <FlatList
+              data={groups}
+              pointerEvents="auto"
+              renderItem={renderContact}
+              keyExtractor={(item) => item._id.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              nestedScrollEnabled={true}
+              style={styleShared.contactList}
+            />
+          )}
         </View>
 
         <View style={styleShared.sectionContainer}>
@@ -347,7 +351,7 @@ const PostDetail = (props) => {
 
   // trang thai
   const [modalVisible, setModalVisible] = useState(false);
- 
+
   const [menuPosition, setMenuPosition] = useState({ top: 0, bottom: 0, left: 0, right: 0 }); // Vị trí của menu
   const reactionRef = useRef(null); // ref để tham chiếu tới tin nhắn
 
@@ -364,20 +368,20 @@ const PostDetail = (props) => {
 
   //loading
   const [isSending, setIsSending] = useState(false);
-    const [failedModalVisible, setFailedModalVisible] = useState(false);
+  const [failedModalVisible, setFailedModalVisible] = useState(false);
 
   //có quyền xem bài post hay ko
   const [isPermission, setIsPermission] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-    const [dialogCopyVisible, setDialogCopyVisible] = useState(false);
+  const [dialogCopyVisible, setDialogCopyVisible] = useState(false);
 
 
-// Hàm sao chép liên kết
-const copyToClipboard = text => {
-  Clipboard.setString(text);
-  setDialogCopyVisible(true);
-};
+  // Hàm sao chép liên kết
+  const copyToClipboard = text => {
+    Clipboard.setString(text);
+    setDialogCopyVisible(true);
+  };
 
 
   //call api chi tiet bai post
@@ -694,7 +698,7 @@ const copyToClipboard = text => {
     }
   };
 
-  
+
 
 
   useEffect(() => {
@@ -1053,23 +1057,23 @@ const copyToClipboard = text => {
       );
     }
     if (!isPermission) {
-      return  <View style={{flex: 1, flexDirection: 'column', gap: 10, justifyContent: 'flex-end', alignItems: 'center', top: height * 0.5}}><Text style={{fontWeight: '500', color: 'black'}}>Bạn không có quyền truy cập vào bài viết!</Text></View>
-      
+      return <View style={{ flex: 1, flexDirection: 'column', gap: 10, justifyContent: 'flex-end', alignItems: 'center', top: height * 0.5 }}><Text style={{ fontWeight: '500', color: 'black' }}>Bạn không có quyền truy cập vào bài viết!</Text></View>
+
     }
     if (!post) {
       return null;
     }
 
     // Kiểm tra nếu bài viết bị xóa và không thuộc về người dùng hiện tại
-  if (post._destroy && me._id !== post.ID_user._id) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', top: height * 0.5 }}>
-        <Text style={{ fontWeight: '500', color: 'black' }}>
-          Bài viết đã bị xóa.
-        </Text>
-      </View>
-    );
-  }
+    if (post._destroy && me._id !== post.ID_user._id) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', top: height * 0.5 }}>
+          <Text style={{ fontWeight: '500', color: 'black' }}>
+            Bài viết đã bị xóa.
+          </Text>
+        </View>
+      );
+    }
     return (
       <View style={styles.postContainer}>
         <View>
@@ -1082,7 +1086,7 @@ const copyToClipboard = text => {
                   <View style={{ marginRight: width * 0.04 }}>
                     <TouchableOpacity
                       onPress={() => {
-                        navigation.navigate(oStackHome.TabHome);// back về
+                        navigation.navigate(oStackHome.TabHome);
                       }}
                     >
                       <Icon name="arrow-back" size={25} color="black" />
@@ -1454,23 +1458,27 @@ const copyToClipboard = text => {
                 {userReaction ? userReaction.ID_reaction.name : reactions[0].name} {/* Nếu đã react, hiển thị icon đó */}
               </Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.action}
+              onPress={() => { setTypeClick("comment") }}
+            >
+              <Icon3 name="comment" size={20} color="black" />
+              <Text style={styles.actionText}>Bình luận</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.action}
-               onPress={() => {
+              onPress={() => {
                 openBottomSheet(55, (
-                    <SharedPost
-                        me={me}
-                        callAddPostShare={callAddPostShare}
-                        copyToClipboard={copyToClipboard}
-                        post={post}
-                        width={width}
-                        styleShared={styleShared}
-                        setShareVisible={setShareVisible}
-                    />
+                  <SharedPost
+                    me={me}
+                    callAddPostShare={callAddPostShare}
+                    copyToClipboard={copyToClipboard}
+                    post={post}
+                    width={width}
+                    styleShared={styleShared}
+                    setShareVisible={setShareVisible}
+                  />
                 ));
-            }}
-             
-             
-             >
+              }}>
               <Icon4 name="share-alt" size={20} color="black" />
               <Text style={styles.actionText}>Chia sẻ</Text>
             </TouchableOpacity>

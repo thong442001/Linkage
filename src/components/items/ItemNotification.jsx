@@ -304,7 +304,7 @@ const ItemNotification = ({data}) => {
       navigation.navigate("Chat", { ID_group: data.ID_group._id })
     }
     else if (data.type === 'Đã thả biểu cảm vào story của bạn') {
-      navigation.navigate("Chat", { ID_group: data.ID_group._id })
+      // navigation.navigate("Chat", { ID_group: data.ID_group._id })
     }
   };
 
