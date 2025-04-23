@@ -51,6 +51,8 @@ import CancelFriendRequestModal from '../../utils/animation/failed/FailedModal';
 
 import { set } from '@react-native-firebase/database';
 import { oStackHome } from '../../navigations/HomeNavigation';
+import NothingFriend from '../../utils/animation/friendAni/NothingFriend';
+import NothingHome from '../../utils/animation/homeanimation/NothingHome';
 const Profile = props => {
     const { route, navigation } = props;
     const { params } = route;
@@ -1146,6 +1148,10 @@ const Profile = props => {
                                     </Text>
                                 </View>
                             </TouchableOpacity>
+                           
+                            
+                       
+                         
                         </View>
                     )
                 }
@@ -1162,7 +1168,7 @@ const Profile = props => {
 
 
     return (
-        <View style={ProfileS.container}>
+        <View style={posts.length === 0 ? ProfileS.container1 : ProfileS.container}>
             <LoadingModal visible={isLoading} />
             <View>
                 <View>
@@ -1195,6 +1201,7 @@ const Profile = props => {
                                     >
                                     </RefreshControl>
                                 }
+                                ListEmptyComponent={<NothingHome/>}
                             />
                         )}
                     </View>

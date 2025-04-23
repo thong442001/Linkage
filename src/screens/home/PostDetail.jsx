@@ -1101,14 +1101,12 @@ const SharedPost = ({
             comment._id === ID_comment ? { ...comment, isPending: false } : comment
           )
         );
-        setSuccessModalVisible(true);
         setTimeout(() => setSuccessModalVisible(false), 1500);
       } else {
         throw new Error('Chỉnh sửa bình luận thất bại');
       }
     } catch (error) {
       console.log('Lỗi khi chỉnh sửa bình luận:', error);
-      setFailedModalVisible(true);
       setTimeout(() => setFailedModalVisible(false), 1500);
       // Refresh post details to revert changes
       callGetChiTietPost(post._id);
@@ -1145,7 +1143,6 @@ const SharedPost = ({
       const response = await dispatch(deleteComment({ ID_comment })).unwrap();
 
       if (response.status) {
-        setSuccessModalVisible(true);
         setTimeout(() => setSuccessModalVisible(false), 1500);
       } else {
         // Revert changes if API fails
@@ -1155,7 +1152,6 @@ const SharedPost = ({
       }
     } catch (error) {
       console.log('Lỗi khi xóa bình luận:', error);
-      setFailedModalVisible(true);
       setTimeout(() => setFailedModalVisible(false), 1500);
       // Refresh post details to revert changes
       callGetChiTietPost(post._id);
@@ -1228,7 +1224,7 @@ const SharedPost = ({
           <Icon name="arrow-back" size={25} color="black" />
         </TouchableOpacity>
         <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-          Bạn không thể truy cập vào bài viết.
+          Không thể truy cập vào bài viết.
         </Text>
       </View>
     );
@@ -1257,7 +1253,7 @@ const SharedPost = ({
           <Icon name="arrow-back" size={25} color="black" />
         </TouchableOpacity>
         <Text style={{ fontWeight: '500', fontSize: 16, color: 'black' }}>
-          Bài viết đã bị xóa.
+         Không thể truy cập vào bài viết.
         </Text>
       </View>
     );

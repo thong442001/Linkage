@@ -48,6 +48,10 @@ const ProfileS = StyleSheet.create({
         flex: 1,
         backgroundColor: "#A1A6AD"
     },
+    container1: {
+        flex: 1,
+        backgroundColor: "white"
+    },
     header: {
         position: 'absolute',
         top: 15,

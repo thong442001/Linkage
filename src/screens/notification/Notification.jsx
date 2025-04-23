@@ -15,6 +15,7 @@ import ItemNotification from '../../components/items/ItemNotification';
 import { getAllNotificationOfUser, getAllPostsInHome } from '../../rtk/API';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { oStackHome } from '../../navigations/HomeNavigation';
+import NothingFriend from '../../utils/animation/friendAni/NothingFriend';
 
 const { width, height } = Dimensions.get('window');
 
@@ -120,6 +121,7 @@ const Notification = (props) => {
           renderItem={({ item }) => <ItemNotification data={item} stories={stories} />}
           keyExtractor={(item, index) => index.toString()}
           scrollEnabled={false}
+          ListEmptyComponent={<NothingFriend message={"Không có thông báo nào"}/>}
         />
         {notifications.length > 7 && (
           <TouchableOpacity style={styles.button} onPress={toggleExpand}>
