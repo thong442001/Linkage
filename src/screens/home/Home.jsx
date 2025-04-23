@@ -27,7 +27,7 @@ const Home = props => {
   const token = useSelector(state => state.app.token);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
-  console.log("canh",posts.length)
+  console.log("canh", posts.length)
   const [stories, setStories] = useState([]);
   const [liveSessions, setLiveSessions] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
