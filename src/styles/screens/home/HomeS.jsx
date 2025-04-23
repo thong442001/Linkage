@@ -23,6 +23,10 @@ const HomeS = StyleSheet.create({
     container: {
         backgroundColor: "#A1A6AD"
     },
+    container1: {
+        backgroundColor: "white",
+        flex: 1
+    },
     header: {
         height: 42,
         flexDirection: 'row',

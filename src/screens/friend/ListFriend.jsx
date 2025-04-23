@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getAllFriendOfID_user,
 } from '../../rtk/API';
+import NothingFriend from '../../utils/animation/friendAni/NothingFriend';
 const { width, height } = Dimensions.get('window');
 const ListFriend = (props) => {
   const { navigation, route } = props;
@@ -110,6 +111,7 @@ const ListFriend = (props) => {
               </TouchableOpacity>
             }
             keyExtractor={(item) => item._id}
+            ListEmptyComponent={<NothingFriend message={"Bạn không có bạn bè nào"}/>}
           />
         </View>
       </View>

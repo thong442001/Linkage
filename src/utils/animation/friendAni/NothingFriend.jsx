@@ -1,23 +1,24 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import LottieView from 'lottie-react-native';
+import { Modal } from 'react-native-paper';
 
-const NothingHome = () => {
+const NothingFriend = ({message}) => {
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                 <LottieView
-                    source={require('./NoData.json')} 
+                    source={require('./NoFriend.json')} 
                     autoPlay
                     loop
                     style={styles.animation} />
-                <Text style={styles.successMessage}>Không có bài viết</Text>
             </View>
+            <Text style={styles.successMessage}>{message}</Text>
         </View>
     );
 };
 
-export default NothingHome;
+export default NothingFriend;
 
 const styles = StyleSheet.create({
     successMessage: {

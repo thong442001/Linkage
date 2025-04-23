@@ -357,6 +357,7 @@ const CommentS = StyleSheet.create({
         alignItems: 'center',
     },
     textInput: {
+        color: 'black',
         backgroundColor: "#d9d9d9",
         borderRadius: width * 0.05,
         marginHorizontal: width * 0.05,
@@ -375,9 +376,6 @@ const CommentS = StyleSheet.create({
         bottom: 0,
         width: '100%',
         backgroundColor: '#fff',
-        padding: 10,
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
       },
     // 🌟 Media (Hình ảnh & Video)
     mediaContainer: {
@@ -490,13 +488,9 @@ const CommentS = StyleSheet.create({
         paddingVertical: 5,
       },
     boxCommentAll: {
-        backgroundColor: 'white', // Đảm bảo có màu nền để bóng hiển thị rõ
-        borderRadius: 6, // Nếu muốn bo góc
+        marginHorizontal: width * 0.01,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
         shadowRadius: 3.84,
-        elevation: 20, // Dành cho Android
     },
     //anh
     modalOverlay: {

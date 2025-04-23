@@ -7,7 +7,7 @@ import { getGoiYBanBe, getRelationshipAvsB, guiLoiMoiKetBan } from '../../rtk/AP
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 import ItemListGoiY from '../../components/items/ItemListGoiY';
-
+import NothingFriend from '../../utils/animation/friendAni/NothingFriend';
 const { width, height } = Dimensions.get('window');
 
 const ListGoiY = ({ navigation, route }) => {
@@ -98,6 +98,7 @@ const ListGoiY = ({ navigation, route }) => {
               </TouchableOpacity>
             )}
             keyExtractor={item => item.user._id}
+            ListEmptyComponent={<NothingFriend message={"Không có gợi ý"}/>}
           />
         </View>
       )}

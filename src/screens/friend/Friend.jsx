@@ -21,6 +21,7 @@ import { Snackbar } from 'react-native-paper';
 import SuccessModal from '../../utils/animation/success/SuccessModal';
 import FailedModal from '../../utils/animation/failed/FailedModal';
 import { useFocusEffect } from '@react-navigation/native'; // Thêm import này
+import NothingFriend from '../../utils/animation/friendAni/NothingFriend';
 
 const Friend = ({ route, navigation }) => {
   const { params } = route;
@@ -36,7 +37,7 @@ const Friend = ({ route, navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   //time now
   const [currentTime, setCurrentTime] = useState(Date.now());
-
+  const [nothingFriend, setNothingFriend] = useState(false)
   const callGetAllLoiMoiKetBan = async () => {
     try {
       setRefreshing(true);
@@ -187,6 +188,7 @@ const Friend = ({ route, navigation }) => {
         showsVerticalScrollIndicator={false}
         refreshing={refreshing}
         onRefresh={onRefresh}
+        ListEmptyComponent={<NothingFriend message={"Không có lời mời nào"}/>}
       />
 
       <SuccessModal visible={successModalVisible} message={modalMessage} />

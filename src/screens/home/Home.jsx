@@ -26,7 +26,8 @@ const Home = props => {
   const me = useSelector(state => state.app.user);
   const token = useSelector(state => state.app.token);
   const [loading, setLoading] = useState(true);
-  const [posts, setPosts] = useState(null);
+  const [posts, setPosts] = useState([]);
+  console.log("canh",posts.length)
   const [stories, setStories] = useState([]);
   const [liveSessions, setLiveSessions] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -203,7 +204,7 @@ const Home = props => {
       {loading && !refreshing ? (
         <HomeLoading />
       ) : (
-        <View style={HomeS.container}>
+        <View style={posts.length === 0 ? HomeS.container1 : HomeS.container}>
           <HomeHeader navigation={navigation} headerTranslate={headerTranslate} />
           <Animated.FlatList
             data={posts}
