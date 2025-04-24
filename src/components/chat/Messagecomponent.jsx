@@ -31,9 +31,8 @@ export default function MessageComponent({
   onHuyGame3la,
 }) {
   const isCurrentUser = message.sender._id === currentUserID; // Kiểm tra tin nhắn có phải của user hiện tại không
-// console.log('message', message.sender.avatar);
   const reactions = useSelector(state => state.app.reactions);
-
+console.log('message', message);
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({
     top: 0,
@@ -50,6 +49,15 @@ export default function MessageComponent({
   const [isPaused, setIsPaused] = useState(true);
 
   const navigation = useNavigation();
+  //hàm kiểm tra đuôi file
+  const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov'];
+  const getFileExtension = (url) => {
+    if (!url) return null;
+    const parts = url.split('.'); // Tách bằng dấu chấm
+    const lastPart = parts[parts.length - 1].split(/[?#]/)[0].toLowerCase(); // Lấy phần cuối trước dấu ? hoặc #
+    return validExtensions.includes(lastPart) ? lastPart : null;
+  };
+   //console.log('đuôi', getFileExtension('https://res.cloudinary.com/ddasyg5z3/video/upload/v1745498035/20250413_142825_q1enma.mp4'));
 
   // gọi lại buttonsheet khi tab thay đổi
   useEffect(() => {
@@ -306,10 +314,70 @@ export default function MessageComponent({
                 {message.ID_message_reply && message._destroy == false && (
                   <View>
                     <View style={styles.replyContainer}>
-                      <Text style={styles.replyText} numberOfLines={2}>
-                        {message.ID_message_reply.content ||
+                    {getFileExtension(message.ID_message_reply?.content)  === 'jpg' ? (
+                      <Image
+                        style={[
+                          styles.messageImage,
+                          isCurrentUser && styles.currentUserText,
+                        ]}
+                        source={{ uri: message.ID_message_reply.content}}
+                      />
+                      ) : getFileExtension(message.ID_message_reply?.content)  === 'mp4' ? (
+                      <Video
+                        source={{ uri: message.ID_message_reply.content }}
+                        style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
+                        controls={true}
+                        resizeMode="contain"
+                        paused={isPaused}
+                        onLoad={() => setIsPaused(true)} // Đảm bảo tạm dừng khi tải
+                      />
+                      ) : isGoogleMapsLink(message.ID_message_reply?.content) ? (
+                      <View style={{ alignItems: 'center' }}>
+                        <MapView
+                          style={{ width: 200, height: 120, borderRadius: 10 }}
+                          initialRegion={{
+                            latitude: parseFloat(
+                              message.ID_message_reply.content.split('q=')[1].split(',')[0],
+                            ),
+                            longitude: parseFloat(
+                              message.ID_message_reply.content.split('q=')[1].split(',')[1],
+                            ),
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                          }}
+                          pointerEvents="none">
+                          <Marker
+                              coordinate={{
+                                latitude: parseFloat(
+                                  message.ID_message_reply.content.split('q=')[1].split(',')[0],
+                                ),
+                                longitude: parseFloat(
+                                  message.ID_message_reply.content.split('q=')[1].split(',')[1],
+                                ),
+                              }}
+                          >
+                            <Image source={{ uri: message.sender.avatar }} style = {styles.avatar}/>
+                          </Marker>
+                        </MapView>
+                        <TouchableOpacity
+                          style={{
+                            marginTop: 5,
+                            backgroundColor: '#2196F3',
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            borderRadius: 8,
+                          }}
+                          onPress={() => handlePressLocation(message.ID_message_reply.content)}>
+                          <Text style={{ color: '#fff' }}>Xem chi tiết</Text>
+                        </TouchableOpacity>
+                      </View>
+                        ) :(
+                          <Text style={styles.replyText} numberOfLines={2}>
+                          {message.ID_message_reply.content ||
                           'Tin nhắn không tồn tại'}
                       </Text>
+                        )
+                      }
                     </View>
                   </View>
                 )}
@@ -491,12 +559,75 @@ export default function MessageComponent({
                     )}
                     {/* Hiển thị tin nhắn trả lời nếu có */}
                     {message.ID_message_reply && message._destroy == false && (
-                      <View style={styles.replyContainer}>
-                        <Text style={styles.replyText} numberOfLines={2}>
-                          {message.ID_message_reply.content}
-                        </Text>
+                  <View>
+                    <View style={styles.replyContainer}>
+                    {getFileExtension(message.ID_message_reply?.content)  === 'jpg' ? (
+                      <Image
+                        style={[
+                          styles.messageImage,
+                          isCurrentUser && styles.currentUserText,
+                        ]}
+                        source={{ uri: message.ID_message_reply.content}}
+                      />
+                      ) : getFileExtension(message.ID_message_reply?.content)  === 'mp4' ? (
+                      <Video
+                        source={{ uri: message.ID_message_reply.content }}
+                        style={[styles.messageVideo, isCurrentUser && styles.currentUserText]}
+                        controls={true}
+                        resizeMode="contain"
+                        paused={isPaused}
+                        onLoad={() => setIsPaused(true)} // Đảm bảo tạm dừng khi tải
+                      />
+                      ) : isGoogleMapsLink(message.ID_message_reply?.content) ? (
+                      <View style={{ alignItems: 'center' }}>
+                        <MapView
+                          style={{ width: 200, height: 120, borderRadius: 10 }}
+                          initialRegion={{
+                            latitude: parseFloat(
+                              message.ID_message_reply.content.split('q=')[1].split(',')[0],
+                            ),
+                            longitude: parseFloat(
+                              message.ID_message_reply.content.split('q=')[1].split(',')[1],
+                            ),
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                          }}
+                          pointerEvents="none">
+                          <Marker
+                              coordinate={{
+                                latitude: parseFloat(
+                                  message.ID_message_reply.content.split('q=')[1].split(',')[0],
+                                ),
+                                longitude: parseFloat(
+                                  message.ID_message_reply.content.split('q=')[1].split(',')[1],
+                                ),
+                              }}
+                          >
+                            <Image source={{ uri: message.sender.avatar }} style = {styles.avatar}/>
+                          </Marker>
+                        </MapView>
+                        <TouchableOpacity
+                          style={{
+                            marginTop: 5,
+                            backgroundColor: '#2196F3',
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            borderRadius: 8,
+                          }}
+                          onPress={() => handlePressLocation(message.ID_message_reply.content)}>
+                          <Text style={{ color: '#fff' }}>Xem chi tiết</Text>
+                        </TouchableOpacity>
                       </View>
-                    )}
+                        ) :(
+                          <Text style={styles.replyText} numberOfLines={2}>
+                          {message.ID_message_reply.content ||
+                          'Tin nhắn không tồn tại'}
+                      </Text>
+                        )
+                      }
+                    </View>
+                  </View>
+                )}
                     {/* Nội dung tin nhắn chính */}
                     {
                       // tin nhắn bị thu hồi
@@ -756,6 +887,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#3A6DF0',
     marginBottom: 5,
     borderRadius: 10,
+    marginTop: -8,
   },
   replyText: {
     fontSize: 14,

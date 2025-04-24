@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -13,18 +13,21 @@ import {
   useCodeScanner,
 } from 'react-native-vision-camera';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useSocket } from '../../context/socketContext';
-import { useSelector } from 'react-redux';
+import {useSocket} from '../../context/socketContext';
+import {useSelector, useDispatch} from 'react-redux';
+import {addMembers} from '../../rtk/API';
 
 const QRScannerScreen = props => {
   const [hasPermission, setHasPermission] = useState(null);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false); // ✅ Cờ tránh quét trùng
   const devices = useCameraDevices();
-  const { navigation } = props;
+  const {navigation} = props;
+  const dispatch = useDispatch();
+
   // const auth = getAuth();
   const [barcodeReady, setBarcodeReady] = useState(false);
-  const { socket } = useSocket();
+  const {socket} = useSocket();
   const me = useSelector(state => state.app.user);
 
   // Barcode scanner ready check
@@ -64,24 +67,46 @@ const QRScannerScreen = props => {
         Alert.alert(
           'Quyền bị từ chối',
           'Bạn cần cấp quyền camera để quét QR.',
-          [{ text: 'OK', onPress: () => navigation.goBack() }],
+          [{text: 'OK', onPress: () => navigation.goBack()}],
         );
       }
     };
 
     checkCameraPermission();
   }, []);
-
+  //call api addtMember
+  const callAddtMembers = async (ID_group, new_members) => {
+    try {
+      const paramsAPI = {
+        ID_group: ID_group,
+        new_members: new_members,
+      };
+      await dispatch(addMembers(paramsAPI))
+        .unwrap()
+        .then(response => {
+          console.log(response.message);
+          navigation.navigate('Chat', {ID_group: ID_group});
+        })
+        .catch(error => {
+          Alert.alert('Thành viên đã có trong nhóm!');
+          console.log('Error1 addtMembers:', error);
+          return;
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleUserPress = _id => {
     navigation.navigate('TabHome', {
       screen: 'Profile',
-      params: { _id: _id },
+      params: {_id: _id},
     });
   };
 
   const handleLoginPress = token => {
     console.log('QR Token:', token);
-    const payload = {//qrToken, ID_user
+    const payload = {
+      //qrToken, ID_user
       qrToken: token,
       ID_user: me._id,
     };
@@ -127,9 +152,29 @@ const QRScannerScreen = props => {
             }
             const qrToken = parts[1].split('?')[0]; // Chỉ lấy `userId`, bỏ qua query params
 
-
             // ✅ Gọi hàm xử lý với chỉ userId
             handleLoginPress(qrToken);
+
+            // ✅ Đợi 2 giây trước khi quét tiếp
+            setTimeout(() => setIsProcessing(false), 2000);
+          } catch (error) {
+            console.error('Lỗi khi xử lý mã QR:', error);
+            Alert.alert('Lỗi', 'Mã QR không hợp lệ!');
+            setIsProcessing(false);
+          }
+        } else if (scannedData.startsWith('linkage://addgroup/')) {
+          try {
+            // Tách `userId` từ URL
+            const parts = scannedData.split('/addgroup/');
+            if (parts.length < 2) {
+              throw new Error('URL không hợp lệ!');
+            }
+            const ID_group = parts[1].split('?')[0]; // Chỉ lấy `userId`, bỏ qua query params
+
+            console.log('ID_group:', ID_group, 'me._id:', me._id);
+
+            // ✅ Gọi hàm xử lý với chỉ userId
+            callAddtMembers(ID_group, [me._id]);
 
             // ✅ Đợi 2 giây trước khi quét tiếp
             setTimeout(() => setIsProcessing(false), 2000);
@@ -152,14 +197,14 @@ const QRScannerScreen = props => {
 
   if (!hasPermission) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 16, color: 'red', textAlign: 'center' }}>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text style={{fontSize: 16, color: 'red', textAlign: 'center'}}>
           Không có quyền truy cập camera
         </Text>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={{ marginTop: 10 }}>
-          <Text style={{ color: 'blue' }}>Quay lại</Text>
+          style={{marginTop: 10}}>
+          <Text style={{color: 'blue'}}>Quay lại</Text>
         </TouchableOpacity>
       </View>
     );
@@ -170,7 +215,7 @@ const QRScannerScreen = props => {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       {/* Nút quay lại đặt trên cùng */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
@@ -193,7 +238,7 @@ const QRScannerScreen = props => {
           aspectRatio: 1,
           alignSelf: 'center',
           top: '40%',
-          transform: [{ translateY: -50 }], // 🔹 Dịch lên để căn giữa
+          transform: [{translateY: -50}], // 🔹 Dịch lên để căn giữa
           borderRadius: 20,
           borderWidth: 5,
           borderColor: 'rgba(255, 255, 255, 0.3)', // 🔹 Viền đỏ để dễ thấy
@@ -204,7 +249,7 @@ const QRScannerScreen = props => {
       {/* Camera */}
       {barcodeReady && selectedDevice && (
         <Camera
-          style={{ flex: 1 }}
+          style={{flex: 1}}
           device={selectedDevice}
           isActive={true}
           codeScanner={codeScanner}
