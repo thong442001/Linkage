@@ -5,7 +5,7 @@ import {
   changeDestroyPost,
   deletePost,
 } from '../../rtk/API';
-import ProfilePage from '../../components/items/ProfilePage';
+import PostItemBin from '../../components/items/ProfilePageBin';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
@@ -97,7 +97,7 @@ const Trash = props => {
           <FlatList
             data={posts}
             renderItem={({ item }) => (
-              <ProfilePage
+              <PostItemBin
                 post={item}
                 ID_user={me._id}
                 onDelete={() => callChangeDestroyPost(item._id)}
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: width * 0.05, // 5% chiều rộng màn hình
-    bottom: height * 0.05, 
+    bottom: height * 0.05,
   },
   lottieAnimation: {
     width: width * 0.5, // 50% chiều rộng màn hình
