@@ -160,15 +160,32 @@ const Profile = props => {
     };
 
     const openBottomSheetAvatar = () => {
-        if (stories?.stories.length > 0) {
+        if (stories?.stories.length > 0 && user?._id == me._id ) {
             openBottomSheet(35, detail_selection_image());
-        } else {
-            openBottomSheet(25, detail_selection_image());
+        } else if(user?._id !== me._id && stories?.stories.length > 0){
+            openBottomSheet(27, detail_selection_image());
+        }
+        else if(user?._id !== me._id) {
+            openBottomSheet(20, detail_selection_image());
+        }  else {
+            openBottomSheet(27, detail_selection_image());
         }
     };
 
+   const openBottomSheetBackground = () => {
+        if (user?._id == me._id) {
+            openBottomSheet(27, detail_selection_background());
+        } else {
+            openBottomSheet(20, detail_selection_background());
+        }
+    };
     const openBottomSheetReportUser = () => {
-        openBottomSheet(25, detail_selection_report_user());
+        if (me._id == user?._id) {
+           openBottomSheet(20, detail_selection_report_user());
+        }
+        else{
+            openBottomSheet(27, detail_selection_report_user());
+        }
     };
 
     const openBottomSheetHuyBanBe = () => {
@@ -354,59 +371,45 @@ const Profile = props => {
     );
 
     const detail_selection_image = () => {
+        if (!user || !stories) return null; // Kiểm tra an toàn
+      
         return (
-            <View>
-                <View style={ProfileS.rectangle}>
-                    <View style={ProfileS.lineBottomSheet}></View>
-                </View>
-                <View style={ProfileS.containerBottomSheet}>
-                    {user?._id === me?._id ? (
-                        <>
-                            <TouchableOpacity
-                                style={ProfileS.option}
-                                onPress={onOpenGalleryChangeAvatar}>
-                                <View style={ProfileS.anhBia}>
-                                    <Icon name="image" size={25} color="black" />
-                                </View>
-                                <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={ProfileS.option}
-                                onPress={() => openImageModal(user?.avatar)}>
-                                <View style={ProfileS.anhBia}>
-                                    <Icon name="person-circle-outline" size={25} color="black" />
-                                </View>
-                                <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
-                            </TouchableOpacity>
-                        </>
-                    ) : (
-                        <TouchableOpacity
-                            style={ProfileS.option}
-                            onPress={() => openImageModal(user?.avatar)}>
-                            <View style={ProfileS.anhBia}>
-                                <Icon name="person-circle-outline" size={25} color="black" />
-                            </View>
-                            <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
-                        </TouchableOpacity>
-                    )}
-                    {stories?.stories.length > 0 && (
-                        <TouchableOpacity
-                            style={ProfileS.option}
-                            onPress={() => {
-                                closeBottomSheet();
-                                navigation.navigate(oStackHome.StoryViewer.name, { StoryView: stories, currentUserId: me?._id, });
-                            }}>
-                            <View style={ProfileS.anhBia}>
-                                <Icon name="radio-button-on" size={25} color="black" />
-                            </View>
-                            <Text style={ProfileS.optionText}>Xem story</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
+          <View>
+            <View style={ProfileS.rectangle}>
+              <View style={ProfileS.lineBottomSheet}></View>
             </View>
+            <View style={ProfileS.containerBottomSheet}>
+              {user._id === me._id && (
+                <TouchableOpacity style={ProfileS.option} onPress={onOpenGalleryChangeAvatar}>
+                  <View style={ProfileS.anhBia}>
+                    <Icon name="image" size={25} color="black" />
+                  </View>
+                  <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={ProfileS.option} onPress={() => openImageModal(user.avatar)}>
+                <View style={ProfileS.anhBia}>
+                  <Icon name="person-circle-outline" size={25} color="black" />
+                </View>
+                <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
+              </TouchableOpacity>
+              {stories.stories.length > 0 && (
+                <TouchableOpacity
+                  style={ProfileS.option}
+                  onPress={() => {
+                    closeBottomSheet();
+                    navigation.navigate(oStackHome.StoryViewer.name, { StoryView: stories, currentUserId: me?._id });
+                  }}>
+                  <View style={ProfileS.anhBia}>
+                    <Icon name="radio-button-on" size={25} color="black" />
+                  </View>
+                  <Text style={ProfileS.optionText}>Xem story</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
         );
-    };
+      };
 
     const detail_selection_background = () => {
         return (
@@ -811,7 +814,7 @@ const Profile = props => {
                     <View>
                         <View>
                             <View>
-                                <Pressable onPress={() => openBottomSheet(30, detail_selection_background)}>
+                                <Pressable onPress={() => openBottomSheetBackground()}>
                                     {user?.background != null ? (
                                         <Image
                                             style={ProfileS.backGroundImage}
