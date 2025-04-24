@@ -296,7 +296,7 @@ const Story = () => {
     }
     openBottomSheet(50, (
       <View style={styles.bottomSheetContent}>
-        <Text style={styles.bottomSheetTitle}>Danh sách người xem ({viewers.length})</Text>
+        <Text style={styles.bottomSheetTitle}>Danh sách người xem ({viewers.length - 1})</Text>
         <FlatList
           data={viewers}
           renderItem={renderViewerItem}
@@ -311,7 +311,7 @@ const Story = () => {
     if (item.ID_user._id === me._id) {
       return null;
     }
-  
+
     return (
       <View style={styles.viewerItem}>
         <Image source={{ uri: item.ID_user.avatar }} style={styles.viewerAvatar} />
@@ -397,12 +397,12 @@ const Story = () => {
         </View>
 
         {me._id !== StoryView.user?._id && (
-         <ScrollView
-         horizontal={true} // Bật cuộn ngang
-         showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn
-         style={styles.reactionContainer}
-         contentContainerStyle={styles.reactionContent}
-         >
+          <ScrollView
+            horizontal={true} // Bật cuộn ngang
+            showsHorizontalScrollIndicator={false} // Ẩn thanh cuộn
+            style={styles.reactionContainer}
+            contentContainerStyle={styles.reactionContent}
+          >
             {reactions && reactions.length > 0 ? (
               reactions.map((reaction, index) => (
                 <TouchableOpacity
@@ -422,7 +422,7 @@ const Story = () => {
           </ScrollView>
         )}
 
-  
+
 
         {me._id === StoryView.user?._id && (
           <TouchableOpacity style={styles.viewersCountContainer} onPress={handleOpenBottomSheet}>
@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   selectedReactionButton: {
-    backgroundColor: 'rgba(255,255,255,0.8)', 
+    backgroundColor: 'rgba(255,255,255,0.8)',
   },
   reactionText: {
     fontSize: 24,
