@@ -43,16 +43,26 @@ const SettingChat = (props) => { // cần ID_group (param)
         // Call API khi lần đầu vào trang
         callGetGroupID();
 
-        // Thêm listener để gọi lại API khi quay lại trang
+        // Thêm listener để gọi lại API hoặc cập nhật từ params khi focus
         const focusListener = navigation.addListener('focus', () => {
-            callGetGroupID();
+            // Kiểm tra nếu có params từ AvtNameGroup
+            if (params?.updatedAvatar || params?.updatedName) {
+                setGroup((prevGroup) => ({
+                    ...prevGroup,
+                    avatar: params.updatedAvatar || prevGroup?.avatar,
+                    name: params.updatedName || prevGroup?.name,
+                }));
+                // Xóa params sau khi sử dụng để tránh lặp lại
+                navigation.setParams({ updatedAvatar: undefined, updatedName: undefined });
+            } else {
+                callGetGroupID();
+            }
         });
 
-        // Cleanup listener khi component bị unmount
         return () => {
             focusListener();
         };
-    }, [navigation]);
+    }, [navigation, params]);
 
     //call api getGroupID
     const callGetGroupID = async () => {

@@ -182,6 +182,7 @@ const AddFriendGroup = (props) => {// cần ID_group (param)
                             membersGroup={membersGroup}
                         />
                     )}
+                    showsVerticalScrollIndicator={false}
                 />
             </View >
         </View>
@@ -197,6 +198,8 @@ const styles = StyleSheet.create({
     },
     container: {
         marginHorizontal: width * 0.05, // 5% chiều rộng màn hình
+        flex: 1,
+        //paddingHorizontal: width * 0.05,
     },
     header: {
         fontSize: width * 0.06, // 6% chiều rộng màn hình

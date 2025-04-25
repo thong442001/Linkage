@@ -27,7 +27,7 @@ const Home = props => {
   const token = useSelector(state => state.app.token);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
-  console.log("canh", posts.length)
+  console.log("canh",posts.length)
   const [stories, setStories] = useState([]);
   const [liveSessions, setLiveSessions] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -115,7 +115,10 @@ const Home = props => {
     setRefreshing(true);
     setCurrentTime(Date.now());
     console.log('Refreshing, keeping liveSessions:', liveSessions); // Debug
-    callGetAllPostsInHome(me._id, false).finally(() => {
+    Promise.all([
+      callGetAllPostsInHome(me._id, false),
+      callgetUser(me._id),
+    ]).finally(() => {
       setRefreshing(false);
     });
   }, [me._id, liveSessions]);
@@ -202,8 +205,8 @@ const Home = props => {
   return (
     <>
       {loading && !refreshing ? (
-        <HomeLoading />
-      ) : (
+        <HomeLoading /> 
+      ) : (   
         <View style={posts.length === 0 ? HomeS.container1 : HomeS.container}>
           <HomeHeader navigation={navigation} headerTranslate={headerTranslate} />
           <Animated.FlatList
@@ -214,7 +217,7 @@ const Home = props => {
             ListHeaderComponent={
               <HomeStories
                 navigation={navigation}
-                me={api_user || me}
+                me={api_user}
                 stories={stories}
                 liveSessions={liveSessions}
               />

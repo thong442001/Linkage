@@ -16,6 +16,7 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import { useSocket } from '../../context/socketContext';
+import LoadingChatList from '../../utils/animation/loadingChatList/LoadingChatList';
 const AvtNameGroup = (props) => { // cần ID_group (param)
     const { route, navigation } = props;
     const { params } = route;
@@ -27,6 +28,7 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
     const [AvtGroup, setAvtGroup] = useState(null);
     const [nameGroup, setNameGroup] = useState(null);
     const [isEditing, setIsEditing] = useState(false);// input name
+    const [isLoading, setIsLoading] = useState(false)
     const { socket } = useSocket();
 
     useEffect(() => {
@@ -97,6 +99,7 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
     //up lên cloudiary
     const uploadFile = async (file) => {
         try {
+            setIsLoading(true)
             const data = new FormData();
             data.append('file', {
                 uri: file.uri,
@@ -117,6 +120,9 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
         } catch (error) {
             console.log('uploadFile -> ', error.response ? error.response.data : error.message);
             console.log("lỗi khi tải file")
+        }
+        finally {
+            setIsLoading(false)
         }
     };
 
@@ -183,7 +189,14 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
                 AvtGroup != null
                 && (
                     <View style={styles.groupAvatarContainer}>
+                        <View style={styles.avatarWrapper}>
                         <Image source={{ uri: AvtGroup }} style={styles.avatar} />
+                        {isLoading && (
+                            <View style={styles.loadingOverlay}>
+                                <LoadingChatList visible={isLoading} />
+                            </View>
+                        )}
+                    </View>
                         {/* Name group */}
                         <TextInput
                             style={styles.searchBox}
@@ -221,6 +234,20 @@ const AvtNameGroup = (props) => { // cần ID_group (param)
 };
 
 const styles = StyleSheet.create({
+    loadingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)', 
+        borderRadius: 60,
+    },
+    avatarWrapper: {
+        position: 'relative', // Để chứa loading overlay
+    },
     containerAll: {
         flex: 1,
         backgroundColor: "#F5F5F5",
@@ -259,9 +286,9 @@ const styles = StyleSheet.create({
         marginTop: 50,
     },
     avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 110,
+        height: 110,
+        borderRadius: 60,
     },
     groupName: {
         fontSize: 18,
