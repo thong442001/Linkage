@@ -835,7 +835,7 @@ const PostItem = memo(({
                                         </View>
                                     )}
                                 </View>
-                                {!post.ID_post_shared && (
+                                {post.type != 'Share' && (
                                     <TouchableOpacity
                                         onPress={() =>
                                             openBottomSheet(
@@ -906,22 +906,38 @@ const PostItem = memo(({
                                     </TouchableOpacity>
                                 )}
                             </View>
-                            {!post?.ID_post_shared?._destroy && (
+                            {/* {!post?.ID_post_shared?._destroy && (
                                 post?.ID_post_shared ? (
                                     <Text style={styles.caption}>{post.ID_post_shared.caption}</Text>
                                 ) : (
                                     hasCaption && <Text style={styles.caption}>{post.caption}</Text>
                                 )
-                            )}
+                            )} */}
+                            {post.type == 'Share' ? (
+                                !((post?.ID_post_shared?._destroy) || !post?.ID_post_shared)
+                                && < Text style={styles.caption}>{post?.ID_post_shared?.caption}</Text>
+                            )
+                                : (
+                                    hasCaption && <Text style={styles.caption}>{post.caption}</Text>
+                                )
+                            }
                         </View>
                     </View>
-                    {!post?.ID_post_shared?._destroy && (
+                    {/* {!post?.ID_post_shared?._destroy && (
                         post?.ID_post_shared ? (
                             hasMedia && renderMediaGrid(post.ID_post_shared.medias)
                         ) : (
                             hasMedia && renderMediaGrid(post.medias)
                         )
-                    )}
+                    )} */}
+                    {post.type == 'Share' ? (
+                        !((post?.ID_post_shared?._destroy) || !post?.ID_post_shared)
+                        && hasMedia && renderMediaGrid(post.ID_post_shared.medias)
+                    )
+                        : (
+                            hasMedia && renderMediaGrid(post.medias)
+                        )
+                    }
                     {/* Sửa điều kiện hiển thị footer */}
                     {!post._destroy && (
                         <View style={styles.footer}>
