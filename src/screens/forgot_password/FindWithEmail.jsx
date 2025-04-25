@@ -11,17 +11,24 @@ const FindWithEmail = (props) => {
     const { navigation } = props;
     const [gmail, setGmail] = useState('');
     const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // Thêm state để quản lý loading
+    const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
 
+    // Hàm chuẩn hóa email
+    const normalizeEmail = (email) => {
+        return email.trim().toLowerCase();
+    };
+
     const handleCheckEmail = async () => {
-        if (!gmail.trim()) {
+        const normalizedEmail = normalizeEmail(gmail);
+
+        if (!normalizedEmail) {
             setError('Vui lòng nhập địa chỉ email.');
             return;
         }
 
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!emailRegex.test(gmail)) {
+        if (!emailRegex.test(normalizedEmail)) {
             setError('Địa chỉ email không hợp lệ.');
             return;
         }
@@ -29,19 +36,19 @@ const FindWithEmail = (props) => {
         setError('');
         setIsLoading(true);
         try {
-            console.log("Sending payload:", { gmail });
-            const response = await dispatch(sendOTP_quenMatKhau_gmail({ gmail })).unwrap();
+            console.log("Sending payload:", { gmail: normalizedEmail });
+            const response = await dispatch(sendOTP_quenMatKhau_gmail({ gmail: normalizedEmail })).unwrap();
             console.log("Response từ sendOTP_quenMatKhau_gmail:", response);
             if (response.status) {
-                navigation.navigate('CheckEmail', { gmail });
-                setGmail('')
+                navigation.navigate('CheckEmail', { gmail: normalizedEmail });
+                setGmail('');
             } else {
                 setError(response.message || 'Gửi OTP thất bại. Vui lòng thử lại.');
             }
         } catch (error) {
-            setError('Có lỗi xảy ra, hãy chắc chắn email này đã được đăng kí.');
+            setError('Có lỗi xảy ra, hãy chắc chắn email này đã được đăng ký.');
         } finally {
-            setIsLoading(false); // Tắt loading sau khi xử lý xong (dù thành công hay thất bại)
+            setIsLoading(false);
         }
     };
 
