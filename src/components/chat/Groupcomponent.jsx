@@ -20,11 +20,11 @@ export default function Groupcomponent({ item }) {
     if (!message || !message.content) return '';
 
     // Debug dữ liệu message
-    console.log('messageLatest:', {
-      type: message.type,
-      content: message.content,
-      sender: message.sender,
-    });
+    // console.log('messageLatest:', {
+    //   type: message.type,
+    //   content: message.content,
+    //   sender: message.sender,
+    // });
 
     const type = message.type || 'text'; 
     const content = message.content;

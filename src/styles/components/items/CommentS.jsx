@@ -39,13 +39,13 @@ const CommentS = StyleSheet.create({
         borderLeftWidth: 1,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
-        marginHorizontal: width * 0.02
+        marginHorizontal: width * 0.02,
         // borderRadius: 7,
         // shadowColor: '#000',
         // shadowOffset: { width: 0, height: 2 },
         // shadowOpacity: 0.25,
         // shadowRadius: 3.84,
-        // elevation: 5, // Dành cho Android
+        // elevation: 5, // Dành cho Android,
     },
     header2: {
     },

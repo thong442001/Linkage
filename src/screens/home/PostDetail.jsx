@@ -340,6 +340,7 @@ const PostDetail = (props) => {
   const textInputRef = useRef(null); // Thêm ref cho TextInput
 
   const [post, setPost] = useState(null)
+  console.log("post", post)
 
   const [timeAgo, setTimeAgo] = useState();
   const [timeAgoShare, setTimeAgoShare] = useState();
@@ -1264,7 +1265,7 @@ const PostDetail = (props) => {
         <View>
           {/* Header share  */}
           {
-            post.ID_post_shared &&
+            post.type == 'Share' &&
             <View style={{ marginVertical: 10, marginHorizontal: 15 }}>
               <View style={styles.header}>
                 <View style={styles.userInfo}>
@@ -1389,14 +1390,20 @@ const PostDetail = (props) => {
 
           }
           {/* Header goc  */}
-          <View style={post.ID_post_shared ? styles.header1 : styles.header2} >
+          <View style={post.type == 'Share' ? styles.header1 : styles.header2} >
             <View style={styles.header}>
               <View style={styles.boxInfor1}>
                 {
-                  post.ID_post_shared
+                  post.type == 'Share'
                     ?
-                    <View style={styles.userInfo}>
-                      {/* {
+                    (
+                      post?.ID_post_shared?._destroy || !post?.ID_post_shared ? (
+                        <View style={styles.userInfo}>
+                          < Text style={styles.caption}>Nội dung bài viết đã bị xóa</Text>
+                        </View>
+                      ) : (
+                        <View style={styles.userInfo}>
+                          {/* {
                         typeClick === "image" && ( // Nếu là chi tiết ảnh thì hiển thị nút Back
                           <TouchableOpacity
                             style={{ marginRight: width * 0.04 }}
@@ -1408,53 +1415,55 @@ const PostDetail = (props) => {
                           </TouchableOpacity>
                         )
                       } */}
-                      <TouchableOpacity onPress={() =>
-                        navigation.navigate('TabHome', {
-                          screen: 'Profile',
-                          params: { _id: post?.ID_post_shared?.ID_user?._id },
-                        })}>
-                        <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
-                      </TouchableOpacity>
-                      <View style={{ marginLeft: 15 }}>
-                        <Text style={styles.name}
-                          onPress={() =>
+                          <TouchableOpacity onPress={() =>
                             navigation.navigate('TabHome', {
                               screen: 'Profile',
                               params: { _id: post?.ID_post_shared?.ID_user?._id },
-                            })}
-                        >
-                          {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
-                          {post.ID_post_shared.tags.length > 0 && (
-                            <Text>
-                              <Text style={{ color: 'gray' }}> cùng với </Text>
-                              <Text style={[styles.name]}
-                                onPress={() => navigation.navigate('TabHome', {
-                                  screen: "Profile", params: { _id: post.ID_post_shared.tags[0]._id }
+                            })}>
+                            <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
+                          </TouchableOpacity>
+                          <View style={{ marginLeft: 15 }}>
+                            <Text style={styles.name}
+                              onPress={() =>
+                                navigation.navigate('TabHome', {
+                                  screen: 'Profile',
+                                  params: { _id: post?.ID_post_shared?.ID_user?._id },
                                 })}
-                              >
-                                {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
-                              </Text>
-                              {post.ID_post_shared.tags.length > 1 && (
-                                <>
-                                  <Text style={{ color: 'gray' }}> và </Text>
-                                  <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })} style={[styles.name]}>
-                                    {post.ID_post_shared.tags.length - 1} người khác
+                            >
+                              {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
+                              {post.ID_post_shared.tags.length > 0 && (
+                                <Text>
+                                  <Text style={{ color: 'gray' }}> cùng với </Text>
+                                  <Text style={[styles.name]}
+                                    onPress={() => navigation.navigate('TabHome', {
+                                      screen: "Profile", params: { _id: post.ID_post_shared.tags[0]._id }
+                                    })}
+                                  >
+                                    {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
                                   </Text>
-                                </>
+                                  {post.ID_post_shared.tags.length > 1 && (
+                                    <>
+                                      <Text style={{ color: 'gray' }}> và </Text>
+                                      <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })} style={[styles.name]}>
+                                        {post.ID_post_shared.tags.length - 1} người khác
+                                      </Text>
+                                    </>
+                                  )}
+                                </Text>
                               )}
                             </Text>
-                          )}
-                        </Text>
-                        {/* <Text style={styles.name}>{post.ID_post_shared.ID_user.first_name + " " + post.ID_post_shared.ID_user.last_name}</Text> */}
-                        <View style={styles.boxName}>
-                          <Text style={styles.time}>{timeAgoShare}</Text>
-                          {/* <Icon name="earth" size={12} color="gray" /> */}
-                          {
-                            getIcon(post.ID_post_shared.status)
-                          }
+                            {/* <Text style={styles.name}>{post.ID_post_shared.ID_user.first_name + " " + post.ID_post_shared.ID_user.last_name}</Text> */}
+                            <View style={styles.boxName}>
+                              <Text style={styles.time}>{timeAgoShare}</Text>
+                              {/* <Icon name="earth" size={12} color="gray" /> */}
+                              {
+                                getIcon(post.ID_post_shared.status)
+                              }
+                            </View>
+                          </View>
                         </View>
-                      </View>
-                    </View>
+                      )
+                    )
                     :
                     <View style={styles.userInfo}>
                       <View style={{ marginRight: width * 0.04 }}>
@@ -1510,12 +1519,11 @@ const PostDetail = (props) => {
                     </View>
                 }
               </View>
-
               {
-                !post.ID_post_shared &&
+                post.type != 'Share' &&
                 <View style={{ marginRight: 15 }}>
                   <TouchableOpacity
-                    // disabled={me._id != post.ID_user._id}
+                    //disabled={me._id != post.ID_user._id}
                     onPress={() =>
                       openBottomSheet(
                         25,
@@ -1587,16 +1595,24 @@ const PostDetail = (props) => {
                       )
                     }
                   >
-                    <Icon name="ellipsis-horizontal" size={22} color="black" />
+                    <Icon name="ellipsis-horizontal" size={22} color="red" />
                   </TouchableOpacity>
                 </View>
               }
             </View>
             {
-              post.ID_post_shared
-                ? (
-                  <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
-                )
+              post.type == 'Share'
+                ?
+                (
+                  (post?.ID_post_shared?._destroy || !post?.ID_post_shared)
+                    ? (
+                      <View style={styles.userInfo}>
+                        < Text style={styles.caption}>
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
+                    ))
                 :
                 (
                   <Text style={styles.caption}>{post?.caption}</Text>
@@ -1606,8 +1622,20 @@ const PostDetail = (props) => {
         </View >
         {
           typeClick == "image"
-            ? (hasMedia && renderMediaSDetail(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
-            : (hasMedia && renderMediaGrid(post.ID_post_shared ? post.ID_post_shared.medias : post.medias))
+            ? (hasMedia && renderMediaSDetail(post.type == 'Share' ? (
+              (post?.ID_post_shared?._destroy || !post?.ID_post_shared)
+                ? [] : (
+                  post.ID_post_shared.medias
+                )
+            ) : post.medias))
+            : (hasMedia && renderMediaGrid(post.type == 'Share' ?
+              (
+                (post?.ID_post_shared?._destroy || !post?.ID_post_shared)
+                  ? [] : (
+                    post.ID_post_shared.medias
+                  )
+              )
+              : post.medias))
         }
         {
           !post._destroy &&
@@ -1663,7 +1691,11 @@ const PostDetail = (props) => {
                     setShareVisible={setShareVisible}
                   />
                 ));
-              }}>
+              }}
+              disabled={
+                post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
+              }
+            >
               <Icon4 name="share-alt" size={20} color="black" />
               <Text style={styles.actionText}>Chia sẻ</Text>
             </TouchableOpacity>
