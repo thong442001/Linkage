@@ -1604,11 +1604,10 @@ const PostDetail = (props) => {
                post.type == 'Share'
                 ?
                      (
-                      (!post?.ID_post_shared?._destroy || post?.ID_post_shared)
+                      (post?.ID_post_shared?._destroy || !post?.ID_post_shared)
                         ? (
                             <View style={styles.userInfo}>
-                              < Text style={styles.caption}>
-                              </Text>
+                              < Text style={styles.caption}> </Text>
                             </View>
                          ) :(
                             <Text style={styles.caption}>{post?.ID_post_shared.caption}</Text>
