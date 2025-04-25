@@ -106,8 +106,12 @@ const ListComment = memo(({ comment, onReply, onEdit, onDelete }) => {
                       style={styles.bottomSheetItem}
                       onPress={() => {
                           closeBottomSheet();
-                          onEdit(comment); // Gọi callback chỉnh sửa
-                      }}
+                          onEdit(comment, (updatedComment) => {
+                            setIsPending(false); // Xóa trạng thái pending
+                            setSuccessModalVisible(true); // Hiển thị modal thành công
+                            setTimeout(() => setSuccessModalVisible(false), 2000); // Tắt sau 2 giây
+                          });
+                        }}
                   >
                       <Icon name="pencil" size={20} color="black" />
                       <Text style={styles.bottomSheetText}>Chỉnh sửa</Text>
@@ -269,7 +273,6 @@ const ListComment = memo(({ comment, onReply, onEdit, onDelete }) => {
                           {comment.type === 'text' ? (
                               <Text style={styles.commentText}>
                                   {comment.content}
-                                  {comment.isPending && <Text style={styles.pendingIndicator}> (Đang gửi...)</Text>}
                               </Text>
                           ) : comment.type === 'image' ? (
                               <TouchableOpacity onPress={() => handleMediaPress(comment.content, 'image')}>
