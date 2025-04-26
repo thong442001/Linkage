@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
       marginHorizontal: width * 0.015,
   },
   reactionText: {
-      fontSize: width * 0.04,
+      fontSize: width * 0.045,
       color: '#000',
       alignSelf: 'flex-end',
   },

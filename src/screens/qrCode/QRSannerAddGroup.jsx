@@ -60,6 +60,7 @@ const QRSannerAddGroup = (props) => {
                 .then((response) => {
                     console.log(response.message)
                     navigation.navigate("Chat", { ID_group: ID_group })
+                    return;
                 })
                 .catch((error) => {
                     Alert.alert("Thành viên đã có trong nhóm!");
@@ -94,7 +95,7 @@ const QRSannerAddGroup = (props) => {
             callAddtMembers(ID_group, [me._id]);
   
             // ✅ Đợi 2 giây trước khi quét tiếp
-            setTimeout(() => setIsProcessing(false), 2000);
+            setTimeout(() => setIsProcessing(false), 10000);
           } catch (error) {
             console.error("Lỗi khi xử lý mã QR:", error);
             Alert.alert("Lỗi", "Mã QR không hợp lệ!");

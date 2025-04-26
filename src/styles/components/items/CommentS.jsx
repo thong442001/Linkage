@@ -156,7 +156,7 @@ const CommentS = StyleSheet.create({
         marginHorizontal: 5,
     },
     reactionText: {
-        fontSize: 18,
+        fontSize: 23,
         color: "#000",
         alignSelf: 'flex-end'
     },

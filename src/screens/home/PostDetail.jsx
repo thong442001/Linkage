@@ -1602,7 +1602,7 @@ const PostDetail = (props) => {
                       )
                     }
                   >
-                    <Icon name="ellipsis-horizontal" size={22} color="red" />
+                    <Icon name="ellipsis-horizontal" size={22} color="black" />
                   </TouchableOpacity>
                 </View>
               }

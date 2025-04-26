@@ -231,7 +231,7 @@ const HomeChat = ({ route, navigation }) => {
                     <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('ChatBot')}>
                         <Icon name="chatbubbles-outline" size={25} color="#333" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('QRSannerAddGroup')}>
+                    <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('QRScannerScreen')}>
                         <Icon name="scan-circle-outline" size={25} color="#333" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('CreateGroup')}>
