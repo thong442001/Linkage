@@ -86,6 +86,7 @@ const QRScannerScreen = props => {
         .then(response => {
           console.log(response.message);
           navigation.navigate('Chat', {ID_group: ID_group});
+          return;
         })
         .catch(error => {
           Alert.alert('Thành viên đã có trong nhóm!');

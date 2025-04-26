@@ -18,7 +18,7 @@ const { width, height } = Dimensions.get('window');
 const Screen3 = (props) => {
     const { route, navigation } = props;
     const { params } = route;
-
+  
     const dispatch = useDispatch();
     const [email, setEmail] = useState('');
     const [emailVerified, setEmailVerified] = useState(false);
@@ -26,93 +26,94 @@ const Screen3 = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isFailed, setIsFailed] = useState(false);
-
+  
+    // Hàm chuẩn hóa email
+    const normalizeEmail = (email) => {
+      return email.trim().toLowerCase();
+    };
+  
     useEffect(() => {
-        const checkUserEmail = async () => {
-            const user = auth().currentUser;
-            if (user) {
-                await user.reload(); // Cập nhật trạng thái từ Firebase
-                callcheck_email(user.uid);
-            }
-        };
-
-        checkUserEmail();
-    }, []); // Chạy một lần khi component mount
-
+      const checkUserEmail = async () => {
+        const user = auth().currentUser;
+        if (user) {
+          await user.reload();
+          callcheck_email(user.uid);
+        }
+      };
+  
+      checkUserEmail();
+    }, []);
+  
     const callcheck_email = (uid) => {
-        dispatch(check_email({ uid: uid }))
-            .unwrap()
-            .then((response) => {
-                setEmailVerified(response.emailVerified);
-            })
-            .catch((error) => {
-                console.log('Error callcheck_email:', error);
-            });
+      dispatch(check_email({ uid: uid }))
+        .unwrap()
+        .then((response) => {
+          setEmailVerified(response.emailVerified);
+        })
+        .catch((error) => {
+          console.log('Error callcheck_email:', error);
+        });
     };
-
+  
     const validateEmail = (email) => {
-        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        return emailPattern.test(email);
+      const normalizedEmail = normalizeEmail(email);
+      return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(normalizedEmail);
     };
-
+  
     const handleTiep = async () => {
-        // Ngăn spam khi đang loading
-        if (isLoading) return;
-
-        // Kiểm tra email hợp lệ
-        if (!validateEmail(email)) {
-            setError('Email không hợp lệ');
-            return;
+      if (isLoading) return;
+  
+      const normalizedEmail = normalizeEmail(email);
+      if (!validateEmail(normalizedEmail)) {
+        setError('Email không hợp lệ');
+        return;
+      }
+  
+      setError('');
+      setIsLoading(true);
+  
+      try {
+        const checkEmailResponse = await dispatch(checkEmail({ email: normalizedEmail })).unwrap();
+        if (!checkEmailResponse.status) {
+          setError(checkEmailResponse.message || 'Email không hợp lệ hoặc đã được sử dụng');
+          setIsLoading(false);
+          setIsFailed(true);
+          setTimeout(() => setIsFailed(false), 1500);
+          return;
         }
-
-        setError(''); // Xóa lỗi nếu có
-        setIsLoading(true); // Bật trạng thái loading
-
-        try {
-            // API checkEmail
-            const checkEmailResponse = await dispatch(checkEmail({ email: email })).unwrap();
-            if (!checkEmailResponse.status) {
-                setError(checkEmailResponse.message || 'Email không hợp lệ hoặc đã được sử dụng');
-                setIsLoading(false);
-                setIsFailed(true);
-                setTimeout(() => setIsFailed(false), 1500);
-                return;
-            }
-
-            // API sendOTP_dangKi_gmail
-            const sendOTPResponse = await dispatch(sendOTP_dangKi_gmail({ gmail: email })).unwrap();
-            if (!sendOTPResponse.status) {
-                setError(sendOTPResponse.message || 'Gửi OTP thất bại');
-                setIsLoading(false);
-                setIsFailed(true);
-                setTimeout(() => setIsFailed(false), 1500);
-                return;
-            }
-
-            // Nếu gửi OTP thành công
-            setIsSuccess(true);
-            setTimeout(() => {
-                setIsLoading(false);
-                setIsSuccess(false);
-                navigation.navigate('OTPGmailScreen', {
-                    first_name: params.first_name,
-                    last_name: params.last_name,
-                    dateOfBirth: params.dateOfBirth,
-                    sex: params.sex,
-                    phone: null,
-                    email: email,
-                });
-            }, 2000);
-            setEmail(''); // Reset email sau khi gửi thành công
-        } catch (error) {
-            console.log('Error:', error);
-            setError('Có lỗi xảy ra. Vui lòng thử lại.');
-            setIsLoading(false);
-            setIsFailed(true);
-            setTimeout(() => setIsFailed(false), 1500);
+  
+        const sendOTPResponse = await dispatch(sendOTP_dangKi_gmail({ gmail: normalizedEmail })).unwrap();
+        if (!sendOTPResponse.status) {
+          setError(sendOTPResponse.message || 'Gửi OTP thất bại');
+          setIsLoading(false);
+          setIsFailed(true);
+          setTimeout(() => setIsFailed(false), 1500);
+          return;
         }
+  
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsLoading(false);
+          setIsSuccess(false);
+          navigation.navigate('OTPGmailScreen', {
+            first_name: params.first_name,
+            last_name: params.last_name,
+            dateOfBirth: params.dateOfBirth,
+            sex: params.sex,
+            phone: null,
+            email: normalizedEmail,
+          });
+        }, 2000);
+        setEmail('');
+      } catch (error) {
+        console.log('Error:', error);
+        setError('Có lỗi xảy ra. Vui lòng thử lại.');
+        setIsLoading(false);
+        setIsFailed(true);
+        setTimeout(() => setIsFailed(false), 1500);
+      }
     };
-
+    
     return (
         <View style={styles.container}>
             <Pressable onPress={() =>

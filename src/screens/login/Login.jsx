@@ -43,8 +43,14 @@ const Login = (props) => {
     });
   }, []);
 
+  // Hàm chuẩn hóa email
+  const normalizeEmail = (email) => {
+    return email.trim().toLowerCase();
+  };
+
   function isValidEmail(email) {
-    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+    const normalizedEmail = normalizeEmail(email);
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(normalizedEmail);
   }
 
   function isValidPhone(phone) {
@@ -82,8 +88,9 @@ const Login = (props) => {
   const checkLogin = () => {
     if (!validateForm()) return;
 
+    const normalizedEmail = normalizeEmail(emailVsPhone);
     const data = isValidEmail(emailVsPhone)
-      ? { email: emailVsPhone, phone: '', password: password, fcmToken: fcmToken }
+      ? { email: normalizedEmail, phone: '', password: password, fcmToken: fcmToken }
       : { email: '', phone: emailVsPhone, password: password, fcmToken: fcmToken };
 
     onLogin(data);
@@ -94,8 +101,6 @@ const Login = (props) => {
     dispatch(login(data))
       .unwrap()
       .then((response) => {
-        //console.log(response);
-        //console.log("fcmToken login: " + fcmToken);
         setLoading(false);
       })
       .catch((error) => {
@@ -109,7 +114,6 @@ const Login = (props) => {
     dispatch(loginGG(data))
       .unwrap()
       .then((response) => {
-        //console.log(response);
         setLoading(false);
       })
       .catch((error) => {
@@ -120,15 +124,12 @@ const Login = (props) => {
 
   const handleGoogleLogin = async () => {
     try {
-      // Đăng xuất trước để chọn lại tài khoản
       setLoading(true);
       await GoogleSignin.signOut();
       await GoogleSignin.hasPlayServices();
 
-      // Đăng nhập Google
       const userInfo = await GoogleSignin.signIn();
-      const { idToken } = await GoogleSignin.getTokens(); // Lấy ID Token
-      //console.log(idToken)
+      const { idToken } = await GoogleSignin.getTokens();
 
       if (!idToken) {
         console.log("Không lấy được ID Token!");
@@ -136,21 +137,20 @@ const Login = (props) => {
         return;
       }
 
-      // Xác thực với Firebase
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      onLoginGG({ email: user.email, name: user.displayName, picture: user.photoURL, fcmToken: fcmToken });
+      const normalizedEmail = normalizeEmail(user.email);
+      onLoginGG({ email: normalizedEmail, name: user.displayName, picture: user.photoURL, fcmToken: fcmToken });
 
     } catch (error) {
       console.log("Lỗi đăng nhập:", error.message);
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <LoadingModal visible={loading} />
