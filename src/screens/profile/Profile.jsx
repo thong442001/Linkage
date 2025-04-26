@@ -104,18 +104,18 @@ const Profile = props => {
         callAllProfile().finally(() => setRefreshing(false));
     }, [params?._id, me]);
 
- // Tự động mở story khi vào từ thông báo
- useEffect(() => {
-    if (params?.autoPlayStory && stories?.stories?.length > 0) {
-      console.log('Tự động mở StoryViewer với stories:', stories);
-      navigation.navigate(oStackHome.StoryViewer.name, {
-        StoryView: stories,
-        currentUserId: me?._id,
-      });
-      // Xóa autoPlayStory khỏi params để tránh lặp lại khi quay lại
-      navigation.setParams({ autoPlayStory: undefined });
-    }
-  }, [stories, params?.autoPlayStory, navigation, me?._id]);
+    // Tự động mở story khi vào từ thông báo
+    useEffect(() => {
+        if (params?.autoPlayStory && stories?.stories?.length > 0) {
+            console.log('Tự động mở StoryViewer với stories:', stories);
+            navigation.navigate(oStackHome.StoryViewer.name, {
+                StoryView: stories,
+                currentUserId: me?._id,
+            });
+            // Xóa autoPlayStory khỏi params để tránh lặp lại khi quay lại
+            navigation.setParams({ autoPlayStory: undefined });
+        }
+    }, [stories, params?.autoPlayStory, navigation, me?._id]);
 
 
 
@@ -160,19 +160,19 @@ const Profile = props => {
     };
 
     const openBottomSheetAvatar = () => {
-        if (stories?.stories.length > 0 && user?._id == me._id ) {
+        if (stories?.stories.length > 0 && user?._id == me._id) {
             openBottomSheet(35, detail_selection_image());
-        } else if(user?._id !== me._id && stories?.stories.length > 0){
+        } else if (user?._id !== me._id && stories?.stories.length > 0) {
             openBottomSheet(27, detail_selection_image());
         }
-        else if(user?._id !== me._id) {
+        else if (user?._id !== me._id) {
             openBottomSheet(20, detail_selection_image());
-        }  else {
+        } else {
             openBottomSheet(27, detail_selection_image());
         }
     };
 
-   const openBottomSheetBackground = () => {
+    const openBottomSheetBackground = () => {
         if (user?._id == me._id) {
             openBottomSheet(27, detail_selection_background());
         } else {
@@ -181,9 +181,9 @@ const Profile = props => {
     };
     const openBottomSheetReportUser = () => {
         if (me._id == user?._id) {
-           openBottomSheet(20, detail_selection_report_user());
+            openBottomSheet(20, detail_selection_report_user());
         }
-        else{
+        else {
             openBottomSheet(27, detail_selection_report_user());
         }
     };
@@ -224,7 +224,7 @@ const Profile = props => {
             setavatar(fileUrl);
             return fileUrl;
         } catch (error) {
-            
+
             console.error(
                 'Lỗi uploadFile:',
                 error.response ? error.response.data : error.message,
@@ -372,44 +372,44 @@ const Profile = props => {
 
     const detail_selection_image = () => {
         if (!user || !stories) return null; // Kiểm tra an toàn
-      
+
         return (
-          <View>
-            <View style={ProfileS.rectangle}>
-              <View style={ProfileS.lineBottomSheet}></View>
-            </View>
-            <View style={ProfileS.containerBottomSheet}>
-              {user._id === me._id && (
-                <TouchableOpacity style={ProfileS.option} onPress={onOpenGalleryChangeAvatar}>
-                  <View style={ProfileS.anhBia}>
-                    <Icon name="image" size={25} color="black" />
-                  </View>
-                  <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity style={ProfileS.option} onPress={() => openImageModal(user.avatar)}>
-                <View style={ProfileS.anhBia}>
-                  <Icon name="person-circle-outline" size={25} color="black" />
+            <View>
+                <View style={ProfileS.rectangle}>
+                    <View style={ProfileS.lineBottomSheet}></View>
                 </View>
-                <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
-              </TouchableOpacity>
-              {stories.stories.length > 0 && (
-                <TouchableOpacity
-                  style={ProfileS.option}
-                  onPress={() => {
-                    closeBottomSheet();
-                    navigation.navigate(oStackHome.StoryViewer.name, { StoryView: stories, currentUserId: me?._id });
-                  }}>
-                  <View style={ProfileS.anhBia}>
-                    <Icon name="radio-button-on" size={25} color="black" />
-                  </View>
-                  <Text style={ProfileS.optionText}>Xem story</Text>
-                </TouchableOpacity>
-              )}
+                <View style={ProfileS.containerBottomSheet}>
+                    {user._id === me._id && (
+                        <TouchableOpacity style={ProfileS.option} onPress={onOpenGalleryChangeAvatar}>
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="image" size={25} color="black" />
+                            </View>
+                            <Text style={ProfileS.optionText}>Đổi ảnh đại diện</Text>
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity style={ProfileS.option} onPress={() => openImageModal(user.avatar)}>
+                        <View style={ProfileS.anhBia}>
+                            <Icon name="person-circle-outline" size={25} color="black" />
+                        </View>
+                        <Text style={ProfileS.optionText}>Xem ảnh đại diện</Text>
+                    </TouchableOpacity>
+                    {stories.stories.length > 0 && (
+                        <TouchableOpacity
+                            style={ProfileS.option}
+                            onPress={() => {
+                                closeBottomSheet();
+                                navigation.navigate(oStackHome.StoryViewer.name, { StoryView: stories, currentUserId: me?._id });
+                            }}>
+                            <View style={ProfileS.anhBia}>
+                                <Icon name="radio-button-on" size={25} color="black" />
+                            </View>
+                            <Text style={ProfileS.optionText}>Xem story</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
-          </View>
         );
-      };
+    };
 
     const detail_selection_background = () => {
         return (
@@ -833,7 +833,7 @@ const Profile = props => {
                                         onPress={() => {
                                             props.route.params.handleScroll(true); // Đảm bảo bottom tab hiển thị
                                             navigation.goBack();
-                                          }}>
+                                        }}>
                                         <View>
                                             <Icon name="chevron-back" size={20} color="black" />
                                         </View>
@@ -1151,10 +1151,10 @@ const Profile = props => {
                                     </Text>
                                 </View>
                             </TouchableOpacity>
-                           
-                            
-                       
-                         
+
+
+
+
                         </View>
                     )
                 }
@@ -1204,7 +1204,7 @@ const Profile = props => {
                                     >
                                     </RefreshControl>
                                 }
-                                ListEmptyComponent={<NothingHome/>}
+                                ListEmptyComponent={<NothingHome />}
                             />
                         )}
                     </View>

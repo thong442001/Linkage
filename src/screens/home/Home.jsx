@@ -27,7 +27,7 @@ const Home = props => {
   const token = useSelector(state => state.app.token);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
-  console.log("canh",posts.length)
+  console.log("canh", posts.length)
   const [stories, setStories] = useState([]);
   const [liveSessions, setLiveSessions] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -66,6 +66,7 @@ const Home = props => {
     const onValueChange = liveSessionsRef.on('value', snapshot => {
       const liveSessions = snapshot.val() ? Object.values(snapshot.val()) : [];
       //console.log('Live sessions from Firebase:', liveSessions); // Debug
+      // Check đk friend 25/4
       setLiveSessions(liveSessions);
     });
     return () => liveSessionsRef.off('value', onValueChange);
@@ -205,8 +206,8 @@ const Home = props => {
   return (
     <>
       {loading && !refreshing ? (
-        <HomeLoading /> 
-      ) : (   
+        <HomeLoading />
+      ) : (
         <View style={posts.length === 0 ? HomeS.container1 : HomeS.container}>
           <HomeHeader navigation={navigation} headerTranslate={headerTranslate} />
           <Animated.FlatList
