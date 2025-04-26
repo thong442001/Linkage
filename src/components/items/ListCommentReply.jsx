@@ -286,12 +286,7 @@ import {
                   {comment.type === 'text' ? (
                     <Text style={styles.commentText}>
                       {comment.content}
-                      {comment.isPending && (
-                        <Text style={styles.pendingIndicator}>
-                          {' '}
-                          (Đang gửi...)
-                        </Text>
-                      )}
+                      
                     </Text>
                   ) : comment.type === 'image' ? (
                     <TouchableOpacity

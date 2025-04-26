@@ -334,6 +334,9 @@ const PostDetail = (props) => {
   const [comment, setComment] = useState('')
   const [countComments, setCountComments] = useState(0)
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [successModalMessage, setSuccessModalMessage] = useState(false);
+
 
   const [reply, setReply] = useState(null);
   const [isReplying, setIsReplying] = useState(false); // Thêm trạng thái trả lời
@@ -1102,12 +1105,16 @@ const PostDetail = (props) => {
             comment._id === ID_comment ? { ...comment, isPending: false } : comment
           )
         );
-        setTimeout(() => setSuccessModalVisible(false), 1500);
+        // Show success modal
+        setSuccessMessage('Chỉnh sửa bình luận thành công!');
+      setSuccessModalMessage(true);
+        setTimeout(() => setSuccessModalMessage(false), 1500);
       } else {
         throw new Error('Chỉnh sửa bình luận thất bại');
       }
     } catch (error) {
       console.log('Lỗi khi chỉnh sửa bình luận:', error);
+      setFailedModalVisible(true);
       setTimeout(() => setFailedModalVisible(false), 1500);
       // Refresh post details to revert changes
       callGetChiTietPost(post._id);
@@ -1980,6 +1987,7 @@ const PostDetail = (props) => {
       )}
       <SuccessModal visible={successModalVisible} message={'Đã chia sẻ bài viết!'} />
       <FailedModal visible={failedModalVisible} message={'Đã có lỗi khi chia sẻ bài viết!'} />
+      <SuccessModal visible={successModalMessage} message={successMessage} />
       <LoadingModal visible={isSharing} />
     </View>
   );
