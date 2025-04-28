@@ -29,7 +29,8 @@ import {
     addPost_Reaction,
     addPost,
     deletePost_reaction,
-    getAllGroupOfUser
+    getAllGroupOfUser,
+    getAllFriendOfID_user
 } from '../../rtk/API';
 import { useNavigation } from '@react-navigation/native';
 import { Snackbar } from 'react-native-paper';
@@ -307,6 +308,7 @@ const PostItem = memo(({
     const reactions = useSelector(state => state.app.reactions);
     const dispatch = useDispatch();
     const { openBottomSheet, closeBottomSheet } = useBottomSheet();
+    const token = useSelector(state => state.app.token);
 
     const [timeAgo, setTimeAgo] = useState(post.createdAt);
     const [timeAgoShare, setTimeAgoShare] = useState(post?.ID_post_shared?.createdAt);
@@ -323,7 +325,7 @@ const PostItem = memo(({
     const [isFirstRender, setIsFirstRender] = useState(true);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isImageModalVisible, setImageModalVisible] = useState(false);
-
+    const [friends, setFriends] = useState([]);
 
 
 
@@ -595,6 +597,31 @@ const PostItem = memo(({
         }
     };
 
+
+    // Hàm gọi API lấy danh sách bạn bè
+const callGetAllFriends = async () => {
+    try {
+      const response = await dispatch(getAllFriendOfID_user({ me: me._id, token })).unwrap();
+      if (response.status) {
+        const friendList = response.data || response.friends || [];
+        setFriends(friendList.map(friend => friend._id)); // Lưu danh sách ID bạn bè
+      } else {
+        console.log('Không lấy được danh sách bạn bè:', response.message);
+        setFriends([]);
+      }
+    } catch (error) {
+      console.log('Lỗi khi lấy danh sách bạn bè:', error);
+      setFriends([]);
+    }
+  };
+  
+  // Gọi API lấy danh sách bạn bè khi component được tải
+  useEffect(() => {
+    if (me._id && token) {
+      callGetAllFriends();
+    }
+  }, [me._id, token]);
+
     const hasCaption = post?.caption?.trim() !== '';
     const hasMedia = post?.medias?.length > 0 || post?.ID_post_shared?.medias?.length > 0;
 
@@ -617,6 +644,9 @@ const PostItem = memo(({
         const mediaCount = medias.length;
         if (mediaCount === 0) return null;
 
+
+
+       
         return (
             <View style={styles.mediaContainer}>
                 {medias.slice(0, 5).map((uri, index) => (
@@ -665,478 +695,520 @@ const PostItem = memo(({
             else return styles.fivePlusMediaSecondRowRight;
         }
     };
+    const canShowShareButton = () => {
+        if (post.type === 'Share') {
+          // Nếu là bài viết shared, chỉ kiểm tra trạng thái của bài viết gốc
+          if (post.ID_post_shared?._destroy || !post.ID_post_shared) {
+            return false;
+          }
+          const sharedPostStatus = post.ID_post_shared.status;
+          const sharedPostAuthorId = post.ID_post_shared.ID_user._id;
+      
+          if (sharedPostStatus === 'Chỉ mình tôi') {
+            return false; // Không hiển thị nút chia sẻ nếu bài viết gốc là "Chỉ mình tôi"
+          }
+          if (sharedPostStatus === 'Bạn bè') {
+            // Chỉ hiển thị nút chia sẻ nếu người dùng là tác giả bài viết gốc hoặc là bạn bè của tác giả
+            return me._id === sharedPostAuthorId || friends.includes(sharedPostAuthorId);
+          }
+          return true; // Hiển thị nút chia sẻ nếu bài viết gốc là "Công khai"
+        }
+      
+        // Nếu là bài viết gốc (không phải bài share), kiểm tra trạng thái của chính nó
+        if (post.status === 'Chỉ mình tôi') {
+          return false; // Không hiển thị nút chia sẻ nếu bài viết là "Chỉ mình tôi"
+        }
+        if (post.status === 'Bạn bè') {
+          // Chỉ hiển thị nút chia sẻ nếu người dùng là tác giả bài viết hoặc là bạn bè của tác giả
+          return me._id === post.ID_user._id || friends.includes(post.ID_user._id);
+        }
+        return true; // Hiển thị nút chia sẻ nếu bài viết là "Công khai"
+      };
 
-    return (
-        <View style={styles.postContainer}>
-            {/* Kiểm tra nếu bài viết bị xóa và không thuộc về người dùng hiện tại */}
-            {post._destroy && ID_user !== post.ID_user._id ? (
-                <View style={styles.deletedPostContainer}>
-                    <Text style={styles.deletedPostText}>Bài viết đã bị xóa.</Text>
+    const canViewSharedPost = () => {
+        if (post.type !== 'Share') {
+          // Nếu không phải bài chia sẻ, kiểm tra trạng thái của bài viết hiện tại
+          if (post.status === 'Chỉ mình tôi') {
+            return me._id === post.ID_user._id; // Chỉ tác giả mới thấy
+          }
+          if (post.status === 'Bạn bè') {
+            return me._id === post.ID_user._id || friends.includes(post.ID_user._id); // Tác giả hoặc bạn bè mới thấy
+          }
+          return true; // Công khai thì ai cũng thấy
+        }
+      
+        // Nếu là bài chia sẻ, kiểm tra trạng thái của bài viết gốc
+        if (!post.ID_post_shared || post.ID_post_shared._destroy) {
+          return false; // Bài viết gốc không tồn tại hoặc đã bị xóa
+        }
+      
+        const sharedPostStatus = post.ID_post_shared.status;
+        const sharedPostAuthorId = post.ID_post_shared.ID_user._id;
+      
+        if (sharedPostStatus === 'Chỉ mình tôi') {
+          return me._id === sharedPostAuthorId; // Chỉ tác giả bài viết gốc mới thấy
+        }
+        if (sharedPostStatus === 'Bạn bè') {
+          return me._id === sharedPostAuthorId || friends.includes(sharedPostAuthorId); // Tác giả hoặc bạn bè của tác giả mới thấy
+        }
+        return true; // Công khai thì ai cũng thấy
+      };
+
+ return (
+  <View style={styles.postContainer}>
+    {/* Kiểm tra nếu bài viết bị xóa và không thuộc về người dùng hiện tại */}
+    {post._destroy && ID_user !== post.ID_user._id ? (
+      <View style={styles.deletedPostContainer}>
+        <Text style={styles.deletedPostText}>Bài viết đã bị xóa.</Text>
+      </View>
+    ) : (
+      <>
+        {/* Nội dung bài viết hiện tại */}
+        <View>
+          {post.type == 'Share' && (
+            <View>
+              <View style={[styles.headerShare]}>
+                <View style={styles.userInfo}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
+                    <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                  </TouchableOpacity>
+                  <View style={{ marginLeft: width * 0.01 }}>
+                    <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
+                      {post?.ID_user?.first_name + " " + post?.ID_user?.last_name}
+                    </Text>
+                    <View style={styles.boxName}>
+                      <Text style={styles.time}>{timeAgo}</Text>
+                      {getIcon(post.status)}
+                    </View>
+                  </View>
                 </View>
-            ) : (
-                <>
-                    {/* Nội dung bài viết hiện tại */}
-                    <View>
-                        {post.type == 'Share' && (
-                            <View>
-                                <View style={[styles.headerShare]}>
-                                    <View style={styles.userInfo}>
-                                        <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
-                                            <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                                        </TouchableOpacity>
-                                        <View style={{ marginLeft: width * 0.01 }}>
-                                            <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
-                                                {post?.ID_user?.first_name + " " + post?.ID_user?.last_name}
-                                            </Text>
-                                            <View style={styles.boxName}>
-                                                <Text style={styles.time}>{timeAgo}</Text>
-                                                {getIcon(post.status)}
-                                            </View>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            openBottomSheet(
-                                                25,
-                                                <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
-                                                    {ID_user !== post.ID_user._id ? (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                closeBottomSheet();
-                                                                navigation.navigate('Report', { ID_post: post._id, ID_user: null });
-                                                            }}
-                                                            style={styles.deleteButton}
-                                                        >
-                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                <Icon name="alert-circle" size={20} color="black" />
-                                                                <Text style={styles.deleteText}>Báo cáo</Text>
-                                                            </View>
-                                                        </TouchableOpacity>
-                                                    ) : (
-                                                        <>
-                                                            <TouchableOpacity
-                                                                onPress={() => {
-                                                                    onDelete();
-                                                                    closeBottomSheet();
-                                                                }}
-                                                                style={styles.deleteButton}
-                                                            >
-                                                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                    <Icon
-                                                                        name={post._destroy ? 'refresh-sharp' : 'trash'}
-                                                                        size={20}
-                                                                        color="black"
-                                                                    />
-                                                                    <Text style={styles.deleteText}>
-                                                                        {post._destroy ? 'Phục hồi' : 'Xóa bài viết'}
-                                                                    </Text>
-                                                                </View>
-                                                            </TouchableOpacity>
-                                                            {post._destroy && (
-                                                                <TouchableOpacity
-                                                                    onPress={() => {
-                                                                        onDeleteVinhVien();
-                                                                        closeBottomSheet();
-                                                                    }}
-                                                                    style={styles.deleteButton}
-                                                                >
-                                                                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                        <Icon name="trash" size={20} color="black" />
-                                                                        <Text style={styles.deleteText}>Xóa vĩnh viễn</Text>
-                                                                    </View>
-                                                                </TouchableOpacity>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                </View>
-                                            )
-                                        }
-                                    >
-                                        <Icon name="ellipsis-horizontal" size={22} color="black" />
-                                    </TouchableOpacity>
-                                </View>
-                                <View>
-                                    {hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>}
-                                </View>
+                <TouchableOpacity
+                  onPress={() =>
+                    openBottomSheet(
+                      25,
+                      <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
+                        {ID_user !== post.ID_user._id ? (
+                          <TouchableOpacity
+                            onPress={() => {
+                              closeBottomSheet();
+                              navigation.navigate('Report', { ID_post: post._id, ID_user: null });
+                            }}
+                            style={styles.deleteButton}
+                          >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                              <Icon name="alert-circle" size={20} color="black" />
+                              <Text style={styles.deleteText}>Báo cáo</Text>
                             </View>
-                        )}
-                        <View style={post.type == 'Share' ? styles.header1 : styles.header2}>
-                            <View style={styles.header}>
-                                <View>
-                                    {post.type == 'Share' ? (
-                                        (post?.ID_post_shared?._destroy || !post?.ID_post_shared)
-                                            ? (
-                                                <View style={styles.userInfo}>
-                                                    < Text style={styles.caption}>Nội dung bài viết đã bị xóa</Text>
-                                                </View>
-                                            )
-                                            : (
-                                                <View style={styles.userInfo}>
-                                                    <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.ID_user._id })}>
-                                                        <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
-                                                    </TouchableOpacity>
-                                                    <View style={{ marginLeft: width * 0.01 }}>
-                                                        <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.ID_user._id })}>
-                                                            {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
-                                                            {post.ID_post_shared.tags.length > 0 && (
-                                                                <Text>
-                                                                    <Text style={{ color: 'gray' }}> cùng với </Text>
-                                                                    <Text onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.tags[0]._id })} style={[styles.name]}>
-                                                                        {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
-                                                                    </Text>
-                                                                    {post.ID_post_shared.tags.length > 1 && (
-                                                                        <>
-                                                                            <Text style={{ color: 'gray' }}> và </Text>
-                                                                            <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })} style={[styles.name]}>
-                                                                                {post.ID_post_shared.tags.length - 1} người khác
-                                                                            </Text>
-                                                                        </>
-                                                                    )}
-                                                                </Text>
-                                                            )}
-                                                        </Text>
-                                                        <View style={styles.boxName}>
-                                                            <Text style={styles.time}>{timeAgoShare}</Text>
-                                                            {getIcon(post.ID_post_shared.status)}
-                                                        </View>
-                                                    </View>
-                                                </View>
-                                            )
-                                    ) : (
-                                        <View style={styles.userInfo}>
-                                            <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
-                                                <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
-                                            </TouchableOpacity>
-                                            <View style={{ marginLeft: width * 0.01 }}>
-                                                <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
-                                                    {post.ID_user.first_name} {post.ID_user.last_name}
-                                                    {post.tags.length > 0 && (
-                                                        <Text>
-                                                            <Text style={{ color: 'gray' }}> cùng với </Text>
-                                                            <Text onPress={() => navigation.navigate('Profile', { _id: post.tags[0]._id })} style={[styles.name]}>
-                                                                {post.tags[0]?.first_name} {post.tags[0]?.last_name}
-                                                            </Text>
-                                                            {post.tags.length > 1 && (
-                                                                <>
-                                                                    <Text style={{ color: 'gray' }}> và </Text>
-                                                                    <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.tags })} style={[styles.name]}>
-                                                                        {post.tags.length - 1} người khác
-                                                                    </Text>
-                                                                </>
-                                                            )}
-                                                        </Text>
-                                                    )}
-                                                </Text>
-                                                <View style={styles.boxName}>
-                                                    <Text style={styles.time}>{timeAgo}</Text>
-                                                    {getIcon(post.status)}
-                                                </View>
-                                            </View>
-                                        </View>
-                                    )}
-                                </View>
-                                {post.type != 'Share' && (
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            openBottomSheet(
-                                                25,
-                                                <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
-                                                    {ID_user != post.ID_user._id ? (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                closeBottomSheet();
-                                                                navigation.navigate('Report', { ID_post: post._id, ID_user: null });
-                                                            }}
-                                                            style={[styles.deleteButton]}
-                                                        >
-                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                <View>
-                                                                    <Icon name="alert-circle" size={20} color="black" />
-                                                                </View>
-                                                                <Text style={[styles.deleteText]}>
-                                                                    {!post._destroy && "Báo cáo"}
-                                                                </Text>
-                                                            </View>
-                                                        </TouchableOpacity>
-                                                    ) : (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                onDelete();
-                                                                closeBottomSheet();
-                                                            }}
-                                                            style={[styles.deleteButton]}
-                                                        >
-                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                {post._destroy ? (
-                                                                    <View>
-                                                                        <Icon name="refresh-sharp" size={20} color="black" />
-                                                                    </View>
-                                                                ) : (
-                                                                    <View>
-                                                                        <Icon name="trash" size={20} color="black" />
-                                                                    </View>
-                                                                )}
-                                                                <Text style={[styles.deleteText]}>
-                                                                    {post._destroy ? "Phục hồi" : "Xóa bài viết"}
-                                                                </Text>
-                                                            </View>
-                                                        </TouchableOpacity>
-                                                    )}
-                                                    {post._destroy && ID_user == post.ID_user._id && (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                onDeleteVinhVien();
-                                                                closeBottomSheet();
-                                                            }}
-                                                            style={styles.deleteButton}
-                                                        >
-                                                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                                                <View>
-                                                                    <Icon name="trash" size={20} color="black" />
-                                                                </View>
-                                                                <Text style={styles.deleteText}>Xóa vĩnh viễn</Text>
-                                                            </View>
-                                                        </TouchableOpacity>
-                                                    )}
-                                                </View>
-                                            )
-                                        }
-                                    >
-                                        <Icon name="ellipsis-horizontal" size={22} color="black" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                            {/* {!post?.ID_post_shared?._destroy && (
-                                post?.ID_post_shared ? (
-                                    <Text style={styles.caption}>{post.ID_post_shared.caption}</Text>
-                                ) : (
-                                    hasCaption && <Text style={styles.caption}>{post.caption}</Text>
-                                )
-                            )} */}
-                            {post.type == 'Share' ? (
-                                !((post?.ID_post_shared?._destroy) || !post?.ID_post_shared)
-                                && < Text style={styles.caption}>{post?.ID_post_shared?.caption}</Text>
-                            )
-                                : (
-                                    hasCaption && <Text style={styles.caption}>{post.caption}</Text>
-                                )
-                            }
-                        </View>
-                    </View>
-                    {/* {!post?.ID_post_shared?._destroy && (
-                        post?.ID_post_shared ? (
-                            hasMedia && renderMediaGrid(post.ID_post_shared.medias)
+                          </TouchableOpacity>
                         ) : (
-                            hasMedia && renderMediaGrid(post.medias)
-                        )
-                    )} */}
-                    {post.type == 'Share' ? (
-                        !((post?.ID_post_shared?._destroy) || !post?.ID_post_shared)
-                        && hasMedia && renderMediaGrid(post.ID_post_shared.medias)
-                    )
-                        : (
-                            hasMedia && renderMediaGrid(post.medias)
-                        )
-                    }
-                    {/* Sửa điều kiện hiển thị footer */}
-                    {!post._destroy && (
-                        <View style={styles.footer}>
-                            {post.post_reactions.length > 0 ? (
-                                <View style={styles.footer2}>
-                                    <TouchableOpacity
-                                        style={{ flexDirection: "row", alignItems: "center" }}
-                                        onPress={() => {
-                                            openBottomSheet(50, renderBottomSheetContent());
-                                            setIsVisible(true);
-                                        }}
-                                    >
-                                        {topReactions.map((reaction, index) => (
-                                            <Text key={index} style={{ color: 'black' }}>
-                                                {reaction.ID_reaction.icon}
-                                            </Text>
-                                        ))}
-                                        <Text style={{ color: 'black', marginLeft: 5 }}>
-                                            {post.post_reactions.some(reaction => reaction.ID_user._id === ID_user)
-                                                ? post.post_reactions.length === 1
-                                                    ? `${me?.first_name + " " + me?.last_name}`
-                                                    : `Bạn và ${post.post_reactions.length - 1} người khác`
-                                                : `${post.post_reactions.length}`}
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ) : (
-                                <View style={{ flex: 1 }} />
-                            )}
-                            <View>
-                                {post?.comments.length > 0 && (
-                                    <Text
-                                        style={styles.slReactionsOfPost}
-                                        onPress={() => {
-                                            console.log("ID_post gửi đi:", post._id);
-                                            navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "comment" });
-                                        }}
-                                    >
-                                        {post?.comments.length} bình luận
-                                    </Text>
-                                )}
-                            </View>
-                        </View>
-                    )}
-                    {/* Hiển thị interactions chỉ khi bài viết không bị xóa */}
-                    {!post._destroy && (
-                        <View style={styles.interactions}>
+                          <>
                             <TouchableOpacity
-                                delayLongPress={200}
-                                delayPressOut={0}
-                                ref={reactionRef}
-                                style={[styles.action, userReaction && { backgroundColor: 'white' }]}
-                                onLongPress={handleLongPress}
-                                onPress={() =>
-                                    userReaction
-                                        ? callDeletePost_reaction(post._id, userReaction._id)
-                                        : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
-                                }
+                              onPress={() => {
+                                onDelete();
+                                closeBottomSheet();
+                              }}
+                              style={styles.deleteButton}
                             >
-                                <Text style={styles.actionText}>
-                                    {userReaction ? userReaction.ID_reaction.icon : <Icon5 name="like2" size={20} color="black" />}
-                                </Text>
-                                <Text
-                                    style={[
-                                        styles.actionText,
-                                        userReaction && { color: '#0064E0' }
-                                    ]}
-                                >
-                                    {userReaction ? userReaction.ID_reaction.name : reactions[0].name}
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.action}
-                                onPress={() => {
-                                    console.log("ID_post gửi đi:", post._id);
-                                    navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "comment" });
-                                }}
-                            >
-                                <Icon3 name="comment" size={20} color="black" />
-                                <Text style={styles.actionText}>Bình luận</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.action}
-                                onPress={() => {
-                                    openBottomSheet(55, (
-                                        <SharedPost
-                                            me={me}
-                                            callAddPostShare={callAddPostShare}
-                                            copyToClipboard={copyToClipboard}
-                                            post={post}
-                                            width={width}
-                                            styles={styles}
-                                            setShareVisible={setShareVisible}
-                                        />
-                                    ));
-                                }}
-                                disabled={
-                                    post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
-                                }
-                            >
-                                <Icon4
-                                    name="share-alt"
-                                    size={20}
-                                    //color="black"
-                                    color={post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
-                                        ? '#888' : 'black'}
+                              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                <Icon
+                                  name={post._destroy ? 'refresh-sharp' : 'trash'}
+                                  size={20}
+                                  color="black"
                                 />
-                                <Text
-                                    style={[styles.actionText,
-                                    post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
-                                    && { color: '#888' }
-                                    ]}
-                                >Chia sẻ</Text>
+                                <Text style={styles.deleteText}>
+                                  {post._destroy ? 'Phục hồi' : 'Xóa bài viết'}
+                                </Text>
+                              </View>
                             </TouchableOpacity>
-                        </View>
-                    )}
-                </>
-            )
-            }
-            <Modal
-                visible={reactionsVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setReactionsVisible(false)}
-            >
-                <TouchableWithoutFeedback onPress={() => setReactionsVisible(false)}>
-                    <View style={styles.overlay}>
-                        <View
-                            style={[
-                                {
-                                    position: "absolute",
-                                    top: menuPosition.top,
-                                    left: 10,
-                                }
-                            ]}
-                        >
-                            <View style={[styles.reactionBar]}>
-                                {reactions.map((reaction, index) => (
-                                    <TouchableOpacity
-                                        key={index}
-                                        style={styles.reactionButton}
-                                        onPress={() => {
-                                            callAddPost_Reaction(reaction._id, reaction.name, reaction.icon);
-                                            setReactionsVisible(false);
-                                        }}
-                                    >
-                                        <Text style={styles.reactionText}>{reaction.icon}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-            <Modal
-                visible={isImageModalVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setImageModalVisible(false)}
-            >
-                <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        {isVideo(selectedImage) ? (
-                            <Video
-                                source={{ uri: selectedImage }}
-                                style={styles.fullImage}
-                                resizeMode="contain"
-                                controls={true}
-                                paused={false}
-                                onError={(e) => console.log("Video error:", e)}
-                            />
-                        ) : (
-                            <Image
-                                source={{ uri: selectedImage }}
-                                style={styles.fullImage}
-                                resizeMode="contain"
-                            />
+                            {post._destroy && (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  onDeleteVinhVien();
+                                  closeBottomSheet();
+                                }}
+                                style={styles.deleteButton}
+                              >
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                  <Icon name="trash" size={20} color="black" />
+                                  <Text style={styles.deleteText}>Xóa vĩnh viễn</Text>
+                                </View>
+                              </TouchableOpacity>
+                            )}
+                          </>
                         )}
+                      </View>
+                    )
+                  }
+                >
+                  <Icon name="ellipsis-horizontal" size={22} color="black" />
+                </TouchableOpacity>
+              </View>
+              <View>
+                {hasCaption && <Text style={[styles.caption, { color: 'black' }]}>{post.caption}</Text>}
+              </View>
+            </View>
+          )}
+          <View style={post.type == 'Share' ? styles.header1 : styles.header2}>
+            <View style={styles.header}>
+              <View>
+                {post.type == 'Share' ? (
+                  (post?.ID_post_shared?._destroy || !post?.ID_post_shared) ? (
+                    <View style={styles.userInfo}>
+                      <Text style={styles.caption}>Nội dung bài viết đã bị xóa</Text>
                     </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-            <Snackbar
-                visible={dialogCopyVisible}
-                onDismiss={() => setDialogCopyVisible(false)}
-                duration={1000}
+                  ) : !canViewSharedPost() ? (
+                    <View style={styles.userInfo}>
+                      <Text style={styles.caption}>Nội dung không khả dụng do cài đặt quyền riêng tư</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.userInfo}>
+                      <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.ID_user._id })}>
+                        <Image source={{ uri: post.ID_post_shared.ID_user.avatar }} style={styles.avatar} />
+                      </TouchableOpacity>
+                      <View style={{ marginLeft: width * 0.01 }}>
+                        <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.ID_user._id })}>
+                          {post.ID_post_shared.ID_user.first_name} {post.ID_post_shared.ID_user.last_name}
+                          {post.ID_post_shared.tags.length > 0 && (
+                            <Text>
+                              <Text style={{ color: 'gray' }}> cùng với </Text>
+                              <Text onPress={() => navigation.navigate('Profile', { _id: post.ID_post_shared.tags[0]._id })} style={[styles.name]}>
+                                {post.ID_post_shared.tags[0]?.first_name} {post.ID_post_shared.tags[0]?.last_name}
+                              </Text>
+                              {post.ID_post_shared.tags.length > 1 && (
+                                <>
+                                  <Text style={{ color: 'gray' }}> và </Text>
+                                  <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.ID_post_shared.tags })} style={[styles.name]}>
+                                    {post.ID_post_shared.tags.length - 1} người khác
+                                  </Text>
+                                </>
+                              )}
+                            </Text>
+                          )}
+                        </Text>
+                        <View style={styles.boxName}>
+                          <Text style={styles.time}>{timeAgoShare}</Text>
+                          {getIcon(post.ID_post_shared.status)}
+                        </View>
+                      </View>
+                    </View>
+                  )
+                ) : (
+                  <View style={styles.userInfo}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
+                      <Image source={{ uri: post?.ID_user?.avatar }} style={styles.avatar} />
+                    </TouchableOpacity>
+                    <View style={{ marginLeft: width * 0.01 }}>
+                      <Text style={styles.name} onPress={() => navigation.navigate('Profile', { _id: post.ID_user._id })}>
+                        {post.ID_user.first_name} {post.ID_user.last_name}
+                        {post.tags.length > 0 && (
+                          <Text>
+                            <Text style={{ color: 'gray' }}> cùng với </Text>
+                            <Text onPress={() => navigation.navigate('Profile', { _id: post.tags[0]._id })} style={[styles.name]}>
+                              {post.tags[0]?.first_name} {post.tags[0]?.last_name}
+                            </Text>
+                            {post.tags.length > 1 && (
+                              <>
+                                <Text style={{ color: 'gray' }}> và </Text>
+                                <Text onPress={() => navigation.navigate('ListTag', { ListTag: post.tags })} style={[styles.name]}>
+                                  {post.tags.length - 1} người khác
+                                </Text>
+                              </>
+                            )}
+                          </Text>
+                        )}
+                      </Text>
+                      <View style={styles.boxName}>
+                        <Text style={styles.time}>{timeAgo}</Text>
+                        {getIcon(post.status)}
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </View>
+              {post.type != 'Share' && (
+                <TouchableOpacity
+                  onPress={() =>
+                    openBottomSheet(
+                      25,
+                      <View style={{ backgroundColor: '#d9d9d960', borderRadius: 10, padding: 10 }}>
+                        {ID_user != post.ID_user._id ? (
+                          <TouchableOpacity
+                            onPress={() => {
+                              closeBottomSheet();
+                              navigation.navigate('Report', { ID_post: post._id, ID_user: null });
+                            }}
+                            style={[styles.deleteButton]}
+                          >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                              <View>
+                                <Icon name="alert-circle" size={20} color="black" />
+                              </View>
+                              <Text style={[styles.deleteText]}>
+                                {!post._destroy && "Báo cáo"}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ) : (
+                          <TouchableOpacity
+                            onPress={() => {
+                              onDelete();
+                              closeBottomSheet();
+                            }}
+                            style={[styles.deleteButton]}
+                          >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                              {post._destroy ? (
+                                <View>
+                                  <Icon name="refresh-sharp" size={20} color="black" />
+                                </View>
+                              ) : (
+                                <View>
+                                  <Icon name="trash" size={20} color="black" />
+                                </View>
+                              )}
+                              <Text style={[styles.deleteText]}>
+                                {post._destroy ? "Phục hồi" : "Xóa bài viết"}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        )}
+                        {post._destroy && ID_user == post.ID_user._id && (
+                          <TouchableOpacity
+                            onPress={() => {
+                              onDeleteVinhVien();
+                              closeBottomSheet();
+                            }}
+                            style={styles.deleteButton}
+                          >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                              <View>
+                                <Icon name="trash" size={20} color="black" />
+                              </View>
+                              <Text style={styles.deleteText}>Xóa vĩnh viễn</Text>
+                            </View>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    )
+                  }
+                >
+                  <Icon name="ellipsis-horizontal" size={22} color="black" />
+                </TouchableOpacity>
+              )}
+            </View>
+            {/* Chỉ hiển thị caption nếu có quyền truy cập */}
+            {post.type == 'Share' ? (
+              !post?.ID_post_shared || post?.ID_post_shared?._destroy || !canViewSharedPost() ? null : (
+                <Text style={styles.caption}>{post?.ID_post_shared?.caption}</Text>
+              )
+            ) : (
+              hasCaption && <Text style={styles.caption}>{post.caption}</Text>
+            )}
+          </View>
+        </View>
+        {/* Chỉ hiển thị media nếu có quyền truy cập */}
+        {post.type == 'Share' && (!post?.ID_post_shared || post?.ID_post_shared?._destroy || !canViewSharedPost()) ? null : (
+          hasMedia && renderMediaGrid(post.type == 'Share' ? post.ID_post_shared.medias : post.medias)
+        )}
+        {/* Sửa điều kiện hiển thị footer */}
+        {!post._destroy && (
+          <View style={styles.footer}>
+            {post.post_reactions.length > 0 ? (
+              <View style={styles.footer2}>
+                <TouchableOpacity
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                  onPress={() => {
+                    openBottomSheet(50, renderBottomSheetContent());
+                    setIsVisible(true);
+                  }}
+                >
+                  {topReactions.map((reaction, index) => (
+                    <Text key={index} style={{ color: 'black' }}>
+                      {reaction.ID_reaction.icon}
+                    </Text>
+                  ))}
+                  <Text style={{ color: 'black', marginLeft: 5 }}>
+                    {post.post_reactions.some(reaction => reaction.ID_user._id === ID_user)
+                      ? post.post_reactions.length === 1
+                        ? `${me?.first_name + " " + me?.last_name}`
+                        : `Bạn và ${post.post_reactions.length - 1} người khác`
+                      : `${post.post_reactions.length}`}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={{ flex: 1 }} />
+            )}
+            <View>
+              {post?.comments.length > 0 && (
+                <Text
+                  style={styles.slReactionsOfPost}
+                  onPress={() => {
+                    console.log("ID_post gửi đi:", post._id);
+                    navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "comment" });
+                  }}
+                >
+                  {post?.comments.length} bình luận
+                </Text>
+              )}
+            </View>
+          </View>
+        )}
+        {/* Hiển thị interactions chỉ khi bài viết không bị xóa */}
+        {!post._destroy && (
+          <View style={styles.interactions}>
+            <TouchableOpacity
+              delayLongPress={200}
+              delayPressOut={0}
+              ref={reactionRef}
+              style={[styles.action, userReaction && { backgroundColor: 'white' }]}
+              onLongPress={handleLongPress}
+              onPress={() =>
+                userReaction
+                  ? callDeletePost_reaction(post._id, userReaction._id)
+                  : callAddPost_Reaction(reactions[0]._id, reactions[0].name, reactions[0].icon)
+              }
             >
-                Đã sao chép tin nhắn!
-            </Snackbar>
-            <SuccessModal
-                visible={successModalVisible}
-                message="Chia sẻ bài viết thành công!"
+              <Text style={styles.actionText}>
+                {userReaction ? userReaction.ID_reaction.icon : <Icon5 name="like2" size={20} color="black" />}
+              </Text>
+              <Text
+                style={[
+                  styles.actionText,
+                  userReaction && { color: '#0064E0' }
+                ]}
+              >
+                {userReaction ? userReaction.ID_reaction.name : reactions[0].name}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.action}
+              onPress={() => {
+                console.log("ID_post gửi đi:", post._id);
+                navigation.navigate("PostDetail", { ID_post: post._id, typeClick: "comment" });
+              }}
+            >
+              <Icon3 name="comment" size={20} color="black" />
+              <Text style={styles.actionText}>Bình luận</Text>
+            </TouchableOpacity>
+            {canShowShareButton() && (
+              <TouchableOpacity
+                style={styles.action}
+                onPress={() => {
+                  openBottomSheet(55, (
+                    <SharedPost
+                      me={me}
+                      callAddPostShare={callAddPostShare}
+                      copyToClipboard={copyToClipboard}
+                      post={post}
+                      width={width}
+                      styles={styles}
+                      setShareVisible={setShareVisible}
+                    />
+                  ));
+                }}
+                disabled={
+                  post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
+                }
+              >
+                <Icon4
+                  name="share-alt"
+                  size={20}
+                  color={post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
+                    ? '#888' : 'black'}
+                />
+                <Text
+                  style={[styles.actionText,
+                    post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
+                    && { color: '#888' }
+                  ]}
+                >Chia sẻ</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </>
+    )}
+    <Modal
+      visible={reactionsVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setReactionsVisible(false)}
+    >
+      <TouchableWithoutFeedback onPress={() => setReactionsVisible(false)}>
+        <View style={styles.overlay}>
+          <View
+            style={[
+              {
+                position: "absolute",
+                top: menuPosition.top,
+                left: 10,
+              }
+            ]}
+          >
+            <View style={[styles.reactionBar]}>
+              {reactions.map((reaction, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.reactionButton}
+                  onPress={() => {
+                    callAddPost_Reaction(reaction._id, reaction.name, reaction.icon);
+                    setReactionsVisible(false);
+                  }}
+                >
+                  <Text style={styles.reactionText}>{reaction.icon}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+    <Modal
+      visible={isImageModalVisible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={() => setImageModalVisible(false)}
+    >
+      <TouchableWithoutFeedback onPress={() => setImageModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          {isVideo(selectedImage) ? (
+            <Video
+              source={{ uri: selectedImage }}
+              style={styles.fullImage}
+              resizeMode="contain"
+              controls={true}
+              paused={false}
+              onError={(e) => console.log("Video error:", e)}
             />
-            <FailedModal
-                visible={failedModalVisible}
-                message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"
+          ) : (
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.fullImage}
+              resizeMode="contain"
             />
-            <LoadingModal visible={isLoading} />
-        </View >
-    );
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+    <Snackbar
+      visible={dialogCopyVisible}
+      onDismiss={() => setDialogCopyVisible(false)}
+      duration={1000}
+    >
+      Đã sao chép tin nhắn!
+    </Snackbar>
+    <SuccessModal
+      visible={successModalVisible}
+      message="Chia sẻ bài viết thành công!"
+    />
+    <FailedModal
+      visible={failedModalVisible}
+      message="Chia sẻ bài viết thất bại. Vui lòng thử lại!"
+    />
+    <LoadingModal visible={isLoading} />
+  </View>
+);
 });
 
 export default PostItem;
