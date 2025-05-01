@@ -142,7 +142,7 @@ const Home = props => {
   useEffect(() => {
     callGetAllPostsInHome(me._id);
     callgetUser(me._id);
-    callGetAllFriendOfID_user()
+    //callGetAllFriendOfID_user()
   }, [me._id]);
 
   const onRefresh = useCallback(() => {
@@ -152,7 +152,7 @@ const Home = props => {
     Promise.all([
       callGetAllPostsInHome(me._id, false),
       callgetUser(me._id),
-      callGetAllFriendOfID_user()
+      //callGetAllFriendOfID_user()
     ]).finally(() => {
       setRefreshing(false);
     });
