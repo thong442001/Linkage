@@ -1267,6 +1267,18 @@ const PostDetail = (props) => {
       );
     }
 
+    const canShowShareButton = () => {
+      if(post.type === 'Share') {
+          // Nếu là bài viết shared, chỉ kiểm tra trạng thái của bài viết gốc
+          if (post.ID_post_shared?._destroy || !post.ID_post_shared) {
+              return false;
+            }
+            return post.ID_post_shared.status !== 'Chỉ mình tôi';
+      }
+      // Nếu là bài viết gốc (ko phải bài share), kiểm tra trạng thái của chính nó
+        return post.status !== 'Chỉ mình tôi';
+  }
+
     return (
       <View style={styles.postContainer}>
         <View>
@@ -1685,7 +1697,9 @@ const PostDetail = (props) => {
               <Icon3 name="comment" size={20} color="black" />
               <Text style={styles.actionText}>Bình luận</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.action}
+            {(
+              canShowShareButton() &&
+              <TouchableOpacity style={styles.action}
               onPress={() => {
                 openBottomSheet(55, (
                   <SharedPost
@@ -1706,6 +1720,8 @@ const PostDetail = (props) => {
               <Icon4 name="share-alt" size={20} color="black" />
               <Text style={styles.actionText}>Chia sẻ</Text>
             </TouchableOpacity>
+            )}
+          
 
 
           </View>

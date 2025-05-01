@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     },
     interactions: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         marginTop: height * 0.015,
         paddingVertical: height * 0.015,
         borderTopWidth: 0.5,

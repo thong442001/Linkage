@@ -702,7 +702,26 @@ const Profile = props => {
             await dispatch(changeDestroyPost({ _id: ID_post }))
                 .unwrap()
                 .then(response => {
-                    setPosts(prevPosts => prevPosts.filter(post => post._id !== ID_post));
+                    setPosts((prevPosts) =>
+                        prevPosts
+                            .map((post) => {
+                                if (
+                                    post.ID_post_shared &&
+                                    post.ID_post_shared._id &&
+                                    post.ID_post_shared._id.toString() === ID_post.toString()
+                                ) {
+                                    return {
+                                        ...post,
+                                        ID_post_shared: {
+                                            ...post.ID_post_shared,
+                                            _destroy: true,
+                                        },
+                                    };
+                                }
+                                return post;
+                            })
+                            .filter((post) => post._id !== ID_post)
+                    );
                 })
                 .catch(error => {
                     console.log('Lỗi khi xóa bài viết:', error);

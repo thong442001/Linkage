@@ -594,6 +594,7 @@ const PostItem = memo(({
             closeBottomSheet();
         }
     };
+    
 
     const hasCaption = post?.caption?.trim() !== '';
     const hasMedia = post?.medias?.length > 0 || post?.ID_post_shared?.medias?.length > 0;
@@ -617,6 +618,9 @@ const PostItem = memo(({
         const mediaCount = medias.length;
         if (mediaCount === 0) return null;
 
+
+
+       
         return (
             <View style={styles.mediaContainer}>
                 {medias.slice(0, 5).map((uri, index) => (
@@ -665,6 +669,17 @@ const PostItem = memo(({
             else return styles.fivePlusMediaSecondRowRight;
         }
     };
+    const canShowShareButton = () => {
+        if(post.type === 'Share') {
+            // Nếu là bài viết shared, chỉ kiểm tra trạng thái của bài viết gốc
+            if (post.ID_post_shared?._destroy || !post.ID_post_shared) {
+                return false;
+              }
+              return post.ID_post_shared.status !== 'Chỉ mình tôi';
+        }
+        // Nếu là bài viết gốc (ko phải bài share), kiểm tra trạng thái của chính nó
+          return post.status !== 'Chỉ mình tôi';
+    }
 
     return (
         <View style={styles.postContainer}>
@@ -1019,39 +1034,43 @@ const PostItem = memo(({
                                 <Icon3 name="comment" size={20} color="black" />
                                 <Text style={styles.actionText}>Bình luận</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.action}
-                                onPress={() => {
-                                    openBottomSheet(55, (
-                                        <SharedPost
-                                            me={me}
-                                            callAddPostShare={callAddPostShare}
-                                            copyToClipboard={copyToClipboard}
-                                            post={post}
-                                            width={width}
-                                            styles={styles}
-                                            setShareVisible={setShareVisible}
-                                        />
-                                    ));
-                                }}
-                                disabled={
-                                    post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
-                                }
-                            >
-                                <Icon4
-                                    name="share-alt"
-                                    size={20}
-                                    //color="black"
-                                    color={post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
-                                        ? '#888' : 'black'}
-                                />
-                                <Text
-                                    style={[styles.actionText,
-                                    post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
-                                    && { color: '#888' }
-                                    ]}
-                                >Chia sẻ</Text>
-                            </TouchableOpacity>
+                            {(
+                                canShowShareButton() && (
+                                    <TouchableOpacity
+                                    style={styles.action}
+                                    onPress={() => {
+                                        openBottomSheet(55, (
+                                            <SharedPost
+                                                me={me}
+                                                callAddPostShare={callAddPostShare}
+                                                copyToClipboard={copyToClipboard}
+                                                post={post}
+                                                width={width}
+                                                styles={styles}
+                                                setShareVisible={setShareVisible}
+                                            />
+                                        ));
+                                    }}
+                                    disabled={
+                                        post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
+                                    }
+                                >
+                                    <Icon4
+                                        name="share-alt"
+                                        size={20}
+                                        //color="black"
+                                        color={post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
+                                            ? '#888' : 'black'}
+                                    />
+                                    <Text
+                                        style={[styles.actionText,
+                                        post && post.type === "Share" && (post.ID_post_shared?._destroy || !post.ID_post_shared)
+                                        && { color: '#888' }
+                                        ]}
+                                    >Chia sẻ</Text>
+                                </TouchableOpacity>
+                                )
+                            )}
                         </View>
                     )}
                 </>

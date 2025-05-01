@@ -111,7 +111,7 @@ const ListFriend = (props) => {
               </TouchableOpacity>
             }
             keyExtractor={(item) => item._id}
-            ListEmptyComponent={<NothingFriend message={"Bạn không có bạn bè nào"}/>}
+            ListEmptyComponent={<NothingFriend message={"Bạn không có bạn bè nào"} />}
           />
         </View>
       </View>
