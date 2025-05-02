@@ -64,26 +64,27 @@ const Home = props => {
 
   useEffect(() => {
     const liveSessionsRef = database().ref('/liveSessions');
-    const onValueChange = liveSessionsRef.on('value', snapshot => {
-      const liveSessions = snapshot.val() ? Object.values(snapshot.val()) : [];
-      console.log('Live sessions from Firebase:', liveSessions); // Debug
+    const onValueChange = liveSessionsRef.on('value', (snapshot) => {
+      const liveSessionsData = snapshot.val() ? Object.values(snapshot.val()) : [];
+      console.log('Live sessions from Firebase:', liveSessionsData); // Debug
+
       // Lọc liveSessions chỉ giữ lại các phiên của bạn bè
-      // const filteredSessions = liveSessions.filter((item) =>
-      //   friends.some((friend) => {
-      //     if (friend.relation !== 'Bạn bè') return false;
-      //     const friendId =
-      //       friend.ID_userA._id.toString() === me?._id.toString()
-      //         ? friend.ID_userB._id.toString()
-      //         : friend.ID_userB._id.toString() === me?._id.toString()
-      //           ? friend.ID_userA._id.toString()
-      //           : null;
-      //     return friendId && friendId === item.userID?.toString();
-      //   })
-      // );
-      setLiveSessions(liveSessions);
+      const filteredSessions = liveSessionsData.filter((item) =>
+        friends.some((friend) => {
+          if (friend.relation !== 'Bạn bè') return false;
+          const friendId =
+            friend.ID_userA?._id.toString() === me?._id?.toString()
+              ? friend.ID_userB?._id.toString()
+              : friend.ID_userB?._id.toString() === me?._id?.toString()
+                ? friend.ID_userA?._id.toString()
+                : null;
+          return friendId && friendId === item.userID?.toString();
+        })
+      );
+      setLiveSessions(filteredSessions);
     });
     return () => liveSessionsRef.off('value', onValueChange);
-  }, []);
+  }, [friends, me?._id]);
 
   useEffect(() => {
     if (route.params?.isDeleted && me?._id) {
@@ -91,6 +92,7 @@ const Home = props => {
       setTimeout(() => {
         callGetAllPostsInHome(me._id, true);
         callgetUser(me._id);
+        callGetAllFriendOfID_user()
       }, 1000);
       navigation.setParams({ isDeleted: undefined });
     }
@@ -103,7 +105,7 @@ const Home = props => {
       await dispatch(getAllFriendOfID_user({ me: me._id, token: token }))
         .unwrap()
         .then((response) => {
-          //console.log(response.relationships)
+          console.log(response.relationships)
           setFriends(response.relationships);
         })
         .catch((error) => {
@@ -142,7 +144,7 @@ const Home = props => {
   useEffect(() => {
     callGetAllPostsInHome(me._id);
     callgetUser(me._id);
-    //callGetAllFriendOfID_user()
+    callGetAllFriendOfID_user()
   }, [me._id]);
 
   const onRefresh = useCallback(() => {
@@ -152,7 +154,7 @@ const Home = props => {
     Promise.all([
       callGetAllPostsInHome(me._id, false),
       callgetUser(me._id),
-      //callGetAllFriendOfID_user()
+      callGetAllFriendOfID_user(),
     ]).finally(() => {
       setRefreshing(false);
     });
