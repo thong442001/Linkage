@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
 import { useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native'; // Import Lottie
-
+import SuccessModal from '../../utils/animation/success/SuccessModal';
 const Report = props => {
     const { route, navigation } = props;
     const { ID_post, ID_user } = route.params;
@@ -19,7 +19,7 @@ const Report = props => {
     const me = useSelector(state => state.app.user);
     const token = useSelector(state => state.app.token);
     const [reasons, setReasons] = useState([]);
-
+    const [modalVisible, setmodalVisible] = useState(false)
     useFocusEffect(
         useCallback(() => {
             callGetAllReason(); // Gọi API load dữ liệu
@@ -57,7 +57,11 @@ const Report = props => {
                 .unwrap()
                 .then(response => {
                     console.log('status callAddReport_post:', response.status);
-                    navigation.goBack()
+                    setmodalVisible(true)
+                    setTimeout(() => {
+                        setmodalVisible(false)
+                        navigation.goBack()
+                    }, 1000);
                 })
                 .catch(error => {
                     console.log('Lỗi khi callAddReport_post:', error);
@@ -82,7 +86,12 @@ const Report = props => {
                 .unwrap()
                 .then(response => {
                     console.log('status callAddReport_user:', response.status);
-                    navigation.goBack()
+                    setmodalVisible(true)
+                    setTimeout(() => {
+                        setmodalVisible(false)
+                        navigation.goBack()
+                    }, 1000);
+
                 })
                 .catch(error => {
                     console.log('Lỗi khi callAddReport_user:', error);
@@ -120,6 +129,7 @@ const Report = props => {
 
     return (
         <View style={styles.container}>
+            <SuccessModal visible={modalVisible} message={"Báo cáo thành công"} />
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color="black" />

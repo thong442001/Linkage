@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import HomeNavigation from './HomeNavigation';
 import UserNavigation from './UserNavigation';
 import Welcome from '../screens/welcome/Welcome';
@@ -9,15 +9,15 @@ import {
   setNoti_token,
   getAllPostsInHome,
 } from '../rtk/API';
-import {requestPermissions} from '../screens/service/MyFirebaseMessagingService';
-import {setReactions, setFcmToken, logout} from '../rtk/Reducer';
+import { requestPermissions } from '../screens/service/MyFirebaseMessagingService';
+import { setReactions, setFcmToken, logout } from '../rtk/Reducer';
 import messaging from '@react-native-firebase/messaging';
-import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-import {useNavigation} from '@react-navigation/native';
-import {navigate} from '../navigations/NavigationService';
-import {getNotificationPreference} from '../noti/notificationHelper';
-import {Linking, AppState} from 'react-native';
-import {parseQueryString} from '../utils/deeplink/queryParser';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import { useNavigation } from '@react-navigation/native';
+import { navigate } from '../navigations/NavigationService';
+import { getNotificationPreference } from '../noti/notificationHelper';
+import { Linking, AppState } from 'react-native';
+import { parseQueryString } from '../utils/deeplink/queryParser';
 
 const AppNavigation = () => {
   const dispatch = useDispatch();
@@ -80,7 +80,7 @@ const AppNavigation = () => {
             const params = parseQueryString(queryString);
             const ID_user = params.ID_user;
             if (ID_user) {
-              navigation.navigate('Profile', {_id: ID_user});
+              navigation.navigate('Profile', { _id: ID_user });
             } else {
               console.error('❌ Thiếu ID_user trong deeplink');
             }
@@ -92,7 +92,7 @@ const AppNavigation = () => {
     };
 
     handleDeepLink();
-    const subscription = Linking.addEventListener('url', ({url}) => {
+    const subscription = Linking.addEventListener('url', ({ url }) => {
       const [path, queryString] = url.split('?');
       if (path.includes('post-chi-tiet')) {
         const params = parseQueryString(queryString);
@@ -110,7 +110,7 @@ const AppNavigation = () => {
         const params = parseQueryString(queryString);
         const ID_user = params.ID_user;
         if (ID_user) {
-          navigation.navigate('Profile', {_id: ID_user});
+          navigation.navigate('Profile', { _id: ID_user });
         } else {
           console.error('❌ Thiếu ID_user trong deeplink');
         }
@@ -136,7 +136,7 @@ const AppNavigation = () => {
 
   const callCheckBanUser = async () => {
     try {
-      await dispatch(checkBanUser({ID_user: user._id, token: token}))
+      await dispatch(checkBanUser({ ID_user: user._id, token: token }))
         .unwrap()
         .then(response => {
           console.log('status : ' + response.status);
@@ -153,7 +153,7 @@ const AppNavigation = () => {
   const callGetAllPostsInHome = async (ID_user, showLoading = false) => {
     try {
       await dispatch(
-        getAllPostsInHome({me: ID_user, token, timestamp: Date.now()}),
+        getAllPostsInHome({ me: ID_user, token, timestamp: Date.now() }),
       )
         .unwrap()
         .then(response => {
@@ -169,14 +169,14 @@ const AppNavigation = () => {
   };
 
   const onLogoutAndNavigate = () => {
-    dispatch(setNoti_token({ID_user: user._id, fcmToken: fcmToken}))
+    dispatch(setNoti_token({ ID_user: user._id, fcmToken: fcmToken }))
       .unwrap()
       .then(response => {
         console.log('✅ Đã gửi token thông báo trước khi logout:', response);
         dispatch(logout());
         navigation.reset({
           index: 0,
-          routes: [{name: 'Login'}],
+          routes: [{ name: 'Login' }],
         });
       })
       .catch(error => {
@@ -184,7 +184,7 @@ const AppNavigation = () => {
         dispatch(logout());
         navigation.reset({
           index: 0,
-          routes: [{name: 'Login'}],
+          routes: [{ name: 'Login' }],
         });
       });
   };
@@ -304,42 +304,36 @@ const AppNavigation = () => {
       notification?.type === 'Lời mời kết bạn' &&
       notification?.ID_relationship
     ) {
-      const {ID_userA, ID_userB} = notification.ID_relationship;
+      const { ID_userA, ID_userB } = notification.ID_relationship;
       if (user?._id?.toString() === ID_userA?._id?.toString()) {
-        return `${ID_userB?.first_name || ''} ${
-          ID_userB?.last_name || ''
-        } đã gửi lời mời kết bạn với bạn`;
+        return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''
+          } đã gửi lời mời kết bạn với bạn`;
       } else {
-        return `${ID_userA?.first_name || ''} ${
-          ID_userA?.last_name || ''
-        } đã gửi lời mời kết bạn với bạn`;
+        return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''
+          } đã gửi lời mời kết bạn với bạn`;
       }
     }
     if (
       notification?.type === 'Đã thành bạn bè của bạn' &&
       notification?.ID_relationship
     ) {
-      const {ID_userA, ID_userB} = notification.ID_relationship;
+      const { ID_userA, ID_userB } = notification.ID_relationship;
       if (user?._id?.toString() === ID_userA?._id?.toString()) {
-        return `${ID_userB?.first_name || ''} ${
-          ID_userB?.last_name || ''
-        } với bạn đã thành bạn bè`;
+        return `${ID_userB?.first_name || ''} ${ID_userB?.last_name || ''
+          } với bạn đã thành bạn bè`;
       } else {
-        return `${ID_userA?.first_name || ''} ${
-          ID_userA?.last_name || ''
-        } với bạn đã thành bạn bè`;
+        return `${ID_userA?.first_name || ''} ${ID_userA?.last_name || ''
+          } với bạn đã thành bạn bè`;
       }
     }
     if (notification?.type === 'Tin nhắn mới' && notification?.ID_message) {
-      const {sender, content} = notification.ID_message;
+      const { sender, content } = notification.ID_message;
       if (notification.ID_message.type === 'text') {
-        return `${sender.first_name || ''} ${sender.last_name || ''}: ${
-          content || 'Đã gửi một tin nhắn'
-        }`;
+        return `${sender.first_name || ''} ${sender.last_name || ''}: ${content || 'Đã gửi một tin nhắn'
+          }`;
       } else {
-        return `${sender.first_name || ''} ${
-          sender.last_name || ''
-        }: Đã gửi một ảnh mới`;
+        return `${sender.first_name || ''} ${sender.last_name || ''
+          }: Đã gửi một ảnh mới`;
       }
     }
     if (
@@ -349,17 +343,15 @@ const AppNavigation = () => {
       return 'Bạn đã được mời vào nhóm mới';
     }
     if (notification?.type === 'Đã đăng story mới' && notification?.ID_post) {
-      const {ID_user: postOwner, caption} = notification.ID_post;
-      return `${postOwner?.first_name || ''} ${
-        postOwner?.last_name || ''
-      } đã đăng story mới ${caption ? `: ${caption}` : ''}`;
+      const { ID_user: postOwner, caption } = notification.ID_post;
+      return `${postOwner?.first_name || ''} ${postOwner?.last_name || ''
+        } đã đăng story mới ${caption ? `: ${caption}` : ''}`;
     }
     if (notification?.type === 'Đã đăng bài mới' && notification?.ID_post) {
-      const {ID_user, content} = notification.ID_post;
+      const { ID_user, content } = notification.ID_post;
       return ID_user
-        ? `${ID_user.first_name || ''} ${ID_user.last_name || ''}: ${
-            content || 'Đã đăng bài post mới'
-          }`
+        ? `${ID_user.first_name || ''} ${ID_user.last_name || ''}: ${content || 'Đã đăng bài post mới'
+        }`
         : 'Có một bài đăng mới';
     }
     if (
@@ -370,18 +362,17 @@ const AppNavigation = () => {
         group: notification.ID_group,
         type: false,
       });
-      const {members, isPrivate, name} = notification.ID_group;
+      const { members, isPrivate, name } = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
-        return `${sender.first_name || ''} ${
-          sender.last_name || ''
-        } đang gọi cho bạn`;
+        return `${sender.first_name || ''} ${sender.last_name || ''
+          } đang gọi cho bạn`;
       } else {
         return name
           ? `${name} đang gọi cho bạn`
           : `${members
-              .map(m => `${m.first_name} ${m.last_name}`)
-              .join(', ')} đang gọi cho bạn`;
+            .map(m => `${m.first_name} ${m.last_name}`)
+            .join(', ')} đang gọi cho bạn`;
       }
     }
     if (
@@ -392,18 +383,17 @@ const AppNavigation = () => {
         group: notification.ID_group,
         type: true,
       });
-      const {members, isPrivate, name} = notification.ID_group;
+      const { members, isPrivate, name } = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
-        return `${sender.first_name || ''} ${
-          sender.last_name || ''
-        } đang gọi video call cho bạn`;
+        return `${sender.first_name || ''} ${sender.last_name || ''
+          } đang gọi video call cho bạn`;
       } else {
         return name
           ? `Tham gia cuộc gọi video call ${name}`
           : `Tham gia cuộc gọi video call với ${members
-              .map(m => `${m.first_name} ${m.last_name}`)
-              .join(', ')}`;
+            .map(m => `${m.first_name} ${m.last_name}`)
+            .join(', ')}`;
       }
     }
     if (
@@ -413,22 +403,19 @@ const AppNavigation = () => {
     ) {
       const sender = notification.ID_relationship;
       if (sender.ID_userA._id === user._id) {
-        return `${sender.ID_userB.first_name || ''} ${
-          sender.ID_userB.last_name || ''
-        } đang phát trực tiếp`;
+        return `${sender.ID_userB.first_name || ''} ${sender.ID_userB.last_name || ''
+          } đang phát trực tiếp`;
       } else {
-        return `${sender.ID_userA.first_name || ''} ${
-          sender.ID_userA.last_name || ''
-        } đang phát trực tiếp`;
+        return `${sender.ID_userA.first_name || ''} ${sender.ID_userA.last_name || ''
+          } đang phát trực tiếp`;
       }
     }
     if (notification?.type === 'Mời chơi game 3 lá' && notification?.ID_group) {
-      const {members, isPrivate} = notification.ID_group;
+      const { members, isPrivate } = notification.ID_group;
       if (isPrivate) {
         const sender = members.find(member => member._id !== user._id);
-        return `${sender.first_name || ''} ${
-          sender.last_name || ''
-        } đang mời bạn chơi game 3 lá`;
+        return `${sender.first_name || ''} ${sender.last_name || ''
+          } đang mời bạn chơi game 3 lá`;
       }
     }
     if (
@@ -441,19 +428,17 @@ const AppNavigation = () => {
       notification?.type === 'Đã bình luận vào bài viết của bạn' &&
       notification?.ID_comment
     ) {
-      const {ID_user, content} = notification.ID_comment || {};
-      return `${ID_user?.first_name || ''} ${
-        ID_user?.last_name || ''
-      } đã bình luận: ${content || 'Bạn có bình luận mới'}`;
+      const { ID_user, content } = notification.ID_comment || {};
+      return `${ID_user?.first_name || ''} ${ID_user?.last_name || ''
+        } đã bình luận: ${content || 'Bạn có bình luận mới'}`;
     }
     if (notification?.type === 'Tài khoản bị khóa') {
       return 'Tài khoản của bạn đã bị khóa';
     }
     if (notification?.type === 'Đã thả biểu cảm vào story của bạn') {
-      const {ID_user} = notification.ID_post || {};
-      return `${ID_user?.first_name || ''} ${
-        ID_user?.last_name || ''
-      } đã thả biểu cảm vào story của bạn`;
+      const { ID_user } = notification.ID_post || {};
+      return `${ID_user?.first_name || ''} ${ID_user?.last_name || ''
+        } đã thả biểu cảm vào story của bạn`;
     }
     return 'Bạn có một thông báo mới';
   };
@@ -528,7 +513,7 @@ const AppNavigation = () => {
         navigation.navigate('HomeChat');
         break;
       case 'Mời chơi game 3 lá':
-        navigation.navigate('Chat', {ID_group: notification?.ID_group?._id});
+        navigation.navigate('Chat', { ID_group: notification?.ID_group?._id });
         break;
       case 'Đã thả biểu cảm vào story của bạn':
       case 'Đã đăng story mới':
@@ -589,7 +574,7 @@ const AppNavigation = () => {
         data: formattedData,
         android: {
           channelId: getChannelId(notification?.type),
-          smallIcon: 'ic_launcher',
+          smallIcon: 'logo_linkage',
         },
       });
     } catch (error) {
@@ -689,7 +674,7 @@ const AppNavigation = () => {
         }
       });
 
-    const unsubscribeNotifee = notifee.onForegroundEvent(({type, detail}) => {
+    const unsubscribeNotifee = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
         console.log(
           '🔔 Người dùng đã nhấn vào thông báo:',
