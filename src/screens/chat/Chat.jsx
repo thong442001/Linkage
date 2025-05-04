@@ -353,9 +353,11 @@ const Chat = (props) => {// cần ID_group (param)
             goBack();
         });
 
-        socket.on("kicked_from_group", ({ ID_group }) => {
+        socket.on("kicked_from_group", ({ ID_group, ID_user }) => {
             //console.log(`🚪 Bạn đã bị kick khỏi nhóm ${ID_group}`);
-            goBack();
+            if (ID_user == me._id) {
+                goBack();
+            }
         });
 
         socket.on("user_typing", ({ ID_group, ID_user }) => {
@@ -743,7 +745,7 @@ const Chat = (props) => {// cần ID_group (param)
                             navigation.navigate('MapScreen', {
                                 ID_group: params?.ID_group,
                                 isGui: true,
-                                Avatar:myAvatar,
+                                Avatar: myAvatar,
                             });
                         }}
                         style={styles.menuItem}>
